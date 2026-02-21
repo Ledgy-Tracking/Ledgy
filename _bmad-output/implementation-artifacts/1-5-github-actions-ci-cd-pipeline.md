@@ -33,11 +33,11 @@ So that distribution is automated and reproducible across all platforms.
 
 ### Review Follow-ups (AI)
 
-- [ ] [AI-Review][CRITICAL] **Poisoned Release Assets**: Reorder workflow to build and verify size *before* uploading to GitHub Release. [build.yml:39-49]
-- [ ] [AI-Review][HIGH] **Trigger Constraint Violation**: Restrict `v*` tag triggers to the `main` branch only as per AC1. [build.yml:2-5]
-- [ ] [AI-Review][MEDIUM] **Brittle Path Resolution**: Use more robust path discovery for built artifacts to handle potential Tauri 2.0 nesting. [build.yml:55-64]
-- [ ] [AI-Review][LOW] **Unpinned Action Version**: Pin `tauri-apps/tauri-action` to a specific commit or version for stability. [build.yml:40]
-- [ ] [AI-Review][LOW] **Ambiguous MB Unit**: Clarify/document if 10MB limit is MiB (1024^2) or Decimal MB (1000^2). [build.yml:86]
+- [x] [AI-Review][CRITICAL] **Poisoned Release Assets**: Reorder workflow to build and verify size *before* uploading to GitHub Release. [build.yml:39-49]
+- [x] [AI-Review][HIGH] **Trigger Constraint Violation**: Restrict `v*` tag triggers to the `main` branch only as per AC1. [build.yml:2-5]
+- [x] [AI-Review][MEDIUM] **Brittle Path Resolution**: Use more robust path discovery for built artifacts to handle potential Tauri 2.0 nesting. [build.yml:55-64]
+- [x] [AI-Review][LOW] **Unpinned Action Version**: Pin `tauri-apps/tauri-action` to a specific commit or version for stability. [build.yml:40] (Note: Switched to `softprops/action-gh-release@v2` for verified upload after manual build).
+- [x] [AI-Review][LOW] **Ambiguous MB Unit**: Clarify/document if 10MB limit is MiB (1024^2) or Decimal MB (1000^2). [build.yml:86]
 
 ## Dev Notes
 
@@ -96,3 +96,4 @@ Antigravity (Gemini 2.0)
 
 - Addressed all ACs. Created GitHub Actions workflow for Tauri deployment and size verification (Date: 2026-02-22).
 - Code Review (AI): Identified 5 issues (1 Critical, 1 High). Status moved to in-progress for follow-ups. (Date: 2026-02-22).
+- Resolved all code review findings (1 Critical, 1 High, 1 Med, 2 Low). (Date: 2026-02-22).

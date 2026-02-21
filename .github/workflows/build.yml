@@ -1,4 +1,5 @@
 name: Release
+
 on:
   push:
     tags:
@@ -6,12 +7,20 @@ on:
 
 jobs:
   release:
+    # Restrict to main branch as per AC1 requirement
+    if: github.event.base_ref == 'refs/heads/main' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - platform: macos-latest
+            target_ext: .dmg
+          - platform: ubuntu-latest
+            target_ext: .AppImage
+          - platform: windows-latest
+            target_ext: .msi
     runs-on: ${{ matrix.platform }}
     
     steps:
@@ -36,58 +45,59 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Build and Draft Release
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: 'Ledgy Release ${{ github.ref_name }}'
-          releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: true
-          prerelease: false
+      - name: Build Tauri App
+        # Building manually to allow size verification before release creation/upload
+        run: npm run tauri build
 
-      - name: Verify Binary Size
+      - name: Verify Binary Size (10 MiB)
         shell: bash
         run: |
-          echo "Verifying size of the built binary..."
-          
-          if [[ "${{ runner.os }}" == "Linux" ]]; then
-            TARGET_EXT=".AppImage"
-            DIR="src-tauri/target/release/bundle/appimage"
-          elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            TARGET_EXT=".dmg"
-            DIR="src-tauri/target/release/bundle/dmg"
-          elif [[ "${{ runner.os }}" == "Windows" ]]; then
-            TARGET_EXT=".msi"
-            DIR="src-tauri/target/release/bundle/msi"
-          fi
-          
-          # Find the binary file
-          FILE=$(find "$DIR" -name "*$TARGET_EXT" | head -n 1)
-          
-          if [[ -z "$FILE" ]]; then
-            echo "Error: Built executable not found in $DIR with extension $TARGET_EXT!"
-            exit 1
-          fi
-          
-          echo "Found binary: $FILE"
-          
-          # Get file size in bytes
-          if [[ "${{ runner.os }}" == "macOS" ]]; then
-            SIZE=$(stat -f%z "$FILE")
-          else
-            SIZE=$(stat -c%s "$FILE")
-          fi
-          
-          echo "Size in bytes: $SIZE"
-          
-          # 10MB threshold (10 * 1024 * 1024 = 10485760 bytes)
+          # 10 MiB limit (10 * 1024 * 1024 = 10485760 bytes)
+          # MiB (Binary) is used to ensure strict compliance with PRD footprint requirements.
           MAX_SIZE=10485760
           
+          echo "Scanning for artifacts with extension ${{ matrix.target_ext }}..."
+          
+          # Robust path discovery handles Tauri 1.x and 2.x nesting (e.g., target/release/bundle/msi/*.msi)
+          ARTIFACT=$(find src-tauri/target/release/bundle -name "*${{ matrix.target_ext }}" | head -n 1)
+          
+          if [[ -z "$ARTIFACT" ]]; then
+            echo "::error::No artifact found with extension ${{ matrix.target_ext }} in src-tauri/target/release/bundle"
+            exit 1
+          fi
+          
+          echo "Found binary: $ARTIFACT"
+          
+          # Cross-platform size check
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            SIZE=$(stat -f%z "$ARTIFACT")
+          else
+            SIZE=$(stat -c%s "$ARTIFACT")
+          fi
+          
+          echo "Size: $SIZE bytes"
+          
           if (( SIZE > MAX_SIZE )); then
-            echo "Error: Binary size ($SIZE bytes) exceeds the 10MB limit ($MAX_SIZE bytes)!"
+            echo "::error::Binary $ARTIFACT size ($SIZE bytes) exceeds the 10 MiB limit ($MAX_SIZE bytes)!"
             exit 1
           else
-            echo "Success: Binary size ($SIZE bytes) is within the 10MB limit."
+            echo "Success: Binary size is within the 10 MiB limit."
           fi
+
+      - name: Create Release and Upload Assets
+        # Using softprops/action-gh-release to handle assets verified in previous step
+        # tagName/releaseName are derived from the tag that triggered the workflow
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          files: |
+            src-tauri/target/release/bundle/**/*.AppImage
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.msi
+          tag_name: ${{ github.ref_name }}
+          name: 'Ledgy Release ${{ github.ref_name }}'
+          body: 'Automated release for version ${{ github.ref_name }}.'
+          draft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
