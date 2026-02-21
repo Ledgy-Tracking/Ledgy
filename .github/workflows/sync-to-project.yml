@@ -54,7 +54,5 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           PROJECT_NUMBER: ${{ inputs.project_number || '2' }}
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-          GITHUB_SHA: ${{ github.sha }}
           BEFORE_SHA: ${{ github.event.before }}
         run: python .github/scripts/sync_to_project.py
