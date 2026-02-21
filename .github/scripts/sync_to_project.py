@@ -412,7 +412,7 @@ def link_issue_to_pr(
         return True
 
     # Append a closing reference to the PR body
-    separator = "\n\n---\n" if body.strip() else ""
+    separator = "\n\n" if body.strip() else ""
     new_body = f"{body}{separator}Closes {issue_ref}"
 
     result = run_gh(
