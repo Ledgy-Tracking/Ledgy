@@ -4,11 +4,11 @@ import { UnlockPage } from './UnlockPage';
 import { useAuthStore } from './useAuthStore';
 import { MemoryRouter } from 'react-router-dom';
 
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-}));
+global.ResizeObserver = class ResizeObserver {
+    observe() { }
+    unobserve() { }
+    disconnect() { }
+} as any;
 
 vi.mock('./useAuthStore', () => ({
     useAuthStore: vi.fn(),
@@ -23,24 +23,20 @@ vi.mock('react-router-dom', async () => {
     };
 });
 
-vi.mock('input-otp', () => ({
-    OTPInput: ({ value, onChange, maxLength }: any) => (
-        <input
-            role="textbox"
-            value={value}
-            maxLength={maxLength}
-            onChange={(e) => onChange(e.target.value)}
-        />
-    ),
-}));
+// Using real input-otp component instead of mocking
 
 describe('UnlockPage', () => {
     const mockUnlock = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (useAuthStore as any).mockReturnValue({
-            unlock: mockUnlock,
+        (useAuthStore as any).mockImplementation((selector: any) => {
+            const state = {
+                totpSecret: 'dummy-secret',
+                isUnlocked: false,
+                unlock: mockUnlock,
+            };
+            return selector ? selector(state) : state;
         });
     });
 
@@ -56,13 +52,13 @@ describe('UnlockPage', () => {
 
     it('calls unlock when 6 digits are entered', async () => {
         mockUnlock.mockResolvedValue(true);
-        render(
+        const { container } = render(
             <MemoryRouter>
                 <UnlockPage />
             </MemoryRouter>
         );
 
-        const input = screen.getByRole('textbox');
+        const input = container.querySelector('input') as HTMLInputElement;
         fireEvent.change(input, { target: { value: '123456' } });
 
         await waitFor(() => {
@@ -73,13 +69,13 @@ describe('UnlockPage', () => {
 
     it('displays error message on invalid code', async () => {
         mockUnlock.mockResolvedValue(false);
-        render(
+        const { container } = render(
             <MemoryRouter>
                 <UnlockPage />
             </MemoryRouter>
         );
 
-        const input = screen.getByRole('textbox');
+        const input = container.querySelector('input') as HTMLInputElement;
         fireEvent.change(input, { target: { value: '000000' } });
 
         await waitFor(() => {
@@ -88,13 +84,13 @@ describe('UnlockPage', () => {
     });
 
     it('disables button when less than 6 digits', () => {
-        render(
+        const { container } = render(
             <MemoryRouter>
                 <UnlockPage />
             </MemoryRouter>
         );
 
-        const input = screen.getByRole('textbox');
+        const input = container.querySelector('input') as HTMLInputElement;
         fireEvent.change(input, { target: { value: '123' } });
 
         const button = screen.getByRole('button', { name: /Unlock Vault/i });

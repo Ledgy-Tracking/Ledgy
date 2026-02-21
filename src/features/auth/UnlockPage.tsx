@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OTPInput, SlotProps } from 'input-otp';
 import { Lock, ShieldAlert, ArrowRight } from 'lucide-react';
@@ -9,8 +9,21 @@ export const UnlockPage: React.FC = () => {
     const [error, setError] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { unlock } = useAuthStore();
+    const totpSecret = useAuthStore(state => state.totpSecret);
+    const isUnlocked = useAuthStore(state => state.isUnlocked);
     const navigate = useNavigate();
     const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (!totpSecret) {
+            navigate('/setup', { replace: true });
+            return;
+        }
+        if (isUnlocked) {
+            navigate('/profiles', { replace: true });
+            return;
+        }
+    }, [totpSecret, isUnlocked, navigate]);
 
     const handleUnlock = async (otp: string) => {
         setIsSubmitting(true);
@@ -35,7 +48,7 @@ export const UnlockPage: React.FC = () => {
     const onChange = (value: string) => {
         setCode(value);
         if (error) setError(false);
-        if (value.length === 6) {
+        if (value.length === 6 && !isSubmitting) {
             handleUnlock(value);
         }
     };
@@ -53,7 +66,7 @@ export const UnlockPage: React.FC = () => {
                     </div>
                 </div>
 
-                <form 
+                <form
                     onSubmit={(e) => {
                         e.preventDefault();
                         if (code.length === 6 && !isSubmitting) {

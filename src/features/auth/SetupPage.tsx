@@ -10,9 +10,15 @@ export const SetupPage: React.FC = () => {
     const [code, setCode] = useState('');
     const [error, setError] = useState<string | null>(null);
     const { verifyAndRegister } = useAuthStore();
+    const totpSecret = useAuthStore(state => state.totpSecret);
+    const isUnlocked = useAuthStore(state => state.isUnlocked);
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (totpSecret) {
+            navigate(isUnlocked ? '/' : '/unlock', { replace: true });
+            return;
+        }
         // Generate new secret on mount
         const rawSecret = generateSecret();
         const encoded = encodeSecret(rawSecret);

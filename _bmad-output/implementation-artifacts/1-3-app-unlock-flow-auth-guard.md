@@ -1,6 +1,6 @@
 # Story 1.3: App Unlock Flow & Auth Guard
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -37,12 +37,12 @@ so that my data is decrypted and I can access my profiles.
 - [x] [AI-Review][Medium] UnlockPage input is not wrapped in a form, preventing native Enter-key submission. [src/features/auth/UnlockPage.tsx:55]
 - [x] [AI-Review][Medium] Focus is not returned to the first input slot automatically after an invalid code attempt. [src/features/auth/UnlockPage.tsx:21]
 - [x] [AI-Review][Low] `Dashboard` placeholder component is declared directly in `App.tsx` instead of its own file. [src/App.tsx:48]
-- [ ] [AI-Review][High] `AuthGuard` retrieves `isRegistered` as a getter function from Zustand (`const { isRegistered } = useAuthStore()`) instead of a reactive selector, breaking React reactivity. [src/features/auth/AuthGuard.tsx:10]
-- [ ] [AI-Review][High] `AuthGuard` allows fully authenticated users to access `/setup` and `/unlock` routes instead of redirecting them. [src/features/auth/AuthGuard.tsx:13]
-- [ ] [AI-Review][Medium] AC 2 specifically stated to NOT wrap `/setup` and `/unlock` in `AuthGuard`, but `App.tsx` wraps ALL routes in `AuthGuard`. [src/App.tsx:9]
-- [ ] [AI-Review][Medium] `UnlockPage` can trigger `handleUnlock` multiple times concurrently; `onChange` lacks an `isSubmitting` check before calling `handleUnlock`. [src/features/auth/UnlockPage.tsx:38]
-- [ ] [AI-Review][Medium] `UnlockPage.test.tsx` naively mocks `<OTPInput>`, bypassing testing of the actual input interaction. [src/features/auth/UnlockPage.test.tsx:26]
-- [ ] [AI-Review][Low] `App.tsx` does not define a fallback catch-all route (e.g., `path="*"`). [src/App.tsx:45]
+- [x] [AI-Review][High] `AuthGuard` retrieves `isRegistered` as a getter function from Zustand (`const { isRegistered } = useAuthStore()`) instead of a reactive selector, breaking React reactivity. [src/features/auth/AuthGuard.tsx:10]
+- [x] [AI-Review][High] `AuthGuard` allows fully authenticated users to access `/setup` and `/unlock` routes instead of redirecting them. [src/features/auth/AuthGuard.tsx:13]
+- [x] [AI-Review][Medium] AC 2 specifically stated to NOT wrap `/setup` and `/unlock` in `AuthGuard`, but `App.tsx` wraps ALL routes in `AuthGuard`. [src/App.tsx:9]
+- [x] [AI-Review][Medium] `UnlockPage` can trigger `handleUnlock` multiple times concurrently; `onChange` lacks an `isSubmitting` check before calling `handleUnlock`. [src/features/auth/UnlockPage.tsx:38]
+- [x] [AI-Review][Medium] `UnlockPage.test.tsx` naively mocks `<OTPInput>`, bypassing testing of the actual input interaction. [src/features/auth/UnlockPage.test.tsx:26]
+- [x] [AI-Review][Low] `App.tsx` does not define a fallback catch-all route (e.g., `path="*"`). [src/App.tsx:45]
 
 ## Dev Notes
 
@@ -81,6 +81,12 @@ Antigravity (Gemini 2.0 Flash)
 - ✅ Resolved review finding [Medium]: UnlockPage input is not wrapped in a form.
 - ✅ Resolved review finding [Medium]: Focus is not returned to the first input slot automatically.
 - ✅ Resolved review finding [Low]: `Dashboard` placeholder component is declared directly in `App.tsx`.
+- ✅ Resolved review finding [High]: `AuthGuard` retrieves `isRegistered` as a getter function
+- ✅ Resolved review finding [High]: `AuthGuard` allows fully authenticated users to access `/setup` and `/unlock` routes
+- ✅ Resolved review finding [Medium]: AC 2 specifically stated to NOT wrap `/setup` and `/unlock` in `AuthGuard`
+- ✅ Resolved review finding [Medium]: `UnlockPage` can trigger `handleUnlock` multiple times concurrently
+- ✅ Resolved review finding [Medium]: `UnlockPage.test.tsx` naively mocks `<OTPInput>`
+- ✅ Resolved review finding [Low]: `App.tsx` does not define a fallback catch-all route
 
 ### File List
 - `src/features/auth/UnlockPage.tsx`
@@ -88,3 +94,6 @@ Antigravity (Gemini 2.0 Flash)
 - `src/features/auth/AuthGuard.tsx`
 - `src/App.tsx`
 - `src/features/dashboard/Dashboard.tsx`
+
+### Change Log
+- Addressed code review findings - 6 items resolved

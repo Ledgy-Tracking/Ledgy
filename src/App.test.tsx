@@ -9,9 +9,12 @@ vi.mock("./features/auth/useAuthStore", () => ({
 }));
 
 test("renders main app without crashing", () => {
-    (useAuthStore as any).mockReturnValue({
-        isRegistered: () => false,
-        isUnlocked: false,
+    (useAuthStore as any).mockImplementation((selector: any) => {
+        const state = {
+            totpSecret: null,
+            isUnlocked: false,
+        };
+        return selector ? selector(state) : state;
     });
 
     render(

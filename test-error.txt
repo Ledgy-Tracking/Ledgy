@@ -1,0 +1,49 @@
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90mC:/Users/njtan/Documents/GitHub/ledgy[39m
+
+stderr | src/features/auth/UnlockPage.test.tsx > UnlockPage > renders the unlock page
+[vitest] The vi.fn() mock did not use 'function' or 'class' in its implementation, see https://vitest.dev/api/vi#vi-spyon for examples.
+
+stderr | src/features/auth/UnlockPage.test.tsx > UnlockPage > calls unlock when 6 digits are entered
+[vitest] The vi.fn() mock did not use 'function' or 'class' in its implementation, see https://vitest.dev/api/vi#vi-spyon for examples.
+
+stderr | src/features/auth/UnlockPage.test.tsx > UnlockPage > displays error message on invalid code
+[vitest] The vi.fn() mock did not use 'function' or 'class' in its implementation, see https://vitest.dev/api/vi#vi-spyon for examples.
+
+stderr | src/features/auth/UnlockPage.test.tsx > UnlockPage > disables button when less than 6 digits
+[vitest] The vi.fn() mock did not use 'function' or 'class' in its implementation, see https://vitest.dev/api/vi#vi-spyon for examples.
+
+ [31mÔØ»[39m src/features/auth/UnlockPage.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[32m 171[2mms[22m[39m
+[31m     [31m├ù[31m renders the unlock page[39m[32m 131[2mms[22m[39m
+[31m     [31m├ù[31m calls unlock when 6 digits are entered[39m[32m 14[2mms[22m[39m
+[31m     [31m├ù[31m displays error message on invalid code[39m[32m 14[2mms[22m[39m
+[31m     [31m├ù[31m disables button when less than 6 digits[39m[32m 10[2mms[22m[39m
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ» Failed Tests 4 ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»
+
+ FAIL  src/features/auth/UnlockPage.test.tsx > UnlockPage > renders the unlock page
+ FAIL  src/features/auth/UnlockPage.test.tsx > UnlockPage > calls unlock when 6 digits are entered
+ FAIL  src/features/auth/UnlockPage.test.tsx > UnlockPage > displays error message on invalid code
+ FAIL  src/features/auth/UnlockPage.test.tsx > UnlockPage > disables button when less than 6 digits
+TypeError: () => ({
+  observe: __vite_ssr_import_0__.vi.fn(),
+  unobserve: __vite_ssr_import_0__.vi.fn(),
+  disconnect: __...<omitted>...}) is not a constructor
+ ÔØ» node_modules/input-otp/dist/index.mjs:1:5166
+ ÔØ» Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25989:20
+ ÔØ» runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:874:13
+ ÔØ» commitHookEffectListMount node_modules/react-dom/cjs/react-dom-client.development.js:13249:29
+ ÔØ» commitHookPassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:13336:11
+ ÔØ» commitPassiveMountOnFiber node_modules/react-dom/cjs/react-dom-client.development.js:15484:13
+ ÔØ» recursivelyTraversePassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:15439:11
+ ÔØ» commitPassiveMountOnFiber node_modules/react-dom/cjs/react-dom-client.development.js:15718:11
+ ÔØ» recursivelyTraversePassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:15439:11
+
+ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»ÔÄ»[1/4]ÔÄ»
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m4 failed[39m[22m[90m (4)[39m
+[2m   Start at [22m 20:53:32
+[2m   Duration [22m 2.29s[2m (transform 147ms, setup 187ms, import 456ms, tests 171ms, environment 1.25s)[22m
+
