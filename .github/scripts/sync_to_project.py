@@ -343,6 +343,34 @@ mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
     return data is not None
 
 
+def add_sub_issue(epic_node_id: str, story_node_id: str) -> bool:
+    """Link a story (sub-issue) to an epic (parent issue)."""
+    mutation = """
+mutation($issueId: ID!, $subIssueId: ID!) {
+  addSubIssue(input: {issueId: $issueId, subIssueId: $subIssueId}) {
+    issue { id }
+  }
+}
+"""
+    args = [
+        "api", "graphql",
+        "-H", "GraphQL-Features: sub_issues",
+        "-f", f"query={mutation}",
+        "-f", f"issueId={epic_node_id}",
+        "-f", f"subIssueId={story_node_id}",
+    ]
+    data = run_gh(*args)
+    if isinstance(data, dict):
+        if "errors" in data:
+            msg = data["errors"][0].get("message", "Unknown GraphQL error")
+            if "already exist" in msg.lower() or "already" in msg.lower():
+                return True
+            print(f"  ⚠  GraphQL Error linking sub-issue: {msg}", file=sys.stderr)
+            return False
+        return True
+    return data is not None or os.getenv("DRY_RUN", "").lower() == "true"
+
+
 # ---------------------------------------------------------------------------
 # Issue body builders
 # ---------------------------------------------------------------------------
@@ -420,6 +448,24 @@ def main() -> int:
         issue = find_or_create_issue(repo, item["title"], item["label"], body)
         if issue:
             issue_map[key] = issue
+
+    # -- Link stories to epics ---------------------------------------------
+    print(f"\n🔗 Linking stories to epics …")
+    for item in items:
+        if item["item_type"] == "story":
+            story_key = item["key"]
+            epic_key = f"epic-{item['epic_num']}"
+            story_issue = issue_map.get(story_key)
+            epic_issue = issue_map.get(epic_key)
+            if story_issue and epic_issue:
+                if dry_run:
+                    print(f"  [DRY RUN] Would link story #{story_issue.get('number')} to epic #{epic_issue.get('number')}")
+                else:
+                    ok = add_sub_issue(epic_issue["id"], story_issue["id"])
+                    if ok:
+                        print(f"  ✔ Linked story #{story_issue.get('number')} to epic #{epic_issue.get('number')}")
+                    else:
+                        print(f"  ⚠ Failed to link story #{story_issue.get('number')} to epic #{epic_issue.get('number')}")
 
     # -- Fetch project -----------------------------------------------------
     print(f"\n📋 Fetching GitHub Project #{project_number} …")
