@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledgy — Design Directions</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --zinc-950: #09090b; --zinc-900: #18181b; --zinc-800: #27272a;
+    --zinc-700: #3f3f46; --zinc-600: #52525b; --zinc-400: #a1a1aa;
+    --zinc-200: #e4e4e7; --zinc-50: #fafafa;
+    --emerald-500: #10b981; --emerald-400: #34d399;
+    --amber-500: #f59e0b; --red-500: #ef4444;
+  }
+  body { font-family: 'Inter', sans-serif; background: #0d0d0f; color: var(--zinc-50); min-height: 100vh; }
+
+  /* NAV */
+  .nav { display: flex; gap: 8px; padding: 20px 32px; background: var(--zinc-950); border-bottom: 1px solid var(--zinc-800); align-items: center; flex-wrap: wrap; }
+  .nav h1 { font-size: 16px; font-weight: 600; color: var(--emerald-500); margin-right: 16px; }
+  .nav-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--zinc-700); background: transparent; color: var(--zinc-400); font-size: 13px; cursor: pointer; font-family: inherit; transition: all .15s; }
+  .nav-btn.active, .nav-btn:hover { background: var(--emerald-500); color: #000; border-color: var(--emerald-500); font-weight: 500; }
+
+  /* SECTIONS */
+  .direction { display: none; padding: 32px; }
+  .direction.active { display: block; }
+  .direction-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--emerald-500); margin-bottom: 8px; }
+  .direction-title { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+  .direction-desc { font-size: 13px; color: var(--zinc-400); margin-bottom: 24px; }
+
+  /* SHELL */
+  .app-shell { display: flex; height: 560px; background: var(--zinc-950); border: 1px solid var(--zinc-800); border-radius: 10px; overflow: hidden; }
+  .sidebar { width: 220px; background: var(--zinc-900); border-right: 1px solid var(--zinc-800); flex-shrink: 0; display: flex; flex-direction: column; }
+  .sidebar-header { padding: 14px 16px 10px; border-bottom: 1px solid var(--zinc-800); }
+  .sidebar-header .app-name { font-size: 14px; font-weight: 600; }
+  .sidebar-header .profile { font-size: 11px; color: var(--zinc-400); margin-top: 2px; }
+  .sidebar-section { padding: 10px 8px 4px; }
+  .sidebar-section-label { font-size: 10px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--zinc-600); padding: 0 8px; margin-bottom: 2px; }
+  .sidebar-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 5px; font-size: 13px; cursor: pointer; color: var(--zinc-400); transition: all .1s; }
+  .sidebar-item:hover { background: var(--zinc-800); color: var(--zinc-50); }
+  .sidebar-item.active { background: var(--zinc-800); color: var(--zinc-50); }
+  .sidebar-item .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--zinc-600); flex-shrink: 0; }
+  .sidebar-item.active .dot { background: var(--emerald-500); }
+  .sidebar-item .badge { margin-left: auto; font-size: 10px; background: var(--zinc-800); color: var(--zinc-400); padding: 1px 6px; border-radius: 10px; }
+  .sidebar-sync { margin-top: auto; padding: 12px 16px; border-top: 1px solid var(--zinc-800); font-size: 11px; color: var(--emerald-500); display: flex; align-items: center; gap: 6px; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-500); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  /* MAIN */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .toolbar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--zinc-800); background: var(--zinc-900); }
+  .toolbar-title { font-size: 14px; font-weight: 600; flex: 1; }
+  .toolbar-sub { font-size: 12px; color: var(--zinc-400); }
+  .btn { padding: 5px 12px; border-radius: 5px; font-size: 12px; font-family: inherit; cursor: pointer; border: none; font-weight: 500; transition: all .15s; }
+  .btn-primary { background: var(--emerald-500); color: #000; }
+  .btn-primary:hover { background: var(--emerald-400); }
+  .btn-ghost { background: transparent; color: var(--zinc-400); border: 1px solid var(--zinc-700); }
+  .btn-ghost:hover { border-color: var(--zinc-500); color: var(--zinc-50); }
+  .kbd { font-size: 10px; font-family: 'JetBrains Mono', monospace; background: var(--zinc-800); border: 1px solid var(--zinc-700); border-radius: 4px; padding: 2px 6px; color: var(--zinc-400); }
+
+  /* TABLE */
+  .table-wrap { flex: 1; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { padding: 8px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--zinc-400); border-bottom: 1px solid var(--zinc-800); position: sticky; top: 0; background: var(--zinc-950); letter-spacing: .04em; text-transform: uppercase; cursor: pointer; }
+  thead th:hover { color: var(--zinc-200); }
+  tbody tr { border-bottom: 1px solid var(--zinc-800); cursor: pointer; }
+  tbody tr:hover { background: var(--zinc-900); }
+  tbody tr.selected { background: rgba(16,185,129,.07); }
+  td { padding: 9px 14px; color: var(--zinc-200); }
+  td.meta { color: var(--zinc-400); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; }
+  .tag-emerald { background: rgba(16,185,129,.15); color: var(--emerald-400); }
+  .tag-amber { background: rgba(245,158,11,.12); color: var(--amber-500); }
+  .tag-zinc { background: var(--zinc-800); color: var(--zinc-400); }
+
+  /* INLINE ADD ROW */
+  .add-row td { padding: 6px 14px; }
+  .add-row input { background: var(--zinc-800); border: 1px solid var(--emerald-500); border-radius: 4px; padding: 4px 8px; font-size: 13px; color: var(--zinc-50); font-family: inherit; width: 100%; outline: none; }
+
+  /* INSPECTOR */
+  .inspector { width: 260px; background: var(--zinc-900); border-left: 1px solid var(--zinc-800); flex-shrink: 0; display: flex; flex-direction: column; }
+  .inspector-header { padding: 12px 14px; border-bottom: 1px solid var(--zinc-800); font-size: 12px; font-weight: 600; color: var(--zinc-400); text-transform: uppercase; letter-spacing: .06em; }
+  .inspector-field { padding: 10px 14px; border-bottom: 1px solid var(--zinc-800); }
+  .inspector-label { font-size: 11px; color: var(--zinc-400); margin-bottom: 4px; }
+  .inspector-value { font-size: 13px; color: var(--zinc-50); }
+  .inspector-value.mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--zinc-400); }
+
+  /* NODE EDITOR */
+  .node-canvas { flex: 1; background: var(--zinc-950); background-image: radial-gradient(circle, var(--zinc-800) 1px, transparent 1px); background-size: 24px 24px; position: relative; overflow: hidden; }
+  .node { position: absolute; background: var(--zinc-900); border: 1px solid var(--zinc-700); border-radius: 8px; width: 180px; font-size: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
+  .node.active { border-color: var(--emerald-500); box-shadow: 0 0 0 2px rgba(16,185,129,.2), 0 4px 16px rgba(0,0,0,.4); }
+  .node-header { padding: 8px 12px; border-bottom: 1px solid var(--zinc-800); font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .node-type { width: 8px; height: 8px; border-radius: 2px; }
+  .node-body { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .port { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--zinc-400); }
+  .port-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid; flex-shrink: 0; }
+  .port-out { margin-left: auto; flex-direction: row-reverse; }
+  svg.wires { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+
+  /* DIFF UI */
+  .diff-shell { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .diff-header { padding: 10px 16px; background: rgba(245,158,11,.08); border-bottom: 1px solid rgba(245,158,11,.2); display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .diff-icon { color: var(--amber-500); }
+  .diff-label { font-weight: 600; }
+  .diff-sub { color: var(--zinc-400); font-size: 12px; }
+  .diff-cols { display: flex; flex: 1; overflow: hidden; }
+  .diff-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .diff-col-header { padding: 8px 16px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--zinc-800); display: flex; align-items: center; gap: 8px; }
+  .diff-col-header.local { background: rgba(16,185,129,.06); color: var(--emerald-400); }
+  .diff-col-header.remote { background: rgba(239,68,68,.06); color: #f87171; border-left: 1px solid var(--zinc-800); }
+  .diff-field { padding: 10px 16px; border-bottom: 1px solid var(--zinc-800); font-size: 13px; }
+  .diff-field-label { font-size: 11px; color: var(--zinc-400); margin-bottom: 3px; }
+  .diff-field.highlight { background: rgba(16,185,129,.06); }
+  .diff-field.highlight-red { background: rgba(239,68,68,.06); border-left: 1px solid var(--zinc-800); }
+  .diff-changed { color: var(--emerald-400); font-weight: 500; }
+  .diff-changed-red { color: #f87171; font-weight: 500; }
+  .diff-actions { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--zinc-800); background: var(--zinc-900); }
+
+  /* CMD PALETTE */
+  .palette-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: flex-start; justify-content: center; padding-top: 80px; z-index: 10; }
+  .palette { width: 480px; background: var(--zinc-900); border: 1px solid var(--zinc-700); border-radius: 10px; box-shadow: 0 24px 48px rgba(0,0,0,.6); overflow: hidden; }
+  .palette-input { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--zinc-800); }
+  .palette-input input { flex: 1; background: transparent; border: none; font-size: 14px; color: var(--zinc-50); font-family: inherit; outline: none; }
+  .palette-results { padding: 6px; }
+  .palette-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+  .palette-item.active { background: var(--zinc-800); }
+  .palette-item .pi-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .palette-item .pi-label { flex: 1; }
+  .palette-item .pi-sub { font-size: 11px; color: var(--zinc-400); }
+
+  /* COMPARISON GRID */
+  .compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 24px 0; }
+  .compare-card { background: var(--zinc-900); border: 1px solid var(--zinc-800); border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color .15s; }
+  .compare-card:hover { border-color: var(--emerald-500); }
+  .compare-card-thumb { height: 120px; background: var(--zinc-950); position: relative; overflow: hidden; }
+  .compare-card-info { padding: 12px; }
+  .compare-card-title { font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+  .compare-card-desc { font-size: 11px; color: var(--zinc-400); line-height: 1.5; }
+  .thumb-mini-sidebar { position: absolute; left: 0; top: 0; bottom: 0; width: 40px; background: var(--zinc-900); border-right: 1px solid var(--zinc-800); }
+  .thumb-mini-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--zinc-700); margin: 8px auto; }
+  .thumb-mini-dot.active { background: var(--emerald-500); }
+  .thumb-mini-content { position: absolute; left: 40px; right: 0; top: 0; bottom: 0; padding: 8px; }
+  .thumb-bar { height: 6px; background: var(--zinc-800); border-radius: 2px; margin-bottom: 5px; }
+  .thumb-bar.accent { background: rgba(16,185,129,.4); }
+  .thumb-row { height: 10px; background: var(--zinc-800); border-radius: 2px; margin-bottom: 4px; opacity: .6; }
+
+  .section-divider { display: flex; align-items: center; gap: 12px; margin: 24px 0 16px; }
+  .section-divider-text { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--zinc-600); white-space: nowrap; }
+  .section-divider-line { flex: 1; height: 1px; background: var(--zinc-800); }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <h1>🌿 Ledgy</h1>
+  <span style="font-size:12px;color:var(--zinc-600);margin-right:8px;">Design Directions</span>
+  <button class="nav-btn active" onclick="show('d1',this)">Direction 1 — Data Lab</button>
+  <button class="nav-btn" onclick="show('d2',this)">Direction 2 — Node Forge</button>
+  <button class="nav-btn" onclick="show('d3',this)">Direction 3 — Diff Guard</button>
+  <button class="nav-btn" onclick="show('d4',this)">Direction 4 — Command</button>
+  <button class="nav-btn" onclick="show('compare',this)">↔ Compare All</button>
+</div>
+
+<!-- DIRECTION 1: Ledger Table (Data Lab) -->
+<div id="d1" class="direction active">
+  <div class="direction-label">Direction 1</div>
+  <div class="direction-title">Data Lab</div>
+  <div class="direction-desc">Primary view: dense ledger table with inline editing. Three-panel layout. Inspired by Linear.</div>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <div class="app-name">🌿 Ledgy</div>
+        <div class="profile">Personal · James</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Projects</div>
+        <div class="sidebar-item active"><span class="dot"></span>Wellness<span class="badge">12</span></div>
+        <div class="sidebar-item"><span class="dot"></span>Finances<span class="badge">34</span></div>
+        <div class="sidebar-item"><span class="dot"></span>Car Maintenance<span class="badge">8</span></div>
+        <div class="sidebar-item" style="color:var(--zinc-600);font-size:12px;padding-left:16px;">+ New Project</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Ledgers</div>
+        <div class="sidebar-item active"><span class="dot"></span>Caffeine Log</div>
+        <div class="sidebar-item"><span class="dot"></span>Sleep Tracker</div>
+        <div class="sidebar-item"><span class="dot"></span>Workouts</div>
+        <div class="sidebar-item" style="color:var(--zinc-600);font-size:12px;padding-left:16px;">+ New Ledger</div>
+      </div>
+      <div class="sidebar-sync"><span class="sync-dot"></span>Synced · 2s ago</div>
+    </div>
+    <!-- Main -->
+    <div class="main">
+      <div class="toolbar">
+        <div class="toolbar-title">Caffeine Log <span class="toolbar-sub">· 12 entries</span></div>
+        <span class="kbd">N</span>
+        <button class="btn btn-primary">+ Add Entry</button>
+        <button class="btn btn-ghost">Filter</button>
+        <button class="btn btn-ghost">⟳ Sync</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th><th>Amount (mg)</th><th>Time</th><th>Mood</th><th>Tags</th><th>Linked</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="add-row">
+              <td><input placeholder="Item name…" autofocus></td>
+              <td><input placeholder="mg…" style="width:60px"></td>
+              <td></td><td></td><td></td><td></td>
+            </tr>
+            <tr class="selected">
+              <td>Flat White</td>
+              <td class="meta">160</td>
+              <td class="meta">08:34</td>
+              <td><span class="tag tag-emerald">Good</span></td>
+              <td><span class="tag tag-zinc">morning</span></td>
+              <td style="font-size:11px;color:var(--emerald-400)">→ Sleep #47</td>
+            </tr>
+            <tr><td>Espresso</td><td class="meta">80</td><td class="meta">13:12</td><td><span class="tag tag-amber">Jittery</span></td><td><span class="tag tag-zinc">afternoon</span></td><td></td></tr>
+            <tr><td>Green Tea</td><td class="meta">40</td><td class="meta">15:50</td><td><span class="tag tag-emerald">Calm</span></td><td></td><td></td></tr>
+            <tr><td>Cold Brew</td><td class="meta">200</td><td class="meta">07:20</td><td><span class="tag tag-amber">Wired</span></td><td><span class="tag tag-zinc">monday</span></td><td style="font-size:11px;color:var(--emerald-400)">→ Sleep #43</td></tr>
+            <tr><td>Flat White</td><td class="meta">160</td><td class="meta">09:10</td><td><span class="tag tag-emerald">Good</span></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- Inspector -->
+    <div class="inspector">
+      <div class="inspector-header">Entry Details</div>
+      <div class="inspector-field"><div class="inspector-label">Item</div><div class="inspector-value">Flat White</div></div>
+      <div class="inspector-field"><div class="inspector-label">Amount</div><div class="inspector-value">160 mg</div></div>
+      <div class="inspector-field"><div class="inspector-label">Time</div><div class="inspector-value">08:34 · 2026-02-21</div></div>
+      <div class="inspector-field"><div class="inspector-label">Mood</div><div class="inspector-value"><span class="tag tag-emerald">Good</span></div></div>
+      <div class="inspector-field"><div class="inspector-label">Linked Entry</div><div class="inspector-value" style="color:var(--emerald-400);font-size:12px;">Sleep #47 → 7h 20m deep sleep</div></div>
+      <div class="inspector-field"><div class="inspector-label">Entry ID</div><div class="inspector-value mono">caf_fb3a9d</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION 2: Node Editor (Node Forge) -->
+<div id="d2" class="direction">
+  <div class="direction-label">Direction 2</div>
+  <div class="direction-title">Node Forge</div>
+  <div class="direction-desc">Primary view: the visual node editor canvas. Connects ledgers with data flows. Inspired by Figma / Unreal Blueprints.</div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-header"><div class="app-name">🌿 Ledgy</div><div class="profile">Node Editor · Wellness</div></div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Ledger Nodes</div>
+        <div class="sidebar-item active"><span class="dot"></span>Caffeine Log</div>
+        <div class="sidebar-item"><span class="dot"></span>Sleep Tracker</div>
+        <div class="sidebar-item"><span class="dot"></span>Workouts</div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Logic Nodes</div>
+        <div class="sidebar-item"><span class="dot" style="background:var(--amber-500)"></span>Correlation</div>
+        <div class="sidebar-item"><span class="dot" style="background:#818cf8"></span>Filter</div>
+        <div class="sidebar-item"><span class="dot" style="background:#38bdf8"></span>Aggregate</div>
+        <div class="sidebar-item"><span class="dot" style="background:#fb923c"></span>Trigger</div>
+      </div>
+      <div class="sidebar-sync"><span class="sync-dot"></span>Canvas saved</div>
+    </div>
+    <div class="main">
+      <div class="toolbar">
+        <div class="toolbar-title">Node Canvas <span class="toolbar-sub">· Wellness Project</span></div>
+        <button class="btn btn-ghost">+ Node</button>
+        <button class="btn btn-ghost">Zoom fit</button>
+        <button class="btn btn-primary">▶ Run</button>
+      </div>
+      <div class="node-canvas">
+        <svg class="wires">
+          <defs>
+            <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 Z" fill="#10b981" opacity=".7"/>
+            </marker>
+          </defs>
+          <path d="M 218 195 C 280 195 280 245 342 245" stroke="#10b981" stroke-width="2" fill="none" opacity=".8" marker-end="url(#arr)"/>
+          <path d="M 218 305 C 280 305 280 260 342 260" stroke="#10b981" stroke-width="2" fill="none" opacity=".8" marker-end="url(#arr)"/>
+          <path d="M 526 252 C 580 252 580 290 620 290" stroke="#f59e0b" stroke-width="2" fill="none" opacity=".6" marker-end="url(#arr)" stroke-dasharray="5,3"/>
+        </svg>
+        <!-- Node 1 -->
+        <div class="node" style="left:32px;top:160px;">
+          <div class="node-header"><div class="node-type" style="background:var(--emerald-500)"></div>Caffeine Log</div>
+          <div class="node-body">
+            <div class="port"><div class="port-dot" style="border-color:var(--zinc-600);background:var(--zinc-800)"></div>Entry</div>
+            <div class="port port-out">Amount (mg)<div class="port-dot" style="border-color:var(--emerald-500);background:var(--emerald-500)"></div></div>
+            <div class="port port-out">Timestamp<div class="port-dot" style="border-color:var(--emerald-500);background:var(--emerald-500)"></div></div>
+          </div>
+        </div>
+        <!-- Node 2 -->
+        <div class="node" style="left:32px;top:272px;">
+          <div class="node-header"><div class="node-type" style="background:var(--emerald-500)"></div>Sleep Tracker</div>
+          <div class="node-body">
+            <div class="port"><div class="port-dot" style="border-color:var(--zinc-600);background:var(--zinc-800)"></div>Entry</div>
+            <div class="port port-out">Deep Sleep %<div class="port-dot" style="border-color:var(--emerald-500);background:var(--emerald-500)"></div></div>
+            <div class="port port-out">Sleep Score<div class="port-dot" style="border-color:var(--emerald-500);background:var(--emerald-500)"></div></div>
+          </div>
+        </div>
+        <!-- Node 3: Correlation -->
+        <div class="node active" style="left:342px;top:210px;">
+          <div class="node-header"><div class="node-type" style="background:var(--amber-500)"></div>Correlation</div>
+          <div class="node-body">
+            <div class="port"><div class="port-dot" style="border-color:var(--emerald-500);background:var(--emerald-500)"></div>Input A</div>
+            <div class="port"><div class="port-dot" style="border-color:var(--emerald-500);background:var(--emerald-500)"></div>Input B</div>
+            <div class="port port-out" style="color:var(--amber-500)">Score (r=−0.78)<div class="port-dot" style="border-color:var(--amber-500);background:var(--amber-500)"></div></div>
+          </div>
+        </div>
+        <!-- Node 4: Output -->
+        <div class="node" style="left:620px;top:262px;">
+          <div class="node-header"><div class="node-type" style="background:#818cf8"></div>Chart Widget</div>
+          <div class="node-body">
+            <div class="port"><div class="port-dot" style="border-color:var(--zinc-600);background:var(--zinc-800)"></div>Data</div>
+            <div style="font-size:11px;color:var(--zinc-400);margin-top:4px;">Outputs to Dashboard</div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:12px;right:12px;font-size:11px;color:var(--zinc-600)">Correlation: caffeine → sleep quality · r = −0.78</div>
+      </div>
+    </div>
+    <div class="inspector">
+      <div class="inspector-header">Node Inspector</div>
+      <div class="inspector-field"><div class="inspector-label">Type</div><div class="inspector-value">Correlation Node</div></div>
+      <div class="inspector-field"><div class="inspector-label">Method</div><div class="inspector-value">Pearson (r)</div></div>
+      <div class="inspector-field"><div class="inspector-label">Result</div><div class="inspector-value" style="color:var(--amber-500)">r = −0.78 (strong)</div></div>
+      <div class="inspector-field"><div class="inspector-label">Sample size</div><div class="inspector-value mono">n = 42 entries</div></div>
+      <div class="inspector-field"><div class="inspector-label">Status</div><div class="inspector-value"><span class="tag tag-emerald">Live</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION 3: Conflict Diff UI (Diff Guard) -->
+<div id="d3" class="direction">
+  <div class="direction-label">Direction 3</div>
+  <div class="direction-title">Diff Guard</div>
+  <div class="direction-desc">Sync conflict resolution UI. Side-by-side diff with explicit accept/reject. Ledgy's "trust" feature.</div>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-header"><div class="app-name">🌿 Ledgy</div><div class="profile">Sync · James</div></div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Conflicts</div>
+        <div class="sidebar-item active"><span class="dot" style="background:var(--amber-500)"></span>Caffeine #47<span class="badge" style="color:var(--amber-500)">!</span></div>
+        <div class="sidebar-item"><span class="dot" style="background:var(--amber-500)"></span>Sleep #23<span class="badge" style="color:var(--amber-500)">!</span></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Synced</div>
+        <div class="sidebar-item"><span class="dot" style="background:var(--emerald-500)"></span>Finances (34)</div>
+        <div class="sidebar-item"><span class="dot" style="background:var(--emerald-500)"></span>Workouts (19)</div>
+      </div>
+      <div class="sidebar-sync"><span class="sync-dot" style="background:var(--amber-500);animation:none"></span>2 conflicts pending</div>
+    </div>
+    <div class="main">
+      <div class="diff-shell">
+        <div class="diff-header">
+          <span class="diff-icon">⚠</span>
+          <div>
+            <div class="diff-label">Sync Conflict — Caffeine Log · Entry #47</div>
+            <div class="diff-sub">Modified on 2 devices simultaneously. Review and accept one version.</div>
+          </div>
+        </div>
+        <div class="diff-cols">
+          <div class="diff-col">
+            <div class="diff-col-header local">✓ Desktop · 13:42 local</div>
+            <div class="diff-field"><div class="diff-field-label">Item</div>Flat White</div>
+            <div class="diff-field highlight"><div class="diff-field-label">Amount</div><span class="diff-changed">160 mg</span></div>
+            <div class="diff-field"><div class="diff-field-label">Time</div>08:34</div>
+            <div class="diff-field highlight"><div class="diff-field-label">Mood</div><span class="diff-changed">Good</span></div>
+            <div class="diff-field"><div class="diff-field-label">Tags</div>morning, weekday</div>
+          </div>
+          <div class="diff-col">
+            <div class="diff-col-header remote">✗ Mobile · 13:39 remote</div>
+            <div class="diff-field highlight-red"><div class="diff-field-label">Item</div>Flat White</div>
+            <div class="diff-field highlight-red"><div class="diff-field-label">Amount</div><span class="diff-changed-red">120 mg</span></div>
+            <div class="diff-field highlight-red"><div class="diff-field-label">Time</div>08:34</div>
+            <div class="diff-field highlight-red"><div class="diff-field-label">Mood</div><span class="diff-changed-red">Okay</span></div>
+            <div class="diff-field highlight-red"><div class="diff-field-label">Tags</div>morning</div>
+          </div>
+        </div>
+        <div class="diff-actions">
+          <button class="btn btn-primary">✓ Accept Desktop (left)</button>
+          <button class="btn btn-ghost">Accept Mobile (right)</button>
+          <button class="btn btn-ghost" style="margin-left:auto">Skip for now</button>
+        </div>
+      </div>
+    </div>
+    <div class="inspector">
+      <div class="inspector-header">Conflict Info</div>
+      <div class="inspector-field"><div class="inspector-label">Entry ID</div><div class="inspector-value mono">caf_fb3a9d</div></div>
+      <div class="inspector-field"><div class="inspector-label">Ledger</div><div class="inspector-value">Caffeine Log</div></div>
+      <div class="inspector-field"><div class="inspector-label">Changed fields</div><div class="inspector-value"><span class="tag tag-amber">Amount</span> <span class="tag tag-amber">Mood</span></div></div>
+      <div class="inspector-field"><div class="inspector-label">Desktop edited</div><div class="inspector-value mono">13:42:08</div></div>
+      <div class="inspector-field"><div class="inspector-label">Mobile edited</div><div class="inspector-value mono">13:39:52</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DIRECTION 4: Command Palette -->
+<div id="d4" class="direction">
+  <div class="direction-label">Direction 4</div>
+  <div class="direction-title">Command</div>
+  <div class="direction-desc">Keyboard-first command palette over the main view. Global actions, project switching, and quick entry.</div>
+  <div class="app-shell" style="position:relative">
+    <div class="sidebar">
+      <div class="sidebar-header"><div class="app-name">🌿 Ledgy</div><div class="profile">Personal · James</div></div>
+      <div class="sidebar-section">
+        <div class="sidebar-section-label">Projects</div>
+        <div class="sidebar-item active"><span class="dot"></span>Wellness</div>
+        <div class="sidebar-item"><span class="dot"></span>Finances</div>
+        <div class="sidebar-item"><span class="dot"></span>Car Maintenance</div>
+      </div>
+      <div class="sidebar-sync"><span class="sync-dot"></span>Synced</div>
+    </div>
+    <div class="main" style="opacity:.35;filter:blur(1px)">
+      <div class="toolbar"><div class="toolbar-title">Caffeine Log</div></div>
+      <div class="table-wrap"><table><thead><tr><th>Item</th><th>Amount</th><th>Time</th><th>Mood</th></tr></thead><tbody>
+        <tr><td>Flat White</td><td class="meta">160mg</td><td class="meta">08:34</td><td><span class="tag tag-emerald">Good</span></td></tr>
+        <tr><td>Espresso</td><td class="meta">80mg</td><td class="meta">13:12</td><td><span class="tag tag-amber">Jittery</span></td></tr>
+      </tbody></table></div>
+    </div>
+    <!-- Palette overlay -->
+    <div class="palette-overlay" style="position:absolute">
+      <div class="palette">
+        <div class="palette-input">
+          <span style="color:var(--zinc-400)">⌘</span>
+          <input value="new entry caf" placeholder="Search or type a command…">
+          <span class="kbd">⎋</span>
+        </div>
+        <div class="palette-results">
+          <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--zinc-600);padding:6px 10px 4px">Suggested</div>
+          <div class="palette-item active">
+            <div class="pi-icon" style="background:rgba(16,185,129,.15);color:var(--emerald-400)">+</div>
+            <div><div class="pi-label">New entry in Caffeine Log</div><div class="pi-sub">Wellness · add row</div></div>
+            <span class="kbd">↵</span>
+          </div>
+          <div class="palette-item">
+            <div class="pi-icon" style="background:rgba(16,185,129,.1);color:var(--emerald-400)">📋</div>
+            <div><div class="pi-label">Open Caffeine Log</div><div class="pi-sub">Wellness · switch view</div></div>
+          </div>
+          <div class="palette-item">
+            <div class="pi-icon" style="background:rgba(245,158,11,.1);color:var(--amber-500)">⟳</div>
+            <div><div class="pi-label">AI Capture — scan receipt</div><div class="pi-sub">AI Plugin · Finances</div></div>
+          </div>
+          <div class="palette-item">
+            <div class="pi-icon" style="background:rgba(129,140,248,.1);color:#818cf8">◈</div>
+            <div><div class="pi-label">Open Node Editor</div><div class="pi-sub">Wellness · canvas</div></div>
+          </div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--zinc-600);padding:8px 10px 4px">Sync</div>
+          <div class="palette-item">
+            <div class="pi-icon" style="background:rgba(16,185,129,.1);color:var(--emerald-400)">✓</div>
+            <div><div class="pi-label">Sync status</div><div class="pi-sub">Last synced 2s ago · 0 conflicts</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPARE ALL -->
+<div id="compare" class="direction">
+  <div class="direction-label">Overview</div>
+  <div class="direction-title">All Design Directions</div>
+  <div class="direction-desc">Compare the four directions side-by-side. Click any card to jump to that mockup.</div>
+  <div class="compare-grid">
+    <div class="compare-card" onclick="show('d1',null)">
+      <div class="compare-card-thumb">
+        <div class="thumb-mini-sidebar"><div class="thumb-mini-dot active"></div><div class="thumb-mini-dot"></div><div class="thumb-mini-dot"></div></div>
+        <div class="thumb-mini-content"><div class="thumb-bar accent"></div><div class="thumb-row"></div><div class="thumb-row" style="width:80%"></div><div class="thumb-row" style="width:90%"></div><div class="thumb-row" style="width:60%"></div></div>
+      </div>
+      <div class="compare-card-info"><div class="compare-card-title">1 — Data Lab</div><div class="compare-card-desc">Dense ledger table · inline editing · three-panel layout · Linear-inspired daily driver</div></div>
+    </div>
+    <div class="compare-card" onclick="show('d2',null)">
+      <div class="compare-card-thumb" style="background-image:radial-gradient(circle,var(--zinc-800) 1px,transparent 1px);background-size:16px 16px">
+        <div style="position:absolute;left:20px;top:20px;width:60px;height:40px;background:var(--zinc-900);border:1px solid var(--emerald-500);border-radius:5px;padding:5px;"><div style="height:3px;background:var(--emerald-500);border-radius:1px;margin-bottom:3px;width:70%"></div><div style="height:2px;background:var(--zinc-700);border-radius:1px"></div></div>
+        <div style="position:absolute;right:20px;top:50px;width:60px;height:40px;background:var(--zinc-900);border:1px solid var(--zinc-700);border-radius:5px;padding:5px;"><div style="height:3px;background:var(--amber-500);border-radius:1px;margin-bottom:3px;width:80%"></div><div style="height:2px;background:var(--zinc-700);border-radius:1px"></div></div>
+        <svg style="position:absolute;width:100%;height:100%;top:0;left:0;pointer-events:none"><path d="M 80 40 C 110 40 110 70 120 70" stroke="#10b981" stroke-width="1.5" fill="none" opacity=".8"/></svg>
+      </div>
+      <div class="compare-card-info"><div class="compare-card-title">2 — Node Forge</div><div class="compare-card-desc">Visual node canvas · wire connections · live data flow · Blueprint/Figma-inspired "aha" moment</div></div>
+    </div>
+    <div class="compare-card" onclick="show('d3',null)">
+      <div class="compare-card-thumb">
+        <div style="position:absolute;inset:0;display:flex">
+          <div style="flex:1;background:rgba(16,185,129,.05);border-right:1px solid var(--zinc-800);padding:8px"><div style="height:3px;background:var(--emerald-500);border-radius:1px;margin-bottom:4px;width:60%"></div><div class="thumb-row" style="width:90%"></div><div style="height:3px;background:rgba(16,185,129,.4);border-radius:1px;margin-top:3px;width:70%"></div></div>
+          <div style="flex:1;background:rgba(239,68,68,.05);padding:8px"><div style="height:3px;background:#ef4444;border-radius:1px;margin-bottom:4px;width:60%"></div><div class="thumb-row" style="width:90%"></div><div style="height:3px;background:rgba(239,68,68,.4);border-radius:1px;margin-top:3px;width:50%"></div></div>
+        </div>
+      </div>
+      <div class="compare-card-info"><div class="compare-card-title">3 — Diff Guard</div><div class="compare-card-desc">Side-by-side conflict resolution · explicit accept/reject · trust-building sync management</div></div>
+    </div>
+    <div class="compare-card" onclick="show('d4',null)">
+      <div class="compare-card-thumb">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+          <div style="width:140px;background:var(--zinc-900);border:1px solid var(--zinc-700);border-radius:6px;padding:8px">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--zinc-800)"><span style="font-size:10px;color:var(--zinc-600)">⌘</span><div style="flex:1;height:2px;background:var(--zinc-800);border-radius:1px"></div></div>
+            <div style="height:2px;background:rgba(16,185,129,.5);border-radius:1px;margin-bottom:4px;width:90%"></div>
+            <div style="height:2px;background:var(--zinc-800);border-radius:1px;margin-bottom:4px;width:70%"></div>
+            <div style="height:2px;background:var(--zinc-800);border-radius:1px;width:80%"></div>
+          </div>
+        </div>
+      </div>
+      <div class="compare-card-info"><div class="compare-card-title">4 — Command</div><div class="compare-card-desc">Keyboard-first palette · global actions · project switching · Linear/Raycast-inspired speed</div></div>
+    </div>
+  </div>
+  <div class="section-divider"><div class="section-divider-line"></div><div class="section-divider-text">Design Decision Framework</div><div class="section-divider-line"></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px">
+    <div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:8px;padding:16px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--emerald-500);margin-bottom:10px">Evaluate By</div>
+      <div style="display:flex;flex-direction:column;gap:8px;color:var(--zinc-400)">
+        <div>✅ <strong style="color:var(--zinc-200)">Layout</strong> — Which information hierarchy matches your day-to-day?</div>
+        <div>✅ <strong style="color:var(--zinc-200)">Interaction</strong> — Which style fits the "canvas, not form" principle?</div>
+        <div>✅ <strong style="color:var(--zinc-200)">Density</strong> — Does the data density feel right for power users?</div>
+        <div>✅ <strong style="color:var(--zinc-200)">Navigation</strong> — Does the nav match your mental model of Projects/Ledgers?</div>
+        <div>✅ <strong style="color:var(--zinc-200)">Brand</strong> — Does the Emerald accent feel right for Ledgy?</div>
+      </div>
+    </div>
+    <div style="background:var(--zinc-900);border:1px solid var(--zinc-800);border-radius:8px;padding:16px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--emerald-500);margin-bottom:10px">Recommendation</div>
+      <div style="color:var(--zinc-400);line-height:1.7">
+        <strong style="color:var(--zinc-200)">Direction 1 (Data Lab)</strong> as the primary daily view.<br>
+        <strong style="color:var(--zinc-200)">Direction 2 (Node Forge)</strong> as the builder's canvas (secondary nav).<br>
+        <strong style="color:var(--zinc-200)">Direction 3 (Diff Guard)</strong> as a modal/sheet when conflicts arise.<br>
+        <strong style="color:var(--zinc-200)">Direction 4 (Command)</strong> as the global cmd+K palette across all views.
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.direction').forEach(d => d.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+</script>
+</body>
+</html>
