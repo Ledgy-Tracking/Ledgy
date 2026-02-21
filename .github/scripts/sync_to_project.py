@@ -196,22 +196,31 @@ def find_or_create_issue(repo: str, title: str, label: str, body: str) -> dict |
             print(f"  · Issue already exists: #{issue['number']} — {title}")
             return issue
 
-    # Create new issue
-    created = run_gh(
+    # Create new issue — gh issue create returns the URL, not JSON
+    url = run_gh(
         "issue", "create",
         "--repo", repo,
         "--title", title,
         "--body", body,
         "--label", label,
-        "--json", "number,id",
     )
-    if created:
-        print(f"  ✔ Created issue #{created['number']} — {title}")
+    if url:
+        # url is like "https://github.com/owner/repo/issues/123"
+        m = re.search(r"/issues/(\d+)$", str(url))
+        if m:
+            number = m.group(1)
+            created = run_gh("issue", "view", number, "--repo", repo, "--json", "number,id")
+            if created:
+                print(f"  ✔ Created issue #{created['number']} — {title}")
+                return created
+            print(f"  ⚠  Created issue but could not fetch details for: {title}", file=sys.stderr)
+        else:
+            print(f"  ⚠  Could not parse issue URL from gh output: {url}", file=sys.stderr)
     else:
         dry_run = os.getenv("DRY_RUN", "").lower() == "true"
         if dry_run:
             print(f"  [DRY RUN] Would create issue: {title}")
-    return created
+    return None
 
 
 # ---------------------------------------------------------------------------
