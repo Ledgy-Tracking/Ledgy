@@ -11,7 +11,7 @@ export interface AppError {
 interface ErrorState {
     error: AppError | null;
     dispatchError: (message: string, type?: ErrorType) => void;
-    clearError: () => void;
+    clearError: (timestamp?: number) => void;
 }
 
 export const useErrorStore = create<ErrorState>((set) => ({
@@ -27,7 +27,12 @@ export const useErrorStore = create<ErrorState>((set) => ({
         });
     },
 
-    clearError: () => {
-        set({ error: null });
+    clearError: (timestamp) => {
+        set((state) => {
+            if (timestamp && state.error?.timestamp !== timestamp) {
+                return state;
+            }
+            return { error: null };
+        });
     },
 }));

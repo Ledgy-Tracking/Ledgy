@@ -101,6 +101,7 @@ describe("AppShell Component", () => {
     });
 
     it("auto-collapses panels on window resize", () => {
+        vi.useFakeTimers();
         render(
             <MemoryRouter>
                 <AppShell />
@@ -108,18 +109,24 @@ describe("AppShell Component", () => {
         );
 
         // Resize to 1200 (hide inspector)
+        Object.defineProperty(window, 'innerWidth', { value: 1200 });
+        window.dispatchEvent(new Event('resize'));
+
         act(() => {
-            Object.defineProperty(window, 'innerWidth', { value: 1200 });
-            window.dispatchEvent(new Event('resize'));
+            vi.advanceTimersByTime(110);
         });
         expect(mockUIState.setRightInspector).toHaveBeenCalledWith(false);
 
         // Resize to 800 (hide sidebar too)
+        Object.defineProperty(window, 'innerWidth', { value: 800 });
+        window.dispatchEvent(new Event('resize'));
+
         act(() => {
-            Object.defineProperty(window, 'innerWidth', { value: 800 });
-            window.dispatchEvent(new Event('resize'));
+            vi.advanceTimersByTime(110);
         });
         expect(mockUIState.setLeftSidebar).toHaveBeenCalledWith(false);
+
+        vi.useRealTimers();
     });
 });
 

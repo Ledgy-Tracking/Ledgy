@@ -18,8 +18,9 @@ export const ErrorToast: React.FC = () => {
 
     const handleClose = () => {
         setIsVisible(false);
+        const currentTimestamp = error?.timestamp;
         // Wait for animation to finish before clearing store
-        setTimeout(clearError, 300);
+        setTimeout(() => clearError(currentTimestamp), 300);
     };
 
     if (!error && !isVisible) return null;

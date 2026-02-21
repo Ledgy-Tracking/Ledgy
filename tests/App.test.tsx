@@ -1,9 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import '@testing-library/jest-dom';
 import { MemoryRouter } from "react-router-dom";
 import App from "../src/App";
 import { useAuthStore, useIsRegistered } from "../src/features/auth/useAuthStore";
+import { useErrorStore } from "../src/stores/useErrorStore";
 
 // Mock the page components to avoid testing their implementation details here
 vi.mock("../src/features/auth/SetupPage", () => ({
@@ -149,6 +150,27 @@ describe("App Routing Integration", () => {
                 </MemoryRouter>
             );
             expect(screen.getByText(/Settings Placeholder/i)).toBeInTheDocument();
+        });
+    });
+
+    describe("Global Components", () => {
+        beforeEach(() => {
+            setupAuthState(null, null, false);
+            useErrorStore.getState().clearError();
+        });
+
+        it("renders ErrorToast when an error is dispatched", () => {
+            render(
+                <MemoryRouter initialEntries={["/"]}>
+                    <App />
+                </MemoryRouter>
+            );
+
+            act(() => {
+                useErrorStore.getState().dispatchError("Global test error");
+            });
+
+            expect(screen.getByText("Global test error")).toBeInTheDocument();
         });
     });
 });
