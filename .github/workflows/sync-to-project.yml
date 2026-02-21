@@ -21,7 +21,7 @@ jobs:
 
     permissions:
       issues: write      # create / read issues
-      repository-projects: write  # add items to project
+      projects: write    # add items to GitHub Project V2
       contents: read     # read planning artifacts
 
     steps:
