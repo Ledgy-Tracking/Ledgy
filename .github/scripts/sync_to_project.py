@@ -359,7 +359,7 @@ def detect_changed_statuses(before_sha: str) -> list[str]:
             return list(parse_sprint_status(SPRINT_STATUS_YAML).keys())
         old_data = yaml.safe_load(result.stdout)
         old_status = old_data.get("development_status", {}) if old_data else {}
-    except Exception:
+    except (subprocess.SubprocessError, yaml.YAMLError, OSError):
         return list(parse_sprint_status(SPRINT_STATUS_YAML).keys())
 
     current_status = parse_sprint_status(SPRINT_STATUS_YAML)
@@ -378,7 +378,7 @@ mutation($issueId: ID!, $oid: GitObjectID!, $name: String!) {
 }
 """
     data = graphql(mutation, issueId=issue_node_id, oid=commit_sha, name=branch_name)
-    if isinstance(data, dict) and "errors" in data:
+    if isinstance(data, dict) and data.get("errors"):
         msg = data["errors"][0].get("message", "")
         if "already" in msg.lower():
             return True
