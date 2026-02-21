@@ -1,29 +1,21 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuthStore } from './useAuthStore';
+import { Navigate } from 'react-router-dom';
+import { useAuthStore, useIsRegistered } from './useAuthStore';
 
 interface AuthGuardProps {
     children: React.ReactNode;
 }
 
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
-    const { isUnlocked, isRegistered } = useAuthStore();
-    const location = useLocation();
+    const isUnlocked = useAuthStore(state => state.isUnlocked);
+    const isRegistered = useIsRegistered();
 
-    if (!isRegistered()) {
-        // If not registered, always force setup
-        if (location.pathname !== '/setup') {
-            return <Navigate to="/setup" replace />;
-        }
-        return <>{children}</>;
+    if (!isRegistered) {
+        return <Navigate to="/setup" replace />;
     }
 
     if (!isUnlocked) {
-        // If registered but locked, redirect to unlock
-        if (location.pathname !== '/unlock') {
-            return <Navigate to="/unlock" replace />;
-        }
-        return <>{children}</>;
+        return <Navigate to="/unlock" replace />;
     }
 
     return <>{children}</>;

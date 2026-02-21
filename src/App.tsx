@@ -1,8 +1,10 @@
-import { Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route } from "react-router-dom";
 import { AuthGuard } from "./features/auth/AuthGuard";
 import { SetupPage } from "./features/auth/SetupPage";
 import { UnlockPage } from "./features/auth/UnlockPage";
 import { Dashboard } from "./features/dashboard/Dashboard";
+import { GuestGuard } from "./features/auth/GuestGuard";
+import { UnlockGuard } from "./features/auth/UnlockGuard";
 
 function App() {
   return (
@@ -10,9 +12,9 @@ function App() {
       <Route
         path="/setup"
         element={
-          <AuthGuard>
+          <GuestGuard>
             <SetupPage />
-          </AuthGuard>
+          </GuestGuard>
         }
       />
 
@@ -28,9 +30,9 @@ function App() {
       <Route
         path="/unlock"
         element={
-          <AuthGuard>
+          <UnlockGuard>
             <UnlockPage />
-          </AuthGuard>
+          </UnlockGuard>
         }
       />
 
@@ -42,6 +44,8 @@ function App() {
           </AuthGuard>
         }
       />
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
