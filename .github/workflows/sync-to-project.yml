@@ -1,0 +1,44 @@
+name: Sync Planning Artifacts to GitHub Project
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_number:
+        description: 'GitHub Project V2 number (find it in the project URL: /projects/<number>)'
+        required: true
+        type: number
+      dry_run:
+        description: 'Dry run — print actions without creating or modifying anything'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  sync:
+    name: Sync epics, stories and sprint statuses
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write      # create / read issues
+      repository-projects: write  # add items to project
+      contents: read     # read planning artifacts
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install PyYAML
+        run: pip install pyyaml --quiet
+
+      - name: Run sync script
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PROJECT_NUMBER: ${{ inputs.project_number }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: python .github/scripts/sync_to_project.py
