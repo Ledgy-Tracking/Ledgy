@@ -12,6 +12,7 @@
   <critical>Read EVERY file in the File List - verify implementation against story requirements</critical>
   <critical>Tasks marked complete but not done = CRITICAL finding</critical>
   <critical>Acceptance Criteria not implemented = HIGH severity finding</critical>
+  <critical>Verify that the developer created a new git branch for the story implementation; if they committed directly to main, this is a HIGH severity finding</critical>
   <critical>Do not review files that are not part of the application's source code. Always exclude the _bmad/ and _bmad-output/ folders from the review. Always exclude IDE and CLI configuration folders like .cursor/ and .windsurf/ and .claude/</critical>
 
 
@@ -64,6 +65,7 @@
       1. **Files changed but not in story File List** → MEDIUM finding (incomplete documentation)
       2. **Story lists files but no git changes** → HIGH finding (false claims)
       3. **Uncommitted changes not documented** → MEDIUM finding (transparency issue)
+      4. **Changes committed directly to main branch** → HIGH finding (must use story branch)
     </action>
 
     <!-- Use combined file list: story File List + git discovered files -->
@@ -124,6 +126,7 @@
       - Acceptance Criteria not implemented
       - Story claims files changed but no git evidence
       - Security vulnerabilities
+      - Story implemented directly on main branch instead of a new feature branch
 
       ## 🟡 MEDIUM ISSUES
       - Files changed but not documented in story File List

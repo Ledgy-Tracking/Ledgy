@@ -195,8 +195,10 @@
 
       <check if="current status == 'ready-for-dev' OR review_continuation == true">
         <action>Update the story in the sprint status report to = "in-progress"</action>
+        <action>Create and checkout a new git branch for this story (e.g., feature/story-{{story_key}})</action>
         <output>🚀 Starting work on story {{story_key}}
           Status updated: ready-for-dev → in-progress
+          Branch created: feature/story-{{story_key}}
         </output>
       </check>
 
