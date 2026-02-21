@@ -1,6 +1,6 @@
 # Story 1.5: GitHub Actions CI/CD Pipeline
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -30,6 +30,14 @@ So that distribution is automated and reproducible across all platforms.
 - [x] Task 2 (AC: 3): Add Size Verification Step
   - [x] Subtask 2.1: Implement a step in the workflow to check the size of the produced `.msi` / `.dmg` / `.AppImage`.
   - [x] Subtask 2.2: Fail the pipeline execution if any binary size exceeds the 10MB threshold.
+
+### Review Follow-ups (AI)
+
+- [ ] [AI-Review][CRITICAL] **Poisoned Release Assets**: Reorder workflow to build and verify size *before* uploading to GitHub Release. [build.yml:39-49]
+- [ ] [AI-Review][HIGH] **Trigger Constraint Violation**: Restrict `v*` tag triggers to the `main` branch only as per AC1. [build.yml:2-5]
+- [ ] [AI-Review][MEDIUM] **Brittle Path Resolution**: Use more robust path discovery for built artifacts to handle potential Tauri 2.0 nesting. [build.yml:55-64]
+- [ ] [AI-Review][LOW] **Unpinned Action Version**: Pin `tauri-apps/tauri-action` to a specific commit or version for stability. [build.yml:40]
+- [ ] [AI-Review][LOW] **Ambiguous MB Unit**: Clarify/document if 10MB limit is MiB (1024^2) or Decimal MB (1000^2). [build.yml:86]
 
 ## Dev Notes
 
@@ -87,3 +95,4 @@ Antigravity (Gemini 2.0)
 ## Change Log
 
 - Addressed all ACs. Created GitHub Actions workflow for Tauri deployment and size verification (Date: 2026-02-22).
+- Code Review (AI): Identified 5 issues (1 Critical, 1 High). Status moved to in-progress for follow-ups. (Date: 2026-02-22).
