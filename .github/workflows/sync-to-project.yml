@@ -5,7 +5,8 @@ on:
     inputs:
       project_number:
         description: 'GitHub Project V2 number (find it in the project URL: /projects/<number>)'
-        required: true
+        required: false
+        default: '4'
         type: number
       dry_run:
         description: 'Dry run — print actions without creating or modifying anything'
