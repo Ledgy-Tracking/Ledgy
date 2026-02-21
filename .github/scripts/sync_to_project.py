@@ -387,21 +387,34 @@ def get_branch_sha(repo: str, branch_name: str) -> str | None:
         return None
 
 
+def find_pr_for_branch(repo: str, branch_name: str) -> dict | None:
+    """Find an open PR whose head branch matches *branch_name*."""
+    prs = run_gh(
+        "pr", "list",
+        "--repo", repo,
+        "--head", branch_name,
+        "--state", "open",
+        "--json", "number,title,body",
+        "--limit", "1",
+    )
+    if prs and isinstance(prs, list) and len(prs) > 0:
+        return prs[0]
+    return None
+
+
 def link_branch_to_issue(
-    issue_node_id: str, branch_name: str, commit_sha: str
+    repo: str, issue_number: int, branch_name: str, commit_sha: str
 ) -> bool:
     """Link a story issue to its PR by adding a closing reference in the PR body.
 
-    The branch is derived from the story key using the naming convention
-    ``feature/story-{key}``.  If a matching open PR exists, the issue
-    reference ``Closes #<number>`` is appended to the PR body so that
-    GitHub populates the issue's *Development* sidebar section.
+    If a matching open PR exists for *branch_name*, the issue reference
+    ``Closes #<number>`` is appended to the PR body so that GitHub
+    populates the issue's *Development* sidebar section.
     """
-    branch_name = f"feature/story-{story_key}"
     pr = find_pr_for_branch(repo, branch_name)
     if not pr:
-        print(f"  ⚠  No open PR found for branch '{branch_name}' "
-              f"(story key: {story_key})", file=sys.stderr)
+        print(f"  ⚠  No open PR found for branch '{branch_name}'",
+              file=sys.stderr)
         return False
 
     body = pr.get("body", "") or ""
@@ -630,7 +643,7 @@ def main() -> int:
                 if dry_run:
                     print(f"  [DRY RUN] Would link branch '{expected_branch}' to issue #{issue.get('number')} ({key})")
                     continue
-                ok = link_branch_to_issue(issue["id"], expected_branch, sha)
+                ok = link_branch_to_issue(repo, issue["number"], expected_branch, sha)
                 if ok:
                     print(f"  ✔ Linked branch '{expected_branch}' → issue #{issue.get('number')} ({key})")
                 else:
