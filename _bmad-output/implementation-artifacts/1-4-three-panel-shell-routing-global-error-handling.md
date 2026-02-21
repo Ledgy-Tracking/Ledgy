@@ -1,6 +1,6 @@
 # Story 1.4: Three-Panel Shell, Routing & Global Error Handling
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -49,6 +49,14 @@ So that I can navigate between areas of the app without disorientation.
     - `/app/:profileId/*` (Protected, uses AppShell)
   - [x] Subtask 3.3: Ensure `AuthGuard` wraps protected routes correctly.
   - [x] Subtask 3.4: Add integration tests for routing in `tests/App.test.tsx`.
+
+### Review Follow-ups (AI)
+
+- [ ] [AI-Review][HIGH] Responsive Logic Gap: Auto-collapse for Inspector (1100–1279px) not implemented in resize handler [src/components/Layout/AppShell.tsx:28]
+- [ ] [AI-Review][HIGH] UI State Flash: Missing hydration check for persisted state causing layout shift [src/components/Layout/AppShell.tsx:17]
+- [ ] [AI-Review][MEDIUM] Duplicate Test Location: Tests found in src/features/auth/ instead of strictly in tests/ [src/features/auth/UnlockPage.test.tsx]
+- [ ] [AI-Review][MEDIUM] Error Handling Consistency: Consider wiring warning banner to useErrorStore [src/components/Layout/AppShell.tsx:44]
+- [ ] [AI-Review][MEDIUM] Missing Resize Test: No tests verifying transition between breakpoints [tests/AppShell.test.tsx]
 
 ## Dev Notes
 
