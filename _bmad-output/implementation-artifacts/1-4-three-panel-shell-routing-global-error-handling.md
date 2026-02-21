@@ -1,6 +1,6 @@
 # Story 1.4: Three-Panel Shell, Routing & Global Error Handling
 
-Status: done
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -66,6 +66,11 @@ So that I can navigate between areas of the app without disorientation.
 - [x] [AI-Review][HIGH] AC 5 Violation (Theme Isolation): The light/dark theme synchronization logic is placed directly inside `AppShell.tsx`, which means public pages like setup and unlock do not receive the theme. [src/components/Layout/AppShell.tsx:22]
 - [x] [AI-Review][HIGH] AC 3 Violation (Error Handling): The story dictates "Strictly no local `useState` for async errors". However, `src/features/auth/UnlockPage.tsx` still contains and uses local `[error, setError]` state variations. [src/features/auth/UnlockPage.tsx:22]
 - [x] [AI-Review][MEDIUM] Redundant Logic: In `AppShell.tsx`, the Left Sidebar contains redundant and potentially confusing conditional width logic in its CSS string evaluation. [src/components/Layout/AppShell.tsx:84]
+- [x] [AI-Review][HIGH] Missing Initial Responsive Check: AppShell.tsx handleResize logic only runs on window event, not on initial mount.
+- [x] [AI-Review][MEDIUM] Contradictory Story Claims: Story claims isMobile warning is dispatched to store (Finding 128), but implementation and later findings (136) suggest otherwise.
+- [x] [AI-Review][MEDIUM] Unfinished UI Elements: Sidebar contains hardcoded [1,2,3,4] placeholders.
+- [x] [AI-Review][LOW] Performance Optimization: Scoping transition-all to transition-[width] in AppShell.tsx.
+- [x] [AI-Review][LOW] Missing CSS Utility: custom-scrollbar used in AppShell.tsx but not defined in index.css.
 
 ## Dev Notes
 
