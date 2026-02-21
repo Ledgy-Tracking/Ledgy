@@ -33,7 +33,7 @@ Data remains trapped in disconnected silos (diet, finance, fitness, health), pre
 
 ### Proposed Solution
 
-A **"Toolkit-First" Platform** that prioritizes architectural freedom. Ledgy provides the necessary "building blocks"—flexible relational ledgers, a visual scripting engine, and AI-powered entry—allowing users to compose their own tracking systems. By putting the effort into *building* the system, users are encouraged to stay engaged for the long term.
+A **"Toolkit-First" Platform** that prioritizes architectural freedom. Ledgy provides the necessary "building blocks"—flexible relational ledgers and a visual scripting engine—allowing users to compose their own tracking systems. Functionality is extended through a first-party plugin system; the **AI Capture plugin** (bundled by default, via Google AI Studio) reduces data entry friction without being part of the core engine. By putting the effort into *building* the system, users are encouraged to stay engaged for the long term.
 
 ### Key Differentiators
 
@@ -41,7 +41,7 @@ A **"Toolkit-First" Platform** that prioritizes architectural freedom. Ledgy pro
 - **Cross-Domain Correlation:** The ability to connect disparate project ledgers (e.g., matching heart rate to caffeine intake) to find deep insights.
 - **Data Sovereignty:** Local-first architecture (PouchDB/CouchDB) ensures the user owns their data forever.
 - **Unified Script Engine:** Visual nodes and plugins share the same powerful engine, enabling complex automation without writing code.
-- **AI-Powered Entry:** Leveraging Google AI Studio to reduce data entry friction via image and voice analysis.
+- **Plugin-First Extensibility:** A first-class plugin system ships with a default AI Capture plugin (via Google AI Studio) to reduce data entry friction; the core engine remains lean and AI-free by design.
 
 ---
 
@@ -65,7 +65,7 @@ A **"Toolkit-First" Platform** that prioritizes architectural freedom. Ledgy pro
 
 1.  **Discovery:** Finds a compelling template online (e.g., "The Ultimate Longevity & Health Tracker") or hears about Ledgy's "Freedom + Tools" philosophy.
 2.  **Onboarding:** Installs Ledgy and picks a template. Guided by in-app tutorials and documentation, they make their first "tweak"—adding a custom field or adjusting a view.
-3.  **Core Usage:** Starts daily tracking. The AI-powered entry (photo/voice) removes the initial tediousness, keeping them engaged through the first critical 30 days.
+3.  **Core Usage:** Starts daily tracking. The default-bundled **AI Capture plugin** (photo capture via Google AI Studio) removes the initial tediousness, keeping them engaged through the first critical 30 days.
 4.  **Success Moment:** The "Aha!" moment occurs when they need a feature the template didn't have—and they build it themselves. Whether it's a visual graph correlating two data points or an automation node, they realize they are no longer dependent on a developer's road map.
 5.  **Long-term:** Ledgy becomes their "Universal Dashboard." They can no longer look at other tracking apps without feeling restricted. They may begin sharing their own custom "tweak" back to the community.
 
@@ -101,7 +101,7 @@ A **"Toolkit-First" Platform** that prioritizes architectural freedom. Ledgy pro
 *   **Structured Ledger Engine:** Flexible schema definition with user-defined fields and relational cross-project linking.
 *   **Customizable UI (Pages & Views):** Tools to design custom layouts and hierarchical views within each project.
 *   **Base Scripting Engine:** Initial visual node-based scripting supporting fundamental arithmetic, string operations, and logical triggers.
-*   **AI Capture (Beta):** Image-to-Ledger extraction via Google AI Studio for reducing manual entry friction.
+*   **Plugin Runtime + AI Capture (Default Plugin, Beta):** A first-party plugin system with the AI Capture plugin bundled by default—enabling image-to-ledger extraction via Google AI Studio without the core engine depending on AI services. The plugin can be activated, deactivated, or replaced independently.
 *   **Offline-First Sync:** PouchDB ↔ CouchDB replication with reliable cross-device data persistence.
 
 ### Out of Scope for MVP

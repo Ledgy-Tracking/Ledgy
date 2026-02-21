@@ -27,13 +27,13 @@ classification:
 
 ## Executive Summary
 
-Ledgy is a local-first personal data platform designed to break the cycle of "Tracking Abandonment" caused by rigid, specialized applications. By transitioning from a feature-centric model to a "Toolkit-First" architecture, Ledgy provides the foundational building blocks—relational ledgers, visual scripting, and AI-powered entry—necessary for users to construct bespoke tracking ecosystems. This approach leverages the "ownership effect," transforming status-tracking from a repetitive chore into a creative, evolving hobby.
+Ledgy is a local-first personal data platform designed to break the cycle of "Tracking Abandonment" caused by rigid, specialized applications. By transitioning from a feature-centric model to a "Toolkit-First" architecture, Ledgy provides the foundational building blocks—relational ledgers and visual scripting—necessary for users to construct bespoke tracking ecosystems. Functionality is extended through a first-party plugin system; the AI Capture plugin (bundled by default) reduces data entry friction via image analysis, while remaining fully removable and replaceable. This approach leverages the "ownership effect," transforming status-tracking from a repetitive chore into a creative, evolving hobby.
 
 ### Strategic Differentiators
 - **Cross-Domain Correlation:** Native ability to link disparate data points (e.g., matching heart rate to caffeine intake) without data silos.
 - **Architectural Freedom:** Decoupled relational data engine allows users to define custom schemas without mid-stream logic breakage.
 - **Data Sovereignty:** Private, user-controlled sync layer ensures 100% data lifetime insurance and privacy.
-- **AI-Powered Entry:** Integration with Google AI Studio for high-accuracy image-to-ledger extraction, reducing data entry friction to a single capture.
+- **Plugin-First Extensibility:** A first-class plugin system ships with a default AI Capture plugin (Google AI Studio image-to-ledger extraction), with the core engine remaining lean and AI-free by design.
 
 ## Project Classification
 
@@ -46,7 +46,7 @@ Ledgy is a local-first personal data platform designed to break the cycle of "Tr
 
 ### Measurable Outcomes
 - **Sync Performance:** Cross-device data propagation occurs in < 2 seconds on stable connections.
-- **AI Accuracy:** > 90% success rate in extraction of structured entries from mobile camera photos via Google AI Studio.
+- **AI Capture Plugin Accuracy:** > 90% success rate in extraction of structured entries from mobile camera photos via the default-bundled AI Capture plugin (Google AI Studio).
 - **System Mastery:** A non-technical user successfully builds a custom relation between two ledgers using visual nodes within their first session.
 - **Retention:** User maintains daily engagement 6+ months post-setup, proving the ownership effect overcomes abandonment.
 - **Cost Efficiency:** Sync and hosting infrastructure remains within 100% free tiers of GCE/Firebase.
@@ -62,7 +62,7 @@ Ledgy is a local-first personal data platform designed to break the cycle of "Tr
 - **Core Engine:** Project lifecycle management with multi-profile isolation.
 - **Relational Ledger:** Flexible schema definition with user-defined fields and bidirectional references.
 - **Visual Scripting (Beta):** Node-based editor for arithmetic, logic, and ledger automation.
-- **AI Entry (Beta):** Image-to-ledger extraction via Google AI Studio.
+- **Plugin Runtime:** First-party plugin system with a default-bundled AI Capture plugin (image-to-ledger extraction via Google AI Studio).
 - **Offline-First Sync:** PouchDB ↔ CouchDB replication with manual conflict diff UI.
 - **Security:** TOTP-based security via Google Authenticator.
 
@@ -116,7 +116,7 @@ Ledgy is a local-first personal data platform designed to break the cycle of "Tr
 ### The Ownership Moat
 - **Toolkit-First Philosophy:** Shifting user retention from passive consumption to active building.
 - **Visual Synthesis:** Native node-graph correlation of disparate life domains (e.g., fuel efficiency vs. grocery expenses).
-- **Hybrid Local AI:** Combined 100% private storage with JIT Cloud AI extraction, balancing privacy and friction.
+- **Hybrid Plugin AI:** The default-bundled AI Capture plugin pairs 100% private local storage with JIT Cloud AI extraction via Google AI Studio, balancing privacy and friction—without coupling AI to the core engine.
 - **Conflict Transparency:** Turning technical sync challenges into a human-governed "Data Insurance" feature.
 
 ## Functional Requirements (Capability Contract)
@@ -133,7 +133,8 @@ Ledgy is a local-first personal data platform designed to break the cycle of "Tr
 - **FR7:** Users can define triggers (On-Create, On-Edit) for autonomous node execution.
 - **FR8:** Users can configure custom dashboard layouts with visualization widgets (Charts, Trends).
 
-### 3. AI-Assisted Entry
+### 3. AI Capture Plugin (Default Plugin)
+> **Note:** FR9–FR11 are delivered by the bundled AI Capture plugin, not the core engine. The core engine exposes no AI logic; these requirements apply to the first-party plugin only.
 - **FR9:** Users can upload/capture images for high-accuracy field extraction via Google AI Studio.
 - **FR10:** Users can review and edit AI-extracted data before ledger commitment.
 - **FR11:** System must treat images as ephemeral unless the user explicitly saves them as attachments.
