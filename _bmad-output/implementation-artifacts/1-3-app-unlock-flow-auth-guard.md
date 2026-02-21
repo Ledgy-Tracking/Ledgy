@@ -1,6 +1,6 @@
 # Story 1.3: App Unlock Flow & Auth Guard
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -54,6 +54,12 @@ so that my data is decrypted and I can access my profiles.
 - [x] [Feature] Provide an option to create a new profile on the unlock screen [src/features/auth/UnlockPage.tsx]
 - [x] [Feature] Auto-focus the OTP input on page load [src/features/auth/UnlockPage.tsx]
 - [x] [Feature] Implement session persistence / "Remember Me" so OTP isn't required on every app load [src/features/auth/useAuthStore.ts]
+
+### Review Follow-ups (AI) - Round 3
+- [ ] [AI-Review][High] Broken "Reset Vault" Flow: The "Not you? Reset vault" link redirects to /setup but is blocked by GuestGuard; it needs to clear auth store first [src/features/auth/UnlockPage.tsx:126]
+- [ ] [AI-Review][Medium] Concurrent Submission Vulnerability: If a user pastes 6 digits and presses Enter simultaneously, both events fire in the same tick [src/features/auth/UnlockPage.tsx:46]
+- [ ] [AI-Review][Medium] Strict Mode Double QR Generation: TOTP secret is generated directly inside a useEffect, causing double generation in Strict Mode [src/features/auth/SetupPage.tsx:17]
+- [ ] [AI-Review][Medium] Missing Test Coverage: "Remember Me" checkbox was added but no tests verify its behavior [src/features/auth/UnlockPage.test.tsx:55]
 
 ## Dev Notes
 
