@@ -44,8 +44,8 @@ development_status:
   1-1-project-scaffold-dev-environment: done
   1-2-totp-registration-encryption-key-derivation: done
   1-3-app-unlock-flow-auth-guard: done
-  1-4-three-panel-shell-routing-global-error-handling: review
-  1-5-github-actions-ci-cd-pipeline: review
+  1-4-three-panel-shell-routing-global-error-handling: done
+  1-5-github-actions-ci-cd-pipeline: done
   epic-1-retrospective: optional
 
   epic-2: backlog
