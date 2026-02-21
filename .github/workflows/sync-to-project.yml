@@ -27,6 +27,7 @@ jobs:
 
     permissions:
       issues: write      # create / read issues
+      pull-requests: write  # edit PR bodies to add closing references
       repository-projects: write  # add items to GitHub Project V2
       contents: read     # read planning artifacts
 
