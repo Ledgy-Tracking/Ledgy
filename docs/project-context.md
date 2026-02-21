@@ -36,6 +36,18 @@ A **personal, AI-powered universal ledger and tracker** — not limited to finan
 
 ---
 
+## Testing Conventions
+
+> [!IMPORTANT]
+> These rules are non-negotiable and apply to all agents and contributors.
+
+- **All test files MUST reside in the `/tests` directory** at the project root — not in `src/` or any subdirectory.
+- **Tests must NEVER be removed**, even if they are already passing, the feature is complete, or the story is marked done.
+- Moving a test out of `/tests` is treated the same as deletion — forbidden.
+- This rule applies to all test types: unit, integration, and E2E.
+
+---
+
 ## Key Concepts & Terminology
 
 ### Projects
