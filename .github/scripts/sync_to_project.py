@@ -366,6 +366,27 @@ def detect_changed_statuses(before_sha: str) -> list[str]:
     return [key for key, status in current_status.items() if old_status.get(key) != status]
 
 
+def story_branch_name(key: str) -> str:
+    """Derive the expected feature branch name from a story key."""
+    return f"feature/story-{key}"
+
+
+def get_branch_sha(repo: str, branch_name: str) -> str | None:
+    """Fetch the HEAD SHA of a branch, or None if the branch doesn't exist."""
+    result = subprocess.run(
+        ["gh", "api", f"repos/{repo}/git/ref/heads/{branch_name}"],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        # 404 means the branch doesn't exist — expected for stories without branches
+        return None
+    try:
+        data = json.loads(result.stdout)
+        return data.get("object", {}).get("sha")
+    except (json.JSONDecodeError, KeyError):
+        return None
+
+
 def link_branch_to_issue(
     issue_node_id: str, branch_name: str, commit_sha: str
 ) -> bool:
@@ -554,13 +575,11 @@ def main() -> int:
 
         print(f"  ✔ #{issue.get('number')} added — {key} [{status_label}]")
 
-    # -- Link branch to changed issues ------------------------------------
-    branch_name = os.environ.get("GITHUB_REF_NAME", "")
-    commit_sha = os.environ.get("GITHUB_SHA", "")
+    # -- Link feature branches to changed story issues ----------------------
     before_sha = os.environ.get("BEFORE_SHA", "")
 
-    if branch_name and commit_sha and before_sha:
-        print(f"\n🔀 Detecting sprint-status changes on branch '{branch_name}' …")
+    if before_sha:
+        print(f"\n🔀 Detecting sprint-status changes …")
         changed_keys = detect_changed_statuses(before_sha)
         if changed_keys:
             print(f"   Changed entries: {changed_keys}")
@@ -568,18 +587,29 @@ def main() -> int:
                 issue = issue_map.get(key)
                 if not issue:
                     continue
-                if dry_run:
-                    print(f"  [DRY RUN] Would link branch '{branch_name}' to issue #{issue.get('number')} ({key})")
+                # Skip non-story items (epics, retrospectives)
+                if key.startswith("epic-") or key.endswith("-retrospective"):
                     continue
-                ok = link_branch_to_issue(issue["id"], branch_name, commit_sha)
+
+                expected_branch = story_branch_name(key)
+                sha = get_branch_sha(repo, expected_branch)
+
+                if not sha:
+                    print(f"  ⏭  No branch '{expected_branch}' found for {key}")
+                    continue
+
+                if dry_run:
+                    print(f"  [DRY RUN] Would link branch '{expected_branch}' to issue #{issue.get('number')} ({key})")
+                    continue
+                ok = link_branch_to_issue(issue["id"], expected_branch, sha)
                 if ok:
-                    print(f"  ✔ Linked branch '{branch_name}' → issue #{issue.get('number')} ({key})")
+                    print(f"  ✔ Linked branch '{expected_branch}' → issue #{issue.get('number')} ({key})")
                 else:
                     print(f"  ⚠  Could not link branch to issue #{issue.get('number')} ({key})")
         else:
             print("   No status changes detected.")
     else:
-        print("\n⏭  Skipping branch linking (missing GITHUB_REF_NAME, GITHUB_SHA, or BEFORE_SHA).")
+        print("\n⏭  Skipping branch linking (missing BEFORE_SHA).")
 
     print("\n✅ Done.")
     return 0
