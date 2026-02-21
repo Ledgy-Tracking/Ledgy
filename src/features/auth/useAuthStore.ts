@@ -1,37 +1,115 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { deriveKeyFromTotp } from '../../lib/crypto';
+import {
+    deriveKeyFromTotp,
+    deriveKeyFromPassphrase,
+    encryptPayload,
+    decryptPayload,
+    HKDF_SALT,
+    EncryptedSecret,
+} from '../../lib/crypto';
 import { decodeSecret, verifyTotp } from '../../lib/totp';
 
+// ---------------------------------------------------------------------------
+// Session expiry options (shown as a dropdown in the unlock UI)
+// ---------------------------------------------------------------------------
+
+export type RememberMeExpiry = '15m' | '1h' | '8h' | '1d' | '7d' | '30d' | 'never';
+
+export const EXPIRY_OPTIONS: { label: string; value: RememberMeExpiry; ms: number | null }[] = [
+    { label: '15 minutes', value: '15m', ms: 15 * 60 * 1000 },
+    { label: '1 hour', value: '1h', ms: 60 * 60 * 1000 },
+    { label: '8 hours', value: '8h', ms: 8 * 60 * 60 * 1000 },
+    { label: '1 day', value: '1d', ms: 24 * 60 * 60 * 1000 },
+    { label: '7 days', value: '7d', ms: 7 * 24 * 60 * 60 * 1000 },
+    { label: '30 days', value: '30d', ms: 30 * 24 * 60 * 60 * 1000 },
+    { label: 'Never', value: 'never', ms: null },
+];
+
+// ---------------------------------------------------------------------------
+// State interface
+// ---------------------------------------------------------------------------
+
 interface AuthState {
-    totpSecret: string | null; // Base32 encoded secret, persisted
-    isUnlocked: boolean;
-    encryptionKey: CryptoKey | null; // Volatile, never persisted
+    // ----- Persisted -----
+    /** Plaintext TOTP secret. Cleared when passphrase-based remember-me is active. */
+    totpSecret: string | null;
+    /** Passphrase-encrypted TOTP secret. Set when the user enables remember-me with a passphrase. */
+    encryptedTotpSecret: EncryptedSecret | null;
+    /** Whether this session should be persisted across app restarts. */
     rememberMe: boolean;
+    /** Unix-ms timestamp after which the remembered session expires; null = never. */
+    rememberMeExpiry: number | null;
+
+    // ----- Volatile (never persisted) -----
+    isUnlocked: boolean;
+    encryptionKey: CryptoKey | null;
+    /** True when app starts with a passphrase-protected secret — UnlockPage shows passphrase prompt. */
+    needsPassphrase: boolean;
+
+    // ----- Actions -----
     setRememberMe: (val: boolean) => void;
-    unlock: (code: string, remember: boolean) => Promise<boolean>;
+    /**
+     * Verify TOTP code and unlock the vault.
+     * @param code       6-digit TOTP code
+     * @param remember   Persist session across restarts
+     * @param passphrase Optional passphrase to encrypt the stored secret at rest
+     * @param expiryMs   Session duration in ms (null = never expires)
+     */
+    unlock: (code: string, remember: boolean, passphrase?: string, expiryMs?: number | null) => Promise<boolean>;
+    /** Unlock the vault using a previously set passphrase (called when needsPassphrase = true). */
+    unlockWithPassphrase: (passphrase: string) => Promise<boolean>;
     verifyAndRegister: (secret: string, code: string) => Promise<boolean>;
+    /** Lock the vault — preserves rememberMe preference so the next unlock can restore it. */
     lock: () => void;
+    /** Hard reset: clears all auth state and persisted data. */
     reset: () => void;
-    isRegistered: () => boolean;
+    /** Called on app start: auto-unlock remembered sessions or flag that passphrase is needed. */
     initSession: () => Promise<void>;
 }
+
+// ---------------------------------------------------------------------------
+// Store
+// ---------------------------------------------------------------------------
 
 export const useAuthStore = create<AuthState>()(
     persist(
         (set, get) => ({
             totpSecret: null,
+            encryptedTotpSecret: null,
             isUnlocked: false,
             encryptionKey: null,
             rememberMe: false,
+            rememberMeExpiry: null,
+            needsPassphrase: false,
 
             setRememberMe: (val: boolean) => set({ rememberMe: val }),
 
             initSession: async () => {
-                const { rememberMe, totpSecret, encryptionKey } = get();
+                const {
+                    rememberMe,
+                    totpSecret,
+                    encryptedTotpSecret,
+                    encryptionKey,
+                    rememberMeExpiry,
+                } = get();
+
+                // Step 1: Check session expiry
+                if (rememberMeExpiry !== null && Date.now() > rememberMeExpiry) {
+                    set({ isUnlocked: false, encryptionKey: null, rememberMeExpiry: null });
+                    return;
+                }
+
+                // Step 2: Passphrase-protected remember-me — can't auto-unlock, prompt instead
+                if (rememberMe && encryptedTotpSecret && !totpSecret) {
+                    set({ needsPassphrase: true });
+                    return;
+                }
+
+                // Step 3: Plain remember-me — auto-derive encryption key and unlock
                 if (rememberMe && totpSecret && !encryptionKey) {
                     try {
-                        const salt = new TextEncoder().encode('ledgy-salt-v1');
+                        const salt = new TextEncoder().encode(HKDF_SALT);
                         const key = await deriveKeyFromTotp(totpSecret, salt);
                         set({ isUnlocked: true, encryptionKey: key });
                     } catch (err) {
@@ -40,7 +118,12 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
-            unlock: async (code: string, remember: boolean = false) => {
+            unlock: async (
+                code: string,
+                remember: boolean = false,
+                passphrase?: string,
+                expiryMs?: number | null,
+            ) => {
                 const { totpSecret } = get();
                 if (!totpSecret) return false;
 
@@ -49,14 +132,42 @@ export const useAuthStore = create<AuthState>()(
                     const isValid = await verifyTotp(rawSecret, code);
 
                     if (isValid) {
-                        const salt = new TextEncoder().encode('ledgy-salt-v1');
-                        const key = await deriveKeyFromTotp(totpSecret, salt);
+                        const hkdfSalt = new TextEncoder().encode(HKDF_SALT);
+                        const key = await deriveKeyFromTotp(totpSecret, hkdfSalt);
 
-                        set({
-                            isUnlocked: true,
-                            encryptionKey: key,
-                            rememberMe: remember
-                        });
+                        const expiryTimestamp =
+                            remember && expiryMs != null ? Date.now() + expiryMs : null;
+
+                        if (remember && passphrase) {
+                            // Encrypt the TOTP secret with a PBKDF2-derived key so it is
+                            // never stored in plaintext when "Remember Me + passphrase" is active.
+                            const pbkdf2Salt = crypto.getRandomValues(new Uint8Array(16));
+                            const passphraseKey = await deriveKeyFromPassphrase(passphrase, pbkdf2Salt);
+                            const { iv, ciphertext } = await encryptPayload(passphraseKey, totpSecret);
+                            const encrypted: EncryptedSecret = {
+                                iv,
+                                ciphertext: Array.from(new Uint8Array(ciphertext)),
+                                pbkdf2Salt: Array.from(pbkdf2Salt),
+                            };
+                            set({
+                                isUnlocked: true,
+                                encryptionKey: key,
+                                rememberMe: remember,
+                                encryptedTotpSecret: encrypted,
+                                totpSecret: null, // Remove plaintext; encrypted version takes over
+                                rememberMeExpiry: expiryTimestamp,
+                                needsPassphrase: false,
+                            });
+                        } else {
+                            set({
+                                isUnlocked: true,
+                                encryptionKey: key,
+                                rememberMe: remember,
+                                encryptedTotpSecret: null,
+                                rememberMeExpiry: expiryTimestamp,
+                                needsPassphrase: false,
+                            });
+                        }
                         return true;
                     }
                 } catch (error) {
@@ -66,19 +177,49 @@ export const useAuthStore = create<AuthState>()(
                 return false;
             },
 
+            unlockWithPassphrase: async (passphrase: string) => {
+                const { encryptedTotpSecret } = get();
+                if (!encryptedTotpSecret) return false;
+
+                try {
+                    const pbkdf2Salt = new Uint8Array(encryptedTotpSecret.pbkdf2Salt);
+                    const passphraseKey = await deriveKeyFromPassphrase(passphrase, pbkdf2Salt);
+
+                    const iv = new Uint8Array(encryptedTotpSecret.iv);
+                    const ciphertext = new Uint8Array(encryptedTotpSecret.ciphertext).buffer;
+                    const totpSecret = await decryptPayload(passphraseKey, iv, ciphertext);
+
+                    const hkdfSalt = new TextEncoder().encode(HKDF_SALT);
+                    const key = await deriveKeyFromTotp(totpSecret, hkdfSalt);
+
+                    set({
+                        isUnlocked: true,
+                        encryptionKey: key,
+                        // Restore secret in volatile memory so TOTP verification still works
+                        // within this session; partialize excludes it from storage when
+                        // encryptedTotpSecret is present (see partialize below).
+                        totpSecret,
+                        needsPassphrase: false,
+                    });
+                    return true;
+                } catch (err) {
+                    console.error('Passphrase unlock failed:', err);
+                    return false;
+                }
+            },
+
             verifyAndRegister: async (secret: string, code: string) => {
                 try {
                     const rawSecret = decodeSecret(secret);
                     const isValid = await verifyTotp(rawSecret, code);
 
                     if (isValid) {
-                        const salt = new TextEncoder().encode('ledgy-salt-v1');
+                        const salt = new TextEncoder().encode(HKDF_SALT);
                         const key = await deriveKeyFromTotp(secret, salt);
-
                         set({
                             totpSecret: secret,
                             isUnlocked: true,
-                            encryptionKey: key
+                            encryptionKey: key,
                         });
                         return true;
                     }
@@ -89,24 +230,36 @@ export const useAuthStore = create<AuthState>()(
             },
 
             lock: () => {
-                set({ isUnlocked: false, encryptionKey: null, rememberMe: false });
+                // Preserve rememberMe preference so the user's choice persists across locks.
+                // Only clear the active session credentials.
+                set({ isUnlocked: false, encryptionKey: null });
             },
 
             reset: () => {
-                set({ totpSecret: null, isUnlocked: false, encryptionKey: null, rememberMe: false });
-            },
-
-            isRegistered: () => {
-                return !!get().totpSecret;
+                set({
+                    totpSecret: null,
+                    encryptedTotpSecret: null,
+                    isUnlocked: false,
+                    encryptionKey: null,
+                    rememberMe: false,
+                    rememberMeExpiry: null,
+                    needsPassphrase: false,
+                });
             },
         }),
         {
             name: 'ledgy-auth-storage',
             storage: createJSONStorage(() => localStorage),
-            // ONLY persist the totpSecret and rememberMe
+            /**
+             * Only persist non-sensitive session state.
+             * When passphrase-based remember-me is active, totpSecret is explicitly excluded
+             * (encryptedTotpSecret holds the protected form instead).
+             */
             partialize: (state) => ({
-                totpSecret: state.totpSecret,
-                rememberMe: state.rememberMe
+                totpSecret: state.encryptedTotpSecret ? null : state.totpSecret,
+                encryptedTotpSecret: state.encryptedTotpSecret,
+                rememberMe: state.rememberMe,
+                rememberMeExpiry: state.rememberMeExpiry,
             } as AuthState),
         }
     )

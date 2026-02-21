@@ -10,6 +10,7 @@ export const SetupPage: React.FC = () => {
     const [code, setCode] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const isSubmittingRef = React.useRef(false);
     const hasGenerated = React.useRef(false);
     const { verifyAndRegister } = useAuthStore();
     const navigate = useNavigate();
@@ -28,9 +29,13 @@ export const SetupPage: React.FC = () => {
     }, []);
 
     const handleVerify = async (val?: string) => {
-        if (isSubmitting) return;
+        if (isSubmittingRef.current) return;
+        isSubmittingRef.current = true;
         const verifyCode = val || code;
-        if (!tempSecret || verifyCode.length !== 6) return;
+        if (!tempSecret || verifyCode.length !== 6) {
+            isSubmittingRef.current = false;
+            return;
+        }
 
         setError(null);
         setIsSubmitting(true);
@@ -38,12 +43,13 @@ export const SetupPage: React.FC = () => {
         try {
             const success = await verifyAndRegister(tempSecret, verifyCode);
             if (success) {
-                navigate('/');
+                navigate('/profiles');
             } else {
                 setError('Invalid code. Please try again.');
             }
         } finally {
             setIsSubmitting(false);
+            isSubmittingRef.current = false;
         }
     };
 

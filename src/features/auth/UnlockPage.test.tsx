@@ -12,9 +12,13 @@ global.ResizeObserver = class ResizeObserver {
 
 document.elementFromPoint = vi.fn();
 
-vi.mock('./useAuthStore', () => ({
-    useAuthStore: vi.fn(),
-}));
+vi.mock('./useAuthStore', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('./useAuthStore')>();
+    return {
+        ...actual,
+        useAuthStore: vi.fn(),
+    };
+});
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -29,6 +33,8 @@ vi.mock('react-router-dom', async () => {
 
 describe('UnlockPage', () => {
     const mockUnlock = vi.fn();
+    const mockReset = vi.fn();
+    const mockUnlockWithPassphrase = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -36,7 +42,10 @@ describe('UnlockPage', () => {
             const state = {
                 totpSecret: 'dummy-secret',
                 isUnlocked: false,
+                needsPassphrase: false,
                 unlock: mockUnlock,
+                unlockWithPassphrase: mockUnlockWithPassphrase,
+                reset: mockReset,
             };
             return selector ? selector(state) : state;
         });
@@ -64,7 +73,7 @@ describe('UnlockPage', () => {
         fireEvent.change(input, { target: { value: '123456' } });
 
         await waitFor(() => {
-            expect(mockUnlock).toHaveBeenCalledWith('123456', false);
+            expect(mockUnlock).toHaveBeenCalledWith('123456', false, undefined, expect.anything());
         });
         expect(mockNavigate).toHaveBeenCalledWith('/profiles');
     });
@@ -122,6 +131,20 @@ describe('UnlockPage', () => {
         resolveUnlock!(true);
     });
 
+    it('calls reset() and navigates to /setup when "Not you?" is clicked', () => {
+        render(
+            <MemoryRouter>
+                <UnlockPage />
+            </MemoryRouter>
+        );
+
+        const resetButton = screen.getByRole('button', { name: /Reset vault/i });
+        fireEvent.click(resetButton);
+
+        expect(mockReset).toHaveBeenCalledTimes(1);
+        expect(mockNavigate).toHaveBeenCalledWith('/setup');
+    });
+
     it('passes rememberMe to unlock when checkbox is checked', async () => {
         mockUnlock.mockResolvedValue(true);
         const { container } = render(
@@ -138,7 +161,7 @@ describe('UnlockPage', () => {
         fireEvent.change(input, { target: { value: '123456' } });
 
         await waitFor(() => {
-            expect(mockUnlock).toHaveBeenCalledWith('123456', true);
+            expect(mockUnlock).toHaveBeenCalledWith('123456', true, undefined, expect.anything());
         });
     });
 });

@@ -9,7 +9,8 @@ interface AuthGuardProps {
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     const isUnlocked = useAuthStore(state => state.isUnlocked);
     const totpSecret = useAuthStore(state => state.totpSecret);
-    const isRegistered = !!totpSecret;
+    const encryptedTotpSecret = useAuthStore(state => state.encryptedTotpSecret);
+    const isRegistered = !!(totpSecret || encryptedTotpSecret);
 
     if (!isRegistered) {
         return <Navigate to="/setup" replace />;
