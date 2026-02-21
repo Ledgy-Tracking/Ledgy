@@ -1,6 +1,6 @@
 # Story 1.2: TOTP Registration & Encryption Key Derivation
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -21,15 +21,15 @@ so that my encryption key is derived and Ledgy is protected without a password.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 (AC: 1, 3): Implement TOTP Core Logic
-  - [ ] Subtask 1.1: Implement `src/lib/totp.ts` with `generateSecret()`, `generateOtpauthUri()`, and `verifyTotp()` using WebCrypto (HMAC-SHA1).
-  - [ ] Subtask 1.2: Add unit tests for `totp.ts` covering edge cases (time windows).
-- [ ] Task 2 (AC: 1, 2): Authentication State & Key Derivation
-  - [ ] Subtask 2.1: Create `src/features/auth/useAuthStore.ts` using Zustand to manage `totpSecret`, `isUnlocked`, and the volatile `encryptionKey`.
-  - [ ] Subtask 2.2: Integrate `deriveKeyFromTotp` from `src/lib/crypto.ts` to derive the key upon successful verification.
-- [ ] Task 3 (AC: 1, 4): Registration UI (First Launch)
-  - [ ] Subtask 3.1: Create `src/features/auth/SetupPage.tsx` with QR code display (using `qrcode.react`) and verification input.
-  - [ ] Subtask 3.2: Implement navigation logic in `App.tsx` or a dedicated router to redirect to `/setup` if no `totpSecret` exists.
+- [x] Task 1 (AC: 1, 3): Implement TOTP Core Logic
+  - [x] Subtask 1.1: Implement `src/lib/totp.ts` with `generateSecret()`, `generateOtpauthUri()`, and `verifyTotp()` using WebCrypto (HMAC-SHA1).
+  - [x] Subtask 1.2: Add unit tests for `totp.ts` covering edge cases (time windows).
+- [x] Task 2 (AC: 1, 2): Authentication State & Key Derivation
+  - [x] Subtask 2.1: Create `src/features/auth/useAuthStore.ts` using Zustand to manage `totpSecret`, `isUnlocked`, and the volatile `encryptionKey`.
+  - [x] Subtask 2.2: Integrate `deriveKeyFromTotp` from `src/lib/crypto.ts` to derive the key upon successful verification.
+- [x] Task 3 (AC: 1, 4): Registration UI (First Launch)
+  - [x] Subtask 3.1: Create `src/features/auth/SetupPage.tsx` with QR code display (using `qrcode.react`) and verification input.
+  - [x] Subtask 3.2: Implement navigation logic in `App.tsx` or a dedicated router to redirect to `/setup` if no `totpSecret` exists.
 
 ## Dev Notes
 
@@ -63,4 +63,20 @@ Antigravity (Gemini 2.0 Flash)
 
 ### Completion Notes List
 
+- ✅ Implemented core TOTP logic (RFC 6238) in `src/lib/totp.ts` using WebCrypto.
+- ✅ Added comprehensive unit tests in `src/lib/totp.test.ts` with RFC test vectors.
+- ✅ Created `useAuthStore` with Zustand for managing persisted TOTP secret and volatile `encryptionKey`.
+- ✅ Implemented `SetupPage` for first-time registration with QR code generation.
+- ✅ Integrated `react-router-dom` and `AuthGuard` for secure routing and redirection.
+- ✅ Verified implementation via unit tests and browser simulation on port 1420.
+
 ### File List
+
+- `src/lib/totp.ts` (NEW)
+- `src/lib/totp.test.ts` (NEW)
+- `src/features/auth/useAuthStore.ts` (NEW)
+- `src/features/auth/SetupPage.tsx` (NEW)
+- `src/features/auth/AuthGuard.tsx` (NEW)
+- `src/App.tsx` (MODIFIED)
+- `src/main.tsx` (MODIFIED)
+- `package.json` (MODIFIED)
