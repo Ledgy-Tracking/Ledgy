@@ -1,6 +1,6 @@
 # Story 2.2: Profile Selector UI
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
