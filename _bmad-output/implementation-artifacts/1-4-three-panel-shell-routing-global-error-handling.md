@@ -1,6 +1,6 @@
 # Story 1.4: Three-Panel Shell, Routing & Global Error Handling
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -52,11 +52,11 @@ So that I can navigate between areas of the app without disorientation.
 
 ### Review Follow-ups (AI)
 
-- [ ] [AI-Review][HIGH] Responsive Logic Flaw: The resize listener in AppShell.tsx fires constantly beneath 1280px, aggressively forcing sidebars closed on every pixel change instead of only on boundary crossings. [src/components/Layout/AppShell.tsx:34]
-- [ ] [AI-Review][HIGH] Missing Profile Context: AppShell does not read the profileId from useParams to provide context to the dashboard as requested by the dev notes. [src/components/Layout/AppShell.tsx:68]
-- [ ] [AI-Review][MEDIUM] Redundant Warning Blast: Resizing to mobile (<900px) shows a full-screen block and simultaneously dispatches a warning to useErrorStore, creating a redundant toast. [src/components/Layout/AppShell.tsx:23]
-- [ ] [AI-Review][MEDIUM] Error Race Condition: ErrorToast uses a blind setTimeout(clearError, 300) during unmount which could clear a newly dispatched error. [src/components/ErrorToast.tsx:22]
-- [ ] [AI-Review][MEDIUM] Theme Ignoring: UnlockPage hardcodes bg-zinc-950 text-zinc-50, ignoring the new dark mode theme classes. [src/features/auth/UnlockPage.tsx:142]
+- [x] [AI-Review][HIGH] Responsive Logic Flaw: The resize listener in AppShell.tsx fires constantly beneath 1280px, aggressively forcing sidebars closed on every pixel change instead of only on boundary crossings. [src/components/Layout/AppShell.tsx:34]
+- [x] [AI-Review][HIGH] Missing Profile Context: AppShell does not read the profileId from useParams to provide context to the dashboard as requested by the dev notes. [src/components/Layout/AppShell.tsx:68]
+- [x] [AI-Review][MEDIUM] Redundant Warning Blast: Resizing to mobile (<900px) shows a full-screen block and simultaneously dispatches a warning to useErrorStore, creating a redundant toast. [src/components/Layout/AppShell.tsx:23]
+- [x] [AI-Review][MEDIUM] Error Race Condition: ErrorToast uses a blind setTimeout(clearError, 300) during unmount which could clear a newly dispatched error. [src/components/ErrorToast.tsx:22]
+- [x] [AI-Review][MEDIUM] Theme Ignoring: UnlockPage hardcodes bg-zinc-950 text-zinc-50, ignoring the new dark mode theme classes. [src/features/auth/UnlockPage.tsx:142]
 - [x] [AI-Review][HIGH] Responsive Logic Gap: Auto-collapse for Inspector (1100–1279px) not implemented in resize handler [src/components/Layout/AppShell.tsx:28]
 - [x] [AI-Review][HIGH] UI State Flash: Missing hydration check for persisted state causing layout shift [src/components/Layout/AppShell.tsx:17]
 - [x] [AI-Review][MEDIUM] Duplicate Test Location: Tests found in src/features/auth/ instead of strictly in tests/ [src/features/auth/UnlockPage.test.tsx]
@@ -127,6 +127,11 @@ Antigravity (Gemini 2.0)
 - ✅ Resolved review finding [HIGH]: AC 5 Violation (Theme Isolation). Moved theme synchronization logic to `App.tsx`.
 - ✅ Resolved review finding [HIGH]: AC 3 Violation (Error Handling). Removed local `[error, setError]` from `UnlockPage` and used `useErrorStore`.
 - ✅ Resolved review finding [MEDIUM]: Redundant Logic. Simplified Left Sidebar width CSS in `AppShell.tsx`.
+- ✅ Resolved review finding [HIGH]: Responsive Logic Flaw. Added prevWidthRef tracking to only toggle state on boundary crossings.
+- ✅ Resolved review finding [HIGH]: Missing Profile Context. Passed profileId from useParams to Outlet context.
+- ✅ Resolved review finding [MEDIUM]: Redundant Warning Blast. Removed duplicate dispatchError in AppShell resize handler.
+- ✅ Resolved review finding [MEDIUM]: Error Race Condition. Updated clearError to optionally accept and check a timestamp before clearing.
+- ✅ Resolved review finding [MEDIUM]: Theme Ignoring. Updated UnlockPage to use proper light/dark mode CSS classes.
 
 ### File List
 
