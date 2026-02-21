@@ -7,9 +7,9 @@ Usage (called by the GitHub Actions workflow):
 Required environment variables:
   GH_TOKEN        – GitHub token with issues:write and projects:write scopes
   GITHUB_REPOSITORY – owner/repo (e.g. njtan142/Ledgy)
-  PROJECT_NUMBER  – numeric ID of the GitHub Project V2
 
 Optional:
+  PROJECT_NUMBER  – numeric ID of the GitHub Project V2 (default: 1)
   DRY_RUN         – if set to "true", print actions without executing them
 """
 
@@ -263,8 +263,13 @@ query($login: String!, $number: Int!) {{
             return project
 
     print(
-        f"⚠  Project #{project_number} not found for owner '{owner}'. "
-        "Check that the project exists and the token has 'project' scope.",
+        f"⚠  Project #{project_number} not found for owner '{owner}'.\n"
+        "   Possible causes:\n"
+        "   1. The project number is incorrect — check the URL: /projects/<number>\n"
+        "   2. The token lacks 'project' scope — the default GITHUB_TOKEN cannot\n"
+        "      access Projects V2.  Create a PAT (classic or fine-grained) with\n"
+        "      the 'project' scope and store it as a repository secret named\n"
+        "      PROJECT_TOKEN.",
         file=sys.stderr,
     )
     return None
@@ -365,14 +370,14 @@ def story_body(key: str, epic_num: int, story_num: int, status: str) -> str:
 
 def main() -> int:
     repo = os.environ.get("GITHUB_REPOSITORY", "")
-    project_number_str = os.environ.get("PROJECT_NUMBER", "")
+    _project_number_env = os.environ.get("PROJECT_NUMBER")
+    project_number_str = _project_number_env or "1"
+    if not _project_number_env:
+        print("ℹ  PROJECT_NUMBER not set — defaulting to project #1")
     dry_run = os.getenv("DRY_RUN", "").lower() == "true"
 
     if not repo:
         print("Error: GITHUB_REPOSITORY is not set.", file=sys.stderr)
-        return 1
-    if not project_number_str:
-        print("Error: PROJECT_NUMBER is not set.", file=sys.stderr)
         return 1
 
     try:

@@ -38,7 +38,11 @@ jobs:
 
       - name: Run sync script
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PROJECT_TOKEN must be a PAT (classic or fine-grained) with the
+          # `project` scope.  The default GITHUB_TOKEN does NOT have access
+          # to GitHub Projects V2.  Create a PAT and store it as a repository
+          # secret named PROJECT_TOKEN.
+          GH_TOKEN: ${{ secrets.PROJECT_TOKEN || secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PROJECT_NUMBER: ${{ inputs.project_number }}
           DRY_RUN: ${{ inputs.dry_run }}
