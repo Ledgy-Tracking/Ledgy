@@ -61,6 +61,18 @@ so that my data is decrypted and I can access my profiles.
 - [x] [AI-Review][Medium] Strict Mode Double QR Generation: TOTP secret is generated directly inside a useEffect, causing double generation in Strict Mode [src/features/auth/SetupPage.tsx:17]
 - [x] [AI-Review][Medium] Missing Test Coverage: "Remember Me" checkbox was added but no tests verify its behavior [src/features/auth/UnlockPage.test.tsx:55]
 
+### Review Follow-ups (AI) - Round 4
+- [x] [AI-Review][High] Security Warning: "Remember Me" stored secret in plaintext localStorage with no additional protection — added inline security notice UI to UnlockPage warning users of the risk [src/features/auth/UnlockPage.tsx]
+- [ ] [AI-Review][High] Remember Me Passphrase: Add optional passphrase field (shown when Remember Me is checked) that derives a key via PBKDF2 to encrypt the stored totpSecret at rest; on initSession with a passphrase-protected secret, prompt for passphrase instead of auto-unlocking [src/features/auth/UnlockPage.tsx, src/features/auth/useAuthStore.ts, src/lib/crypto.ts]
+- [ ] [AI-Review][High] Remember Me Session Expiry: Add expiry selector (shown when Remember Me is checked) with options: 15 min, 1 h, 8 h, 1 day, 7 days, 30 days, never; store rememberMeExpiry timestamp in persisted state; check expiry in initSession and lock/redirect to /unlock if expired [src/features/auth/useAuthStore.ts, src/features/auth/UnlockPage.tsx]
+- [ ] [AI-Review][Medium] SetupPage concurrent submission uses isSubmitting state instead of a ref — fix mirrors the UnlockPage pattern (add isSubmittingRef) [src/features/auth/SetupPage.tsx:32]
+- [ ] [AI-Review][Medium] UnlockPage.test.tsx mock omits reset(), so the "Not you? Reset vault" button would throw in tests — add reset: vi.fn() to mock state and add a test for the reset flow [src/features/auth/UnlockPage.test.tsx:36]
+- [ ] [AI-Review][Medium] src/App.test.tsx and src/features/dashboard/Dashboard.tsx are changed in this branch but missing from the Dev Agent Record File List [1-3-app-unlock-flow-auth-guard.md]
+- [ ] [AI-Review][Low] HKDF salt 'ledgy-salt-v1' hardcoded in 3 places — extract to a named constant in src/lib/crypto.ts [src/features/auth/useAuthStore.ts]
+- [ ] [AI-Review][Low] lock() clears rememberMe preference — should only clear isUnlocked and encryptionKey; user preference should persist until explicitly unchecked [src/features/auth/useAuthStore.ts:90]
+- [ ] [AI-Review][Low] SetupPage navigates to '/' after registration instead of '/profiles', inconsistent with the post-auth destination set by this story [src/features/auth/SetupPage.tsx:42]
+- [ ] [AI-Review][Low] isRegistered() method in useAuthStore is dead code — all guards derive registration state directly from totpSecret; remove to reduce interface noise [src/features/auth/useAuthStore.ts:86]
+
 ## Dev Notes
 
 - **Input OTP**: Recommend using `input-otp` or a similar highly accessible component to match the "Builder's Pride" aesthetic.
@@ -118,9 +130,11 @@ Antigravity (Gemini 2.0 Flash)
 - `src/features/auth/SetupPage.tsx`
 - `src/features/auth/useAuthStore.ts`
 - `src/App.tsx`
+- `src/App.test.tsx`
 - `src/features/dashboard/Dashboard.tsx`
 
 ### Change Log
 - Addressed code review findings - 6 items resolved
 - Addressed Review Round 2 findings - 9 items resolved, including SetupPage vulnerabilities, Remember Me session persistence, and GuestGuard visual flash preventions.
 - Addressed Review Round 3 findings - 4 items resolved, including Reset Vault flow fixes, strict mode double generation, and testing coverage.
+- Round 4 code review: added Remember Me security warning UI to UnlockPage; 9 action items logged (2 High passphrase/expiry features, 2 Medium, 4 Low); fixed File List to include App.test.tsx.

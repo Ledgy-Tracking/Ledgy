@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OTPInput, SlotProps } from 'input-otp';
-import { Lock, ShieldAlert, ArrowRight } from 'lucide-react';
+import { Lock, ShieldAlert, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from './useAuthStore';
 
 export const UnlockPage: React.FC = () => {
@@ -97,16 +97,33 @@ export const UnlockPage: React.FC = () => {
                         </div>
                     )}
 
-                    <label className="flex items-center gap-2 self-start text-sm text-zinc-400 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
-                            checked={rememberMe}
-                            onChange={(e) => setRememberMe(e.target.checked)}
-                            disabled={isSubmitting}
-                        />
-                        Remember me on this device
-                    </label>
+                    <div className="w-full space-y-3">
+                        <label className="flex items-center gap-2 self-start text-sm text-zinc-400 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                disabled={isSubmitting}
+                            />
+                            Remember me on this device
+                        </label>
+
+                        {rememberMe && (
+                            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                                <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wide">
+                                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                                    Security Notice
+                                </div>
+                                <p className="text-xs text-zinc-400 leading-relaxed">
+                                    Your vault secret will be stored in local device storage. Anyone with OS-level access to this device may be able to retrieve it without entering a TOTP code.
+                                </p>
+                                <p className="text-xs text-zinc-500 leading-relaxed">
+                                    To strengthen this, you will be able to add a <span className="text-zinc-300 font-medium">passphrase</span> and set a <span className="text-zinc-300 font-medium">session expiry</span> — coming soon.
+                                </p>
+                            </div>
+                        )}
+                    </div>
 
                     <button
                         type="submit"
