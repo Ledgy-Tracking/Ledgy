@@ -1,6 +1,6 @@
 # Story 1.4: Three-Panel Shell, Routing & Global Error Handling
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -26,29 +26,29 @@ So that I can navigate between areas of the app without disorientation.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 (AC: 3): Implement Global Error Handling
-  - [ ] Subtask 1.1: Create `src/stores/useErrorStore.ts` with `error` state and `dispatchError` / `clearError` actions.
-  - [ ] Subtask 1.2: Create `src/components/ErrorToast.tsx` using Shadcn `Toast` or custom implementation, subscribed to `useErrorStore`.
-  - [ ] Subtask 1.3: Add `ErrorToast` to `src/App.tsx` (global level).
-  - [ ] Subtask 1.4: Add tests in `tests/useErrorStore.test.ts`.
-- [ ] Task 2 (AC: 1, 4, 5): Implement App Shell Layout
-  - [ ] Subtask 2.1: Create `src/components/Layout/AppShell.tsx`.
-  - [ ] Subtask 2.2: Implement Left Sidebar (Collapsible, Width transition).
-  - [ ] Subtask 2.3: Implement Right Inspector (Collapsible, Width transition).
-  - [ ] Subtask 2.4: Implement Main Canvas area (Flex grow).
-  - [ ] Subtask 2.5: Implement Responsive Logic (Breakpoints) and Warning Banner for <900px.
-  - [ ] Subtask 2.6: Implement Theme Toggle (Dark/Light) and persistence in `useUIStore` or similar.
-  - [ ] Subtask 2.7: Add component tests in `tests/AppShell.test.tsx`.
-- [ ] Task 3 (AC: 2): Configure Routing
-  - [ ] Subtask 3.1: Update `src/App.tsx` to use React Router v7.
-  - [ ] Subtask 3.2: Define routes:
+- [x] Task 1 (AC: 3): Implement Global Error Handling
+  - [x] Subtask 1.1: Create `src/stores/useErrorStore.ts` with `error` state and `dispatchError` / `clearError` actions.
+  - [x] Subtask 1.2: Create `src/components/ErrorToast.tsx` using Shadcn `Toast` or custom implementation, subscribed to `useErrorStore`.
+  - [x] Subtask 1.3: Add `ErrorToast` to `src/App.tsx` (global level).
+  - [x] Subtask 1.4: Add tests in `tests/useErrorStore.test.ts`.
+- [x] Task 2 (AC: 1, 4, 5): Implement App Shell Layout
+  - [x] Subtask 2.1: Create `src/components/Layout/AppShell.tsx`.
+  - [x] Subtask 2.2: Implement Left Sidebar (Collapsible, Width transition).
+  - [x] Subtask 2.3: Implement Right Inspector (Collapsible, Width transition).
+  - [x] Subtask 2.4: Implement Main Canvas area (Flex grow).
+  - [x] Subtask 2.5: Implement Responsive Logic (Breakpoints) and Warning Banner for <900px.
+  - [x] Subtask 2.6: Implement Theme Toggle (Dark/Light) and persistence in `useUIStore` or similar.
+  - [x] Subtask 2.7: Add component tests in `tests/AppShell.test.tsx`.
+- [x] Task 3 (AC: 2): Configure Routing
+  - [x] Subtask 3.1: Update `src/App.tsx` to use React Router v7.
+  - [x] Subtask 3.2: Define routes:
     - `/` -> Redirect to `/profiles` (or `/unlock` via AuthGuard)
     - `/unlock` (Public/Guard logic)
     - `/setup` (Public)
     - `/profiles` (Protected)
     - `/app/:profileId/*` (Protected, uses AppShell)
-  - [ ] Subtask 3.3: Ensure `AuthGuard` wraps protected routes correctly.
-  - [ ] Subtask 3.4: Add integration tests for routing in `tests/App.test.tsx`.
+  - [x] Subtask 3.3: Ensure `AuthGuard` wraps protected routes correctly.
+  - [x] Subtask 3.4: Add integration tests for routing in `tests/App.test.tsx`.
 
 ## Dev Notes
 
@@ -87,13 +87,32 @@ So that I can navigate between areas of the app without disorientation.
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+Antigravity (Gemini 2.0)
 
 ### Debug Log References
 
+- Fixed `vite.config.ts` to include `tests/` directory as per project rules.
+- Resolved `MemoryRouter` context issues in `App.test.tsx`.
+
 ### Completion Notes List
 
+- Implemented `useErrorStore` for global error/warning dispatch.
+- Implemented `ErrorToast` component for global notifications.
+- Created `AppShell` with a responsive three-panel layout (Sidebar, Main, Inspector).
+- Configured React Router v7 with nested routes and redirects.
+- Added 17 unit and integration tests (100% pass).
+
 ### File List
+
+- `src/stores/useErrorStore.ts`
+- `src/stores/useUIStore.ts`
+- `src/components/ErrorToast.tsx`
+- `src/components/Layout/AppShell.tsx`
+- `src/App.tsx`
+- `vite.config.ts`
+- `tests/useErrorStore.test.ts`
+- `tests/AppShell.test.tsx`
+- `tests/App.test.tsx`
 
 ## Git Intelligence Summary (Previous Story)
 

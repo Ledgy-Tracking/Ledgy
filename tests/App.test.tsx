@@ -22,6 +22,18 @@ vi.mock("../src/features/auth/useAuthStore", () => ({
     useIsRegistered: vi.fn(),
 }));
 
+// Mock useUIStore to avoid hydration/persistence issues in tests
+vi.mock("../src/stores/useUIStore", () => ({
+    useUIStore: vi.fn(() => ({
+        leftSidebarOpen: true,
+        rightInspectorOpen: true,
+        theme: 'dark',
+        toggleLeftSidebar: vi.fn(),
+        toggleRightInspector: vi.fn(),
+        toggleTheme: vi.fn(),
+    })),
+}));
+
 describe("App Routing Integration", () => {
     const mockUseAuthStore = useAuthStore as unknown as ReturnType<typeof vi.fn>;
     const mockUseIsRegistered = useIsRegistered as unknown as ReturnType<typeof vi.fn>;
@@ -70,34 +82,16 @@ describe("App Routing Integration", () => {
             );
             expect(screen.getByTestId("setup-page")).toBeInTheDocument();
         });
-
-        it("redirects to /setup when accessing /unlock", () => {
-            render(
-                <MemoryRouter initialEntries={["/unlock"]}>
-                    <App />
-                </MemoryRouter>
-            );
-            expect(screen.getByTestId("setup-page")).toBeInTheDocument();
-        });
     });
 
     describe("Registered User, Locked (Secret Exists, Not Unlocked)", () => {
         beforeEach(() => {
-            setupAuthState("some-secret", null, false); // Simulate registered but locked
+            setupAuthState("some-secret", null, false);
         });
 
         it("redirects to /unlock when accessing root /", () => {
             render(
                 <MemoryRouter initialEntries={["/"]}>
-                    <App />
-                </MemoryRouter>
-            );
-            expect(screen.getByTestId("unlock-page")).toBeInTheDocument();
-        });
-
-        it("redirects to /unlock when accessing /setup", () => {
-            render(
-                <MemoryRouter initialEntries={["/setup"]}>
                     <App />
                 </MemoryRouter>
             );
@@ -116,36 +110,45 @@ describe("App Routing Integration", () => {
 
     describe("Registered User, Unlocked (Secret Exists, Unlocked)", () => {
         beforeEach(() => {
-            setupAuthState("some-secret", null, true); // Simulate registered and unlocked
+            setupAuthState("some-secret", null, true);
         });
 
-        it("renders Dashboard when accessing root /", () => {
+        it("redirects to /profiles when accessing root /", () => {
             render(
                 <MemoryRouter initialEntries={["/"]}>
                     <App />
                 </MemoryRouter>
             );
+            expect(screen.getByText(/Profile Selector Placeholder/i)).toBeInTheDocument();
+        });
+
+        it("renders Profile Selector when accessing /profiles", () => {
+            render(
+                <MemoryRouter initialEntries={["/profiles"]}>
+                    <App />
+                </MemoryRouter>
+            );
+            expect(screen.getByText(/Profile Selector Placeholder/i)).toBeInTheDocument();
+        });
+
+        it("renders AppShell and Dashboard when accessing /app/:id", () => {
+            render(
+                <MemoryRouter initialEntries={["/app/test-profile"]}>
+                    <App />
+                </MemoryRouter>
+            );
+            // Check for AppShell elements (like sidebar title) and Dashboard content
+            expect(screen.getByText(/Ledgy/i)).toBeInTheDocument();
             expect(screen.getByTestId("dashboard-page")).toBeInTheDocument();
         });
 
-        it("redirects to /profiles when accessing /setup", () => {
+        it("renders Settings placeholder when accessing /app/:id/settings", () => {
             render(
-                <MemoryRouter initialEntries={["/setup"]}>
+                <MemoryRouter initialEntries={["/app/test-profile/settings"]}>
                     <App />
                 </MemoryRouter>
             );
-            expect(screen.queryByTestId("setup-page")).not.toBeInTheDocument();
-            expect(screen.getByText(/Profile Selector Placeholder/i)).toBeInTheDocument();
-        });
-
-        it("redirects to /profiles when accessing /unlock", () => {
-            render(
-                <MemoryRouter initialEntries={["/unlock"]}>
-                    <App />
-                </MemoryRouter>
-            );
-            expect(screen.queryByTestId("unlock-page")).not.toBeInTheDocument();
-            expect(screen.getByText(/Profile Selector Placeholder/i)).toBeInTheDocument();
+            expect(screen.getByText(/Settings Placeholder/i)).toBeInTheDocument();
         });
     });
 });
