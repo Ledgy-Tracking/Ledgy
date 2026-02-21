@@ -1,12 +1,18 @@
 name: Sync Planning Artifacts to GitHub Project
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - '_bmad-output/planning-artifacts/epics.md'
+      - '_bmad-output/implementation-artifacts/sprint-status.yaml'
   workflow_dispatch:
     inputs:
       project_number:
         description: 'GitHub Project V2 number (find it in the project URL: /projects/<number>)'
         required: false
-        default: '4'
+        default: '1'
         type: number
       dry_run:
         description: 'Dry run — print actions without creating or modifying anything'
@@ -44,6 +50,6 @@ jobs:
           # secret named PROJECT_TOKEN.
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN || secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          PROJECT_NUMBER: ${{ inputs.project_number }}
-          DRY_RUN: ${{ inputs.dry_run }}
+          PROJECT_NUMBER: ${{ inputs.project_number || '1' }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
         run: python .github/scripts/sync_to_project.py
