@@ -343,6 +343,50 @@ mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
     return data is not None
 
 
+def detect_changed_statuses(before_sha: str) -> list[str]:
+    """Compare sprint-status.yaml against a previous commit to find changed entries.
+
+    Returns a list of status keys whose values differ (or are new).
+    """
+    try:
+        result = subprocess.run(
+            ["git", "show", f"{before_sha}:{SPRINT_STATUS_YAML}"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            # File didn't exist in the previous commit — treat every entry as new
+            return list(parse_sprint_status(SPRINT_STATUS_YAML).keys())
+        old_data = yaml.safe_load(result.stdout)
+        old_status = old_data.get("development_status", {}) if old_data else {}
+    except (subprocess.SubprocessError, yaml.YAMLError, OSError):
+        return list(parse_sprint_status(SPRINT_STATUS_YAML).keys())
+
+    current_status = parse_sprint_status(SPRINT_STATUS_YAML)
+    return [key for key, status in current_status.items() if old_status.get(key) != status]
+
+
+def link_branch_to_issue(
+    issue_node_id: str, branch_name: str, commit_sha: str
+) -> bool:
+    """Link an existing branch to an issue via the createLinkedBranch mutation."""
+    mutation = """
+mutation($issueId: ID!, $oid: GitObjectID!, $name: String!) {
+  createLinkedBranch(input: {issueId: $issueId, oid: $oid, name: $name}) {
+    linkedBranch { id }
+  }
+}
+"""
+    data = graphql(mutation, issueId=issue_node_id, oid=commit_sha, name=branch_name)
+    if isinstance(data, dict) and data.get("errors"):
+        msg = data["errors"][0].get("message", "")
+        if "already" in msg.lower():
+            return True
+        print(f"  ⚠  Error linking branch to issue: {msg}", file=sys.stderr)
+        return False
+    return data is not None
+
+
 def add_sub_issue(epic_node_id: str, story_node_id: str) -> bool:
     """Link a story (sub-issue) to an epic (parent issue)."""
     mutation = """
@@ -509,6 +553,33 @@ def main() -> int:
             status_label = "no status field"
 
         print(f"  ✔ #{issue.get('number')} added — {key} [{status_label}]")
+
+    # -- Link branch to changed issues ------------------------------------
+    branch_name = os.environ.get("GITHUB_REF_NAME", "")
+    commit_sha = os.environ.get("GITHUB_SHA", "")
+    before_sha = os.environ.get("BEFORE_SHA", "")
+
+    if branch_name and commit_sha and before_sha:
+        print(f"\n🔀 Detecting sprint-status changes on branch '{branch_name}' …")
+        changed_keys = detect_changed_statuses(before_sha)
+        if changed_keys:
+            print(f"   Changed entries: {changed_keys}")
+            for key in changed_keys:
+                issue = issue_map.get(key)
+                if not issue:
+                    continue
+                if dry_run:
+                    print(f"  [DRY RUN] Would link branch '{branch_name}' to issue #{issue.get('number')} ({key})")
+                    continue
+                ok = link_branch_to_issue(issue["id"], branch_name, commit_sha)
+                if ok:
+                    print(f"  ✔ Linked branch '{branch_name}' → issue #{issue.get('number')} ({key})")
+                else:
+                    print(f"  ⚠  Could not link branch to issue #{issue.get('number')} ({key})")
+        else:
+            print("   No status changes detected.")
+    else:
+        print("\n⏭  Skipping branch linking (missing GITHUB_REF_NAME, GITHUB_SHA, or BEFORE_SHA).")
 
     print("\n✅ Done.")
     return 0
