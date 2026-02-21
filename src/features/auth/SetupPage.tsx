@@ -9,7 +9,7 @@ export const SetupPage: React.FC = () => {
     const [qrUri, setQrUri] = useState<string>('');
     const [code, setCode] = useState('');
     const [error, setError] = useState<string | null>(null);
-    const { setTotpSecret, unlock } = useAuthStore();
+    const { verifyAndRegister } = useAuthStore();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,22 +22,31 @@ export const SetupPage: React.FC = () => {
         setQrUri(uri);
     }, []);
 
-    const handleVerify = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!tempSecret) return;
+    const handleVerify = async (val?: string) => {
+        const verifyCode = val || code;
+        if (!tempSecret || verifyCode.length !== 6) return;
 
         setError(null);
 
-        // Temporarily set secret in store to test unlock
-        // Actually, we can just use the local tempSecret
-        setTotpSecret(tempSecret);
-
-        const success = await unlock(code);
+        const success = await verifyAndRegister(tempSecret, verifyCode);
         if (success) {
             navigate('/');
         } else {
             setError('Invalid code. Please try again.');
         }
+    };
+
+    const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+        setCode(value);
+        if (value.length === 6) {
+            handleVerify(value);
+        }
+    };
+
+    const handleFormSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        handleVerify();
     };
 
     return (
@@ -64,7 +73,7 @@ export const SetupPage: React.FC = () => {
                         Secret: <span className="text-zinc-300">{tempSecret}</span>
                     </div>
 
-                    <form onSubmit={handleVerify} className="space-y-4">
+                    <form onSubmit={handleFormSubmit} className="space-y-4">
                         <div className="space-y-2">
                             <label htmlFor="code" className="block text-sm font-medium text-zinc-400 text-center">
                                 Enter 6-digit confirmation code
@@ -74,7 +83,7 @@ export const SetupPage: React.FC = () => {
                                 type="text"
                                 maxLength={6}
                                 value={code}
-                                onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                                onChange={handleCodeChange}
                                 placeholder="000000"
                                 className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-4 text-center text-3xl tracking-widest text-zinc-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono"
                                 autoFocus
