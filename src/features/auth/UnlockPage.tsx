@@ -47,7 +47,7 @@ export const UnlockPage: React.FC = () => {
     // If already unlocked (e.g. via ?reset=true bypass), show management UI
     if (isUnlocked) {
         return (
-            <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col items-center justify-center p-6 font-sans">
+            <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 flex flex-col items-center justify-center p-6 font-sans">
                 <div className="w-full max-w-sm space-y-8 text-center">
                     <div className="p-4 bg-emerald-500/10 rounded-full border border-emerald-500/20 inline-block">
                         <Lock className="w-8 h-8 text-emerald-500" />
@@ -99,7 +99,7 @@ export const UnlockPage: React.FC = () => {
                 dispatchError('Invalid code. Please try again.', 'error');
                 setCode('');
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Unlock error occurred', err);
             dispatchError(getFriendlyErrorMessage(err), 'error');
             setCode('');
@@ -121,7 +121,7 @@ export const UnlockPage: React.FC = () => {
             } else {
                 dispatchError('Incorrect passphrase. Please try again.', 'error');
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Passphrase unlock error occurred', err);
             dispatchError(getFriendlyErrorMessage(err), 'error');
         } finally {
@@ -139,7 +139,7 @@ export const UnlockPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col items-center justify-center p-6 font-sans">
+        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 flex flex-col items-center justify-center p-6 font-sans">
             <div className="w-full max-w-sm space-y-8">
                 <div className="flex flex-col items-center text-center space-y-4">
                     <div className="p-4 bg-emerald-500/10 rounded-full border border-emerald-500/20">
