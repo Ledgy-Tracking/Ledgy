@@ -366,25 +366,69 @@ def detect_changed_statuses(before_sha: str) -> list[str]:
     return [key for key, status in current_status.items() if old_status.get(key) != status]
 
 
-def link_branch_to_issue(
-    issue_node_id: str, branch_name: str, commit_sha: str
+def find_pr_for_branch(repo: str, branch_name: str) -> dict | None:
+    """Find an open PR whose head branch matches *branch_name*."""
+    results = run_gh(
+        "pr", "list",
+        "--repo", repo,
+        "--head", branch_name,
+        "--state", "open",
+        "--json", "number,id,title,body,url",
+        "--limit", "1",
+    )
+    if isinstance(results, list) and results:
+        return results[0]
+    return None
+
+
+def link_issue_to_pr(
+    repo: str, issue_number: int, story_key: str
 ) -> bool:
-    """Link an existing branch to an issue via the createLinkedBranch mutation."""
-    mutation = """
-mutation($issueId: ID!, $oid: GitObjectID!, $name: String!) {
-  createLinkedBranch(input: {issueId: $issueId, oid: $oid, name: $name}) {
-    linkedBranch { id }
-  }
-}
-"""
-    data = graphql(mutation, issueId=issue_node_id, oid=commit_sha, name=branch_name)
-    if isinstance(data, dict) and data.get("errors"):
-        msg = data["errors"][0].get("message", "")
-        if "already" in msg.lower():
-            return True
-        print(f"  ⚠  Error linking branch to issue: {msg}", file=sys.stderr)
+    """Link a story issue to its PR by adding a closing reference in the PR body.
+
+    The branch is derived from the story key using the naming convention
+    ``feature/story-{key}``.  If a matching open PR exists, the issue
+    reference ``Closes #<number>`` is appended to the PR body so that
+    GitHub populates the issue's *Development* sidebar section.
+    """
+    branch_name = f"feature/story-{story_key}"
+    pr = find_pr_for_branch(repo, branch_name)
+    if not pr:
+        print(f"  ⚠  No open PR found for branch '{branch_name}' "
+              f"(story key: {story_key})", file=sys.stderr)
         return False
-    return data is not None
+
+    body = pr.get("body", "") or ""
+    issue_ref = f"#{issue_number}"
+
+    # Check whether the PR body already contains a closing keyword for this issue
+    closing_patterns = [
+        f"closes {issue_ref}", f"close {issue_ref}",
+        f"fixes {issue_ref}",  f"fix {issue_ref}",
+        f"resolves {issue_ref}", f"resolve {issue_ref}",
+    ]
+    if any(pat in body.lower() for pat in closing_patterns):
+        print(f"  · PR #{pr['number']} already references issue {issue_ref}")
+        return True
+
+    # Append a closing reference to the PR body
+    separator = "\n\n---\n" if body.strip() else ""
+    new_body = f"{body}{separator}Closes {issue_ref}"
+
+    result = run_gh(
+        "pr", "edit", str(pr["number"]),
+        "--repo", repo,
+        "--body", new_body,
+    )
+    dry_run = os.getenv("DRY_RUN", "").lower() == "true"
+    if result is not None or dry_run:
+        print(f"  ✔ Linked issue {issue_ref} → PR #{pr['number']} "
+              f"({pr.get('title', '?')})")
+        return True
+
+    print(f"  ⚠  Failed to update PR #{pr['number']} body with closing "
+          f"reference for issue {issue_ref}", file=sys.stderr)
+    return False
 
 
 def add_sub_issue(epic_node_id: str, story_node_id: str) -> bool:
@@ -554,7 +598,7 @@ def main() -> int:
 
         print(f"  ✔ #{issue.get('number')} added — {key} [{status_label}]")
 
-    # -- Link branch to changed issues ------------------------------------
+    # -- Link changed stories to their PRs ----------------------------------
     branch_name = os.environ.get("GITHUB_REF_NAME", "")
     commit_sha = os.environ.get("GITHUB_SHA", "")
     before_sha = os.environ.get("BEFORE_SHA", "")
@@ -569,17 +613,15 @@ def main() -> int:
                 if not issue:
                     continue
                 if dry_run:
-                    print(f"  [DRY RUN] Would link branch '{branch_name}' to issue #{issue.get('number')} ({key})")
+                    print(f"  [DRY RUN] Would link issue #{issue.get('number')} to PR for story '{key}'")
                     continue
-                ok = link_branch_to_issue(issue["id"], branch_name, commit_sha)
-                if ok:
-                    print(f"  ✔ Linked branch '{branch_name}' → issue #{issue.get('number')} ({key})")
-                else:
-                    print(f"  ⚠  Could not link branch to issue #{issue.get('number')} ({key})")
+                ok = link_issue_to_pr(repo, issue["number"], key)
+                if not ok:
+                    print(f"  ⚠  Could not link issue #{issue.get('number')} to a PR (key: {key})")
         else:
             print("   No status changes detected.")
     else:
-        print("\n⏭  Skipping branch linking (missing GITHUB_REF_NAME, GITHUB_SHA, or BEFORE_SHA).")
+        print("\n⏭  Skipping PR linking (missing GITHUB_REF_NAME, GITHUB_SHA, or BEFORE_SHA).")
 
     print("\n✅ Done.")
     return 0
