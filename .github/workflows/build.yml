@@ -1,4 +1,4 @@
-name: Release
+name: GitHub Actions CI/CD Pipeline
 
 on:
   push:
@@ -6,9 +6,43 @@ on:
       - 'v*'
 
 jobs:
-  release:
-    # Restrict to main branch as per AC1 requirement
-    if: github.event.base_ref == 'refs/heads/main' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+      html_url: ${{ steps.create_release.outputs.html_url }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Tag is on Main
+        # AC1: "Given a git tag is pushed to main"
+        # Since tags aren't branch-bound, we verify the commit is reachable from origin/main.
+        run: |
+          if ! git branch -r --contains ${{ github.sha }} | grep -q 'origin/main'; then
+            echo "::error::Tag push detected on a commit not reachable from origin/main. Skipping release."
+            exit 1
+          fi
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: 'Ledgy Release ${{ github.ref_name }}'
+          body: 'Automated release for version ${{ github.ref_name }}.'
+          draft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    needs: create-release
     permissions:
       contents: write
     strategy:
@@ -36,6 +70,12 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: "v1-rust"
+          shared-key: "tauri-build"
+
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-latest'
         run: |
@@ -46,20 +86,26 @@ jobs:
         run: npm ci
 
       - name: Build Tauri App
-        # Building manually to allow size verification before release creation/upload
         run: npm run tauri build
 
-      - name: Verify Binary Size (10 MiB)
+      - name: Verify and Locate Binary
+        id: locate
         shell: bash
         run: |
-          # 10 MiB limit (10 * 1024 * 1024 = 10485760 bytes)
-          # MiB (Binary) is used to ensure strict compliance with PRD footprint requirements.
-          MAX_SIZE=10485760
+          # 10 MB limit (decimal: 10 * 1000 * 1000 = 10,000,000 bytes)
+          MAX_SIZE=10000000
           
           echo "Scanning for artifacts with extension ${{ matrix.target_ext }}..."
           
-          # Robust path discovery handles Tauri 1.x and 2.x nesting (e.g., target/release/bundle/msi/*.msi)
-          ARTIFACT=$(find src-tauri/target/release/bundle -name "*${{ matrix.target_ext }}" | head -n 1)
+          # Target specific subfolders based on extension to avoid finding old build artifacts or nested bundles
+          case "${{ matrix.target_ext }}" in
+            .msi) SEARCH_DIR="src-tauri/target/release/bundle/msi" ;;
+            .dmg) SEARCH_DIR="src-tauri/target/release/bundle/dmg" ;;
+            .AppImage) SEARCH_DIR="src-tauri/target/release/bundle/appimage" ;;
+            *) SEARCH_DIR="src-tauri/target/release/bundle" ;;
+          esac
+          
+          ARTIFACT=$(find "$SEARCH_DIR" -maxdepth 1 -name "*${{ matrix.target_ext }}" | head -n 1)
           
           if [[ -z "$ARTIFACT" ]]; then
             echo "::error::No artifact found with extension ${{ matrix.target_ext }} in src-tauri/target/release/bundle"
@@ -78,26 +124,17 @@ jobs:
           echo "Size: $SIZE bytes"
           
           if (( SIZE > MAX_SIZE )); then
-            echo "::error::Binary $ARTIFACT size ($SIZE bytes) exceeds the 10 MiB limit ($MAX_SIZE bytes)!"
+            echo "::error::Binary $ARTIFACT size ($SIZE bytes) exceeds the 10 MiB limit!"
             exit 1
-          else
-            echo "Success: Binary size is within the 10 MiB limit."
           fi
+          
+          # Set output for subsequent upload step to avoid glob pollution
+          echo "artifact_path=$ARTIFACT" >> $GITHUB_OUTPUT
 
-      - name: Create Release and Upload Assets
-        # Using softprops/action-gh-release to handle assets verified in previous step
-        # tagName/releaseName are derived from the tag that triggered the workflow
+      - name: Upload Asset
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/v')
         with:
-          files: |
-            src-tauri/target/release/bundle/**/*.AppImage
-            src-tauri/target/release/bundle/**/*.dmg
-            src-tauri/target/release/bundle/**/*.msi
+          files: ${{ steps.locate.outputs.artifact_path }}
           tag_name: ${{ github.ref_name }}
-          name: 'Ledgy Release ${{ github.ref_name }}'
-          body: 'Automated release for version ${{ github.ref_name }}.'
-          draft: true
-          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

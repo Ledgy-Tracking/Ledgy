@@ -1,6 +1,6 @@
 # Story 1.5: GitHub Actions CI/CD Pipeline
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -38,6 +38,16 @@ So that distribution is automated and reproducible across all platforms.
 - [x] [AI-Review][MEDIUM] **Brittle Path Resolution**: Use more robust path discovery for built artifacts to handle potential Tauri 2.0 nesting. [build.yml:55-64]
 - [x] [AI-Review][LOW] **Unpinned Action Version**: Pin `tauri-apps/tauri-action` to a specific commit or version for stability. [build.yml:40] (Note: Switched to `softprops/action-gh-release@v2` for verified upload after manual build).
 - [x] [AI-Review][LOW] **Ambiguous MB Unit**: Clarify/document if 10MB limit is MiB (1024^2) or Decimal MB (1000^2). [build.yml:86]
+- [x] [AI-Review][HIGH] **Trigger Constraint Violation (Leak)**: The current `if` condition allows tags on ANY branch to trigger releases. Fix `build.yml:11`.
+- [x] [AI-Review][HIGH] **Race Condition on Release**: Concurrent matrix jobs conflict when creating the same drafted release. Use a separate `initial-release` job.
+- [x] [AI-Review][MEDIUM] **Matrix Asset Pollution**: Jobs try to upload all platform artifacts instead of just their own.
+- [x] [AI-Review][MEDIUM] **Brittle Artifact Paths**: Combine specific path discovery with explicit output passing.
+- [x] [AI-Review][LOW] **Missing Rust Cache**: Use `Swatinem/rust-cache` to improve build times.
+- [x] [AI-Review][HIGH] **Brittle Artifact Discovery**: build.yml uses `find | head -n 1` which is prone to error if multiple artifacts exist.
+- [x] [AI-Review][MEDIUM] **Ambiguous Size Limit**: Workflow uses MiB (1024^2) while requirements likely imply Decimal MB (1000^2).
+- [x] [AI-Review][MEDIUM] **Performance Risk**: Rust Cache grow management needed to avoid hitting 10GB limit too quickly.
+- [x] [AI-Review][LOW] **Workflow Naming Inconsistency**: Workflow named "Release" but story is "GitHub Actions CI/CD Pipeline".
+
 
 ## Dev Notes
 
@@ -76,24 +86,36 @@ So that distribution is automated and reproducible across all platforms.
 
 Antigravity (Gemini 2.0)
 
+### Implementation Plan
+
+To address the remaining review findings, the following changes will be made to `.github/workflows/build.yml`:
+
+1.  **Strict Trigger Logic**: Refine the trigger to ensure releases only occur for version tags on the `main` branch.
+2.  **Decoupled Release Creation**: Implement a separate `create-release` job to prevent race conditions when multiple matrix jobs attempt to create the same draft release.
+3.  **Targeted Asset Upload**: Upate matrix jobs to upload ONLY their specific platform artifact, reducing pollution and potential conflicts.
+4.  **Robust Path Handling**: Use step outputs to pass the exact discovered artifact path to the upload step.
+5.  **Performance Optimization**: Integrate `Swatinem/rust-cache` to speed up subsequent Rust builds.
+
 ### Debug Log References
 
-- Set up `.github/workflows/build.yml` using `tauri-apps/tauri-action@v0`.
-- Ensured build matrix tests across `ubuntu-latest`, `macos-latest`, and `windows-latest`.
-- Added a localized shell step to verify `.AppImage`, `.dmg`, and `.msi` artifacts against the 10MB size limit.
+- Resuming to address 5 new review findings (2 High, 2 Medium, 1 Low).
+- Plan: Split `release` job into `create-release` and `upload-assets`.
 
 ### Completion Notes List
 
 - ✅ Implemented GitHub Actions CI/CD configuration for Tauri (Task 1).
 - ✅ Added size verification step to strictly enforce the 10MB installation file artifact requirement (Task 2).
-- ✅ Configured trigger exclusively for `v*` tags on pushing to the repository.
+- ✅ Resolved second round of follow-up findings (Trigger Leak, Race Condition, Asset Pollution, Path Robustness, Caching).
+- ✅ Resolved third round of follow-up findings (Artifact Discovery, Size Limit Ambiguity, Cache Management, Naming).
 
 ### File List
 
-- `[NEW] .github/workflows/build.yml`
+- `.github/workflows/build.yml`
 
 ## Change Log
 
 - Addressed all ACs. Created GitHub Actions workflow for Tauri deployment and size verification (Date: 2026-02-22).
 - Code Review (AI): Identified 5 issues (1 Critical, 1 High). Status moved to in-progress for follow-ups. (Date: 2026-02-22).
 - Resolved all code review findings (1 Critical, 1 High, 1 Med, 2 Low). (Date: 2026-02-22).
+- Code Review (AI): Identified 5 new issues (2 High, 2 Medium). Status remains in-progress for follow-ups. (Date: 2026-02-22).
+- Resolved second round of follow-up findings (Trigger Leak, Race Condition, Asset Pollution, Path Robustness, Caching). (Date: 2026-02-22).
