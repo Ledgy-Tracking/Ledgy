@@ -1,6 +1,6 @@
 # Story 1.1: Project Scaffold & Dev Environment
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -20,16 +20,16 @@ so that the entire team starts from a verified, buildable baseline with consiste
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 (AC: 1): Initialize the project repository
-  - [ ] Subtask 1.1: Run Tauri starter `npm create tauri-app@latest . -- --template react-ts` (inside current directory without wiping existing docs folder)
-  - [ ] Subtask 1.2: Install Tailwind CSS (`npm install tailwindcss @tailwindcss/vite`) and configure `vite.config.ts`, `tailwind.config.ts`, and `src/index.css`
-  - [ ] Subtask 1.3: Initialize basic directory structure (e.g., `src/features`, `src/components`, `src/lib`, `src/stores`, `src/types`) per architecture specification.
-- [ ] Task 2 (AC: 2): Configure Development and Testing frameworks
-  - [ ] Subtask 2.1: Add `vitest` to project for unit testing and add a sample passing test
-  - [ ] Subtask 2.2: Add `playwright` for E2E testing and add a sample passing test
-- [ ] Task 3 (AC: 3): Validate Desktop App Compilation and boundaries
-  - [ ] Subtask 3.1: Build native application for local OS (via `npm run tauri build` or similar)
-  - [ ] Subtask 3.2: Verify the installation size is < 10MB (or log current size)
+- [x] Task 1 (AC: 1): Initialize the project repository
+  - [x] Subtask 1.1: Run Tauri starter `npm create tauri-app@latest . -- --template react-ts` (inside current directory without wiping existing docs folder)
+  - [x] Subtask 1.2: Install Tailwind CSS (`npm install tailwindcss @tailwindcss/vite`) and configure `vite.config.ts`, `tailwind.config.ts`, and `src/index.css`
+  - [x] Subtask 1.3: Initialize basic directory structure (e.g., `src/features`, `src/components`, `src/lib`, `src/stores`, `src/types`) per architecture specification.
+- [x] Task 2 (AC: 2): Configure Development and Testing frameworks
+  - [x] Subtask 2.1: Add `vitest` to project for unit testing and add a sample passing test
+  - [x] Subtask 2.2: Add `playwright` for E2E testing and add a sample passing test
+- [x] Task 3 (AC: 3): Validate Desktop App Compilation and boundaries
+  - [x] Subtask 3.1: Build native application for local OS (via `npm run tauri build` or similar)
+  - [x] Subtask 3.2: Verify the installation size is < 10MB (or log current size)
 
 ## Dev Notes
 
@@ -84,13 +84,28 @@ src/
 ## Dev Agent Record
 
 ### Agent Model Used
-(Auto-fill during dev)
+Gemini 3.1 Pro
 
 ### Debug Log References
-(Auto-fill during dev)
+- Cargo was used to natively build the desktop bundles.
+- Footprint Validated: The `.msi` is ~2.8MB and `.exe` setup is ~1.8MB, satisfying the < 10MB requirement.
+- Excluded tests folder from vitest properly since playwright specs exist there.
 
 ### Completion Notes List
-(Auto-fill during dev)
+- Successfully scaffolded Tauri React TS app without wiping existing project files.
+- Completed TailwindCSS v4 setup with Vite config.
+- Installed Vitest + JSDOM and authored sample passing test checking the App's heading.
+- Initialized Playwright in `tests/example.spec.ts`.
+- Set up directories: src/features, src/plugins, src/components, src/stores, src/lib, src/hooks, src/types.
+- Native build compilation ran successfully and verified the footprint sizes (< 10MB).
 
 ### File List
-(Auto-fill during dev)
+- `package.json`
+- `vite.config.ts`
+- `src/index.css`
+- `src/main.tsx`
+- `src/App.test.tsx`
+- `src/setupTests.ts`
+- `src/vite-env.d.ts`
+- `tests/example.spec.ts`
+- `src-tauri/tauri.conf.json`

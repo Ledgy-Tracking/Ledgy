@@ -41,7 +41,7 @@ story_location: "{project-root}/_bmad-output/implementation-artifacts"
 
 development_status:
   epic-1: in-progress
-  1-1-project-scaffold-dev-environment: ready-for-dev
+  1-1-project-scaffold-dev-environment: review
   1-2-totp-registration-encryption-key-derivation: backlog
   1-3-app-unlock-flow-auth-guard: backlog
   1-4-three-panel-shell-routing-global-error-handling: backlog
