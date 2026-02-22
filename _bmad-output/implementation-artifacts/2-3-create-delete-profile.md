@@ -1,6 +1,6 @@
 # Story 2.3: Create & Delete Profile
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -41,6 +41,9 @@ so that my tracking spaces stay organized and I can fully remove data I want gon
 - [x] [AI-Review][Medium] Fix Ghost Profile Risk in `deleteProfile`: Ensure failure when updating the master DB handles rollback or prevents app crash on selection.
 - [x] [AI-Review][Low] Fix PouchDB Instances Memory Leak: Implement garbage collection or `.close()` for profiles when switching away from them in `db.ts`.
 - [x] [AI-Review][High] Orphan Data Breach Risk (NFR12 Violation): `deleteProfile` marks profile as deleted before calling `profileDb.destroy()`. If `destroy()` fails, orphaned databases persist. [src/stores/useProfileStore.ts:135]
+- [ ] [AI-Review][Medium] UX Improvement: `createProfile` should return the new profile ID so UI can auto-select it. [src/stores/useProfileStore.ts:97]
+- [ ] [AI-Review][Medium] Untestable Logic: Sync Warning logic in UI is unreachable as `createProfile` cannot set `remoteSyncEndpoint`. [src/features/profiles/ProfileSelector.tsx:193]
+- [ ] [AI-Review][Low] Duplicate Names: Add validation to prevent duplicate profile names. [src/stores/useProfileStore.ts:97]
 
 ## Dev Notes
 

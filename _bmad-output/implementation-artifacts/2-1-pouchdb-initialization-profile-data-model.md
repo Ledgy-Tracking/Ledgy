@@ -1,6 +1,6 @@
 # Story 2.1: PouchDB Initialization & Profile Data Model
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -39,6 +39,10 @@ so that profile data is never accessible across profile boundaries.
 - [x] [AI-Review][High] Encryption Key Race Condition: fetching `encryptionKey` synchronously from `useAuthStore.getState()` in `createProfile` could throw or lead to unencrypted state if not stabilized. [src/stores/useProfileStore.ts:90]
 - [x] [AI-Review][Medium] Performance Bottleneck in `fetchProfiles`: decrypting and mapping every profile with `Promise.all` simultaneously could hang JS thread. [src/stores/useProfileStore.ts:37]
 - [x] [AI-Review][Low] Broad error catching in `useProfileStore`: check `err.name` or `err.status` instead of simply grabbing `err.message` for DB errors. [src/stores/useProfileStore.ts:71]
+- [ ] [AI-Review][High] Missing Implementation: Task requires `create_profile` and `list_profiles` in `src/lib/db.ts`, but they are missing. Logic is coupled in `useProfileStore.ts`. [src/lib/db.ts:1]
+- [ ] [AI-Review][Medium] Architecture Violation: `useProfileStore.ts` contains DB implementation details (encryption, direct PouchDB access) that should be in the DAL. [src/stores/useProfileStore.ts:33]
+- [ ] [AI-Review][Medium] ID Generation Discrepancy: `createProfile` creates documents that might drift from standard envelope. [src/stores/useProfileStore.ts:113]
+- [ ] [AI-Review][Low] Type Safety: `doc.name_enc` access relies on loose typing. [src/stores/useProfileStore.ts:50]
 
 ## Dev Notes
 

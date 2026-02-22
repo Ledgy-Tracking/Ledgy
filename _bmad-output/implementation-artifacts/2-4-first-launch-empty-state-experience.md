@@ -1,6 +1,6 @@
 # Story 2.4: First-Launch Empty State Experience
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -32,6 +32,9 @@ so that I understand how to begin without being overwhelmed by choice.
 - [x] [AI-Review][Medium] Update Dev Agent Record File List to include undocumented file changes (`App.tsx`, `AppShell.tsx`, `package-lock.json`).
 - [x] [AI-Review][Medium] Missing Fallback UI: no skeleton loading state in `AppShell` means users may see a jarring flash of normal dashboard layout before empty state. [src/features/app-shell/AppShell.tsx:l]
 - [x] [AI-Review][Low] Hardcoded Placeholder Action: "Create Ledger" CTA triggers global info toast through error store, misusing it. [src/features/dashboard/EmptyDashboard.tsx]
+- [ ] [AI-Review][Medium] UX Flaw: `AppShell` displays raw `profileId` instead of human-readable Profile Name. Fetch profile details in `AppShell`. [src/components/Layout/AppShell.tsx:96]
+- [ ] [AI-Review][Low] Styling Fragility: `EmptyDashboard` uses hardcoded `min-h-[400px]` which may affect responsiveness. [src/features/dashboard/EmptyDashboard.tsx:10]
+- [ ] [AI-Review][Low] Accessibility: `EmptyDashboard` relies on emoji for illustration. Use SVG icon. [src/features/dashboard/EmptyDashboard.tsx:12]
 
 ## Dev Notes
 
