@@ -1,6 +1,6 @@
 # Story 2.3: Create & Delete Profile
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -54,6 +54,11 @@ so that my tracking spaces stay organized and I can fully remove data I want gon
 - [x] [AI-Review][Low] Error Messages Generic: All errors show "Failed to create/delete profile" without specificity. Add specific error messages for common failures. [src/stores/useProfileStore.ts:102, 151]
 - [x] [AI-Review][Low] Duplicate Name Check Inefficient: Decrypts ALL profiles for every name check - O(n) decryption operations. Cache decrypted names or use indexed search. [src/stores/useProfileStore.ts:113-124]
 
+### Review Follow-ups (AI) - Code Review 2026-02-22
+- [ ] [CR][High] Sync warning is always shown, not conditional per AC5. Warning should only appear when `profileToDelete.remoteSyncEndpoint` exists, not as a generic future-proof note. [src/features/profiles/ProfileSelector.tsx:210-214]
+- [ ] [CR][Medium] `isDeleting` state exists but no `isCreating` state for create button loading feedback. Add consistent loading states. [src/features/profiles/ProfileSelector.tsx:17]
+- [ ] [CR][Medium] Duplicate name validation is inefficient O(n) decryption - same as Story 2-1 finding. [src/stores/useProfileStore.ts:95-113]
+
 ## Dev Notes
 
 - **PouchDB Destruction:** Use `db.destroy()` to physically remove the database from IndexedDB. This is critical for NFR12.
@@ -98,6 +103,7 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - ✅ **2026-02-22**: Sync warning always shown as future-proof notice [High]
 - ✅ **2026-02-22**: closeProfileDb called before destroy in deleteProfile [Medium] (already implemented in db.ts)
 - ✅ All 7 adversarial review follow-ups resolved.
+- ⚠️ Code Review 2026-02-22: 3 new action items created (1 High, 2 Medium) - story returned to in-progress.
 
 ### File List
 
@@ -121,3 +127,4 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - **2026-02-22**: Added loading states with spinners [Low]
 - **2026-02-22**: Sync warning always shown [High]
 - **2026-02-22**: All 7 adversarial review follow-ups resolved - Story 2-3 ready for code review
+- **2026-02-22**: Code Review completed - 3 new CR action items created, story returned to in-progress

@@ -1,6 +1,6 @@
 # Story 2.4: First-Launch Empty State Experience
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -44,6 +44,11 @@ so that I understand how to begin without being overwhelmed by choice.
 - [x] [AI-Review][Medium] Notification System Misused: "Create Ledger" CTA shows notification for unimplemented feature, confusing users. Implement proper placeholder route or disable button. [src/features/dashboard/Dashboard.tsx:15-17]
 - [x] [AI-Review][Low] SVG Icon Claim Exaggerated: Claims "uses SVG icon (Lucide Sparkles)" but Lucide is just a library import, not a custom SVG. Update documentation to be accurate. [Story file: Completion Notes List]
 
+### Review Follow-ups (AI) - Code Review 2026-02-22
+- [ ] [CR][High] `hasLedgers = false` is hardcoded - always shows empty state, will never transition to ledger view when implemented in Epic 3. Add TODO comment or implement basic ledger count check. [src/features/dashboard/Dashboard.tsx:11]
+- [ ] [CR][Medium] Alert dialog is not user-friendly - using `alert()` blocks UI and is not consistent with modern UX patterns. Use proper toast/notification or disable button with tooltip. [src/features/dashboard/Dashboard.tsx:16]
+- [ ] [CR][Low] Completion Notes claim is slightly inaccurate/defensive about Lucide SVG icon. [Story file: Completion Notes List]
+
 ## Dev Notes
 
 - **Empty States:** Ledger empty → instructional CTA. [Source: UX Design Spec#Empty States]
@@ -84,6 +89,7 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - ✅ AppShell displays profile name instead of raw profileId with proper loading state.
 - ✅ Lucide Sparkles icon is an SVG React component from the Lucide library (accurate claim).
 - ✅ All 6 adversarial review follow-ups resolved.
+- ⚠️ Code Review 2026-02-22: 3 new action items created (1 High, 1 Medium, 1 Low) - story returned to in-progress.
 
 ### File List
 - `src/features/dashboard/Dashboard.tsx` - Removed notification store usage, added alert for placeholder
@@ -104,3 +110,4 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - **2026-02-22**: Smooth skeleton transitions with `fade-in duration-500` [Medium]
 - **2026-02-22**: Replaced notification misuse with simple alert [Medium]
 - **2026-02-22**: All 6 adversarial review follow-ups resolved - Story 2-4 ready for code review
+- **2026-02-22**: Code Review completed - 3 new CR action items created, story returned to in-progress
