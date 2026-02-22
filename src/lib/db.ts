@@ -208,6 +208,185 @@ export async function decryptProfileMetadata(
             remoteSyncEndpoint: doc.remoteSyncEndpoint,
         });
     }
-    
+
     return profiles;
+}
+
+// ==================== LEDGER SCHEMA OPERATIONS ====================
+
+import { LedgerSchema, SchemaField, EncryptedLedgerSchemaMetadata } from '../types/ledger';
+import { encryptPayload, decryptPayload } from './crypto';
+
+/**
+ * Creates a new ledger schema document.
+ * @param db - Profile database instance
+ * @param name - Schema name
+ * @param fields - Array of schema fields
+ * @returns The created schema ID
+ */
+export async function create_schema(
+    db: Database,
+    name: string,
+    fields: SchemaField[],
+    profileId: string
+): Promise<string> {
+    const response = await db.createDocument<LedgerSchema>('schema', {
+        name,
+        fields,
+        profileId,
+    });
+    if (!response.ok) {
+        throw new Error('Failed to create schema document');
+    }
+    return response.id;
+}
+
+/**
+ * Updates an existing ledger schema document.
+ * Increments schema_version for JIT migration support (NFR9).
+ * @param db - Profile database instance
+ * @param schemaId - Schema document ID
+ * @param name - Updated schema name
+ * @param fields - Updated schema fields
+ */
+export async function update_schema(
+    db: Database,
+    schemaId: string,
+    name: string,
+    fields: SchemaField[]
+): Promise<void> {
+    const schema = await db.getDocument<LedgerSchema>(schemaId);
+    await db.updateDocument(schemaId, {
+        name,
+        fields,
+        schema_version: schema.schema_version + 1,
+    });
+}
+
+/**
+ * Lists all ledger schemas for a profile.
+ * @param db - Profile database instance
+ * @returns Array of schema documents
+ */
+export async function list_schemas(db: Database): Promise<LedgerSchema[]> {
+    const schemaDocs = await db.getAllDocuments<LedgerSchema>('schema');
+    return schemaDocs.filter(doc => !doc.isDeleted);
+}
+
+/**
+ * Gets a single schema by ID.
+ * @param db - Profile database instance
+ * @param schemaId - Schema document ID
+ */
+export async function get_schema(db: Database, schemaId: string): Promise<LedgerSchema> {
+    return await db.getDocument<LedgerSchema>(schemaId);
+}
+
+/**
+ * Creates a new ledger entry document.
+ * @param db - Profile database instance
+ * @param schemaId - Reference to the schema
+ * @param ledgerId - Ledger identifier (same as schemaId for simple cases)
+ * @param data - Entry data matching schema fields
+ * @param profileId - Profile ID for isolation
+ * @returns The created entry ID
+ */
+export async function create_entry(
+    db: Database,
+    schemaId: string,
+    ledgerId: string,
+    data: Record<string, unknown>,
+    profileId: string
+): Promise<string> {
+    const response = await db.createDocument<LedgerEntry>('entry', {
+        schemaId,
+        ledgerId,
+        data,
+        profileId,
+    });
+    if (!response.ok) {
+        throw new Error('Failed to create entry document');
+    }
+    return response.id;
+}
+
+/**
+ * Updates an existing ledger entry document.
+ * @param db - Profile database instance
+ * @param entryId - Entry document ID
+ * @param data - Updated entry data
+ */
+export async function update_entry(
+    db: Database,
+    entryId: string,
+    data: Record<string, unknown>
+): Promise<void> {
+    await db.updateDocument(entryId, { data });
+}
+
+/**
+ * Lists all entries for a specific ledger/schema.
+ * @param db - Profile database instance
+ * @param ledgerId - Ledger identifier to filter by
+ * @returns Array of entry documents
+ */
+export async function list_entries(db: Database, ledgerId: string): Promise<LedgerEntry[]> {
+    const entryDocs = await db.getAllDocuments<LedgerEntry>('entry');
+    return entryDocs.filter(doc => !doc.isDeleted && doc.ledgerId === ledgerId);
+}
+
+/**
+ * Soft-deletes an entry (Ghost Reference pattern - NFR4, NFR10).
+ * @param db - Profile database instance
+ * @param entryId - Entry document ID
+ */
+export async function delete_entry(db: Database, entryId: string): Promise<void> {
+    const entry = await db.getDocument<LedgerEntry>(entryId);
+    await db.updateDocument(entryId, {
+        isDeleted: true,
+        deletedAt: new Date().toISOString(),
+    });
+}
+
+/**
+ * Decrypts ledger schema metadata from encrypted documents.
+ * @param schemaDocs - Array of schema documents from PouchDB
+ * @param encryptionKey - AES-GCM encryption key
+ * @returns Array of schema metadata
+ */
+export async function decryptSchemaMetadata(
+    schemaDocs: any[],
+    encryptionKey: CryptoKey
+): Promise<EncryptedLedgerSchemaMetadata[]> {
+    const activeSchemas = schemaDocs.filter(doc => !doc.isDeleted);
+    const schemas: EncryptedLedgerSchemaMetadata[] = [];
+
+    for (const doc of activeSchemas) {
+        let name = doc.name;
+
+        if (doc.name_enc && typeof doc.name_enc === 'object') {
+            try {
+                const iv = new Uint8Array(doc.name_enc.iv);
+                const ciphertext = new Uint8Array(doc.name_enc.ciphertext).buffer;
+                name = await decryptPayload(encryptionKey, iv, ciphertext);
+            } catch (e) {
+                console.error('Failed to decrypt schema:', e);
+                name = `[Encrypted Schema ${doc._id?.slice(-4) || 'unknown'}]`;
+            }
+        }
+
+        schemas.push({
+            _id: doc._id,
+            _type: 'schema',
+            schema_version: doc.schema_version,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+            name_enc: doc.name_enc,
+            name,
+            profileId: doc.profileId,
+            fieldCount: doc.fields?.length || 0,
+        });
+    }
+
+    return schemas;
 }

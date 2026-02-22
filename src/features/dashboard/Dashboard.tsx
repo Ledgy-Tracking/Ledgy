@@ -1,20 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { PanelRightOpen } from 'lucide-react';
 import { EmptyDashboard } from './EmptyDashboard';
+import { SchemaBuilder } from './SchemaBuilder';
+import { useLedgerStore } from '../../stores/useLedgerStore';
 
 export const Dashboard: React.FC = () => {
     const { toggleRightInspector, rightInspectorOpen } = useUIStore();
+    const { schemas } = useLedgerStore();
+    const [isSchemaBuilderOpen, setIsSchemaBuilderOpen] = useState(false);
 
-    // TODO: Replace with actual ledger count check when Epic 3 (Relational Ledger Engine) is implemented
-    // Current implementation: Always shows empty state for Story 2.4 MVP
-    // Future: const hasLedgers = ledgers.length > 0;
-    const hasLedgers = false;
+    // Ledger detection: Use schema count as proxy for ledgers
+    const hasLedgers = schemas.length > 0;
 
     const handleCreateLedger = () => {
-        // TODO: Replace alert with proper modal/route to Schema Builder when Epic 3 is implemented
-        // For now, using alert to avoid misusing the notification system for unimplemented features
-        alert('Schema Builder will be available in Epic 3. This will let you define custom ledger schemas with field types.');
+        setIsSchemaBuilderOpen(true);
     };
 
     return (
@@ -42,6 +42,10 @@ export const Dashboard: React.FC = () => {
                     </div>
                 )}
             </div>
+
+            {isSchemaBuilderOpen && (
+                <SchemaBuilder onClose={() => setIsSchemaBuilderOpen(false)} />
+            )}
         </div>
     );
 };
