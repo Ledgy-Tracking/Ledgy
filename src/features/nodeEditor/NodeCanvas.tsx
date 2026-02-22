@@ -16,11 +16,15 @@ import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
+import { CorrelationNode } from './nodes/CorrelationNode';
+import { ArithmeticNode } from './nodes/ArithmeticNode';
 import { DataEdge } from './edges/DataEdge';
 
 // Custom node types
 const nodeTypes = {
     ledgerSource: LedgerSourceNode,
+    correlation: CorrelationNode,
+    arithmetic: ArithmeticNode,
 };
 
 // Custom edge types
