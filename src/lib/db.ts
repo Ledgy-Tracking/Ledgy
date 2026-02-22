@@ -5,8 +5,10 @@ import { LedgyDocument } from '../types/profile';
 // We use the 'pouchdb-browser' which includes the IndexedDB adapter by default
 export class Database {
     private db: PouchDB.Database;
+    private profileId: string;
 
     constructor(profileId: string) {
+        this.profileId = profileId;
         // Architecture: "Ensure database naming/prefixing prevents intersection."
         // Format: ledgy_profile_{id}
         this.db = new PouchDB(`ledgy_profile_${profileId}`);
@@ -35,9 +37,13 @@ export class Database {
 
     async updateDocument<T extends object>(id: string, data: T): Promise<PouchDB.Core.Response> {
         const existing = await this.db.get<LedgyDocument>(id);
+
+        // Prevent overwriting immutable envelope fields
+        const { _id, _rev, createdAt, schema_version, type, ...restData } = data as any;
+
         const updatedDoc = {
             ...existing,
-            ...data,
+            ...restData,
             updatedAt: new Date().toISOString(),
         };
         return await this.db.put(updatedDoc);
@@ -63,7 +69,9 @@ export class Database {
     }
 
     async destroy() {
-        return await this.db.destroy();
+        const result = await this.db.destroy();
+        delete profileDatabases[this.profileId];
+        return result;
     }
 }
 

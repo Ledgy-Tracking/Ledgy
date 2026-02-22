@@ -4,6 +4,7 @@ export interface ProfileMetadata {
     description?: string;
     createdAt: string;
     updatedAt: string;
+    remoteSyncEndpoint?: string;
 }
 
 export interface LedgyDocument {
@@ -21,4 +22,5 @@ export interface ProfileDocument extends LedgyDocument {
     type: 'profile';
     name: string;
     description?: string;
+    remoteSyncEndpoint?: string;
 }

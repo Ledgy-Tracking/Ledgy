@@ -64,6 +64,7 @@ export const useProfileStore = create<ProfileState>()(
                                 description,
                                 createdAt: doc.createdAt,
                                 updatedAt: doc.updatedAt,
+                                remoteSyncEndpoint: doc.remoteSyncEndpoint,
                             };
                         }));
                     set({ profiles, isLoading: false });

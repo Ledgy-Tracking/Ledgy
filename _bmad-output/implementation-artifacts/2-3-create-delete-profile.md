@@ -1,6 +1,6 @@
 # Story 2.3: Create & Delete Profile
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -32,11 +32,11 @@ so that my tracking spaces stay organized and I can fully remove data I want gon
   - [x] Handle failures in DB creation or destruction via `useErrorStore`.
 
 ### Review Follow-ups (AI)
-- [ ] [AI-Review][Critical] Implement `CreateProfileDialog` to allow user to input a name instead of hardcoding "New Profile X" in `ProfileSelector.tsx`.
-- [ ] [AI-Review][High] Replace `window.confirm` with a custom dialog for deletion using the exact warning text: "This will permanently delete all local data for this profile."
-- [ ] [AI-Review][High] Add logic to check for a configured remote sync endpoint and warn user that remote data must be purged separately before deletion.
-- [ ] [AI-Review][Medium] Fix memory leak in `src/lib/db.ts` by removing closed PouchDB instances from `profileDatabases` registry upon deletion.
-- [ ] [AI-Review][Medium] Fix `updateDocument()` in `src/lib/db.ts` to prevent overwriting immutable envelope fields like `createdAt` and `schema_version`.
+- [x] [AI-Review][Critical] Implement `CreateProfileDialog` to allow user to input a name instead of hardcoding "New Profile X" in `ProfileSelector.tsx`.
+- [x] [AI-Review][High] Replace `window.confirm` with a custom dialog for deletion using the exact warning text: "This will permanently delete all local data for this profile."
+- [x] [AI-Review][High] Add logic to check for a configured remote sync endpoint and warn user that remote data must be purged separately before deletion.
+- [x] [AI-Review][Medium] Fix memory leak in `src/lib/db.ts` by removing closed PouchDB instances from `profileDatabases` registry upon deletion.
+- [x] [AI-Review][Medium] Fix `updateDocument()` in `src/lib/db.ts` to prevent overwriting immutable envelope fields like `createdAt` and `schema_version`.
 
 ## Dev Notes
 
@@ -81,3 +81,10 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - `src/stores/useProfileStore.test.ts`
 - `src/lib/db.ts`
 - `src/features/profiles/ProfileSelector.tsx`
+
+### Change Log
+
+- Replaced `window.confirm` with custom dialog for Create/Delete Profile
+- Warn user of remote sync before deletion
+- Fixed PouchDB registry memory leak upon deletion
+- Refactored `updateDocument` to preserve immutable envelope fields
