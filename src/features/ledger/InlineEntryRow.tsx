@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LedgerSchema, SchemaField } from '../../types/ledger';
+import { LedgerSchema, SchemaField, LedgerEntry } from '../../types/ledger';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
+import { RelationCombobox } from './RelationCombobox';
 
 interface InlineEntryRowProps {
     schema: LedgerSchema;
@@ -20,6 +21,29 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [currentFieldIndex, setCurrentFieldIndex] = useState(0);
     const inputRefs = useRef<(HTMLInputElement | HTMLSelectElement | null)[]>([]);
+    const [targetEntries, setTargetEntries] = useState<Record<string, LedgerEntry[]>>({});
+
+    // Load target ledger entries for relation fields
+    useEffect(() => {
+        const loadRelationTargets = async () => {
+            const relationFields = schema.fields.filter(f => f.type === 'relation' && f.relationTarget);
+            if (relationFields.length === 0 || !activeProfileId) return;
+
+            const entriesMap: Record<string, LedgerEntry[]> = {};
+            for (const field of relationFields) {
+                try {
+                    // relationTarget is the target ledger/schema ID
+                    const entries = await useLedgerStore.getState().fetchEntries(activeProfileId, field.relationTarget!);
+                    entriesMap[field.name] = useLedgerStore.getState().entries[field.relationTarget!] || [];
+                } catch (e) {
+                    console.warn(`Failed to load entries for ${field.relationTarget}`);
+                }
+            }
+            setTargetEntries(entriesMap);
+        };
+
+        loadRelationTargets();
+    }, [schema.fields, activeProfileId]);
 
     // Focus first field on mount
     useEffect(() => {
@@ -171,18 +195,19 @@ const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement, FieldI
                     />
                 );
             case 'relation':
-                // TODO: Implement combobox (Story 3-3)
                 return (
-                    <input
-                        ref={ref as React.RefObject<HTMLInputElement>}
-                        type="text"
-                        className={baseClasses}
-                        value={value as string || ''}
-                        onChange={(e) => onChange(e.target.value)}
-                        onKeyDown={onKeyDown}
-                        placeholder={`Select ${field.relationTarget || 'relation'}`}
-                        readOnly
-                        onClick={() => alert('Relation selector - Story 3-3')}
+                    <RelationCombobox
+                        entries={targetEntries[field.name] || []}
+                        value={value as string | string[]}
+                        onChange={(newValue) => onChange(newValue)}
+                        placeholder={`Select ${field.name}...`}
+                        allowMultiple={true}
+                        getDisplayValue={(entry) => {
+                            // Get first non-ID field value for display
+                            const data = entry.data || {};
+                            const firstValue = Object.values(data)[0];
+                            return firstValue ? String(firstValue) : entry._id.slice(-8);
+                        }}
                     />
                 );
             default: // text

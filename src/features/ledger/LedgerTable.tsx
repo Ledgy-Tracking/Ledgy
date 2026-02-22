@@ -3,6 +3,7 @@ import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerSchema, LedgerEntry, SchemaField } from '../../types/ledger';
 import { InlineEntryRow } from './InlineEntryRow';
+import { RelationTagChip } from './RelationTagChip';
 
 interface LedgerTableProps {
     schemaId: string;
@@ -125,10 +126,10 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId }) => {
                         {schema.fields.map((field) => (
                             <div
                                 key={`${entry._id}-${field.name}`}
-                                className="flex-1 px-3 py-2.5 text-sm text-zinc-300 border-r border-zinc-800 last:border-r-0 truncate"
+                                className="flex-1 px-3 py-2.5 text-sm text-zinc-300 border-r border-zinc-800 last:border-r-0"
                                 role="gridcell"
                             >
-                                {renderFieldValue(entry.data[field.name], field.type)}
+                                {renderFieldValue(entry.data[field.name], field.type, entry, field)}
                             </div>
                         ))}
                     </div>
@@ -138,7 +139,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId }) => {
     );
 };
 
-function renderFieldValue(value: unknown, type: string): React.ReactNode {
+function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, field?: SchemaField): React.ReactNode {
     if (value === null || value === undefined) {
         return <span className="text-zinc-600 italic">-</span>;
     }
@@ -149,8 +150,17 @@ function renderFieldValue(value: unknown, type: string): React.ReactNode {
         case 'number':
             return typeof value === 'number' ? value.toLocaleString() : String(value);
         case 'relation':
-            // TODO: Render as Tag Chip (Story 3-3)
-            return String(value);
+            // Render as Tag Chip with navigation (Story 3-3)
+            return (
+                <RelationTagChip
+                    value={value as string | string[]}
+                    targetLedgerId={field?.relationTarget}
+                    onClick={() => {
+                        // TODO: Navigate to target ledger (Story 3-3)
+                        console.log('Navigate to', field?.relationTarget);
+                    }}
+                />
+            );
         default:
             return String(value);
     }
