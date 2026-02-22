@@ -56,14 +56,14 @@ development_status:
   epic-2-retrospective: optional
 
   epic-3: in-progress
-  3-1-schema-builder-ui: ready-for-dev
+  3-1-schema-builder-ui: in-progress
   3-2-ledger-data-table-inline-entry-routing: backlog
   3-3-bidirectional-relational-links: backlog
   3-4-ghost-reference-handling-soft-delete: backlog
   epic-3-retrospective: optional
 
   epic-4: in-progress
-  4-1-node-canvas-engine-foundation: ready-for-dev
+  4-1-node-canvas-engine-foundation: in-progress
   4-2-ledger-source-nodes-basic-wiring: backlog
   4-3-correlation-compute-nodes: backlog
   4-4-autonomous-triggers-on-create-on-edit: backlog
@@ -71,7 +71,7 @@ development_status:
   epic-4-retrospective: optional
 
   epic-5: in-progress
-  5-1-couchdb-remote-configuration-sync-client: ready-for-dev
+  5-1-couchdb-remote-configuration-sync-client: in-progress
   5-2-sync-status-indicator-badge: backlog
   5-3-conflict-detection-diff-guard-layout: backlog
   5-4-conflict-resolution-accept-reject: backlog
@@ -79,14 +79,14 @@ development_status:
   epic-5-retrospective: optional
 
   epic-6: in-progress
-  6-1-plugin-runtime-permissions: ready-for-dev
+  6-1-plugin-runtime-permissions: in-progress
   6-2-ai-capture-plugin-image-ingestion-ephemerality: backlog
   6-3-ai-capture-plugin-google-ai-studio-integration: backlog
   6-4-ai-capture-plugin-draft-review-show-before-save: backlog
   epic-6-retrospective: optional
 
   epic-7: in-progress
-  7-1-schema-graph-serialization: ready-for-dev
+  7-1-schema-graph-serialization: in-progress
   7-2-json-file-export-ui: backlog
   7-3-json-file-import-ui: backlog
   epic-7-retrospective: optional

@@ -390,3 +390,72 @@ export async function decryptSchemaMetadata(
 
     return schemas;
 }
+
+// ==================== NODE CANVAS OPERATIONS ====================
+
+import { NodeCanvas, CanvasNode, CanvasEdge, Viewport } from '../types/nodeEditor';
+
+/**
+ * Creates or updates a node canvas document.
+ * @param db - Profile database instance
+ * @param canvasId - Canvas identifier (e.g., 'default')
+ * @param nodes - Array of canvas nodes
+ * @param edges - Array of canvas edges
+ * @param viewport - Viewport state
+ * @param profileId - Profile ID for isolation
+ * @returns The canvas ID
+ */
+export async function save_canvas(
+    db: Database,
+    canvasId: string,
+    nodes: CanvasNode[],
+    edges: CanvasEdge[],
+    viewport: Viewport,
+    profileId: string
+): Promise<string> {
+    const canvasDocId = `canvas:${canvasId}`;
+    
+    try {
+        // Try to get existing canvas
+        const existing = await db.getDocument<NodeCanvas>(canvasDocId);
+        await db.updateDocument(canvasDocId, {
+            nodes,
+            edges,
+            viewport,
+        });
+        return canvasDocId;
+    } catch (e: any) {
+        if (e.status === 404) {
+            // Canvas doesn't exist, create it
+            const response = await db.createDocument<NodeCanvas>('canvas', {
+                profileId,
+                canvasId,
+                nodes,
+                edges,
+                viewport,
+            });
+            return response.id;
+        }
+        throw e;
+    }
+}
+
+/**
+ * Loads a node canvas document.
+ * @param db - Profile database instance
+ * @param canvasId - Canvas identifier
+ * @returns Canvas document or null if not found
+ */
+export async function load_canvas(
+    db: Database,
+    canvasId: string
+): Promise<NodeCanvas | null> {
+    try {
+        return await db.getDocument<NodeCanvas>(`canvas:${canvasId}`);
+    } catch (e: any) {
+        if (e.status === 404) {
+            return null;
+        }
+        throw e;
+    }
+}

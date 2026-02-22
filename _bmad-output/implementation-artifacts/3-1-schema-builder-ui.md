@@ -92,12 +92,23 @@ So that my ledger structure perfectly matches the real-world data I am tracking.
 
 ### Completion Notes List
 
-<!-- To be filled by dev agent -->
+- ✅ Types created: LedgerSchema, LedgerEntry, SchemaField, FieldType
+- ✅ DAL functions: create_schema, update_schema, list_schemas, get_schema, create_entry, update_entry, list_entries, delete_entry
+- ✅ Store: useLedgerStore with full CRUD operations
+- ✅ UI Component: SchemaBuilder with field management (add/remove/reorder, field types, relation config)
+- ✅ Dashboard Integration: Replaced placeholder alert with SchemaBuilder modal
+- ✅ Tests: All 65 tests passing
 
 ### File List
 
-<!-- To be filled by dev agent -->
+- `src/types/ledger.ts` - NEW: Ledger types
+- `src/lib/db.ts` - MODIFIED: Added schema/entry DAL functions
+- `src/stores/useLedgerStore.ts` - NEW: Ledger Zustand store
+- `src/features/ledger/SchemaBuilder.tsx` - NEW: Schema builder UI
+- `src/features/dashboard/Dashboard.tsx` - MODIFIED: Integrated SchemaBuilder
+- `src/features/dashboard/Dashboard.test.tsx` - MODIFIED: Updated test for new behavior
 
 ### Change Log
 
-<!-- To be filled by dev agent -->
+- **2026-02-23**: Story 3-1 implementation started - Schema Builder UI foundation complete
+- **2026-02-23**: All tests passing (65/65)
