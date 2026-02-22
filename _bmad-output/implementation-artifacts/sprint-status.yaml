@@ -55,19 +55,19 @@ development_status:
   2-4-first-launch-empty-state-experience: review
   epic-2-retrospective: optional
 
-  epic-3: done
-  3-1-schema-builder-ui: done
-  3-2-ledger-data-table-inline-entry-routing: done
-  3-3-bidirectional-relational-links: done
-  3-4-ghost-reference-handling-soft-delete: done
+  epic-3: review
+  3-1-schema-builder-ui: review
+  3-2-ledger-data-table-inline-entry-routing: review
+  3-3-bidirectional-relational-links: review
+  3-4-ghost-reference-handling-soft-delete: review
   epic-3-retrospective: optional
 
-  epic-4: done
-  4-1-node-canvas-engine-foundation: done
-  4-2-ledger-source-nodes-basic-wiring: done
-  4-3-correlation-compute-nodes: done
-  4-4-autonomous-triggers-on-create-on-edit: done
-  4-5-dashboard-widgets: done
+  epic-4: review
+  4-1-node-canvas-engine-foundation: review
+  4-2-ledger-source-nodes-basic-wiring: review
+  4-3-correlation-compute-nodes: review
+  4-4-autonomous-triggers-on-create-on-edit: review
+  4-5-dashboard-widgets: review
   epic-4-retrospective: optional
 
   epic-5: in-progress
