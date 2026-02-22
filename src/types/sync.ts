@@ -29,7 +29,7 @@ export interface SyncConfig extends LedgyDocument {
  * Sync status for UI
  */
 export interface SyncStatus {
-    status: 'idle' | 'syncing' | 'pending' | 'conflict' | 'offline';
+    status: 'idle' | 'syncing' | 'pending' | 'conflict' | 'offline' | 'synced';
     lastSync?: string;
     pendingChanges?: number;
     conflictCount?: number;

@@ -4,6 +4,8 @@ import { Outlet, useParams } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen, PanelRightClose, MonitorOff } from 'lucide-react';
 import { useErrorStore } from '../../stores/useErrorStore';
 import { useProfileStore } from '../../stores/useProfileStore';
+import { useSyncStore } from '../../stores/useSyncStore';
+import { SyncStatusBadge } from '../../features/sync/SyncStatusBadge';
 
 export const AppShell: React.FC = () => {
     const {
@@ -151,9 +153,16 @@ export const AppShell: React.FC = () => {
                 </div>
 
                 {leftSidebarOpen && (
-                    <div className="mt-auto px-4 py-3 border-t border-zinc-800 text-[11px] text-emerald-500 flex items-center gap-1.5 shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        Synced · 2s ago
+                    <div className="mt-auto px-4 py-3 border-t border-zinc-800 flex items-center justify-between shrink-0">
+                        <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-600"></span>
+                            Local Only
+                        </div>
+                        <SyncStatusBadge
+                            state="synced"
+                            lastSyncTime={new Date().toISOString()}
+                            onClick={() => console.log('Sync badge clicked')}
+                        />
                     </div>
                 )}
             </aside>

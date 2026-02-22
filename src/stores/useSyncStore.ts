@@ -14,6 +14,8 @@ interface SyncState {
     loadSyncConfig: (profileId: string) => Promise<void>;
     saveSyncConfig: (profileId: string, config: Partial<SyncConfig>) => Promise<void>;
     triggerSync: (profileId: string) => Promise<void>;
+    updateSyncStatus: (status: Partial<SyncStatus>) => void;
+    setConflictCount: (count: number) => void;
 }
 
 export const useSyncStore = create<SyncState>((set, get) => ({
@@ -21,6 +23,23 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     syncStatus: { status: 'idle' },
     isLoading: false,
     error: null,
+
+    updateSyncStatus: (status: Partial<SyncStatus>) => {
+        set({
+            syncStatus: { ...get().syncStatus, ...status },
+        });
+    },
+
+    setConflictCount: (count: number) => {
+        const current = get().syncStatus;
+        set({
+            syncStatus: {
+                ...current,
+                conflictCount: count,
+                status: count > 0 ? 'conflict' : current.status === 'conflict' ? 'pending' : current.status,
+            },
+        });
+    },
 
     loadSyncConfig: async (profileId: string) => {
         set({ isLoading: true, error: null });

@@ -336,6 +336,35 @@ export async function list_entries(db: Database, ledgerId: string): Promise<Ledg
 }
 
 /**
+ * Finds all entries that have relation fields pointing to a specific entry ID.
+ * Used for bidirectional back-link display (Story 3-3).
+ * @param db - Profile database instance
+ * @param targetEntryId - The entry ID to find back-links for
+ * @returns Array of entries that reference the target entry
+ */
+export async function find_entries_with_relation_to(
+    db: Database,
+    targetEntryId: string
+): Promise<LedgerEntry[]> {
+    const entryDocs = await db.getAllDocuments<LedgerEntry>('entry');
+    return entryDocs.filter(doc => {
+        if (doc.isDeleted) return false;
+        
+        // Check each field in the entry's data
+        for (const fieldName of Object.keys(doc.data)) {
+            const value = doc.data[fieldName];
+            // Handle single relation (string) or multiple relations (string[])
+            if (Array.isArray(value)) {
+                if (value.includes(targetEntryId)) return true;
+            } else if (value === targetEntryId) {
+                return true;
+            }
+        }
+        return false;
+    });
+}
+
+/**
  * Soft-deletes an entry (Ghost Reference pattern - NFR4, NFR10).
  * @param db - Profile database instance
  * @param entryId - Entry document ID

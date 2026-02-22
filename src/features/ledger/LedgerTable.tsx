@@ -4,12 +4,14 @@ import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerSchema, LedgerEntry, SchemaField } from '../../types/ledger';
 import { InlineEntryRow } from './InlineEntryRow';
 import { RelationTagChip } from './RelationTagChip';
+import { BackLinksPanel } from './BackLinksPanel';
 
 interface LedgerTableProps {
     schemaId: string;
+    highlightEntryId?: string;
 }
 
-export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId }) => {
+export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEntryId }) => {
     const { schemas, entries, fetchEntries } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
     const [isAddingEntry, setIsAddingEntry] = useState(false);
@@ -24,6 +26,17 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId }) => {
     }, [activeProfileId, schemaId, fetchEntries]);
 
     const ledgerEntries = entries[schemaId] || [];
+    const selectedEntry = selectedRow >= 0 ? ledgerEntries[selectedRow] : null;
+
+    // Auto-select highlighted entry on mount (Story 3-3, AC 5)
+    useEffect(() => {
+        if (highlightEntryId && ledgerEntries.length > 0) {
+            const index = ledgerEntries.findIndex(e => e._id === highlightEntryId);
+            if (index >= 0) {
+                setSelectedRow(index);
+            }
+        }
+    }, [highlightEntryId, ledgerEntries]);
 
     // Handle keyboard shortcuts
     useEffect(() => {
@@ -108,12 +121,14 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId }) => {
                 )}
 
                 {/* Entry Rows */}
-                {ledgerEntries.map((entry, index) => (
+                {ledgerEntries.map((entry, index) => {
+                    const isHighlighted = highlightEntryId && entry._id === highlightEntryId;
+                    return (
                     <div
                         key={entry._id}
                         className={`flex border-b border-zinc-800 hover:bg-zinc-800/30 transition-colors ${
                             selectedRow === index ? 'bg-zinc-800/50' : ''
-                        }`}
+                        } ${isHighlighted ? 'ring-2 ring-emerald-500/50 bg-emerald-900/10' : ''}`}
                         role="row"
                         onClick={() => setSelectedRow(index)}
                         tabIndex={0}
@@ -129,17 +144,26 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId }) => {
                                 className="flex-1 px-3 py-2.5 text-sm text-zinc-300 border-r border-zinc-800 last:border-r-0"
                                 role="gridcell"
                             >
-                                {renderFieldValue(entry.data[field.name], field.type, entry, field)}
+                                {renderFieldValue(entry.data[field.name], field.type, entry, field, schemaId)}
                             </div>
                         ))}
                     </div>
-                ))}
+                );
+                })}
             </div>
+
+            {/* Back-Links Panel - Shows when entry is selected (Story 3-3, AC 4) */}
+            {selectedEntry && (
+                <BackLinksPanel
+                    targetEntryId={selectedEntry._id}
+                    targetLedgerId={schemaId}
+                />
+            )}
         </div>
     );
 };
 
-function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, field?: SchemaField): React.ReactNode {
+function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, field?: SchemaField, schemaId?: string): React.ReactNode {
     if (value === null || value === undefined) {
         return <span className="text-zinc-600 italic">-</span>;
     }
@@ -155,8 +179,9 @@ function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, fie
                 <RelationTagChip
                     value={value as string | string[]}
                     targetLedgerId={field?.relationTarget}
+                    entryId={entry?._id}
                     onClick={() => {
-                        // TODO: Navigate to target ledger (Story 3-3)
+                        // TODO: Navigate to target ledger (Story 3-3, Task 4)
                         console.log('Navigate to', field?.relationTarget);
                     }}
                 />

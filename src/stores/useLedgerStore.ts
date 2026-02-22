@@ -12,11 +12,13 @@ import {
     update_entry,
     list_entries,
     delete_entry,
+    find_entries_with_relation_to,
 } from '../lib/db';
 
 interface LedgerState {
     schemas: LedgerSchema[];
     entries: Record<string, LedgerEntry[]>; // keyed by ledgerId
+    backLinks: Record<string, LedgerEntry[]>; // keyed by targetEntryId
     isLoading: boolean;
     error: string | null;
 
@@ -25,6 +27,7 @@ interface LedgerState {
     createSchema: (profileId: string, name: string, fields: SchemaField[]) => Promise<string>;
     updateSchema: (schemaId: string, name: string, fields: SchemaField[]) => Promise<void>;
     fetchEntries: (profileId: string, ledgerId: string) => Promise<void>;
+    fetchBackLinks: (profileId: string, targetEntryId: string) => Promise<void>;
     createEntry: (profileId: string, schemaId: string, ledgerId: string, data: Record<string, unknown>) => Promise<string>;
     updateEntry: (entryId: string, data: Record<string, unknown>) => Promise<void>;
     deleteEntry: (entryId: string) => Promise<void>;
@@ -33,6 +36,7 @@ interface LedgerState {
 export const useLedgerStore = create<LedgerState>((set, get) => ({
     schemas: [],
     entries: {},
+    backLinks: {},
     isLoading: false,
     error: null,
 
@@ -106,12 +110,33 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
 
             const db = getProfileDb(profileId);
             const entries = await list_entries(db, ledgerId);
-            set({ 
+            set({
                 entries: { ...get().entries, [ledgerId]: entries },
-                isLoading: false 
+                isLoading: false
             });
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to fetch entries';
+            set({ error: errorMsg, isLoading: false });
+            useErrorStore.getState().dispatchError(errorMsg);
+        }
+    },
+
+    fetchBackLinks: async (profileId: string, targetEntryId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const authState = useAuthStore.getState();
+            if (!authState.isUnlocked) {
+                throw new Error('Vault must be unlocked to fetch back-links.');
+            }
+
+            const db = getProfileDb(profileId);
+            const backLinks = await find_entries_with_relation_to(db, targetEntryId);
+            set({
+                backLinks: { ...get().backLinks, [targetEntryId]: backLinks },
+                isLoading: false
+            });
+        } catch (err: any) {
+            const errorMsg = err.message || 'Failed to fetch back-links';
             set({ error: errorMsg, isLoading: false });
             useErrorStore.getState().dispatchError(errorMsg);
         }
