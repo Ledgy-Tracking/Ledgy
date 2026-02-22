@@ -1,6 +1,6 @@
 # Story 2.3: Create & Delete Profile
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -40,6 +40,7 @@ so that my tracking spaces stay organized and I can fully remove data I want gon
 - [x] [AI-Review][High] In `useProfileStore.ts`, remove the unencrypted fallback in `createProfile`. If `encryptionKey` is missing, throw an error.
 - [x] [AI-Review][Medium] Fix Ghost Profile Risk in `deleteProfile`: Ensure failure when updating the master DB handles rollback or prevents app crash on selection.
 - [x] [AI-Review][Low] Fix PouchDB Instances Memory Leak: Implement garbage collection or `.close()` for profiles when switching away from them in `db.ts`.
+- [ ] [AI-Review][High] Orphan Data Breach Risk (NFR12 Violation): `deleteProfile` marks profile as deleted before calling `profileDb.destroy()`. If `destroy()` fails, orphaned databases persist. [src/stores/useProfileStore.ts:135]
 
 ## Dev Notes
 

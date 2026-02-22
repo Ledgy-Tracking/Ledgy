@@ -1,6 +1,6 @@
 # Story 2.1: PouchDB Initialization & Profile Data Model
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -36,6 +36,9 @@ so that profile data is never accessible across profile boundaries.
 
 ### Review Follow-ups (AI)
 - [x] [AI-Review][High] In `useProfileStore.ts`, remove the unencrypted fallback in `createProfile`. If `encryptionKey` is missing, throw an error instead of saving in plain text.
+- [ ] [AI-Review][High] Encryption Key Race Condition: fetching `encryptionKey` synchronously from `useAuthStore.getState()` in `createProfile` could throw or lead to unencrypted state if not stabilized. [src/stores/useProfileStore.ts:90]
+- [ ] [AI-Review][Medium] Performance Bottleneck in `fetchProfiles`: decrypting and mapping every profile with `Promise.all` simultaneously could hang JS thread. [src/stores/useProfileStore.ts:37]
+- [ ] [AI-Review][Low] Broad error catching in `useProfileStore`: check `err.name` or `err.status` instead of simply grabbing `err.message` for DB errors. [src/stores/useProfileStore.ts:71]
 
 ## Dev Notes
 

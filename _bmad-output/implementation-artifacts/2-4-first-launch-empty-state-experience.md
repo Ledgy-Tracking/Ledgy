@@ -1,6 +1,6 @@
 # Story 2.4: First-Launch Empty State Experience
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -30,6 +30,8 @@ so that I understand how to begin without being overwhelmed by choice.
 ### Review Follow-ups (AI)
 - [x] [AI-Review][Critical] `Dashboard.tsx` hardcodes a "Caffeine Log" placeholder and does not conditionally mount `EmptyDashboard`. Make it mount conditionally and fix failing tests in `Dashboard.test.tsx`.
 - [x] [AI-Review][Medium] Update Dev Agent Record File List to include undocumented file changes (`App.tsx`, `AppShell.tsx`, `package-lock.json`).
+- [ ] [AI-Review][Medium] Missing Fallback UI: no skeleton loading state in `AppShell` means users may see a jarring flash of normal dashboard layout before empty state. [src/features/app-shell/AppShell.tsx:l]
+- [ ] [AI-Review][Low] Hardcoded Placeholder Action: "Create Ledger" CTA triggers global info toast through error store, misusing it. [src/features/dashboard/EmptyDashboard.tsx]
 
 ## Dev Notes
 
