@@ -50,8 +50,8 @@ development_status:
 
   epic-2: in-progress
   2-1-pouchdb-initialization-profile-data-model: review
-  2-2-profile-selector-ui: review
-  2-3-create-delete-profile: review
+  2-2-profile-selector-ui: in-progress
+  2-3-create-delete-profile: in-progress
   2-4-first-launch-empty-state-experience: review
   epic-2-retrospective: optional
 

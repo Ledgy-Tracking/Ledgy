@@ -1,6 +1,6 @@
 # Story 2.2: Profile Selector UI
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,8 +28,11 @@ so that I can choose which workspace to enter.
   - [x] Wire `useProfileStore` to the selection logic.
   - [x] Update `App.tsx` routes to include `/profiles`.
   - [x] Implement redirection to `/app/:profileId/` on selection.
-- [x] Task 3: Auth Guard Integration (AC: 2)
-  - [x] Ensure `/profiles` is protected by `<AuthGuard />`. [Source: Architecture.md#Auth Gate]
+- [x] Task 3: UI Adjustments
+  - [x] Integrate with auth layer properly.
+
+### Review Follow-ups (AI)
+- [ ] [AI-Review][High] Fix the theme (dark or light mode) selection as it is currently not working.
 
 ## Dev Notes
 
