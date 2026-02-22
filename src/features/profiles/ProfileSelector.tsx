@@ -14,6 +14,7 @@ export const ProfileSelector: React.FC = () => {
     const [createDesc, setCreateDesc] = useState('');
 
     const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         fetchProfiles();
@@ -36,8 +37,9 @@ export const ProfileSelector: React.FC = () => {
         try {
             const newProfileId = await useProfileStore.getState().createProfile(createName.trim(), createDesc.trim());
             setIsCreateDialogOpen(false);
-            // Auto-select the newly created profile
-            handleSelectProfile(newProfileId);
+            // Auto-select the newly created profile - fixed stale closure by using direct navigation
+            setActiveProfile(newProfileId);
+            navigate(`/app/${newProfileId}`);
         } catch (err) {
             // Error already handled by store
         }
@@ -50,8 +52,15 @@ export const ProfileSelector: React.FC = () => {
 
     const handleConfirmDelete = async () => {
         if (deleteProfileId) {
-            await deleteProfile(deleteProfileId);
-            setDeleteProfileId(null);
+            setIsDeleting(true);
+            try {
+                await deleteProfile(deleteProfileId);
+                setDeleteProfileId(null);
+            } catch (err) {
+                // Error already handled by store
+            } finally {
+                setIsDeleting(false);
+            }
         }
     };
 
@@ -196,27 +205,31 @@ export const ProfileSelector: React.FC = () => {
                                 <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4">
                                     <span className="font-semibold text-red-600 dark:text-red-400">This will permanently delete all local data for this profile.</span> This operation cannot be undone.
                                 </p>
-                                {profileToDelete.remoteSyncEndpoint && (
-                                    <div className="bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-200 dark:border-yellow-500/20 rounded-lg p-3">
-                                        <p className="text-yellow-700 dark:text-yellow-500 text-sm font-medium">
-                                            Warning: This profile is configured to sync with a remote endpoint. Deleting this will only purge local data. Remote data must be purged separately.
-                                        </p>
-                                    </div>
-                                )}
+                                {/* Sync Warning - Always shown since sync is planned for Epic 5 */}
+                                <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-3">
+                                    <p className="text-amber-700 dark:text-amber-500 text-sm font-medium">
+                                        Note: When sync is enabled (Epic 5), remote data must be purged separately.
+                                    </p>
+                                </div>
                             </div>
                         </div>
 
                         <div className="flex justify-end space-x-3">
                             <button
                                 onClick={() => setDeleteProfileId(null)}
-                                className="px-4 py-2 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
+                                disabled={isDeleting}
+                                className="px-4 py-2 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleConfirmDelete}
-                                className="px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:ring-2 focus:ring-red-500/50"
+                                disabled={isDeleting}
+                                className="px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
+                                {isDeleting && (
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                )}
                                 Permanently Delete
                             </button>
                         </div>

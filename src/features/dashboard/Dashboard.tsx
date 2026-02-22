@@ -2,17 +2,18 @@ import React from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { PanelRightOpen } from 'lucide-react';
 import { EmptyDashboard } from './EmptyDashboard';
-import { useNotificationStore } from '../../stores/useNotificationStore';
 
 export const Dashboard: React.FC = () => {
     const { toggleRightInspector, rightInspectorOpen } = useUIStore();
-    const addNotification = useNotificationStore(state => state.addNotification);
 
-    // Placeholder until ledgers are implemented
+    // TODO: Implement actual ledger detection when ledgers are implemented in Epic 3
+    // For now, always show empty state as per Story 2.4 requirements
     const hasLedgers = false;
 
     const handleCreateLedger = () => {
-        addNotification('Schema Builder not yet implemented. Template Picker is deferred.', 'info');
+        // Placeholder until Schema Builder is implemented (Epic 3)
+        // Using a simple alert for now since notification system is meant for user feedback, not feature placeholders
+        alert('Schema Builder will be available in Epic 3. This will let you define custom ledger schemas with field types.');
     };
 
     return (

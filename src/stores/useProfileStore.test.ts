@@ -1,7 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
 import { useProfileStore } from './useProfileStore';
 import { getProfileDb, _clearProfileDatabases } from '../lib/db';
 import { useAuthStore } from '../features/auth/useAuthStore';
+import PouchDB from 'pouchdb';
 
 describe('useProfileStore Encryption', () => {
     // Mock key
@@ -36,6 +37,17 @@ describe('useProfileStore Encryption', () => {
 
         const masterDb = getProfileDb('master');
         await masterDb.destroy();
+        _clearProfileDatabases();
+    });
+
+    // Cleanup: Destroy test databases after all tests
+    afterAll(async () => {
+        try {
+            const masterDb = new PouchDB('ledgy_profile_master');
+            await masterDb.destroy();
+        } catch (e) {
+            // Ignore - might not exist
+        }
         _clearProfileDatabases();
     });
 

@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { getProfileDb } from './db';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
+import { getProfileDb, _clearProfileDatabases } from './db';
 import PouchDB from 'pouchdb';
 
 describe('Database Isolation', () => {
@@ -9,6 +9,26 @@ describe('Database Isolation', () => {
         const db2 = new PouchDB('ledgy_profile_test2');
         await db1.destroy();
         await db2.destroy();
+        _clearProfileDatabases();
+    });
+
+    // Cleanup: Destroy all test databases after all tests complete
+    afterAll(async () => {
+        const testDbs = [
+            'ledgy_profile_test1',
+            'ledgy_profile_test2',
+            'ledgy_profile_test-scheme',
+            'ledgy_profile_test-envelope',
+        ];
+        for (const dbName of testDbs) {
+            try {
+                const db = new PouchDB(dbName);
+                await db.destroy();
+            } catch (e) {
+                // Ignore errors - database might not exist
+            }
+        }
+        _clearProfileDatabases();
     });
 
     it('should maintain isolation between different profiles', async () => {

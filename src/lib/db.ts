@@ -1,6 +1,7 @@
 import PouchDB from 'pouchdb';
 import { v4 as uuidv4 } from 'uuid';
-import { LedgyDocument } from '../types/profile';
+import { LedgyDocument, ProfileMetadata } from '../types/profile';
+import { decryptPayload } from '../lib/crypto';
 
 // We use the 'pouchdb-browser' which includes the IndexedDB adapter by default
 export class Database {
@@ -156,4 +157,57 @@ export async function create_profile_encrypted(
 export async function list_profiles(masterDb: Database): Promise<any[]> {
     const profileDocs = await masterDb.getAllDocuments<any>('profile');
     return profileDocs.filter(doc => !doc.isDeleted);
+}
+
+/**
+ * Decrypts profile metadata from encrypted profile documents.
+ * This moves encryption logic from the store to the DAL layer.
+ * 
+ * @param profileDocs - Array of profile documents from PouchDB
+ * @param encryptionKey - AES-GCM encryption key
+ * @returns Array of decrypted ProfileMetadata objects
+ */
+export async function decryptProfileMetadata(
+    profileDocs: any[],
+    encryptionKey: CryptoKey
+): Promise<ProfileMetadata[]> {
+    const activeProfiles = profileDocs.filter(doc => !doc.isDeleted);
+    
+    // Process profiles sequentially to avoid overwhelming the JS thread
+    // Note: BATCH_SIZE removed - sequential processing is more predictable and easier to debug
+    const profiles: ProfileMetadata[] = [];
+    
+    for (const doc of activeProfiles) {
+        let name = doc.name;
+        let description = doc.description;
+
+        // Type-safe encrypted metadata access
+        if (doc.name_enc && typeof doc.name_enc === 'object') {
+            try {
+                const iv = new Uint8Array(doc.name_enc.iv);
+                const ciphertext = new Uint8Array(doc.name_enc.ciphertext).buffer;
+                name = await decryptPayload(encryptionKey, iv, ciphertext);
+
+                if (doc.description_enc && typeof doc.description_enc === 'object') {
+                    const dIv = new Uint8Array(doc.description_enc.iv);
+                    const dCiphertext = new Uint8Array(doc.description_enc.ciphertext).buffer;
+                    description = await decryptPayload(encryptionKey, dIv, dCiphertext);
+                }
+            } catch (e) {
+                console.error('Failed to decrypt profile:', e);
+                name = `[Encrypted Profile ${doc._id?.slice(-4) || 'unknown'}]`;
+            }
+        }
+
+        profiles.push({
+            id: doc._id,
+            name,
+            description,
+            createdAt: doc.createdAt,
+            updatedAt: doc.updatedAt,
+            remoteSyncEndpoint: doc.remoteSyncEndpoint,
+        });
+    }
+    
+    return profiles;
 }

@@ -7,7 +7,7 @@ interface EmptyDashboardProps {
 
 export const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onActionClick }) => {
     return (
-        <div className="flex flex-col items-center justify-center p-8 bg-zinc-950/50 rounded-2xl border border-zinc-900 border-dashed text-center min-h-[60vh]">
+        <div className="flex flex-col items-center justify-center p-8 bg-zinc-950/50 rounded-2xl border border-zinc-900 border-dashed text-center w-full max-w-lg">
             <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-6">
                 <Sparkles size={32} className="text-emerald-500" aria-hidden="true" />
             </div>

@@ -19,7 +19,8 @@ export const AppShell: React.FC = () => {
     
     // Fetch profile name for display
     const [profileName, setProfileName] = useState<string>('');
-    const { profiles } = useProfileStore();
+    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+    const { profiles, fetchProfiles } = useProfileStore();
 
     useEffect(() => {
         setMounted(true);
@@ -35,15 +36,20 @@ export const AppShell: React.FC = () => {
         }
     }, [dispatchError]);
 
-    // Update profile name when profiles list changes or profileId changes
+    // Fetch profiles on mount and update profile name when profiles list changes or profileId changes
     useEffect(() => {
-        if (profileId && profiles.length > 0) {
-            const profile = profiles.find(p => p.id === profileId);
-            if (profile) {
-                setProfileName(profile.name);
+        if (profileId) {
+            if (profiles.length === 0) {
+                fetchProfiles();
+            } else {
+                const profile = profiles.find(p => p.id === profileId);
+                if (profile) {
+                    setProfileName(profile.name);
+                }
+                setIsLoadingProfile(false);
             }
         }
-    }, [profileId, profiles]);
+    }, [profileId, profiles, fetchProfiles]);
 
     useEffect(() => {
         let timeoutId: number;
@@ -72,13 +78,19 @@ export const AppShell: React.FC = () => {
 
     if (!mounted) {
         return (
-            <div className="flex h-screen w-full bg-[#0d0d0f] animate-pulse">
+            <div className="flex h-screen w-full bg-[#0d0d0f] animate-in fade-in duration-500">
                 {/* Left Sidebar Skeleton */}
-                <div className="w-[220px] bg-zinc-900 border-r border-zinc-800 shrink-0" />
+                <div className="w-[220px] bg-zinc-900 border-r border-zinc-800 shrink-0">
+                    <div className="h-14 bg-zinc-800/50 animate-pulse" />
+                </div>
                 {/* Main Content Skeleton */}
-                <div className="flex-1 bg-zinc-950" />
-                {/* Right Inspector Skeleton (optional, but good for consistency) */}
-                <div className="w-0 bg-zinc-900 border-l border-zinc-800 shrink-0" />
+                <div className="flex-1 bg-zinc-950">
+                    <div className="h-full bg-zinc-900/30 animate-pulse" />
+                </div>
+                {/* Right Inspector Skeleton */}
+                <div className="w-[260px] bg-zinc-900 border-l border-zinc-800 shrink-0">
+                    <div className="h-14 bg-zinc-800/50 animate-pulse" />
+                </div>
             </div>
         );
     }
@@ -107,8 +119,12 @@ export const AppShell: React.FC = () => {
                             <div className="flex items-center gap-2">
                                 <div className="text-sm font-semibold">🌿 Ledgy</div>
                             </div>
-                            <div className="text-[11px] text-zinc-400 mt-0.5 truncate">
-                                Personal · {profileName || 'Loading...'}
+                            <div className="text-[11px] text-zinc-400 mt-0.5 truncate transition-opacity duration-300">
+                                {isLoadingProfile ? (
+                                    <span className="inline-block w-24 h-3 bg-zinc-800 rounded animate-pulse" />
+                                ) : (
+                                    `Personal · ${profileName || 'No profile'}`
+                                )}
                             </div>
                         </div>
                     ) : (

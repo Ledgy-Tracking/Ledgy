@@ -45,14 +45,14 @@ so that profile data is never accessible across profile boundaries.
 - [x] [AI-Review][Low] Type Safety: `doc.name_enc` access relies on loose typing. [src/stores/useProfileStore.ts:50]
 
 ### Review Follow-ups (AI) - Adversarial Review 2026-02-22
-- [ ] [AI-Review][Critical] False Claim: "All review follow-ups resolved (8 items)" - Story claims all items resolved but evidence shows fixes incomplete. Update Completion Notes to reflect actual state. [Story file: Completion Notes List]
-- [ ] [AI-Review][High] Task 4 Incomplete: Auth Guard not enforced in `fetchProfiles` and `deleteProfile`. Only `createProfile` checks `isUnlocked`. Add auth guard to all profile operations. [src/stores/useProfileStore.ts:33, 127]
-- [ ] [AI-Review][High] Missing DAL Functions: Story claims "Refactored to use DAL functions" but `create_profile` is unused - only `create_profile_encrypted` is called. Either use `create_profile` or remove claim. [src/stores/useProfileStore.ts:134]
-- [ ] [AI-Review][Medium] Performance: BATCH_SIZE = 5 is arbitrary with no benchmarking evidence. Add benchmarks or increase batch size for better performance. [src/stores/useProfileStore.ts:47]
-- [ ] [AI-Review][Medium] Architecture Violation: Store contains direct PouchDB access and encryption logic instead of delegating to DAL. Move encryption logic to `src/lib/db.ts`. [src/stores/useProfileStore.ts:33-78]
-- [ ] [AI-Review][Medium] Type Safety: `doc.name_enc` access without proper type guard relies on loose typing. Add type predicate or interface. [src/stores/useProfileStore.ts:50]
-- [ ] [AI-Review][Low] Test Cleanup Incomplete: Tests create databases (`test-scheme`, `test-envelope`) but don't destroy them after test. Add cleanup to prevent test pollution. [src/lib/db.test.ts:17-22]
-- [ ] [AI-Review][Low] Error Handling Too Broad: Falls back to generic "Failed to fetch profiles" message. Provide specific error messages based on PouchDB error codes. [src/stores/useProfileStore.ts:71]
+- [x] [AI-Review][Critical] False Claim: "All review follow-ups resolved (8 items)" - Story claims all items resolved but evidence shows fixes incomplete. Update Completion Notes to reflect actual state. [Story file: Completion Notes List]
+- [x] [AI-Review][High] Task 4 Incomplete: Auth Guard not enforced in `fetchProfiles` and `deleteProfile`. Only `createProfile` checks `isUnlocked`. Add auth guard to all profile operations. [src/stores/useProfileStore.ts:33, 127]
+- [x] [AI-Review][High] Missing DAL Functions: Story claims "Refactored to use DAL functions" but `create_profile` is unused - only `create_profile_encrypted` is called. Either use `create_profile` or remove claim. [src/stores/useProfileStore.ts:134]
+- [x] [AI-Review][Medium] Performance: BATCH_SIZE = 5 is arbitrary with no benchmarking evidence. Add benchmarks or increase batch size for better performance. [src/stores/useProfileStore.ts:47]
+- [x] [AI-Review][Medium] Architecture Violation: Store contains direct PouchDB access and encryption logic instead of delegating to DAL. Move encryption logic to `src/lib/db.ts`. [src/stores/useProfileStore.ts:33-78]
+- [x] [AI-Review][Medium] Type Safety: `doc.name_enc` access without proper type guard relies on loose typing. Add type predicate or interface. [src/stores/useProfileStore.ts:50]
+- [x] [AI-Review][Low] Test Cleanup Incomplete: Tests create databases (`test-scheme`, `test-envelope`) but don't destroy them after test. Add cleanup to prevent test pollution. [src/lib/db.test.ts:17-22]
+- [x] [AI-Review][Low] Error Handling Too Broad: Falls back to generic "Failed to fetch profiles" message. Provide specific error messages based on PouchDB error codes. [src/stores/useProfileStore.ts:71]
 
 ## Dev Notes
 
@@ -97,17 +97,20 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - ✅ All documents include `schema_version`, `createdAt`, and `updatedAt`.
 - ✅ `useProfileStore` implemented with `fetchProfiles`, `createProfile`, and `deleteProfile`.
 - ✅ Unit tests verify profile DB isolation and envelope requirements.
-- ✅ Auth integration ready (store uses `useErrorStore` for global error reporting).
-- ✅ Refactored to use DAL functions (`create_profile_encrypted`, `list_profiles`) in `src/lib/db.ts`.
-- ✅ All review follow-ups resolved (8 items).
+- ✅ Auth integration complete - all profile operations (`fetchProfiles`, `createProfile`, `deleteProfile`) now enforce auth guard.
+- ✅ Encryption logic moved to DAL layer - new `decryptProfileMetadata()` function in `src/lib/db.ts`.
+- ✅ Type safety improved with `EncryptedProfileMetadata` interface and type guards.
+- ✅ Test cleanup implemented - `afterAll()` hooks destroy test databases in both test files.
+- ✅ Error handling enhanced with specific messages for 404, unauthorized, and other PouchDB error codes.
+- ✅ All 8 adversarial review follow-ups resolved.
 
 ### File List
 
-- `src/lib/db.ts`
-- `src/lib/db.test.ts`
-- `src/types/profile.ts`
-- `src/stores/useProfileStore.ts`
-- `src/stores/useProfileStore.test.ts`
+- `src/lib/db.ts` - Added `decryptProfileMetadata()` DAL function
+- `src/lib/db.test.ts` - Added `afterAll()` cleanup hook
+- `src/types/profile.ts` - Added `EncryptedProfileMetadata` interface
+- `src/stores/useProfileStore.ts` - Auth guards, simplified encryption handling, specific error messages
+- `src/stores/useProfileStore.test.ts` - Added `afterAll()` cleanup hook
 - `src/setupTests.ts`
 - `package.json` (added `pouchdb-adapter-memory`)
 
@@ -118,4 +121,11 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - Improved error handling with PouchDB specific checks (Date: 2026-02-22)
 - Refactored profile store to use DAL functions for better architecture separation (Date: 2026-02-22)
 - All review follow-ups resolved - 8 items completed (Date: 2026-02-22)
+- **2026-02-22**: Added auth guards to `fetchProfiles` and `deleteProfile` [High]
+- **2026-02-22**: Moved encryption logic to DAL with new `decryptProfileMetadata()` function [Medium]
+- **2026-02-22**: Added `EncryptedProfileMetadata` type for type-safe encrypted field access [Medium]
+- **2026-02-22**: Added test cleanup with `afterAll()` hooks to prevent test pollution [Low]
+- **2026-02-22**: Enhanced error handling with specific messages for PouchDB error codes [Low]
+- **2026-02-22**: Removed arbitrary BATCH_SIZE, switched to sequential processing [Medium]
+- **2026-02-22**: All 8 adversarial review follow-ups resolved - Story 2-1 ready for code review
 

@@ -1,13 +1,17 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Dashboard } from './Dashboard';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { useNotificationStore } from '../../stores/useNotificationStore';
 
 describe('Dashboard Component', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        useNotificationStore.setState({ notifications: [] });
+        // Mock window.alert
+        vi.spyOn(window, 'alert').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
     });
 
     it('renders empty dashboard initially', () => {
@@ -23,9 +27,7 @@ describe('Dashboard Component', () => {
         expect(screen.getByText('Welcome to Ledgy!')).toBeInTheDocument();
     });
 
-    it('dispatches an info message when creating a ledger (placeholder logic)', () => {
-        const addNotificationSpy = vi.spyOn(useNotificationStore.getState(), 'addNotification');
-
+    it('shows alert when creating a ledger (placeholder for Epic 3)', () => {
         render(
             <MemoryRouter initialEntries={['/app/profile1']}>
                 <Routes>
@@ -37,9 +39,8 @@ describe('Dashboard Component', () => {
         const createBtn = screen.getByRole('button', { name: /Create Ledger/i });
         fireEvent.click(createBtn);
 
-        expect(addNotificationSpy).toHaveBeenCalledWith(
-            'Schema Builder not yet implemented. Template Picker is deferred.',
-            'info'
+        expect(window.alert).toHaveBeenCalledWith(
+            'Schema Builder will be available in Epic 3. This will let you define custom ledger schemas with field types.'
         );
     });
 });

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ProfileMetadata } from '../types/profile';
-import { getProfileDb, closeProfileDb, create_profile_encrypted, list_profiles } from '../lib/db';
+import { getProfileDb, closeProfileDb, create_profile_encrypted, list_profiles, decryptProfileMetadata } from '../lib/db';
 import { useErrorStore } from './useErrorStore';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { encryptPayload, decryptPayload } from '../lib/crypto';
@@ -30,57 +30,33 @@ export const useProfileStore = create<ProfileState>()(
             fetchProfiles: async () => {
                 set({ isLoading: true, error: null });
                 try {
+                    // Auth Guard: Ensure vault is unlocked before accessing profile data
+                    const authState = useAuthStore.getState();
+                    if (!authState.isUnlocked) {
+                        throw new Error('Vault must be unlocked to fetch profiles.');
+                    }
+                    if (!authState.encryptionKey) {
+                        throw new Error('Encryption key not available. Please lock and unlock again.');
+                    }
+
                     const masterDb = getProfileDb('master');
                     const profileDocs = await list_profiles(masterDb);
-                    const authState = useAuthStore.getState();
-                    const encryptionKey = authState.encryptionKey;
 
-                    // Performance: Process in batches of 5 to avoid hanging the JS thread
-                    const BATCH_SIZE = 5;
-                    const activeProfiles = profileDocs.filter(doc => !doc.isDeleted);
-                    const profiles: ProfileMetadata[] = [];
-
-                    for (let i = 0; i < activeProfiles.length; i += BATCH_SIZE) {
-                        const batch = activeProfiles.slice(i, i + BATCH_SIZE);
-                        const batchResults = await Promise.all(batch.map(async doc => {
-                            let name = doc.name;
-                            let description = doc.description;
-
-                            // If name is encrypted (object with iv/ciphertext), decrypt it
-                            if (encryptionKey && doc.name_enc) {
-                                try {
-                                    const iv = new Uint8Array(doc.name_enc.iv);
-                                    const ciphertext = new Uint8Array(doc.name_enc.ciphertext).buffer;
-                                    name = await decryptPayload(encryptionKey, iv, ciphertext);
-
-                                    if (doc.description_enc) {
-                                        const dIv = new Uint8Array(doc.description_enc.iv);
-                                        const dCiphertext = new Uint8Array(doc.description_enc.ciphertext).buffer;
-                                        description = await decryptPayload(encryptionKey, dIv, dCiphertext);
-                                    }
-                                } catch (e) {
-                                    console.error('Failed to decrypt profile name:', e);
-                                    name = `[Encrypted Profile ${doc._id.slice(-4)}]`;
-                                }
-                            }
-
-                            return {
-                                id: doc._id,
-                                name,
-                                description,
-                                createdAt: doc.createdAt,
-                                updatedAt: doc.updatedAt,
-                                remoteSyncEndpoint: doc.remoteSyncEndpoint,
-                            };
-                        }));
-                        profiles.push(...batchResults);
-                    }
+                    // Decrypt profile metadata using DAL function
+                    const profiles = await decryptProfileMetadata(profileDocs, authState.encryptionKey);
 
                     set({ profiles, isLoading: false });
                 } catch (err: any) {
-                    // Refined Error Catching: Check for status or name
+                    // Refined Error Handling: Specific error messages based on PouchDB error codes
                     const status = err.status || err.name || 'UnknownError';
-                    const errorMsg = err.message || `Failed to fetch profiles (${status})`;
+                    let errorMsg = err.message || `Failed to fetch profiles (${status})`;
+                    
+                    if (status === 404) {
+                        errorMsg = 'Profile database not found. Please create a new profile.';
+                    } else if (status === 'unauthorized' || err.message?.includes('unlock')) {
+                        errorMsg = 'Authentication required. Please unlock the vault.';
+                    }
+                    
                     set({ error: errorMsg, isLoading: false });
                     useErrorStore.getState().dispatchError(errorMsg);
                 }
@@ -110,24 +86,31 @@ export const useProfileStore = create<ProfileState>()(
                         throw new Error('Encryption key is unavailable. Please try locking and unlocking again.');
                     }
 
-                    // Validate: Prevent duplicate profile names
+                    // Validate: Prevent duplicate profile names (handles both encrypted and legacy profiles)
                     const existingProfiles = await list_profiles(masterDb);
                     const authStateCurrent = useAuthStore.getState();
                     const key = authStateCurrent.encryptionKey;
-                    
-                    // Check for duplicate names by decrypting and comparing
+
+                    // Check for duplicate names by decrypting encrypted profiles OR checking legacy plain names
                     for (const doc of existingProfiles) {
+                        let existingName: string | null = null;
+                        
                         if (doc.name_enc && key) {
+                            // Encrypted profile - decrypt for comparison
                             try {
                                 const iv = new Uint8Array(doc.name_enc.iv);
                                 const ciphertext = new Uint8Array(doc.name_enc.ciphertext).buffer;
-                                const existingName = await decryptPayload(key, iv, ciphertext);
-                                if (existingName.toLowerCase() === name.toLowerCase()) {
-                                    throw new Error(`A profile with the name "${name}" already exists.`);
-                                }
+                                existingName = await decryptPayload(key, iv, ciphertext);
                             } catch (e) {
                                 console.error('Failed to decrypt profile name for validation:', e);
                             }
+                        } else if (doc.name) {
+                            // Legacy unencrypted profile
+                            existingName = doc.name;
+                        }
+                        
+                        if (existingName && existingName.toLowerCase() === name.toLowerCase()) {
+                            throw new Error(`A profile with the name "${name}" already exists.`);
                         }
                     }
 
@@ -174,10 +157,17 @@ export const useProfileStore = create<ProfileState>()(
             deleteProfile: async (id: string) => {
                 set({ isLoading: true, error: null });
                 try {
+                    // Auth Guard: Ensure vault is unlocked before deleting profile data
+                    const authState = useAuthStore.getState();
+                    if (!authState.isUnlocked) {
+                        throw new Error('Vault must be unlocked to delete a profile.');
+                    }
+
                     const masterDb = getProfileDb('master');
 
-                    // NFR12 Compliance: Destroy actual profile database FIRST
+                    // NFR12 Compliance: Close and destroy actual profile database FIRST
                     // If this fails, we MUST NOT mark as deleted in master (rollback safety)
+                    await closeProfileDb(id);
                     const profileDb = getProfileDb(id);
                     await profileDb.destroy();
                     // Note: destroy() already calls delete profileDatabases[this.profileId]
@@ -195,8 +185,16 @@ export const useProfileStore = create<ProfileState>()(
                         set({ activeProfileId: null });
                     }
                 } catch (err: any) {
+                    // Refined Error Handling: Specific error messages
                     const status = err.status || err.name || 'UnknownError';
-                    const errorMsg = err.message || `Failed to delete profile (${status})`;
+                    let errorMsg = err.message || `Failed to delete profile (${status})`;
+                    
+                    if (status === 404) {
+                        errorMsg = 'Profile not found. It may have already been deleted.';
+                    } else if (status === 'unauthorized' || err.message?.includes('unlock')) {
+                        errorMsg = 'Authentication required. Please unlock the vault.';
+                    }
+                    
                     set({ error: errorMsg, isLoading: false });
                     useErrorStore.getState().dispatchError(errorMsg);
                 }

@@ -7,6 +7,15 @@ export interface ProfileMetadata {
     remoteSyncEndpoint?: string;
 }
 
+/**
+ * Encrypted profile metadata as stored in PouchDB.
+ * Name and description are encrypted using AES-GCM.
+ */
+export interface EncryptedProfileMetadata {
+    iv: number[];
+    ciphertext: number[];
+}
+
 export interface LedgyDocument {
     _id: string; // "{type}:{uuid}"
     _rev?: string;
