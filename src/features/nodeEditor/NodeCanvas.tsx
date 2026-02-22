@@ -18,6 +18,7 @@ import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
 import { ArithmeticNode } from './nodes/ArithmeticNode';
+import { TriggerNode } from './nodes/TriggerNode';
 import { DataEdge } from './edges/DataEdge';
 
 // Custom node types
@@ -25,6 +26,7 @@ const nodeTypes = {
     ledgerSource: LedgerSourceNode,
     correlation: CorrelationNode,
     arithmetic: ArithmeticNode,
+    trigger: TriggerNode,
 };
 
 // Custom edge types

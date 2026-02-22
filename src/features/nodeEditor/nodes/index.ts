@@ -4,3 +4,5 @@ export { CorrelationNode } from './CorrelationNode';
 export type { CorrelationNodeData } from './CorrelationNode';
 export { ArithmeticNode } from './ArithmeticNode';
 export type { ArithmeticNodeData } from './ArithmeticNode';
+export { TriggerNode } from './TriggerNode';
+export type { TriggerNodeData } from './TriggerNode';

@@ -24,6 +24,7 @@ interface LedgerState {
     backLinks: Record<string, LedgerEntry[]>; // keyed by targetEntryId
     isLoading: boolean;
     error: string | null;
+    onEntryEvent?: (eventType: 'on-create' | 'on-edit', entry: LedgerEntry) => void;
 
     // Actions
     fetchSchemas: (profileId: string) => Promise<void>;
@@ -35,6 +36,7 @@ interface LedgerState {
     updateEntry: (entryId: string, data: Record<string, unknown>) => Promise<void>;
     deleteEntry: (entryId: string) => Promise<void>;
     restoreEntry: (entryId: string) => Promise<void>;
+    setOnEntryEvent: (callback: (eventType: 'on-create' | 'on-edit', entry: LedgerEntry) => void) => void;
 }
 
 export const useLedgerStore = create<LedgerState>((set, get) => ({
@@ -160,6 +162,14 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             const db = getProfileDb(profileId);
             const entryId = await create_entry(db, schemaId, ledgerId, data, profileId);
             await get().fetchEntries(profileId, ledgerId);
+            
+            // Fire on-create trigger event
+            const state = get();
+            if (state.onEntryEvent) {
+                const entry = await db.getDocument<any>(entryId);
+                state.onEntryEvent('on-create', entry);
+            }
+            
             return entryId;
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to create entry';
@@ -179,7 +189,14 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
 
             const db = getProfileDb(state.activeProfileId);
             await update_entry(db, entryId, data);
-            
+
+            // Fire on-edit trigger event
+            const ledgerState = get();
+            if (ledgerState.onEntryEvent) {
+                const entry = await db.getDocument<any>(entryId);
+                ledgerState.onEntryEvent('on-edit', entry);
+            }
+
             // Refresh entries for the ledger
             const schema = await get_schema(db, (await db.getDocument<any>(entryId)).schemaId);
             await get().fetchEntries(state.activeProfileId, schema.ledgerId);
@@ -233,6 +250,10 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             useErrorStore.getState().dispatchError(errorMsg);
             throw err;
         }
+    },
+
+    setOnEntryEvent: (callback: (eventType: 'on-create' | 'on-edit', entry: LedgerEntry) => void) => {
+        set({ onEntryEvent: callback });
     },
 }));
 
