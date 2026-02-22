@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { useUIStore } from '../../stores/useUIStore';
-import { Outlet, useParams } from 'react-router-dom';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Moon, Sun, MonitorOff, LayoutDashboard, Settings, UserCircle, Database } from 'lucide-react';
+import { Outlet, useParams, Link } from 'react-router-dom';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, MonitorOff } from 'lucide-react';
 import { useErrorStore } from '../../stores/useErrorStore';
 
 export const AppShell: React.FC = () => {
     const {
         leftSidebarOpen, toggleLeftSidebar,
         rightInspectorOpen, toggleRightInspector,
-        theme, toggleTheme
+        theme
     } = useUIStore();
 
     const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
     const [mounted, setMounted] = useState(false);
     const { profileId } = useParams();
     const prevWidthRef = React.useRef(window.innerWidth);
-
     const { dispatchError } = useErrorStore();
 
     useEffect(() => {
         setMounted(true);
-        // Initial responsive check
         const width = window.innerWidth;
         if (width < 900) {
             dispatchError("Mobile and Tablet layouts are not supported in this version.", "warning");
@@ -33,18 +31,14 @@ export const AppShell: React.FC = () => {
         }
     }, [dispatchError]);
 
-    // Handle responsive breakpoints
     useEffect(() => {
         let timeoutId: number;
-
         const handleResize = () => {
             clearTimeout(timeoutId);
             timeoutId = window.setTimeout(() => {
                 const width = window.innerWidth;
                 const prevWidth = prevWidthRef.current;
                 setIsMobile(width < 900);
-
-                // Auto-collapse logic based on width boundary crossings
                 if (prevWidth >= 1280 && width < 1280) {
                     useUIStore.getState().setRightInspector(false);
                 }
@@ -52,11 +46,9 @@ export const AppShell: React.FC = () => {
                     useUIStore.getState().setRightInspector(false);
                     useUIStore.getState().setLeftSidebar(false);
                 }
-
                 prevWidthRef.current = width;
-            }, 100); // 100ms debounce
+            }, 100);
         };
-
         window.addEventListener('resize', handleResize);
         return () => {
             window.removeEventListener('resize', handleResize);
@@ -64,20 +56,17 @@ export const AppShell: React.FC = () => {
         };
     }, []);
 
-    if (!mounted) {
-        return null;
-    }
+    if (!mounted) return null;
 
     return (
-        <div className="relative flex h-screen w-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 overflow-hidden font-sans">
+        <div className="relative flex h-screen w-full bg-[#0d0d0f] text-zinc-50 font-sans overflow-hidden">
             {isMobile && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-950/95 backdrop-blur-sm text-white p-6 text-center">
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-zinc-950/95 backdrop-blur-sm p-6 text-center">
                     <div className="max-w-xs space-y-4">
                         <MonitorOff size={48} className="mx-auto text-emerald-500" />
                         <h1 className="text-xl font-bold italic tracking-tight">Ledgy Desktop</h1>
                         <p className="text-zinc-400 text-sm">
                             Mobile and Tablet layouts are not supported in this version.
-                            Please switch to a desktop device or increase your window width.
                         </p>
                     </div>
                 </div>
@@ -85,126 +74,98 @@ export const AppShell: React.FC = () => {
 
             {/* Left Sidebar */}
             <aside
-                className={`flex flex-col border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 backdrop-blur-md transition-[width] duration-300 ease-in-out shrink-0 overflow-hidden ${leftSidebarOpen ? 'w-[240px]' : 'w-[48px]'
-                    }`}
+                className={`flex flex-col bg-zinc-900 border-r border-zinc-800 transition-[width] duration-300 ease-in-out shrink-0 overflow-hidden ${leftSidebarOpen ? 'w-[220px]' : 'w-[48px]'}`}
             >
-                <div className="h-14 flex items-center px-3 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
-                    <button
-                        onClick={toggleLeftSidebar}
-                        className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors"
-                        title={leftSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-                    >
-                        {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+                <div className="px-4 pt-3.5 pb-2.5 border-b border-zinc-800 shrink-0 flex items-center">
+                    {leftSidebarOpen ? (
+                        <div className="flex-1 overflow-hidden">
+                            <div className="text-sm font-semibold flex items-center gap-2">
+                                🌿 Ledgy
+                            </div>
+                            <div className="text-[11px] text-zinc-400 mt-0.5 truncate">
+                                Personal · {profileId || 'James'}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex justify-center">🌿</div>
+                    )}
+                    <button onClick={toggleLeftSidebar} className="text-zinc-400 hover:text-zinc-200 ml-1">
+                        {leftSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
                     </button>
+                </div>
+
+                <div className="flex-grow overflow-y-auto overflow-x-hidden py-2 custom-scrollbar">
                     {leftSidebarOpen && (
-                        <span className="ml-3 font-bold italic text-emerald-500 text-lg select-none">Ledgy</span>
+                        <>
+                            <div className="px-2 pb-1">
+                                <div className="text-[10px] font-semibold tracking-wider uppercase text-zinc-600 px-2 mb-0.5 mt-2">Projects</div>
+                                <SidebarItem label="Wellness" active badge="12" />
+                                <SidebarItem label="Finances" badge="34" />
+                                <SidebarItem label="Car Maintenance" badge="8" />
+                                <div className="text-[12px] text-zinc-600 px-4 py-1.5 cursor-pointer hover:text-zinc-400 transition-colors">+ New Project</div>
+                            </div>
+                            <div className="px-2 mt-4 pb-1">
+                                <div className="text-[10px] font-semibold tracking-wider uppercase text-zinc-600 px-2 mb-0.5">Ledgers</div>
+                                <SidebarItem label="Caffeine Log" active />
+                                <SidebarItem label="Sleep Tracker" />
+                                <SidebarItem label="Workouts" />
+                                <div className="text-[12px] text-zinc-600 px-4 py-1.5 cursor-pointer hover:text-zinc-400 transition-colors">+ New Ledger</div>
+                            </div>
+                        </>
                     )}
                 </div>
 
-                <div className="flex-grow overflow-y-auto overflow-x-hidden py-4 custom-scrollbar">
-                    <nav className="space-y-1 px-2">
-                        <NavItem
-                            icon={<LayoutDashboard size={18} />}
-                            label="Dashboard"
-                            active
-                            collapsed={!leftSidebarOpen}
-                        />
-                        <NavItem
-                            icon={<Database size={18} />}
-                            label="Ledgers"
-                            collapsed={!leftSidebarOpen}
-                        />
-                        <NavItem
-                            icon={<UserCircle size={18} />}
-                            label="Profiles"
-                            collapsed={!leftSidebarOpen}
-                        />
-                        <NavItem
-                            icon={<Settings size={18} />}
-                            label="Settings"
-                            collapsed={!leftSidebarOpen}
-                        />
-                    </nav>
-                </div>
-
-                <div className="p-3 border-t border-zinc-200 dark:border-zinc-800">
-                    <button
-                        onClick={toggleTheme}
-                        className="flex items-center justify-center w-full h-9 rounded-md hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-                        title="Toggle Theme"
-                    >
-                        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-                        {leftSidebarOpen && <span className="ml-3 text-sm font-medium">Theme</span>}
-                    </button>
-                </div>
+                {leftSidebarOpen && (
+                    <div className="mt-auto px-4 py-3 border-t border-zinc-800 text-[11px] text-emerald-500 flex items-center gap-1.5 shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Synced · 2s ago
+                    </div>
+                )}
             </aside>
 
             {/* Main Canvas */}
-            <main className="flex-grow flex flex-col min-w-0 bg-transparent overflow-hidden">
-                <header className="h-14 flex items-center justify-between px-6 border-b border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/30 backdrop-blur-sm shrink-0">
-                    <div className="flex items-center gap-4">
-                        <h2 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">Dashboard</h2>
-                    </div>
-                </header>
-
-                <div className="flex-grow overflow-y-auto p-8 custom-scrollbar">
-                    <Outlet context={{ profileId }} />
-                </div>
+            <main className="flex-1 flex flex-col min-w-0 bg-zinc-950 overflow-hidden relative">
+                <Outlet context={{ profileId }} />
             </main>
 
             {/* Right Inspector */}
             <aside
-                className={`flex flex-col border-l border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 backdrop-blur-md transition-[width] duration-300 ease-in-out shrink-0 overflow-hidden ${rightInspectorOpen ? 'w-[280px]' : 'w-0'
-                    }`}
+                className={`flex flex-col bg-zinc-900 border-l border-zinc-800 transition-[width] duration-300 ease-in-out shrink-0 overflow-hidden ${rightInspectorOpen ? 'w-[260px]' : 'w-0'}`}
             >
-                <div className="h-14 flex items-center px-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
-                    <button
-                        onClick={toggleRightInspector}
-                        className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-md transition-colors"
-                        title={rightInspectorOpen ? "Collapse Inspector" : "Expand Inspector"}
-                    >
-                        {rightInspectorOpen ? <PanelRightClose size={18} /> : <PanelRightOpen size={18} />}
+                <div className="h-12 flex items-center px-3.5 border-b border-zinc-800 shrink-0 text-[12px] font-semibold text-zinc-400 uppercase tracking-wider">
+                    <button onClick={toggleRightInspector} className="mr-2 text-zinc-400 hover:text-zinc-200">
+                        <PanelRightClose size={16} />
                     </button>
-                    {rightInspectorOpen && (
-                        <span className="ml-3 text-xs font-bold uppercase tracking-widest text-zinc-500">Inspector</span>
-                    )}
+                    {rightInspectorOpen && "Entry Details"}
                 </div>
-                <div className="flex-grow p-4">
-                    {/* Inspector Content Placeholder */}
-                    <div className="space-y-4">
-                        <div className="h-4 w-1/2 bg-zinc-200 dark:bg-white/10 rounded" />
-                        <div className="h-32 bg-zinc-100 dark:bg-white/5 rounded-lg border border-zinc-200 dark:border-zinc-800" />
+                {rightInspectorOpen && (
+                    <div className="flex-grow overflow-y-auto custom-scrollbar">
+                        <InspectorField label="Item" value="Flat White" />
+                        <InspectorField label="Amount" value="160 mg" />
+                        <InspectorField label="Time" value="08:34 · 2026-02-21" />
+                        <InspectorField label="Mood" value={<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/15 text-emerald-400">Good</span>} />
+                        <InspectorField label="Linked Entry" value={<span className="text-emerald-400 text-[12px]">Sleep #47 → 7h 20m deep sleep</span>} />
+                        <InspectorField label="Entry ID" value={<span className="font-mono text-[12px] text-zinc-400">caf_fb3a9d</span>} />
                     </div>
-                </div>
+                )}
             </aside>
         </div>
     );
 };
 
-interface NavItemProps {
-    icon: React.ReactNode;
-    label: string;
-    active?: boolean;
-    collapsed?: boolean;
-}
+const SidebarItem = ({ label, active, badge }: { label: string, active?: boolean, badge?: string }) => (
+    <div className={`flex items-center gap-2 px-2 py-1.5 rounded text-[13px] cursor-pointer transition-colors ${active ? 'bg-zinc-800 text-zinc-50' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-50'}`}>
+        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? 'bg-emerald-500' : 'bg-zinc-600'}`}></span>
+        <span className="truncate flex-1">{label}</span>
+        {badge && (
+            <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 rounded-full ml-auto">{badge}</span>
+        )}
+    </div>
+);
 
-const NavItem: React.FC<NavItemProps> = ({ icon, label, active, collapsed }) => (
-    <div
-        className={`flex items-center h-10 px-3 mx-1 rounded-md transition-colors cursor-pointer group ${active
-            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-            : 'text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-white/5'
-            }`}
-    >
-        <div className="shrink-0">{icon}</div>
-        {!collapsed && (
-            <span className="ml-3 text-sm font-medium whitespace-nowrap overflow-hidden transition-opacity">
-                {label}
-            </span>
-        )}
-        {collapsed && (
-            <div className="absolute left-14 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-zinc-800 text-white text-[10px] px-2 py-1 rounded pointer-events-none z-50">
-                {label}
-            </div>
-        )}
+const InspectorField = ({ label, value }: { label: string, value: React.ReactNode }) => (
+    <div className="px-3.5 py-2.5 border-b border-zinc-800">
+        <div className="text-[11px] text-zinc-400 mb-1">{label}</div>
+        <div className="text-[13px] text-zinc-50">{value}</div>
     </div>
 );
