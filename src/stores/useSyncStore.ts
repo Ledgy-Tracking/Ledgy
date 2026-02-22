@@ -3,10 +3,12 @@ import { getProfileDb } from '../lib/db';
 import { useErrorStore } from './useErrorStore';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { SyncConfig, SyncStatus } from '../types/sync';
+import { ConflictEntry } from '../features/sync/ConflictListSheet';
 
 interface SyncState {
     syncConfig: SyncConfig | null;
     syncStatus: SyncStatus;
+    conflicts: ConflictEntry[];
     isLoading: boolean;
     error: string | null;
 
@@ -16,13 +18,73 @@ interface SyncState {
     triggerSync: (profileId: string) => Promise<void>;
     updateSyncStatus: (status: Partial<SyncStatus>) => void;
     setConflictCount: (count: number) => void;
+    addConflict: (conflict: ConflictEntry) => void;
+    removeConflict: (entryId: string) => void;
+    clearConflicts: () => void;
+    getConflicts: () => ConflictEntry[];
 }
 
 export const useSyncStore = create<SyncState>((set, get) => ({
     syncConfig: null,
     syncStatus: { status: 'idle' },
+    conflicts: [],
     isLoading: false,
     error: null,
+
+    addConflict: (conflict: ConflictEntry) => {
+        const current = get().conflicts;
+        // Avoid duplicates
+        if (!current.some(c => c.entryId === conflict.entryId)) {
+            set({ conflicts: [...current, conflict] });
+            // Update sync status to conflict
+            set({
+                syncStatus: {
+                    ...get().syncStatus,
+                    status: 'conflict',
+                    conflictCount: current.length + 1,
+                },
+            });
+        }
+    },
+
+    removeConflict: (entryId: string) => {
+        const current = get().conflicts;
+        const remaining = current.filter(c => c.entryId !== entryId);
+        set({ conflicts: remaining });
+        
+        // Update sync status
+        if (remaining.length === 0) {
+            set({
+                syncStatus: {
+                    ...get().syncStatus,
+                    status: 'synced',
+                    conflictCount: 0,
+                },
+            });
+        } else {
+            set({
+                syncStatus: {
+                    ...get().syncStatus,
+                    conflictCount: remaining.length,
+                },
+            });
+        }
+    },
+
+    clearConflicts: () => {
+        set({ conflicts: [] });
+        set({
+            syncStatus: {
+                ...get().syncStatus,
+                status: 'synced',
+                conflictCount: 0,
+            },
+        });
+    },
+
+    getConflicts: () => {
+        return get().conflicts;
+    },
 
     updateSyncStatus: (status: Partial<SyncStatus>) => {
         set({
