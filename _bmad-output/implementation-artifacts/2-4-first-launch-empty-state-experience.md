@@ -1,6 +1,6 @@
 # Story 2.4: First-Launch Empty State Experience
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -35,6 +35,14 @@ so that I understand how to begin without being overwhelmed by choice.
 - [x] [AI-Review][Medium] UX Flaw: `AppShell` displays raw `profileId` instead of human-readable Profile Name. Fetch profile details in `AppShell`. [src/components/Layout/AppShell.tsx:96]
 - [x] [AI-Review][Low] Styling Fragility: `EmptyDashboard` uses hardcoded `min-h-[400px]` which may affect responsiveness. [src/features/dashboard/EmptyDashboard.tsx:10]
 - [x] [AI-Review][Low] Accessibility: `EmptyDashboard` relies on emoji for illustration. Use SVG icon. [src/features/dashboard/EmptyDashboard.tsx:12]
+
+### Review Follow-ups (AI) - Adversarial Review 2026-02-22
+- [ ] [AI-Review][Critical] False Claim: "EmptyDashboard uses responsive `min-h-[60vh]`" - `60vh` is NOT responsive, it's a fixed viewport height. Use media queries or percentage-based heights. [src/features/dashboard/EmptyDashboard.tsx:10]
+- [ ] [AI-Review][High] Hardcoded `hasLedgers = false`: No actual ledger detection logic implemented. Always shows empty state, will never show ledger view. Implement actual ledger count check. [src/features/dashboard/Dashboard.tsx:13]
+- [ ] [AI-Review][High] Profile Name Race Condition: Profile name only updates AFTER profiles fetched, but component renders immediately. Results in "Loading..." flicker. Add loading state or skeleton. [src/components/Layout/AppShell.tsx:56-63]
+- [ ] [AI-Review][Medium] Skeleton Loading Not Smooth: Uses `animate-pulse` but only on initial mount, no transition animation. Still jarring. Add smooth fade-in transition. [src/components/Layout/AppShell.tsx:79-87]
+- [ ] [AI-Review][Medium] Notification System Misused: "Create Ledger" CTA shows notification for unimplemented feature, confusing users. Implement proper placeholder route or disable button. [src/features/dashboard/Dashboard.tsx:15-17]
+- [ ] [AI-Review][Low] SVG Icon Claim Exaggerated: Claims "uses SVG icon (Lucide Sparkles)" but Lucide is just a library import, not a custom SVG. Update documentation to be accurate. [Story file: Completion Notes List]
 
 ## Dev Notes
 
@@ -87,6 +95,7 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - `package-lock.json`
 
 ### Change Log
+- Adversarial code review completed - 6 new action items created (Date: 2026-02-22)
 - Addressed code review findings - 2 items resolved (Date: 2026-02-22)
 - AppShell displays profile name, EmptyDashboard uses responsive height and SVG icon (Date: 2026-02-22)
 - All review follow-ups resolved - 7 items completed (Date: 2026-02-22)

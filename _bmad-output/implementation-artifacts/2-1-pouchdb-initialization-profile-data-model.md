@@ -1,6 +1,6 @@
 # Story 2.1: PouchDB Initialization & Profile Data Model
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -43,6 +43,16 @@ so that profile data is never accessible across profile boundaries.
 - [x] [AI-Review][Medium] Architecture Violation: `useProfileStore.ts` contains DB implementation details (encryption, direct PouchDB access) that should be in the DAL. [src/stores/useProfileStore.ts:33]
 - [x] [AI-Review][Medium] ID Generation Discrepancy: `createProfile` creates documents that might drift from standard envelope. [src/stores/useProfileStore.ts:113]
 - [x] [AI-Review][Low] Type Safety: `doc.name_enc` access relies on loose typing. [src/stores/useProfileStore.ts:50]
+
+### Review Follow-ups (AI) - Adversarial Review 2026-02-22
+- [ ] [AI-Review][Critical] False Claim: "All review follow-ups resolved (8 items)" - Story claims all items resolved but evidence shows fixes incomplete. Update Completion Notes to reflect actual state. [Story file: Completion Notes List]
+- [ ] [AI-Review][High] Task 4 Incomplete: Auth Guard not enforced in `fetchProfiles` and `deleteProfile`. Only `createProfile` checks `isUnlocked`. Add auth guard to all profile operations. [src/stores/useProfileStore.ts:33, 127]
+- [ ] [AI-Review][High] Missing DAL Functions: Story claims "Refactored to use DAL functions" but `create_profile` is unused - only `create_profile_encrypted` is called. Either use `create_profile` or remove claim. [src/stores/useProfileStore.ts:134]
+- [ ] [AI-Review][Medium] Performance: BATCH_SIZE = 5 is arbitrary with no benchmarking evidence. Add benchmarks or increase batch size for better performance. [src/stores/useProfileStore.ts:47]
+- [ ] [AI-Review][Medium] Architecture Violation: Store contains direct PouchDB access and encryption logic instead of delegating to DAL. Move encryption logic to `src/lib/db.ts`. [src/stores/useProfileStore.ts:33-78]
+- [ ] [AI-Review][Medium] Type Safety: `doc.name_enc` access without proper type guard relies on loose typing. Add type predicate or interface. [src/stores/useProfileStore.ts:50]
+- [ ] [AI-Review][Low] Test Cleanup Incomplete: Tests create databases (`test-scheme`, `test-envelope`) but don't destroy them after test. Add cleanup to prevent test pollution. [src/lib/db.test.ts:17-22]
+- [ ] [AI-Review][Low] Error Handling Too Broad: Falls back to generic "Failed to fetch profiles" message. Provide specific error messages based on PouchDB error codes. [src/stores/useProfileStore.ts:71]
 
 ## Dev Notes
 
@@ -102,6 +112,7 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - `package.json` (added `pouchdb-adapter-memory`)
 
 ### Change Log
+- Adversarial code review completed - 8 new action items created (Date: 2026-02-22)
 - Addressed code review findings - 1 item resolved (Date: 2026-02-22)
 - Fixed Encryption Key Race Condition and optimized profile fetching (Date: 2026-02-22)
 - Improved error handling with PouchDB specific checks (Date: 2026-02-22)

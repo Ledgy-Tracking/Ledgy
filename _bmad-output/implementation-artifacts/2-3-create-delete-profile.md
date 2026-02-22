@@ -1,6 +1,6 @@
 # Story 2.3: Create & Delete Profile
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -44,6 +44,15 @@ so that my tracking spaces stay organized and I can fully remove data I want gon
 - [x] [AI-Review][Medium] UX Improvement: `createProfile` should return the new profile ID so UI can auto-select it. [src/stores/useProfileStore.ts:97]
 - [x] [AI-Review][Medium] Untestable Logic: Sync Warning logic in UI is unreachable as `createProfile` cannot set `remoteSyncEndpoint`. [src/features/profiles/ProfileSelector.tsx:193]
 - [x] [AI-Review][Low] Duplicate Names: Add validation to prevent duplicate profile names. [src/stores/useProfileStore.ts:97]
+
+### Review Follow-ups (AI) - Adversarial Review 2026-02-22
+- [ ] [AI-Review][Critical] False Claim: "Duplicate name validation added" - Validation only works for encrypted profiles, NOT legacy unencrypted profiles. Fix to check both `doc.name_enc` and `doc.name`. [src/stores/useProfileStore.ts:113-124]
+- [ ] [AI-Review][High] Orphan Data Risk in `deleteProfile`: Database destroyed FIRST, then master updated. If master update fails, profile is orphaned. Reverse order or use transaction. [src/stores/useProfileStore.ts:135-148]
+- [ ] [AI-Review][High] Sync Warning Logic Untestable: Warning only shows if `profileToDelete.remoteSyncEndpoint` exists, but `createProfile` cannot set this field. Dead code path. [src/features/profiles/ProfileSelector.tsx:237-244]
+- [ ] [AI-Review][Medium] Memory Leak: PouchDB Registry - `closeProfileDb` exists but only called when switching profiles, not on deletion. Call `close()` before `destroy()`. [src/lib/db.ts:76-80]
+- [ ] [AI-Review][Medium] Profile Auto-Selection Not Working: `handleConfirmCreate` returns profile ID but `handleSelectProfile` called with stale closure. Fix closure or use state. [src/features/profiles/ProfileSelector.tsx:47-50]
+- [ ] [AI-Review][Low] Error Messages Generic: All errors show "Failed to create/delete profile" without specificity. Add specific error messages for common failures. [src/stores/useProfileStore.ts:102, 151]
+- [ ] [AI-Review][Low] Duplicate Name Check Inefficient: Decrypts ALL profiles for every name check - O(n) decryption operations. Cache decrypted names or use indexed search. [src/stores/useProfileStore.ts:113-124]
 
 ## Dev Notes
 
@@ -94,6 +103,7 @@ Antigravity (Gemini 2.0 Flash Thinking)
 
 ### Change Log
 
+- Adversarial code review completed - 7 new action items created (Date: 2026-02-22)
 - Replaced `window.confirm` with custom dialog for Create/Delete Profile
 - Warn user of remote sync before deletion
 - Fixed PouchDB registry memory leak upon deletion
