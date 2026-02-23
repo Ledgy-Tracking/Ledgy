@@ -1,6 +1,6 @@
 # Story 2.4: First-Launch Empty State Experience
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -43,6 +43,15 @@ so that I understand how to begin without being overwhelmed by choice.
   - [x] Implement logic to detect when the ledger list is empty (for now, it will always be empty).
 - [x] Task 3: Placeholder CTA
   - [x] The "Create your first ledger" button should be a placeholder or simple link to the (not yet implemented) Schema Builder.
+
+### Review Follow-ups (AI) - Senior Developer Review 2026-02-23
+- [ ] [AI-Review][High] Terminology Conflict: Sidebar and Dashboard use "Project" when engine uses "Ledger". Profile should equal Project. [src/features/dashboard/EmptyDashboard.tsx, src/components/Layout/AppShell.tsx]
+- [ ] [AI-Review][High] Functional Bug: Dashboard lacks `fetchSchemas` call on mount, causing persistent empty state. [src/features/dashboard/Dashboard.tsx]
+- [ ] [AI-Review][Medium] Store Bloat in AppShell: Refactor `profileName` and loading logic into selectors in `useProfileStore`. [src/components/Layout/AppShell.tsx]
+- [ ] [AI-Review][Medium] Sidebar Redundancy: Remove duplicate "+ New Project" button or differentiate it from "+ New Ledger". [src/components/Layout/AppShell.tsx]
+- [ ] [AI-Review][Medium] Test Gaps: Add tests for Dashboard with populated ledger state. [src/features/dashboard/Dashboard.test.tsx]
+- [ ] [AI-Review][Low] Cleanup: Remove placeholder `console.log` in `SyncStatusBadge` handler. [src/components/Layout/AppShell.tsx]
+- [ ] [AI-Review][Low] Accessibility: Unify `aria-label` values for identical UI actions. [src/components/Layout/AppShell.tsx]
 
 ### Review Follow-ups (AI)
 - [x] [AI-Review][Critical] `Dashboard.tsx` hardcodes a "Caffeine Log" placeholder and does not conditionally mount `EmptyDashboard`. Make it mount conditionally and fix failing tests in `Dashboard.test.tsx`.
