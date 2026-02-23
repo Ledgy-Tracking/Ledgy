@@ -12,6 +12,7 @@ import { ProfileSelector } from "./features/profiles/ProfileSelector";
 import { useUIStore } from "./stores/useUIStore";
 import { useEffect } from "react";
 import { LedgerView } from "./features/ledger/LedgerView";
+import { TrashView } from "./features/ledger/TrashView";
 
 function App() {
   const theme = useUIStore((state) => state.theme);
@@ -70,6 +71,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="settings" element={<div>Settings Placeholder</div>} />
           <Route path="ledger/:ledgerId" element={<LedgerView />} />
+          <Route path="trash" element={<TrashView />} />
           {/* Add more profile-scoped routes here */}
         </Route>
 

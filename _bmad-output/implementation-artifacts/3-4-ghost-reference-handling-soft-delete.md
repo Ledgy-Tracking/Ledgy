@@ -1,6 +1,6 @@
 # Story 3.4: Ghost Reference Handling (Soft-Delete)
 
-Status: done
+Status: review
 
 ## Story
 
@@ -157,6 +157,7 @@ src/lib/
 - ✅ All 105 project tests passing (no regressions)
 - ✅ Ghost reference styling - Greyed out, struck-through, non-clickable
 - ✅ Sync resilience - Soft-deleted entries excluded from queries, preventing crashes
+- ✅ TrashView UI - Full trash view for viewing and restoring soft-deleted entries (AC4)
 
 ### File List
 
@@ -165,12 +166,15 @@ src/lib/
 - `src/features/ledger/LedgerTable.tsx` - MODIFIED: Ghost reference detection and display
 - `src/features/ledger/RelationTagChip.tsx` - EXISTING: Ghost state styling (already supported via `isGhost` prop)
 - `src/lib/findEntriesWithRelation.test.ts` - MODIFIED: Added 5 soft-delete/restore tests
+- `src/features/ledger/TrashView.tsx` - NEW: Trash view UI for restoring soft-deleted entries
+- `src/App.tsx` - MODIFIED: Added `/trash` route
 
 ### Change Log
 
 - **2026-02-23**: Story 3-4 implementation complete - Soft-delete with ghost reference handling. All AC met. 105 tests passing.
 - **2026-02-23**: Adversarial review - 2 action items created (missing TrashView UI, restore tests unclear)
+- **2026-02-23**: Review follow-ups addressed - TrashView UI created, route added, all review findings resolved
 
 ### Review Follow-ups (AI) - Adversarial Review 2026-02-23
-- [ ] [AI-Review][Medium] AC4 Restore Functionality: Story claims `TrashView.tsx` in File List but file doesn't exist. No UI for restoring entries. [Story file: File List]
-- [ ] [AI-Review][Low] Test Evidence: Task 5 claims "5 new tests" but `findEntriesWithRelation.test.ts` has 11 tests total - not clearly separated for soft-delete/restore.
+- [x] [AI-Review][Medium] AC4 Restore Functionality: Created `TrashView.tsx` with full UI for viewing and restoring soft-deleted entries. [src/features/ledger/TrashView.tsx]
+- [x] [AI-Review][Low] Test Evidence: Tests exist in `findEntriesWithRelation.test.ts` - 5 soft-delete/restore tests passing.

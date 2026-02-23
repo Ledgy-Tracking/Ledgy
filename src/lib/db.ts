@@ -514,3 +514,85 @@ export async function load_canvas(
         throw e;
     }
 }
+
+// ============================================================================
+// Dashboard Layout Functions (Story 4-5)
+// ============================================================================
+
+import { WidgetConfig } from '../features/dashboard/widgets';
+
+/**
+ * Dashboard Layout document structure.
+ */
+export interface DashboardLayout {
+    profileId: string;
+    dashboardId: string;
+    widgets: WidgetConfig[];
+    layout: {
+        columns: number;
+        rows: number;
+    };
+}
+
+/**
+ * Saves dashboard layout configuration.
+ * Story 4-5, AC 5: Layout Persistence.
+ * @param db - Profile database instance
+ * @param dashboardId - Dashboard identifier (e.g., 'default')
+ * @param widgets - Array of widget configurations
+ * @param profileId - Profile ID for isolation
+ * @returns The dashboard layout ID
+ */
+export async function save_dashboard_layout(
+    db: Database,
+    dashboardId: string,
+    widgets: WidgetConfig[],
+    profileId: string
+): Promise<string> {
+    const dashboardDocId = `dashboard:${dashboardId}`;
+
+    try {
+        // Try to get existing dashboard
+        const existing = await db.getDocument<DashboardLayout>(dashboardDocId);
+        await db.updateDocument(dashboardDocId, {
+            widgets,
+        });
+        return dashboardDocId;
+    } catch (e: any) {
+        if (e.status === 404) {
+            // Dashboard doesn't exist, create it
+            const response = await db.createDocument<DashboardLayout>('dashboard', {
+                profileId,
+                dashboardId,
+                widgets,
+                layout: {
+                    columns: 4,
+                    rows: 10,
+                },
+            });
+            return response.id;
+        }
+        throw e;
+    }
+}
+
+/**
+ * Loads dashboard layout configuration.
+ * Story 4-5, AC 5: Layout Persistence.
+ * @param db - Profile database instance
+ * @param dashboardId - Dashboard identifier
+ * @returns Dashboard layout or null if not found
+ */
+export async function load_dashboard_layout(
+    db: Database,
+    dashboardId: string
+): Promise<DashboardLayout | null> {
+    try {
+        return await db.getDocument<DashboardLayout>(`dashboard:${dashboardId}`);
+    } catch (e: any) {
+        if (e.status === 404) {
+            return null;
+        }
+        throw e;
+    }
+}
