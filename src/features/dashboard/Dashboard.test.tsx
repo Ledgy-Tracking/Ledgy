@@ -25,7 +25,7 @@ describe('Dashboard Component', () => {
         expect(screen.getByText('Welcome to Ledgy!')).toBeInTheDocument();
     });
 
-    it('opens Schema Builder when clicking Create Ledger', () => {
+    it('opens Schema Builder when clicking Create Project', () => {
         render(
             <MemoryRouter initialEntries={['/app/profile1']}>
                 <Routes>
@@ -34,7 +34,7 @@ describe('Dashboard Component', () => {
             </MemoryRouter>
         );
 
-        const createBtn = screen.getByRole('button', { name: /Create Ledger/i });
+        const createBtn = screen.getByRole('button', { name: /Create your first project/i });
         fireEvent.click(createBtn);
 
         // Schema Builder modal should appear

@@ -53,27 +53,22 @@ development_status:
   2-2-profile-selector-ui: done
   2-3-create-delete-profile: done
   2-4-first-launch-empty-state-experience: review
-  # Review Follow-ups 2026-02-23 (UI Audit):
-  # - [AI-Review][High] EmptyDashboard CTA text: "Create Ledger" → "Create Project" [src/features/dashboard/EmptyDashboard.tsx:21]
-  # - [AI-Review][High] Sidebar "+ New Project" non-functional [src/components/Layout/AppShell.tsx:136]
-  # - [AI-Review][Medium] Dashboard CTA flow clarification [src/features/dashboard/Dashboard.tsx]
-  # Review Follow-ups 2026-02-23 (Code Review):
-  # - [AI-Review][High] EmptyDashboard button text "Create Ledger" → "Create Project" [src/features/dashboard/EmptyDashboard.tsx:23]
-  # - [AI-Review][High] Sidebar "+ New Project" decorative only [src/components/Layout/AppShell.tsx:157]
-  # - [AI-Review][High] Sidebar "+ New Ledger" decorative only [src/components/Layout/AppShell.tsx:162]
-  # - [AI-Review][Medium] Dashboard CTA flow confusing [src/features/dashboard/Dashboard.tsx:18]
-  # - [AI-Review][Medium] Story File List vs Git mismatch [git diff]
-  # - [AI-Review][Low] Missing aria-label on button [src/features/dashboard/EmptyDashboard.tsx:18]
+  # ✅ Review Follow-ups 2026-02-23 - ALL RESOLVED:
+  # - [x] EmptyDashboard CTA text: "Create Ledger" → "Create Project" [src/features/dashboard/EmptyDashboard.tsx:23]
+  # - [x] Sidebar "+ New Project" functional with onClick handler [src/components/Layout/AppShell.tsx:145-150]
+  # - [x] Sidebar "+ New Ledger" functional with onClick handler [src/components/Layout/AppShell.tsx:154-159]
+  # - [x] Dashboard CTA flow unified - all buttons open SchemaBuilder [src/features/dashboard/Dashboard.tsx:60]
+  # - [x] Added aria-label to EmptyDashboard button [src/features/dashboard/EmptyDashboard.tsx:19]
+  # - [x] Added setSchemaBuilderOpen to useUIStore [src/stores/useUIStore.ts]
   epic-2-retrospective: optional
 
   epic-3: in-progress
   3-1-schema-builder-ui: review
   3-2-ledger-data-table-inline-entry-routing: review
-  # Review Follow-ups 2026-02-23 (UI Audit):
-  # - [AI-Review][High] Sidebar "+ New Ledger" non-functional [src/components/Layout/AppShell.tsx:141]
-  # Review Follow-ups 2026-02-23 (Code Review):
-  # - [AI-Review][High] Sidebar "+ New Ledger" decorative only [src/components/Layout/AppShell.tsx:162]
-  # - [AI-Review][Medium] Story File List vs Git mismatch [git diff]
+  # ✅ Review Follow-ups 2026-02-23 - ALL RESOLVED:
+  # - [x] Sidebar "+ New Ledger" functional with onClick handler [src/components/Layout/AppShell.tsx:154-159]
+  # - [x] Story File List vs Git mismatch resolved
+  # - [x] AC9 Empty State CTA clarified - LedgerTable.tsx already has correct message
   3-3-bidirectional-relational-links: review
   3-4-ghost-reference-handling-soft-delete: review
   epic-3-retrospective: optional

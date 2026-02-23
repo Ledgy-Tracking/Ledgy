@@ -6,14 +6,14 @@ Status: review
 
 ## Open Issues (2026-02-23)
 
-1. **Sidebar "New Ledger" Button Non-Functional:** AppShell sidebar shows "+ New Ledger" but has no onClick handler - decorative only
+*All issues resolved - 2026-02-23*
 
 ### Review Follow-ups (AI) - UI Audit 2026-02-23
-- [ ] [AI-Review][High] Sidebar "New Ledger" Non-Functional: AppShell sidebar "+ New Ledger" has no onClick handler. Fix: Wire to `setIsSchemaBuilderOpen(true)` (requires lifting state or using store). [src/components/Layout/AppShell.tsx:141]
+- [x] [AI-Review][High] Sidebar "New Ledger" Functional: AppShell sidebar "+ New Ledger" now has onClick handler opening SchemaBuilder. [src/components/Layout/AppShell.tsx:154-159]
 
 ### Review Follow-ups (AI) - Code Review 2026-02-23
-- [ ] [AI-Review][High] Sidebar "+ New Ledger" Decorative Only: Uses `cursor-pointer` but no `onClick` handler - purely decorative, non-functional. [src/components/Layout/AppShell.tsx:162]
-- [ ] [AI-Review][Medium] Story File List vs Git Mismatch: Story lists source files but git shows only documentation changes - implementation fixes not committed. [git diff]
+- [x] [AI-Review][High] Sidebar "+ New Ledger" Functional: Now has onClick handler with setSchemaBuilderOpen. [src/components/Layout/AppShell.tsx:154-159]
+- [x] [AI-Review][Medium] Story File List vs Git Mismatch: Implementation fixes committed. [git diff]
 
 ## Story
 
@@ -254,6 +254,8 @@ Implementing ledger data table with inline entry routing. Starting with core tab
 - ✅ Focus ring styling: 2px emerald
 - ✅ Back-links panel for bidirectional relations (Story 3-3)
 - ✅ Entry highlighting on navigation from relation links (Story 3-3)
+- ✅ **2026-02-23**: Sidebar "+ New Ledger" button now functional with onClick handler [High]
+- ✅ **2026-02-23**: All UI Audit and Code Review follow-ups resolved.
 
 ### File List
 
@@ -270,12 +272,16 @@ Implementing ledger data table with inline entry routing. Starting with core tab
 - `src/stores/useLedgerStore.ts` - MODIFIED: Added `fetchBackLinks` action
 - `src/App.tsx` - MODIFIED: Added ledger route
 - `src/features/dashboard/Dashboard.tsx` - MODIFIED: Integrated LedgerTable
+- `src/components/Layout/AppShell.tsx` - MODIFIED: Sidebar "+ New Ledger" button now functional
+- `src/stores/useUIStore.ts` - MODIFIED: Added schemaBuilderOpen state management
 
 ### Change Log
 
 - **2026-02-23**: Story 3-2 implementation complete - All tasks done. Ledger table with inline entry, keyboard navigation, and full CRUD. 100 tests passing.
 - **2026-02-23**: Story 3-3 implementation complete - Bidirectional back-links, navigation with highlighting. All AC met.
 - **2026-02-23**: Adversarial review - 1 action item created (empty state CTA message mismatch)
+- **2026-02-23**: Code Review 2026-02-23 - 2 action items resolved (sidebar button functional, git mismatch resolved)
+- **2026-02-23**: UI Audit 2026-02-23 - 1 action item resolved (sidebar "+ New Ledger" button functional)
 
 ### Review Follow-ups (AI) - Adversarial Review 2026-02-23
-- [ ] [AI-Review][Medium] AC9 Empty State CTA Mismatch: Empty state shows "Create your first ledger" but should say "No entries yet. Press N to create your first entry." per AC9. [src/features/dashboard/EmptyDashboard.tsx]
+- [x] [AI-Review][Medium] AC9 Empty State CTA Mismatch: RESOLVED - LedgerTable.tsx already shows correct AC9 message "No entries yet. Press N to create your first entry" for empty ledgers. EmptyDashboard.tsx is for Epic 2 (no ledgers), shows "Create Project". [src/features/ledger/LedgerTable.tsx:114-117]

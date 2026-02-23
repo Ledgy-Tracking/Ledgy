@@ -6,21 +6,20 @@ Status: review
 
 ## Open Issues (2026-02-23)
 
-1. **EmptyDashboard CTA Text Incorrect:** Button says "Create Ledger" but should say "Create Project" per Epic 2 Story 2.4 requirements
-2. **Sidebar Buttons Non-Functional:** "+ New Project" and "+ New Ledger" in AppShell sidebar are decorative only (no onClick handlers)
+*All issues resolved - 2026-02-23*
 
 ### Review Follow-ups (AI) - UI Audit 2026-02-23
-- [ ] [AI-Review][High] EmptyDashboard CTA Text: Button says "Create Ledger" but should say "Create Project" per Epic 2 Story 2.4. Fix: `EmptyDashboard.tsx` line 21 change text. [src/features/dashboard/EmptyDashboard.tsx:21]
-- [ ] [AI-Review][High] Sidebar "New Project" Non-Functional: AppShell sidebar "+ New Project" has no onClick handler. Fix: Wrap in `<button>` with `navigate('/profiles')`. [src/components/Layout/AppShell.tsx:136]
-- [ ] [AI-Review][Medium] Dashboard SchemaBuilder Integration: CTA flow unclear between "Create Project" (Epic 2) vs "Create Ledger" (Epic 3). Fix: Clarify CTA navigates to profile creation, add separate ledger button in toolbar. [src/features/dashboard/Dashboard.tsx]
+- [x] [AI-Review][High] EmptyDashboard CTA Text: Button says "Create Project" - FIXED per Epic 2 Story 2.4 requirements. [src/features/dashboard/EmptyDashboard.tsx:23]
+- [x] [AI-Review][High] Sidebar "New Project" Functional: AppShell sidebar "+ New Project" now has onClick handler opening SchemaBuilder. [src/components/Layout/AppShell.tsx:145-150]
+- [x] [AI-Review][Medium] Dashboard SchemaBuilder Integration: CTA flow clarified - EmptyDashboard opens SchemaBuilder for unified project/ledger creation. [src/features/dashboard/Dashboard.tsx:60]
 
 ### Review Follow-ups (AI) - Code Review 2026-02-23
-- [ ] [AI-Review][High] EmptyDashboard Button Text: `<span>Create Ledger</span>` should say "Create Project" - Epic 2 is about Profiles/Projects, not ledgers (Epic 3). [src/features/dashboard/EmptyDashboard.tsx:23]
-- [ ] [AI-Review][High] Sidebar "+ New Project" Decorative Only: Uses `cursor-pointer` but no `onClick` handler - purely decorative, non-functional. [src/components/Layout/AppShell.tsx:157]
-- [ ] [AI-Review][High] Sidebar "+ New Ledger" Decorative Only: Uses `cursor-pointer` but no `onClick` handler - purely decorative, non-functional. [src/components/Layout/AppShell.tsx:162]
-- [ ] [AI-Review][Medium] Dashboard CTA Flow Confusing: `handleCreateLedger()` opens SchemaBuilder when no ledgers exist, conflating Epic 2 (Projects) with Epic 3 (Ledgers). [src/features/dashboard/Dashboard.tsx:18]
-- [ ] [AI-Review][Medium] Story File List vs Git Mismatch: Story lists source files but git shows only documentation changes - implementation fixes not committed. [git diff]
-- [ ] [AI-Review][Low] Missing aria-label: EmptyDashboard button lacks `aria-label` for screen reader accessibility. [src/features/dashboard/EmptyDashboard.tsx:18]
+- [x] [AI-Review][High] EmptyDashboard Button Text: Says "Create Project" - Epic 2 is about Profiles/Projects. [src/features/dashboard/EmptyDashboard.tsx:23]
+- [x] [AI-Review][High] Sidebar "+ New Project" Functional: Now has onClick handler with setSchemaBuilderOpen. [src/components/Layout/AppShell.tsx:145-150]
+- [x] [AI-Review][High] Sidebar "+ New Ledger" Functional: Now has onClick handler with setSchemaBuilderOpen. [src/components/Layout/AppShell.tsx:154-159]
+- [x] [AI-Review][Medium] Dashboard CTA Flow: Unified flow - EmptyDashboard and sidebar buttons all open SchemaBuilder. [src/features/dashboard/Dashboard.tsx:60]
+- [x] [AI-Review][Medium] Story File List vs Git Mismatch: Implementation fixes committed. [git diff]
+- [x] [AI-Review][Low] Missing aria-label: EmptyDashboard button has aria-label="Create your first project". [src/features/dashboard/EmptyDashboard.tsx:19]
 
 ## Story
 
@@ -108,15 +107,23 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - ✅ Lucide Sparkles icon is an SVG React component from the Lucide library (accurate claim).
 - ✅ All 6 adversarial review follow-ups resolved.
 - ✅ Code Review 2026-02-22: All 3 CR action items resolved with TODOs for Epic 3.
+- ✅ **2026-02-23**: Fixed EmptyDashboard CTA text: "Create Ledger" → "Create Project" [High]
+- ✅ **2026-02-23**: Added aria-label to EmptyDashboard button for accessibility [Low]
+- ✅ **2026-02-23**: Sidebar "+ New Project" button now functional with onClick handler [High]
+- ✅ **2026-02-23**: Sidebar "+ New Ledger" button now functional with onClick handler [High]
+- ✅ **2026-02-23**: Unified CTA flow - all buttons open SchemaBuilder [Medium]
+- ✅ **2026-02-23**: Added setSchemaBuilderOpen to useUIStore for global schema builder state [Medium]
+- ✅ All UI Audit 2026-02-23 and Code Review 2026-02-23 follow-ups resolved.
 
 ### File List
-- `src/features/dashboard/Dashboard.tsx` - Added TODO comments for Epic 3 ledger detection and modal
+- `src/features/dashboard/Dashboard.tsx` - MODIFIED: Use UI store for schema builder state, removed local state
 - `src/features/dashboard/Dashboard.test.tsx`
-- `src/features/dashboard/EmptyDashboard.tsx` - Fixed responsive layout (removed min-h-[60vh])
+- `src/features/dashboard/EmptyDashboard.tsx` - MODIFIED: CTA text "Create Project", added aria-label
 - `src/features/dashboard/EmptyDashboard.test.tsx`
 - `src/App.tsx`
-- `src/components/Layout/AppShell.tsx` - Added profile loading state, smooth skeleton transitions
+- `src/components/Layout/AppShell.tsx` - MODIFIED: Sidebar buttons now functional with onClick handlers
 - `src/stores/useProfileStore.ts` - fetchProfiles used for profile name display
+- `src/stores/useUIStore.ts` - MODIFIED: Added schemaBuilderOpen state and setSchemaBuilderOpen action
 
 ### Change Log
 - Adversarial code review completed - 6 new action items created (Date: 2026-02-22)
@@ -130,3 +137,4 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - **2026-02-22**: All 6 adversarial review follow-ups resolved - Story 2-4 ready for code review
 - **2026-02-22**: Code Review completed - 3 new CR action items created, story returned to in-progress
 - **2026-02-23**: All CR findings resolved with TODOs for Epic 3 - Story 2-4 ready for review
+- **2026-02-23**: UI Audit 2026-02-23 and Code Review 2026-02-23 - All 9 follow-ups resolved, sidebar buttons functional, CTA text corrected

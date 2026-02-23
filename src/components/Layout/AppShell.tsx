@@ -142,11 +142,23 @@ export const AppShell: React.FC = () => {
                         <>
                             <div className="px-2 pb-1">
                                 <div className="text-[10px] font-semibold tracking-wider uppercase text-zinc-600 px-2 mb-0.5 mt-2">Projects</div>
-                                <div className="text-[12px] text-zinc-600 px-4 py-1.5 cursor-pointer hover:text-zinc-400 transition-colors">+ New Project</div>
+                                <button
+                                    onClick={() => useUIStore.getState().setSchemaBuilderOpen(true)}
+                                    className="w-full text-left text-[12px] text-zinc-600 px-4 py-1.5 cursor-pointer hover:text-zinc-400 transition-colors bg-transparent border-none"
+                                    aria-label="Create new project"
+                                >
+                                    + New Project
+                                </button>
                             </div>
                             <div className="px-2 mt-4 pb-1">
                                 <div className="text-[10px] font-semibold tracking-wider uppercase text-zinc-600 px-2 mb-0.5">Ledgers</div>
-                                <div className="text-[12px] text-zinc-600 px-4 py-1.5 cursor-pointer hover:text-zinc-400 transition-colors">+ New Ledger</div>
+                                <button
+                                    onClick={() => useUIStore.getState().setSchemaBuilderOpen(true)}
+                                    className="w-full text-left text-[12px] text-zinc-600 px-4 py-1.5 cursor-pointer hover:text-zinc-400 transition-colors bg-transparent border-none"
+                                    aria-label="Create new ledger"
+                                >
+                                    + New Ledger
+                                </button>
                             </div>
                         </>
                     )}

@@ -8,17 +8,12 @@ import { LedgerTable } from '../ledger/LedgerTable';
 import { ExportTemplateButton } from '../templates/ExportTemplateButton';
 
 export const Dashboard: React.FC = () => {
-    const { toggleRightInspector, rightInspectorOpen } = useUIStore();
+    const { toggleRightInspector, rightInspectorOpen, schemaBuilderOpen, setSchemaBuilderOpen } = useUIStore();
     const { schemas } = useLedgerStore();
-    const [isSchemaBuilderOpen, setIsSchemaBuilderOpen] = useState(false);
     const [selectedLedgerId, setSelectedLedgerId] = useState<string | null>(null);
 
     // Ledger detection: Use schema count as proxy for ledgers
     const hasLedgers = schemas.length > 0;
-
-    const handleCreateLedger = () => {
-        setIsSchemaBuilderOpen(true);
-    };
 
     const handleSelectLedger = (schemaId: string) => {
         setSelectedLedgerId(schemaId);
@@ -62,7 +57,7 @@ export const Dashboard: React.FC = () => {
             <div className="flex-1 overflow-hidden">
                 {!hasLedgers ? (
                     <div className="h-full flex items-center justify-center">
-                        <EmptyDashboard onActionClick={handleCreateLedger} />
+                        <EmptyDashboard onActionClick={() => setSchemaBuilderOpen(true)} />
                     </div>
                 ) : selectedLedgerId ? (
                     <LedgerTable schemaId={selectedLedgerId} />
@@ -73,8 +68,8 @@ export const Dashboard: React.FC = () => {
                 )}
             </div>
 
-            {isSchemaBuilderOpen && (
-                <SchemaBuilder onClose={() => setIsSchemaBuilderOpen(false)} />
+            {schemaBuilderOpen && (
+                <SchemaBuilder onClose={() => setSchemaBuilderOpen(false)} />
             )}
         </div>
     );
