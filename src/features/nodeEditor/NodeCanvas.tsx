@@ -14,6 +14,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
+import { useLedgerStore } from '../../stores/useLedgerStore';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
@@ -21,6 +22,8 @@ import { ArithmeticNode } from './nodes/ArithmeticNode';
 import { TriggerNode } from './nodes/TriggerNode';
 import { DashboardOutputNode } from './nodes/DashboardOutputNode';
 import { DataEdge } from './edges/DataEdge';
+import { executeTrigger } from '../../services/triggerEngine';
+import { useErrorStore } from '../../stores/useErrorStore';
 
 // Custom node types
 const nodeTypes = {
@@ -39,6 +42,49 @@ const edgeTypes = {
 export const NodeCanvas: React.FC = () => {
     const { activeProfileId } = useProfileStore();
     const { nodes, edges, viewport, isLoading, loadCanvas, saveCanvas, setNodes, setEdges, setViewport } = useNodeStore();
+    const { setOnEntryEvent } = useLedgerStore();
+    const { dispatchError } = useErrorStore();
+
+    // Wire trigger engine to ledger events (Story 4-4)
+    useEffect(() => {
+        setOnEntryEvent(async (eventType, entry) => {
+            // Find all matching trigger nodes
+            const matchingTriggers = nodes.filter(n => 
+                n.type === 'trigger' && 
+                n.data.ledgerId === entry.ledgerId && 
+                n.data.eventType === eventType
+            );
+
+            for (const trigger of matchingTriggers) {
+                try {
+                    // Update trigger status visually (simulated update)
+                    trigger.data.status = 'fired';
+                    trigger.data.lastFired = new Date().toISOString();
+                    
+                    await executeTrigger(
+                        {
+                            triggerId: trigger.id,
+                            entryId: entry._id,
+                            ledgerId: entry.ledgerId,
+                            eventType,
+                            depth: 0,
+                            data: entry.data
+                        },
+                        nodes,
+                        edges,
+                        trigger.id
+                    );
+                } catch (err: any) {
+                    trigger.data.status = 'error';
+                    trigger.data.error = err.message;
+                    dispatchError(`Trigger failed: ${err.message}`);
+                }
+            }
+        });
+
+        // Cleanup subscriber on unmount
+        return () => setOnEntryEvent(() => {});
+    }, [nodes, edges, setOnEntryEvent, dispatchError]);
 
     const [rfNodes, setRfNodes, onNodesChange] = useNodesState(nodes);
     const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(edges);
