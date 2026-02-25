@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Database } from './db';
-import { find_entries_with_relation_to, create_entry, create_schema, delete_entry, restore_entry, list_entries, list_all_entries } from './db';
+import { Database } from '../src/lib/db';
+import { find_entries_with_relation_to, create_entry, create_schema, delete_entry, restore_entry, list_entries, list_all_entries } from '../src/lib/db';
 
 describe('find_entries_with_relation_to', () => {
     let db: Database;

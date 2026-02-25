@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerSchema, LedgerEntry, SchemaField } from '../../types/ledger';
@@ -19,6 +19,19 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     const [selectedRow, setSelectedRow] = useState<number>(-1);
 
     const schema = schemas.find(s => s._id === schemaId);
+
+    // Memoized set of deleted entry IDs for efficient ghost detection (Story 3-4)
+    const deletedEntryIds = useMemo(() => {
+        const deleted = new Set<string>();
+        Object.values(allEntries).forEach(ledgerEntries => {
+            ledgerEntries.forEach(entry => {
+                if (entry.isDeleted) {
+                    deleted.add(entry._id);
+                }
+            });
+        });
+        return deleted;
+    }, [allEntries]);
 
     useEffect(() => {
         if (activeProfileId && schemaId) {
@@ -159,7 +172,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                     className="flex-1 px-3 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 border-r border-zinc-200 dark:border-zinc-800 last:border-r-0"
                                     role="gridcell"
                                 >
-                                    {renderFieldValue(entry.data[field.name], field.type, entry, field, schemaId, allEntries ? Object.values(allEntries).flat() : undefined)}
+                                    {renderFieldValue(entry.data[field.name], field.type, entry, field, schemaId, deletedEntryIds)}
                                 </div>
                             ))}
                         </div>
@@ -178,7 +191,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     );
 };
 
-function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, field?: SchemaField, schemaId?: string, allEntries?: LedgerEntry[]): React.ReactNode {
+function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, field?: SchemaField, schemaId?: string, deletedEntryIds?: Set<string>): React.ReactNode {
     if (value === null || value === undefined) {
         return <span className="text-zinc-400 dark:text-zinc-600 italic">-</span>;
     }
@@ -191,10 +204,7 @@ function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, fie
         case 'relation':
             // Check if target entries are deleted (ghost references - Story 3-4)
             const values = Array.isArray(value) ? value as string[] : [value as string];
-            const deletedEntryIds = allEntries
-                ? new Set(allEntries.filter(e => e.isDeleted).map(e => e._id))
-                : new Set<string>();
-            const hasDeletedTarget = values.some(v => deletedEntryIds.has(v));
+            const hasDeletedTarget = values.some(v => deletedEntryIds?.has(v));
 
             // Render as Tag Chip with navigation (Story 3-3)
             return (
@@ -203,10 +213,6 @@ function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, fie
                     targetLedgerId={field?.relationTarget}
                     entryId={entry?._id}
                     isGhost={hasDeletedTarget}
-                    onClick={() => {
-                        // TODO: Navigate to target ledger (Story 3-3, Task 4)
-                        console.log('Navigate to', field?.relationTarget);
-                    }}
                 />
             );
         default:

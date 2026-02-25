@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { ProfileMetadata } from '../types/profile';
-import { getProfileDb, closeProfileDb, create_profile_encrypted, list_profiles, decryptProfileMetadata } from '../lib/db';
+import { getProfileDb, closeProfileDb, create_profile_encrypted, list_profiles, decryptProfileMetadata, hard_delete_profile } from '../lib/db';
 import { useErrorStore } from './useErrorStore';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { encryptPayload, decryptPayload } from '../lib/crypto';
@@ -172,13 +172,8 @@ export const useProfileStore = create<ProfileState>()(
                     await profileDb.destroy();
                     // Note: destroy() already calls delete profileDatabases[this.profileId]
 
-                    // Only after successful destroy, mark as deleted in master
-                    const profileDoc = await masterDb.getDocument<any>(id);
-                    await masterDb.updateDocument(id, {
-                        ...profileDoc,
-                        isDeleted: true,
-                        deletedAt: new Date().toISOString()
-                    });
+                    // NFR12 Compliance: Hard-delete the profile record from master DB
+                    await hard_delete_profile(masterDb, id);
 
                     await get().fetchProfiles();
                     if (get().activeProfileId === id) {

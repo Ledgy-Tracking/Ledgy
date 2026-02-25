@@ -10,6 +10,7 @@ import {
     Moon,
     FolderKanban,
     Network,
+    Trash2
 } from 'lucide-react';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useSyncStore } from '../../stores/useSyncStore';
@@ -93,6 +94,17 @@ export const AppShell: React.FC = () => {
                     >
                         <FolderKanban size={18} className="group-hover:text-zinc-900 dark:group-hover:text-zinc-100" />
                         <span className="text-sm font-medium">Projects</span>
+                    </button>
+
+                    <button
+                        onClick={() => navigate(`/app/${profileId}/trash`)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group ${window.location.pathname.includes('/trash')
+                            ? 'bg-zinc-200 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100'
+                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-900'
+                            }`}
+                    >
+                        <Trash2 size={18} className="group-hover:text-zinc-900 dark:group-hover:text-zinc-100" />
+                        <span className="text-sm font-medium">Trash</span>
                     </button>
                     {/* Placeholder for other navigation if needed */}
                 </nav>

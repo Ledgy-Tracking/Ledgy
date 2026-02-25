@@ -49,6 +49,7 @@ describe('LedgerTable', () => {
         (useLedgerStore as any).mockReturnValue({
             schemas: [mockSchema],
             entries: { 'schema:test-123': mockEntries },
+            allEntries: { 'schema:test-123': mockEntries },
             fetchEntries: vi.fn(),
         });
         (useProfileStore as any).mockReturnValue({
@@ -60,6 +61,7 @@ describe('LedgerTable', () => {
         (useLedgerStore as any).mockReturnValue({
             schemas: [mockSchema],
             entries: {},
+            allEntries: {},
             fetchEntries: vi.fn(),
         });
 

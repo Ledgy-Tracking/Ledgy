@@ -37,6 +37,11 @@ export class Database {
         return await this.db.get<T>(id);
     }
 
+    async hardDeleteDocument(id: string): Promise<PouchDB.Core.Response> {
+        const doc = await this.db.get(id);
+        return await this.db.remove(doc);
+    }
+
     async updateDocument<T extends object>(id: string, data: T): Promise<PouchDB.Core.Response> {
         const existing = await this.db.get<LedgyDocument>(id);
 
@@ -170,6 +175,14 @@ export async function create_profile_encrypted(
 export async function list_profiles(masterDb: Database): Promise<any[]> {
     const profileDocs = await masterDb.getAllDocuments<any>('profile');
     return profileDocs.filter(doc => !doc.isDeleted);
+}
+
+/**
+ * Hard-deletes a profile record from the master database.
+ * NFR12 Compliance: Right-to-be-forgotten requires permanent removal.
+ */
+export async function hard_delete_profile(masterDb: Database, profileId: string): Promise<void> {
+    await masterDb.hardDeleteDocument(profileId);
 }
 
 /**

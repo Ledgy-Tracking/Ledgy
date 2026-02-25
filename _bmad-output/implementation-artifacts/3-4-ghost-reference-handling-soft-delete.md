@@ -1,6 +1,6 @@
 # Story 3.4: Ghost Reference Handling (Soft-Delete)
 
-Status: review
+Status: done
 
 ## Story
 
@@ -42,6 +42,12 @@ So that my system doesn't crash or break when a related entry is removed or hasn
   - [x] Unit tests for `RelationTagChip` ghost state.
   - [x] Integration test: Delete entry → verify ghost state → restore → verify link restored.
   - [x] E2E test: Soft-delete sync across devices.
+
+## Review Follow-ups (AI) - Adversarial Review 2026-02-25
+- [x] [AI-Review][High] Standards Violation: Moved all soft-delete tests to `/tests/SoftDelete.test.ts`.
+- [x] [AI-Review][High] NFR12 Compliance: Updated `deleteProfile` to hard-delete the profile record in the master DB.
+- [x] [AI-Review][Medium] UI/UX Fix: Added Trash navigation link to `AppShell` sidebar for user accessibility.
+- [x] [AI-Review][Medium] Performance Optimization: Memoized ghost detection logic in `LedgerTable` to avoid O(N) flattening on every cell render.
 
 ## Dev Notes
 
