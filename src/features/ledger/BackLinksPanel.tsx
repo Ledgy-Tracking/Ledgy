@@ -3,7 +3,7 @@ import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerEntry } from '../../types/ledger';
 import { RelationTagChip } from './RelationTagChip';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
 interface BackLinksPanelProps {
@@ -47,6 +47,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                     <BackLinkItem
                         key={entry._id}
                         entry={entry}
+                        targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
                     />
                 ))}
@@ -57,11 +58,14 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
 
 interface BackLinkItemProps {
     entry: LedgerEntry;
+    targetEntryId: string;
     targetLedgerId: string;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetLedgerId }) => {
+const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, targetLedgerId }) => {
     const { schemas } = useLedgerStore();
+    const { profileId } = useParams<{ profileId: string }>();
+    const { activeProfileId } = useProfileStore();
 
     // Find the schema for this entry's ledger
     const entrySchema = schemas.find(s => s.ledgerId === entry.ledgerId || s._id === entry.ledgerId);
@@ -82,12 +86,15 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetLedgerId }) =>
         ? String(entry.data[entrySchema.fields[0].name] || entry._id)
         : entry._id;
 
+    const navProfileId = profileId || activeProfileId;
+
     return (
         <div className="p-3 bg-zinc-800/30 rounded border border-zinc-700 hover:border-zinc-600 transition-colors">
             <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                     <Link
-                        to={`/ledger/${entry.ledgerId}`}
+                        to={`/app/${navProfileId}/ledger/${entry.ledgerId}`}
+                        state={{ highlightEntryId: entry._id }}
                         className="text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:underline truncate block"
                     >
                         {displayValue}

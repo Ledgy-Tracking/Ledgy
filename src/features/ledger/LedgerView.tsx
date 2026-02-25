@@ -15,14 +15,16 @@ export const LedgerView: React.FC = () => {
     const { activeProfileId } = useProfileStore();
     const [highlightEntryId, setHighlightEntryId] = useState<string | null>(null);
 
+    const navigate = useNavigate();
+
     // Extract highlightEntryId from navigation state
     useEffect(() => {
         if (location.state?.highlightEntryId) {
             setHighlightEntryId(location.state.highlightEntryId);
-            // Clear the state after extracting
-            window.history.replaceState({}, '');
+            // Clear the state after extracting using React Router
+            navigate(location.pathname, { replace: true, state: {} });
         }
-    }, [location]);
+    }, [location, navigate]);
 
     useEffect(() => {
         if (activeProfileId) {

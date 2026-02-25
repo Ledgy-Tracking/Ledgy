@@ -3,6 +3,14 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { RelationTagChip } from '../src/features/ledger/RelationTagChip';
 
+vi.mock('react-router-dom', async () => {
+    const actual = await vi.importActual('react-router-dom');
+    return {
+        ...actual,
+        useParams: () => ({ profileId: 'profile-1' }),
+    };
+});
+
 const renderWithRouter = (component: React.ReactElement) => {
     return render(
         <BrowserRouter>

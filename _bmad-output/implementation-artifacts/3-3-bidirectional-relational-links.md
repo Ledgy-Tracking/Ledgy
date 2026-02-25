@@ -1,6 +1,6 @@
 # Story 3.3: Bidirectional Relational Links
 
-Status: in-progress
+Status: done
 
 ## Story
 
@@ -27,22 +27,28 @@ So that I can capture cross-domain relationships (e.g., linking a "Coffee" entry
   - [x] Style chips with Tailwind (distinct from text/number fields).
 - [x] Task 2: Combobox for Relation Selection (AC: 2, 3)
   - [x] Create `RelationCombobox` component with search/filter.
-  - [ ] Populate combobox with target ledger entries via `list_entries`.
+  - [x] Populate combobox with target ledger entries via `list_entries`.
   - [x] Implement search/filter for large entry lists.
-  - [ ] Wire `update_entry` to save relation field value.
-- [ ] Task 3: Bidirectional Back-Links (AC: 4)
-  - [ ] Query entries that have relation fields pointing to current entry.
-  - [ ] Display back-links in a "Referenced By" section or column.
-  - [ ] Ensure back-links update on relation add/remove.
-- [ ] Task 4: Navigation on Click (AC: 5)
-  - [ ] Wire Tag Chip click to navigate to target ledger route.
-  - [ ] Highlight target entry on navigation (visual feedback).
-  - [ ] Use React Router v7 for navigation.
-- [ ] Task 5: Testing & Integration
-  - [ ] Unit tests for `RelationTagChip` rendering.
-  - [ ] Unit tests for `RelationCombobox` selection logic.
-  - [ ] Integration test: Create relation → verify persistence → verify back-link.
-  - [ ] E2E test: Navigate via relation link.
+  - [x] Wire `update_entry` to save relation field value.
+- [x] Task 3: Bidirectional Back-Links (AC: 4)
+  - [x] Query entries that have relation fields pointing to current entry.
+  - [x] Display back-links in a "Referenced By" section or column.
+  - [x] Ensure back-links update on relation add/remove.
+- [x] Task 4: Navigation on Click (AC: 5)
+  - [x] Wire Tag Chip click to navigate to target ledger route.
+  - [x] Highlight target entry on navigation (visual feedback).
+  - [x] Use React Router v7 for navigation.
+- [x] Task 5: Testing & Integration
+  - [x] Unit tests for `RelationTagChip` rendering.
+  - [x] Unit tests for `RelationCombobox` selection logic.
+  - [x] Integration test: Create relation → verify persistence → verify back-link.
+  - [x] E2E test: Navigate via relation link.
+
+## Review Follow-ups (AI) - Adversarial Review 2026-02-25
+- [x] [AI-Review][High] Navigation Fix: Corrected `BackLinksPanel.tsx` Link paths to include `/app/:profileId` prefix.
+- [x] [AI-Review][High] Multi-Relation Highlighting: Fixed `RelationTagChip.tsx` to highlight the specific entry ID clicked.
+- [x] [AI-Review][High] Missing Tests: Created `RelationCombobox.test.tsx` and `BackLinksPanel.test.tsx`.
+- [x] [AI-Review][Medium] State Management: Refactored `LedgerView.tsx` to use React Router `navigate` for clearing highlight state.
 
 ## Dev Notes
 

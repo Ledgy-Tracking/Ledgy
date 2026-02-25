@@ -32,7 +32,7 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
         return <span className="text-zinc-600 italic">-</span>;
     }
 
-    const handleClick = () => {
+    const handleClick = (id: string) => {
         if (isGhost) return;
         
         // Call custom onClick if provided
@@ -42,9 +42,13 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
         
         // Navigate to target ledger (Story 3-3, AC 5)
         if (targetLedgerId) {
-            const navProfileId = profileId || activeProfileId || ':profileId';
+            const navProfileId = profileId || activeProfileId;
+            if (!navProfileId) {
+                console.warn('Cannot navigate: No profile ID found');
+                return;
+            }
             navigate(`/app/${navProfileId}/ledger/${targetLedgerId}`, {
-                state: { highlightEntryId: entryId || values[0] }
+                state: { highlightEntryId: id }
             });
         }
     };
@@ -54,7 +58,7 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
             {values.map((val, index) => (
                 <button
                     key={index}
-                    onClick={handleClick}
+                    onClick={() => handleClick(val)}
                     className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded border transition-colors ${
                         isGhost
                             ? 'bg-zinc-800 border-zinc-700 text-zinc-500 line-through cursor-not-allowed'
