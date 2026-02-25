@@ -67,7 +67,7 @@ development_status:
   4-2-ledger-source-nodes-basic-wiring: done
   4-3-correlation-compute-nodes: done
   4-4-autonomous-triggers-on-create-on-edit: done
-  4-5-dashboard-widgets: review
+  4-5-dashboard-widgets: done
   epic-4-retrospective: optional
 
   epic-5: in-progress

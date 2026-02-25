@@ -7,11 +7,14 @@ import { SchemaBuilder } from '../ledger/SchemaBuilder';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { LedgerTable } from '../ledger/LedgerTable';
 import { ExportTemplateButton } from '../templates/ExportTemplateButton';
+import { DashboardView } from './DashboardView';
+import { Table, LayoutGrid } from 'lucide-react';
 
 export const Dashboard: React.FC = () => {
     const { profileId, projectId } = useParams<{ profileId: string, projectId: string }>();
     const { toggleRightInspector, rightInspectorOpen, schemaBuilderOpen, setSchemaBuilderOpen } = useUIStore();
     const { schemas, fetchSchemas } = useLedgerStore();
+    const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
     // Scoped schemas for this project
     const projectSchemas = schemas.filter(s => s.projectId === projectId);
@@ -35,8 +38,26 @@ export const Dashboard: React.FC = () => {
             {/* Toolbar */}
             <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-800 bg-zinc-900 shrink-0">
                 <div className="flex-1 flex items-baseline gap-2">
-                    <h1 className="text-sm font-semibold">Ledger Dashboard</h1>
-                    {hasLedgers && (
+                    <h1 className="text-sm font-semibold italic tracking-tighter text-emerald-500 mr-2">LEDGY</h1>
+                    
+                    <div className="flex bg-zinc-800 rounded-lg p-0.5 border border-zinc-700">
+                        <button
+                            onClick={() => setViewMode('table')}
+                            className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-zinc-700 text-emerald-400 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            title="Table View"
+                        >
+                            <Table size={14} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-zinc-700 text-emerald-400 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            title="Metric Grid"
+                        >
+                            <LayoutGrid size={14} />
+                        </button>
+                    </div>
+
+                    {viewMode === 'table' && hasLedgers && (
                         <select
                             value={selectedLedgerId || ''}
                             onChange={(e) => handleSelectLedger(e.target.value)}
@@ -71,10 +92,12 @@ export const Dashboard: React.FC = () => {
 
             {/* Table Area / Main Content */}
             <div className="flex-1 overflow-hidden">
-                {!hasLedgers ? (
+                {!hasLedgers && viewMode === 'table' ? (
                     <div className="h-full flex items-center justify-center">
                         <EmptyDashboard onActionClick={() => setSchemaBuilderOpen(true)} />
                     </div>
+                ) : viewMode === 'grid' ? (
+                    <DashboardView dashboardId={projectId || 'default'} />
                 ) : selectedLedgerId ? (
                     <LedgerTable schemaId={selectedLedgerId} />
                 ) : (

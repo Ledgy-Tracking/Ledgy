@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { EmptyDashboard } from './EmptyDashboard';
+import { EmptyDashboard } from '../src/features/dashboard/EmptyDashboard';
 
 describe('EmptyDashboard', () => {
     it('renders the welcome message and CTA', () => {

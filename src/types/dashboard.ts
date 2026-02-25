@@ -9,6 +9,7 @@ export interface WidgetPosition {
 
 export interface WidgetConfig {
     id: string;
+    nodeId?: string; // Link to source computation node
     type: 'chart' | 'trend' | 'text';
     title: string;
     position: WidgetPosition;

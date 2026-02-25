@@ -1,6 +1,6 @@
 # Story 4.5: Dashboard Widgets
 
-Status: review
+Status: done
 
 ## Story
 
@@ -189,10 +189,9 @@ src/features/nodeEditor/nodes/
 - **2026-02-23**: Adversarial review - 6 action items created (CRITICAL: widgets folder missing, no dashboard layout, no live updates)
 - **2026-02-23**: Review follow-ups addressed - All widget types implemented, dashboard view created, layout persistence added, live updates wired
 
-### Review Follow-ups (AI) - Adversarial Review 2026-02-23
-- [x] [AI-Review][Critical] AC1 Dashboard Output Node: Created `DashboardView` with full widget system. `widgets/` folder created with `ChartWidget.tsx`, `TrendWidget.tsx`, `TextWidget.tsx`.
-- [x] [AI-Review][Critical] AC2 Widget Types: All three widget types implemented - Chart (bar/line), Trend (up/down), Text (large value).
-- [x] [AI-Review][Critical] AC3 Live Updates: Widgets update in real-time via `useDashboardStore` and simulated data fluctuations.
-- [x] [AI-Review][Critical] AC4 Flexible Layout: CSS grid layout with responsive breakpoints, draggable widget positions.
-- [x] [AI-Review][Critical] AC5 Layout Persistence: `save_dashboard_layout` and `load_dashboard_layout` functions in `db.ts`, auto-save on change.
-- [x] [AI-Review][High] Task 5 Tests: 117 project tests passing, no regressions from dashboard widget implementation.
+### Review Follow-ups (AI) - Adversarial Review 2026-02-25
+- [x] [AI-Review][Critical] Integration Fix: Wired `DashboardOutputNode` to `useDashboardStore` to automatically create and update widgets from the node editor.
+- [x] [AI-Review][Critical] Live Data Fix: Refactored `DashboardView` to pull real computation results from `useNodeStore` instead of using random fluctuations.
+- [x] [AI-Review][High] Standards Violation: Moved `EmptyDashboard.test.tsx` to the root `/tests` directory.
+- [x] [AI-Review][Medium] UI/UX Fix: Integrated the Metric Grid view into the main `Dashboard.tsx` component with a view toggle (Table vs Grid).
+- [x] [AI-Review][Medium] Logic Stability: Added `nodeId` to `WidgetConfig` to maintain robust links between visual widgets and their source computation nodes.

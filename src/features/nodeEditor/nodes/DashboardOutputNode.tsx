@@ -1,6 +1,7 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { useProfileStore } from '../../../stores/useProfileStore';
+import { useDashboardStore } from '../../../stores/useDashboardStore';
 import { BarChart3, TrendingUp, Type } from 'lucide-react';
 
 export interface DashboardOutputNodeData {
@@ -16,15 +17,42 @@ export interface DashboardOutputNodeData {
  */
 export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
     const { activeProfileId } = useProfileStore();
+    const { addWidget, updateWidget, widgets } = useDashboardStore();
     const nodeData = data as DashboardOutputNodeData;
+
+    // Ensure widget exists on dashboard when node is added
+    useEffect(() => {
+        if (!activeProfileId) return;
+
+        const existingWidget = widgets.find(w => w.id === nodeData.widgetId || w.nodeId === id);
+        
+        if (!existingWidget) {
+            const newWidgetId = nodeData.widgetId || `widget-${id}`;
+            data.widgetId = newWidgetId;
+            
+            addWidget({
+                id: newWidgetId,
+                nodeId: id,
+                type: nodeData.widgetType || 'text',
+                title: nodeData.title || 'New Widget',
+                position: { x: 0, y: 0, w: 1, h: 1 },
+                data: { value: 0 }
+            });
+        }
+    }, [id, activeProfileId, addWidget, nodeData.widgetId, widgets]);
 
     const handleWidgetTypeChange = (type: 'chart' | 'trend' | 'text') => {
         data.widgetType = type;
-        data.widgetId = `widget-${Date.now()}`;
+        if (data.widgetId) {
+            updateWidget(data.widgetId, { type });
+        }
     };
 
     const handleTitleChange = (title: string) => {
         data.title = title;
+        if (data.widgetId) {
+            updateWidget(data.widgetId, { title });
+        }
     };
 
     const getWidgetIcon = () => {
