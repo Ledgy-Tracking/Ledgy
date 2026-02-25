@@ -51,6 +51,11 @@ export interface Viewport {
     zoom: number;
 }
 
+export type ComputeType = 'correlation' | 'arithmetic';
+export type ArithmeticOperation = 'sum' | 'average' | 'min' | 'max';
+
+export const ARITHMETIC_OPERATIONS: ArithmeticOperation[] = ['sum', 'average', 'min', 'max'];
+
 /**
  * Node store state
  */

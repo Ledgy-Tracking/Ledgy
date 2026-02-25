@@ -26,7 +26,7 @@ interface ComputeResponse {
  * Calculate Pearson correlation coefficient
  * Returns value between -1 and 1, or NaN for insufficient data
  */
-function pearsonCorrelation(x: number[], y: number[]): number {
+export function pearsonCorrelation(x: number[], y: number[]): number {
   if (!x || !y || x.length === 0 || y.length === 0) {
     return NaN;
   }
@@ -59,7 +59,7 @@ function pearsonCorrelation(x: number[], y: number[]): number {
 /**
  * Arithmetic operations
  */
-function arithmetic(values: number[], operation: string): number {
+export function arithmetic(values: number[], operation: string): number {
   if (!values || values.length === 0) {
     return NaN;
   }

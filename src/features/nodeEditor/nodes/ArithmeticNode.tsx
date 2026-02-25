@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { computationService } from '../../../services/computationService';
 import { Calculator, AlertCircle } from 'lucide-react';
+import { ArithmeticOperation, ARITHMETIC_OPERATIONS } from '../../../types/nodeEditor';
 
 export interface ArithmeticNodeData {
     label: string;
@@ -23,11 +24,17 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
     const [result, setResult] = useState<number | null>(nodeData.result || null);
     const [error, setError] = useState<string | undefined>(nodeData.error);
     const [isComputing, setIsComputing] = useState(false);
-    const [operation, setOperation] = useState<'sum' | 'average' | 'min' | 'max'>(
+    const [operation, setOperation] = useState<ArithmeticOperation>(
         nodeData.operation || 'average'
     );
+    const operationRef = useRef(operation);
     const inputDataRef = useRef<{ values?: number[] }>({});
     const computeTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Keep operation ref in sync
+    useEffect(() => {
+        operationRef.current = operation;
+    }, [operation]);
 
     // Trigger computation when input data changes (debounced)
     const triggerComputation = useCallback((values?: number[]) => {
@@ -36,6 +43,7 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
         }
 
         computeTimerRef.current = setTimeout(() => {
+            const currentOperation = operationRef.current;
             if (!values || values.length === 0) {
                 setResult(null);
                 setError('Waiting for input data...');
@@ -46,7 +54,7 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
             setIsComputing(true);
             setError(undefined);
 
-            computationService.computeArithmetic(values, operation, (response) => {
+            computationService.computeArithmetic(values, currentOperation, (response) => {
                 setResult(response.result);
                 setError(response.error);
                 setIsComputing(false);
@@ -57,7 +65,7 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
                 data.isComputing = false;
             });
         }, 300); // 300ms debounce
-    }, [data, operation]);
+    }, [data]);
 
     // Listen for data changes
     useEffect(() => {
@@ -104,13 +112,14 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
             <div className="px-3 py-2 border-b border-zinc-700">
                 <select
                     value={operation}
-                    onChange={(e) => handleOperationChange(e.target.value as any)}
+                    onChange={(e) => handleOperationChange(e.target.value as ArithmeticOperation)}
                     className="w-full bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
-                    <option value="sum">Sum</option>
-                    <option value="average">Average</option>
-                    <option value="min">Min</option>
-                    <option value="max">Max</option>
+                    {ARITHMETIC_OPERATIONS.map(op => (
+                        <option key={op} value={op}>
+                            {op.charAt(0).toUpperCase() + op.slice(1)}
+                        </option>
+                    ))}
                 </select>
             </div>
 

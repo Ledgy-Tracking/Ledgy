@@ -4,8 +4,7 @@
  * Story 4-3: Correlation & Compute Nodes
  */
 
-type ComputeType = 'correlation' | 'arithmetic';
-type ArithmeticOperation = 'sum' | 'average' | 'min' | 'max';
+import { ComputeType, ArithmeticOperation } from '../types/nodeEditor';
 
 interface ComputeRequest {
   id: string;
@@ -29,18 +28,19 @@ type ComputeCallback = (response: ComputeResponse) => void;
 class ComputationService {
   private worker: Worker | null = null;
   private callbacks: Map<string, ComputeCallback> = new Map();
-  private initialized: boolean = false;
+  private initializing: boolean = false;
 
   /**
    * Initialize the computation worker
    */
   init() {
-    if (this.initialized) return;
+    if (this.worker || this.initializing) return;
+    this.initializing = true;
 
     try {
       // Use Vite's worker import
       this.worker = new Worker(
-        new URL('./computation.worker.ts', import.meta.url),
+        new URL('../workers/computation.worker.ts', import.meta.url),
         { type: 'module' }
       );
 
@@ -55,22 +55,22 @@ class ComputationService {
 
       this.worker.onerror = (error) => {
         console.error('Worker error:', error);
-        // Notify all pending callbacks of the error
-        this.callbacks.forEach((callback, id) => {
-          callback({
-            id,
-            result: null,
-            error: 'Computation failed',
-          });
-        });
-        this.callbacks.clear();
+        this.failAllPending('Computation worker error');
       };
 
-      this.initialized = true;
+      this.initializing = false;
     } catch (err) {
       console.error('Failed to initialize computation worker:', err);
-      this.initialized = false;
+      this.initializing = false;
+      this.failAllPending('Failed to initialize worker');
     }
+  }
+
+  private failAllPending(error: string) {
+    this.callbacks.forEach((callback, id) => {
+      callback({ id, result: null, error });
+    });
+    this.callbacks.clear();
   }
 
   /**
@@ -99,7 +99,7 @@ class ComputationService {
    * Queue a compute request
    */
   private queueCompute(request: ComputeRequest, callback: ComputeCallback) {
-    if (!this.initialized) {
+    if (!this.worker && !this.initializing) {
       this.init();
     }
 
@@ -107,9 +107,7 @@ class ComputationService {
 
     if (this.worker) {
       this.worker.postMessage(request);
-    } else {
-      // Fallback: compute synchronously (shouldn't happen)
-      console.warn('Worker not available, computation skipped');
+    } else if (!this.initializing) {
       callback({
         id: request.id,
         result: null,
