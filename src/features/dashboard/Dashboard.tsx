@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useUIStore } from '../../stores/useUIStore';
 import { PanelRightOpen } from 'lucide-react';
 import { EmptyDashboard } from './EmptyDashboard';
@@ -8,9 +9,16 @@ import { LedgerTable } from '../ledger/LedgerTable';
 import { ExportTemplateButton } from '../templates/ExportTemplateButton';
 
 export const Dashboard: React.FC = () => {
+    const { profileId } = useParams<{ profileId: string }>();
     const { toggleRightInspector, rightInspectorOpen, schemaBuilderOpen, setSchemaBuilderOpen } = useUIStore();
-    const { schemas } = useLedgerStore();
+    const { schemas, fetchSchemas } = useLedgerStore();
     const [selectedLedgerId, setSelectedLedgerId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (profileId) {
+            fetchSchemas(profileId);
+        }
+    }, [profileId, fetchSchemas]);
 
     // Ledger detection: Use schema count as proxy for ledgers
     const hasLedgers = schemas.length > 0;
@@ -46,7 +54,12 @@ export const Dashboard: React.FC = () => {
                     {hasLedgers && <ExportTemplateButton />}
                     
                     {!rightInspectorOpen && (
-                        <button onClick={toggleRightInspector} className="ml-2 text-zinc-400 hover:text-zinc-200" title="Open Inspector">
+                        <button 
+                            onClick={toggleRightInspector} 
+                            className="ml-2 text-zinc-400 hover:text-zinc-200" 
+                            title="Open Inspector"
+                            aria-label="Open inspector panel"
+                        >
                             <PanelRightOpen size={16} />
                         </button>
                     )}

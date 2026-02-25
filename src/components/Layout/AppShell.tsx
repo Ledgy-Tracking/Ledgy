@@ -20,9 +20,10 @@ export const AppShell: React.FC = () => {
     const { dispatchError } = useErrorStore();
     
     // Fetch profile name for display
-    const [profileName, setProfileName] = useState<string>('');
-    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-    const { profiles, fetchProfiles } = useProfileStore();
+    const { profiles, fetchProfiles, isLoading: isStoreLoading } = useProfileStore();
+    const profile = profiles.find(p => p.id === profileId);
+    const profileName = profile?.name || '';
+    const isLoadingProfile = isStoreLoading || (!profile && profiles.length === 0);
 
     useEffect(() => {
         setMounted(true);
@@ -38,20 +39,12 @@ export const AppShell: React.FC = () => {
         }
     }, [dispatchError]);
 
-    // Fetch profiles on mount and update profile name when profiles list changes or profileId changes
+    // Fetch profiles on mount if empty
     useEffect(() => {
-        if (profileId) {
-            if (profiles.length === 0) {
-                fetchProfiles();
-            } else {
-                const profile = profiles.find(p => p.id === profileId);
-                if (profile) {
-                    setProfileName(profile.name);
-                }
-                setIsLoadingProfile(false);
-            }
+        if (profiles.length === 0 && profileId) {
+            fetchProfiles();
         }
-    }, [profileId, profiles, fetchProfiles]);
+    }, [profileId, profiles.length, fetchProfiles]);
 
     useEffect(() => {
         let timeoutId: number;
@@ -132,7 +125,11 @@ export const AppShell: React.FC = () => {
                     ) : (
                         <div className="flex-1 flex justify-center">🌿</div>
                     )}
-                    <button onClick={toggleLeftSidebar} className="text-zinc-400 hover:text-zinc-200 ml-1">
+                    <button 
+                        onClick={toggleLeftSidebar} 
+                        className="text-zinc-400 hover:text-zinc-200 ml-1"
+                        aria-label={leftSidebarOpen ? "Close sidebar" : "Open sidebar"}
+                    >
                         {leftSidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
                     </button>
                 </div>
@@ -140,16 +137,6 @@ export const AppShell: React.FC = () => {
                 <div className="flex-grow overflow-y-auto overflow-x-hidden py-2 custom-scrollbar">
                     {leftSidebarOpen && (
                         <>
-                            <div className="px-2 pb-1">
-                                <div className="text-[10px] font-semibold tracking-wider uppercase text-zinc-600 px-2 mb-0.5 mt-2">Projects</div>
-                                <button
-                                    onClick={() => useUIStore.getState().setSchemaBuilderOpen(true)}
-                                    className="w-full text-left text-[12px] text-zinc-600 px-4 py-1.5 cursor-pointer hover:text-zinc-400 transition-colors bg-transparent border-none"
-                                    aria-label="Create new project"
-                                >
-                                    + New Project
-                                </button>
-                            </div>
                             <div className="px-2 mt-4 pb-1">
                                 <div className="text-[10px] font-semibold tracking-wider uppercase text-zinc-600 px-2 mb-0.5">Ledgers</div>
                                 <button
@@ -173,7 +160,7 @@ export const AppShell: React.FC = () => {
                         <SyncStatusBadge
                             state="synced"
                             lastSyncTime={new Date().toISOString()}
-                            onClick={() => console.log('Sync badge clicked')}
+                            onClick={() => {}}
                         />
                     </div>
                 )}
@@ -189,7 +176,11 @@ export const AppShell: React.FC = () => {
                 className={`flex flex-col bg-zinc-900 border-l border-zinc-800 transition-[width] duration-300 ease-in-out shrink-0 overflow-hidden ${rightInspectorOpen ? 'w-[260px]' : 'w-0'}`}
             >
                 <div className="h-12 flex items-center px-3.5 border-b border-zinc-800 shrink-0 text-[12px] font-semibold text-zinc-400 uppercase tracking-wider">
-                    <button onClick={toggleRightInspector} className="mr-2 text-zinc-400 hover:text-zinc-200">
+                    <button 
+                        onClick={toggleRightInspector} 
+                        className="mr-2 text-zinc-400 hover:text-zinc-200"
+                        aria-label="Close inspector panel"
+                    >
                         <PanelRightClose size={16} />
                     </button>
                     {rightInspectorOpen && "Entry Details"}

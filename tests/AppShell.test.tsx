@@ -1,10 +1,11 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import '@testing-library/jest-dom';
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { AppShell } from "../src/components/Layout/AppShell";
 import { useUIStore } from "../src/stores/useUIStore";
 import { useErrorStore } from "../src/stores/useErrorStore";
+import { useProfileStore } from "../src/stores/useProfileStore";
 
 // Mock stores
 vi.mock("../src/stores/useUIStore", () => ({
@@ -15,9 +16,14 @@ vi.mock("../src/stores/useErrorStore", () => ({
     useErrorStore: vi.fn(),
 }));
 
+vi.mock("../src/stores/useProfileStore", () => ({
+    useProfileStore: vi.fn(),
+}));
+
 describe("AppShell Component", () => {
     const mockUseUIStore = vi.mocked(useUIStore);
     const mockUseErrorStore = vi.mocked(useErrorStore);
+    const mockUseProfileStore = vi.mocked(useProfileStore);
 
 
     const mockUIState = {
@@ -29,6 +35,7 @@ describe("AppShell Component", () => {
         theme: 'dark',
         toggleTheme: vi.fn(),
         setLeftSidebar: vi.fn(),
+        setSchemaBuilderOpen: vi.fn(),
     };
 
     const mockErrorState = {
@@ -37,11 +44,21 @@ describe("AppShell Component", () => {
         clearError: vi.fn(),
     };
 
+    const mockProfileState = {
+        profiles: [{ id: 'p1', name: 'Test Profile' }],
+        fetchProfiles: vi.fn(),
+        isLoading: false,
+    };
+
     beforeEach(() => {
         vi.clearAllMocks();
         mockUseUIStore.mockReturnValue(mockUIState);
         (mockUseUIStore as any).getState = vi.fn().mockReturnValue(mockUIState);
+        
         mockUseErrorStore.mockReturnValue(mockErrorState);
+        
+        mockUseProfileStore.mockReturnValue(mockProfileState);
+        (mockUseProfileStore as any).getState = vi.fn().mockReturnValue(mockProfileState);
 
         // Reset window width to desktop default
         Object.defineProperty(window, 'innerWidth', {
@@ -53,15 +70,17 @@ describe("AppShell Component", () => {
 
     it("renders all three panels on desktop (width >= 1280)", () => {
         render(
-            <MemoryRouter>
-                <AppShell />
+            <MemoryRouter initialEntries={['/app/p1']}>
+                 <Routes>
+                    <Route path="/app/:profileId" element={<AppShell />} />
+                </Routes>
             </MemoryRouter>
         );
 
         expect(screen.getByText(/Ledgy/i)).toBeInTheDocument();
-        expect(screen.getByText(/Ledgy/i)).toBeInTheDocument();
+        expect(screen.getByText(/Test Profile/i)).toBeInTheDocument();
         expect(screen.getByText(/Entry Details/i)).toBeInTheDocument();
-        expect(screen.getByRole("main")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /open sidebar|close sidebar/i })).toBeInTheDocument();
     });
 
     it("performs initial responsive check on mount", () => {
@@ -69,8 +88,10 @@ describe("AppShell Component", () => {
         Object.defineProperty(window, 'innerWidth', { value: 1200 });
 
         render(
-            <MemoryRouter>
-                <AppShell />
+            <MemoryRouter initialEntries={['/app/p1']}>
+                 <Routes>
+                    <Route path="/app/:profileId" element={<AppShell />} />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -82,8 +103,10 @@ describe("AppShell Component", () => {
         Object.defineProperty(window, 'innerWidth', { value: 850 });
 
         render(
-            <MemoryRouter>
-                <AppShell />
+            <MemoryRouter initialEntries={['/app/p1']}>
+                 <Routes>
+                    <Route path="/app/:profileId" element={<AppShell />} />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -99,8 +122,10 @@ describe("AppShell Component", () => {
         Object.defineProperty(window, 'innerWidth', { value: 800 });
 
         render(
-            <MemoryRouter>
-                <AppShell />
+            <MemoryRouter initialEntries={['/app/p1']}>
+                 <Routes>
+                    <Route path="/app/:profileId" element={<AppShell />} />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -113,35 +138,41 @@ describe("AppShell Component", () => {
         mockUseUIStore.mockReturnValue({ ...mockUIState, rightInspectorOpen: false });
 
         render(
-            <MemoryRouter>
-                <AppShell />
+            <MemoryRouter initialEntries={['/app/p1']}>
+                 <Routes>
+                    <Route path="/app/:profileId" element={<AppShell />} />
+                </Routes>
             </MemoryRouter>
         );
 
         const asides = screen.getAllByRole('complementary');
+        // We need to be careful with getAllByRole as the mobile banner might not be there
+        // The desktop layout has 2 asides (left sidebar, right inspector)
         const inspector = asides[1];
         expect(inspector).toHaveClass('w-0');
     });
 
     it("toggles sidebar when clicking the button", () => {
         render(
-            <MemoryRouter>
-                <AppShell />
+            <MemoryRouter initialEntries={['/app/p1']}>
+                 <Routes>
+                    <Route path="/app/:profileId" element={<AppShell />} />
+                </Routes>
             </MemoryRouter>
         );
 
-        const asides = screen.getAllByRole('complementary');
-        const sidebar = asides[0];
-        const toggleBtn = sidebar.querySelector('button');
-        if (toggleBtn) fireEvent.click(toggleBtn);
+        const toggleBtn = screen.getByRole('button', { name: /close sidebar/i });
+        fireEvent.click(toggleBtn);
         expect(mockUIState.toggleLeftSidebar).toHaveBeenCalled();
     });
 
     it("auto-collapses panels on window resize", () => {
         vi.useFakeTimers();
         render(
-            <MemoryRouter>
-                <AppShell />
+            <MemoryRouter initialEntries={['/app/p1']}>
+                 <Routes>
+                    <Route path="/app/:profileId" element={<AppShell />} />
+                </Routes>
             </MemoryRouter>
         );
 
@@ -166,4 +197,3 @@ describe("AppShell Component", () => {
         vi.useRealTimers();
     });
 });
-

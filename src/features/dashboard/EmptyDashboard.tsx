@@ -13,15 +13,15 @@ export const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onActionClick })
             </div>
             <h2 className="text-2xl font-bold text-zinc-100 mb-2">Welcome to Ledgy!</h2>
             <p className="text-zinc-400 max-w-sm mb-8">
-                Create your first project to get started tracking your data securely and privately.
+                Create your first ledger to get started tracking your data securely and privately.
             </p>
             <button
                 onClick={onActionClick}
                 className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-2.5 px-6 rounded-lg transition-colors shadow-lg shadow-emerald-500/20"
-                aria-label="Create your first project"
+                aria-label="Create new ledger"
             >
                 <Plus size={20} />
-                <span>Create Project</span>
+                <span>Create Ledger</span>
             </button>
         </div>
     );

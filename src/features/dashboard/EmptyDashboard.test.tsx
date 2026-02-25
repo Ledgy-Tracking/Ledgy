@@ -8,9 +8,9 @@ describe('EmptyDashboard', () => {
         render(<EmptyDashboard onActionClick={mockAction} />);
 
         expect(screen.getByText('Welcome to Ledgy!')).toBeInTheDocument();
-        expect(screen.getByText(/Create your first project to get started/)).toBeInTheDocument();
+        expect(screen.getByText(/Create your first ledger to get started/)).toBeInTheDocument();
 
-        const button = screen.getByRole('button', { name: /Create your first project/i });
+        const button = screen.getByRole('button', { name: /Create new ledger/i });
         expect(button).toBeInTheDocument();
 
         fireEvent.click(button);
