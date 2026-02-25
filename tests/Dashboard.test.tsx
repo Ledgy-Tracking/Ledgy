@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { Dashboard } from './Dashboard';
+import { Dashboard } from '../src/features/dashboard/Dashboard';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import * as useLedgerStoreModule from '../../stores/useLedgerStore';
-import * as useUIStoreModule from '../../stores/useUIStore';
+import * as useLedgerStoreModule from '../src/stores/useLedgerStore';
+import * as useUIStoreModule from '../src/stores/useUIStore';
 
 // Mock the stores
-vi.mock('../../stores/useLedgerStore');
-vi.mock('../../stores/useUIStore');
+vi.mock('../src/stores/useLedgerStore');
+vi.mock('../src/stores/useUIStore');
 
 describe('Dashboard Component', () => {
     const mockSetSchemaBuilderOpen = vi.fn();

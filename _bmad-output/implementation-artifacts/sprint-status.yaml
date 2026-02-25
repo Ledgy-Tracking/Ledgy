@@ -56,7 +56,7 @@ development_status:
   epic-2-retrospective: optional
 
   epic-3: in-progress
-  3-1-schema-builder-ui: review
+  3-1-schema-builder-ui: done
   3-2-ledger-data-table-inline-entry-routing: review
   3-3-bidirectional-relational-links: review
   3-4-ghost-reference-handling-soft-delete: review

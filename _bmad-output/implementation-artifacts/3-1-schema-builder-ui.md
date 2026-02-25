@@ -1,6 +1,6 @@
 # Story 3.1: Schema Builder UI
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -103,8 +103,8 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - `src/types/ledger.ts` - NEW: Ledger types
 - `src/lib/db.ts` - MODIFIED: Added schema/entry DAL functions
 - `src/stores/useLedgerStore.ts` - NEW: Ledger Zustand store
-- `src/features/ledger/SchemaBuilder.tsx` - NEW: Schema builder UI
-- `src/features/ledger/SchemaBuilder.test.tsx` - NEW: Unit tests for SchemaBuilder
+- `src/features/ledger/SchemaBuilder.tsx` - MODIFIED: Schema builder UI with relation support and error handling
+- `tests/SchemaBuilder.test.tsx` - NEW: Unit tests for SchemaBuilder (moved from src per standards)
 - `src/features/dashboard/Dashboard.tsx` - MODIFIED: Integrated SchemaBuilder
 - `src/features/dashboard/Dashboard.test.tsx` - MODIFIED: Updated test for new behavior
 
@@ -113,7 +113,11 @@ Antigravity (Gemini 2.0 Flash Thinking)
 - **2026-02-23**: Story 3-1 implementation started - Schema Builder UI foundation complete
 - **2026-02-25**: Fixed missing unit tests (`SchemaBuilder.test.tsx`).
 - **2026-02-25**: Moved story to `review` status.
+- **2026-02-25**: Adversarial Review Fixes: Implemented Relation target selector (AC4), integrated `useErrorStore`, and moved tests to `/tests` directory.
 
 ### Review Follow-ups (AI) - Adversarial Review 2026-02-25
 - [x] [AI-Review][Critical] Missing Tests: Created `SchemaBuilder.test.tsx`.
 - [x] [AI-Review][Medium] Dashboard Integration Incomplete: Unified `hasLedgers` check and improved CTA flow.
+- [x] [AI-Review][High] AC4 Implementation: Replaced relation text input with populated ledger selector and added validation.
+- [x] [AI-Review][High] Standards Violation: Moved `SchemaBuilder.test.tsx` to `/tests` directory.
+- [x] [AI-Review][Medium] Error Handling: Integrated `useErrorStore` in `SchemaBuilder` component.

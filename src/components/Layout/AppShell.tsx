@@ -133,6 +133,7 @@ export const AppShell: React.FC = () => {
                         <button
                             onClick={toggleLeftSidebar}
                             className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
+                            aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
                         >
                             {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
                         </button>
@@ -147,6 +148,7 @@ export const AppShell: React.FC = () => {
                             onClick={toggleTheme}
                             className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
                             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                         >
                             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                         </button>
@@ -154,6 +156,7 @@ export const AppShell: React.FC = () => {
                         <button
                             onClick={toggleRightInspector}
                             className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
+                            aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
                         >
                             <PanelRightClose size={18} className={rightInspectorOpen ? '' : 'rotate-180'} />
                         </button>

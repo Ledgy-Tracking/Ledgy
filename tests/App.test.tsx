@@ -16,15 +16,47 @@ vi.mock("../src/features/auth/UnlockPage", () => ({
 vi.mock("../src/features/dashboard/Dashboard", () => ({
     Dashboard: () => <div data-testid="dashboard-page">Dashboard Page</div>,
 }));
+vi.mock("../src/features/projects/ProjectDashboard", () => ({
+    ProjectDashboard: () => <div data-testid="project-dashboard">Project Dashboard</div>,
+}));
 vi.mock("../src/features/profiles/ProfileSelector", () => ({
     ProfileSelector: () => <div data-testid="profile-selector">Profile Selector Placeholder</div>,
 }));
 
+// Mock useProfileStore to avoid real DB calls and auth checks in routing tests
+vi.mock("../src/stores/useProfileStore", () => {
+    const mockState = {
+        profiles: [{ id: 'test-profile', name: 'Test Profile' }],
+        fetchProfiles: vi.fn().mockResolvedValue(undefined),
+        isLoading: false,
+    };
+    return {
+        useProfileStore: Object.assign(vi.fn((selector?: any) => {
+            return selector ? selector(mockState) : mockState;
+        }), {
+            getState: vi.fn(() => mockState)
+        })
+    };
+});
+
+// Create a state object that we can update
+const authState = {
+    totpSecret: null as string | null,
+    encryptedTotpSecret: null as string | null,
+    isUnlocked: false,
+};
+
 // Mock useAuthStore and useIsRegistered
-vi.mock("../src/features/auth/useAuthStore", () => ({
-    useAuthStore: vi.fn(),
-    useIsRegistered: vi.fn(),
-}));
+vi.mock("../src/features/auth/useAuthStore", () => {
+    return {
+        useAuthStore: Object.assign(vi.fn((selector?: any) => {
+            return selector ? selector(authState) : authState;
+        }), {
+            getState: vi.fn(() => authState)
+        }),
+        useIsRegistered: vi.fn(() => !!(authState.totpSecret || authState.encryptedTotpSecret)),
+    };
+});
 
 // Mock useUIStore to avoid hydration/persistence issues in tests
 vi.mock("../src/stores/useUIStore", () => {
@@ -48,11 +80,13 @@ vi.mock("../src/stores/useUIStore", () => {
 });
 
 describe("App Routing Integration", () => {
-    const mockUseAuthStore = useAuthStore as unknown as ReturnType<typeof vi.fn>;
     const mockUseIsRegistered = useIsRegistered as unknown as ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
         vi.clearAllMocks();
+        authState.totpSecret = null;
+        authState.encryptedTotpSecret = null;
+        authState.isUnlocked = false;
     });
 
     const setupAuthState = (
@@ -60,16 +94,9 @@ describe("App Routing Integration", () => {
         encryptedTotpSecret: string | null,
         isUnlocked: boolean
     ) => {
-        mockUseAuthStore.mockImplementation((selector: any) => {
-            const state = {
-                totpSecret,
-                encryptedTotpSecret,
-                isUnlocked,
-            };
-            return selector ? selector(state) : state;
-        });
-
-        // Mock useIsRegistered to return true if either secret is present
+        authState.totpSecret = totpSecret;
+        authState.encryptedTotpSecret = encryptedTotpSecret;
+        authState.isUnlocked = isUnlocked;
         mockUseIsRegistered.mockReturnValue(!!(totpSecret || encryptedTotpSecret));
     };
 
@@ -144,14 +171,14 @@ describe("App Routing Integration", () => {
             expect(screen.getByText(/Profile Selector Placeholder/i)).toBeInTheDocument();
         });
 
-        it("renders AppShell and Dashboard when accessing /app/:id", () => {
+        it("renders AppShell and Dashboard when accessing /app/:id/project/:pid", () => {
             render(
-                <MemoryRouter initialEntries={["/app/test-profile"]}>
+                <MemoryRouter initialEntries={["/app/test-profile/project/test-project"]}>
                     <App />
                 </MemoryRouter>
             );
             // Check for AppShell elements (like sidebar title) and Dashboard content
-            expect(screen.getByText(/Ledgy/i)).toBeInTheDocument();
+            expect(screen.getByText(/LEDGY/i)).toBeInTheDocument();
             expect(screen.getByTestId("dashboard-page")).toBeInTheDocument();
         });
 

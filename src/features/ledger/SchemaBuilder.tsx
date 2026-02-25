@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
+import { useErrorStore } from '../../stores/useErrorStore';
 import { SchemaField, FieldType } from '../../types/ledger';
 import { X, Plus, Trash2, ChevronUp, ChevronDown, Save } from 'lucide-react';
 
@@ -11,11 +12,15 @@ interface SchemaBuilderProps {
 
 export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose }) => {
     const { activeProfileId } = useProfileStore();
-    const { createSchema, isLoading } = useLedgerStore();
+    const { createSchema, isLoading, schemas } = useLedgerStore();
+    const { dispatchError } = useErrorStore();
 
     const [schemaName, setSchemaName] = useState('');
     const [fields, setFields] = useState<SchemaField[]>([]);
-    const [error, setError] = useState<string | null>(null);
+    const [localError, setLocalError] = useState<string | null>(null);
+
+    // Filter schemas to show as potential relation targets
+    const availableLedgers = schemas.filter(s => s.projectId === projectId);
 
     const handleAddField = () => {
         setFields([...fields, { name: '', type: 'text', required: false }]);
@@ -44,25 +49,44 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLocalError(null);
+
         if (!schemaName.trim()) {
-            setError('Schema name is required');
+            const msg = 'Schema name is required';
+            setLocalError(msg);
+            dispatchError(msg);
             return;
         }
         if (fields.length === 0) {
-            setError('At least one field is required');
+            const msg = 'At least one field is required';
+            setLocalError(msg);
+            dispatchError(msg);
             return;
         }
+
+        // Validate relation fields
+        for (const field of fields) {
+            if (field.type === 'relation' && !field.relationTarget) {
+                const msg = `Relation target required for field "${field.name || 'unnamed'}"`;
+                setLocalError(msg);
+                dispatchError(msg);
+                return;
+            }
+        }
+
         if (!activeProfileId) {
-            setError('No active profile selected');
+            const msg = 'No active profile selected';
+            setLocalError(msg);
+            dispatchError(msg);
             return;
         }
 
         try {
-            setError(null);
             await createSchema(activeProfileId, projectId, schemaName.trim(), fields);
             onClose();
         } catch (err: any) {
-            setError(err.message || 'Failed to create schema');
+            setLocalError(err.message || 'Failed to create schema');
+            // useLedgerStore already dispatches to useErrorStore
         }
     };
 
@@ -70,7 +94,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/70 backdrop-blur-sm p-4">
             <form
                 onSubmit={handleSave}
-                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 max-w-2xl w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto"
+                className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 max-w-3xl w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto"
             >
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Create Ledger Schema</h2>
@@ -83,9 +107,9 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                     </button>
                 </div>
 
-                {error && (
+                {localError && (
                     <div className="mb-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
-                        <p className="text-red-700 dark:text-red-500 text-sm">{error}</p>
+                        <p className="text-red-700 dark:text-red-500 text-sm">{localError}</p>
                     </div>
                 )}
 
@@ -163,13 +187,18 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                     </select>
 
                                     {field.type === 'relation' && (
-                                        <input
-                                            type="text"
-                                            placeholder="Target ledger ID"
+                                        <select
                                             value={field.relationTarget || ''}
                                             onChange={(e) => handleFieldChange(index, 'relationTarget', e.target.value)}
-                                            className="w-32 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded px-3 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 transition-colors"
-                                        />
+                                            className="w-40 bg-white dark:bg-zinc-900 border border-emerald-500/50 dark:border-emerald-500/50 rounded px-3 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors"
+                                        >
+                                            <option value="">Select Target...</option>
+                                            {availableLedgers.map(ledger => (
+                                                <option key={ledger._id} value={ledger._id}>
+                                                    {ledger.name}
+                                                </option>
+                                            ))}
+                                        </select>
                                     )}
 
                                     <label className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
@@ -225,3 +254,4 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         </div>
     );
 };
+
