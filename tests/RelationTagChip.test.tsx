@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { RelationTagChip } from './RelationTagChip';
+import { RelationTagChip } from '../src/features/ledger/RelationTagChip';
 
 const renderWithRouter = (component: React.ReactElement) => {
     return render(

@@ -6,20 +6,22 @@ import { RelationCombobox } from './RelationCombobox';
 
 interface InlineEntryRowProps {
     schema: LedgerSchema;
+    entry?: LedgerEntry;
     onCancel: () => void;
     onComplete: () => void;
 }
 
 export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
     schema,
+    entry,
     onCancel,
     onComplete,
 }) => {
-    const { createEntry } = useLedgerStore();
+    const { createEntry, updateEntry } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
-    const [formData, setFormData] = useState<Record<string, unknown>>({});
+    const [formData, setFormData] = useState<Record<string, unknown>>(entry?.data || {});
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const inputRefs = useRef<(HTMLInputElement | HTMLSelectElement | null)[]>([]);
+    const inputRefs = useRef<(HTMLInputElement | HTMLSelectElement | HTMLButtonElement | null)[]>([]);
     const [targetEntries, setTargetEntries] = useState<Record<string, LedgerEntry[]>>({});
 
     // Load target ledger entries for relation fields
@@ -100,16 +102,20 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
         }
 
         try {
-            await createEntry(
-                activeProfileId,
-                schema._id,
-                schema._id, // ledgerId same as schemaId for now
-                formData
-            );
+            if (entry) {
+                await updateEntry(entry._id, formData);
+            } else {
+                await createEntry(
+                    activeProfileId,
+                    schema._id,
+                    schema._id, // ledgerId same as schemaId for now
+                    formData
+                );
+            }
             setFormData({});
             onComplete();
         } catch (err: any) {
-            setErrors({ _form: err.message || 'Failed to create entry' });
+            setErrors({ _form: err.message || 'Failed to save entry' });
         }
     };
 
@@ -166,63 +172,77 @@ interface FieldInputProps {
     targetEntries: Record<string, LedgerEntry[]>;
 }
 
-const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement, FieldInputProps>(
+const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLButtonElement, FieldInputProps>(
     ({ field, value, onChange, onKeyDown, error, targetEntries }, ref) => {
         const baseClasses = `w-full bg-transparent border ${error ? 'border-red-500' : 'border-zinc-700'} rounded px-2 py-1 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all`;
 
-        switch (field.type) {
-            case 'number':
-                return (
-                    <input
-                        ref={ref as React.RefObject<HTMLInputElement>}
-                        type="number"
-                        className={baseClasses}
-                        value={value as string || ''}
-                        onChange={(e) => onChange(e.target.valueAsNumber || 0)}
-                        onKeyDown={onKeyDown}
-                        placeholder={`Enter ${field.name}`}
-                    />
-                );
-            case 'date':
-                return (
-                    <input
-                        ref={ref as React.RefObject<HTMLInputElement>}
-                        type="date"
-                        className={baseClasses}
-                        value={value as string || ''}
-                        onChange={(e) => onChange(e.target.value)}
-                        onKeyDown={onKeyDown}
-                    />
-                );
-            case 'relation':
-                return (
-                    <RelationCombobox
-                        entries={targetEntries[field.name] || []}
-                        value={value as string | string[]}
-                        onChange={(newValue) => onChange(newValue)}
-                        placeholder={`Select ${field.name}...`}
-                        allowMultiple={true}
-                        getDisplayValue={(entry) => {
-                            // Get first non-ID field value for display
-                            const data = entry.data || {};
-                            const firstValue = Object.values(data)[0];
-                            return firstValue ? String(firstValue) : entry._id.slice(-8);
-                        }}
-                    />
-                );
-            default: // text
-                return (
-                    <input
-                        ref={ref as React.RefObject<HTMLInputElement>}
-                        type="text"
-                        className={baseClasses}
-                        value={value as string || ''}
-                        onChange={(e) => onChange(e.target.value)}
-                        onKeyDown={onKeyDown}
-                        placeholder={`Enter ${field.name}`}
-                    />
-                );
-        }
+        const renderInput = () => {
+            switch (field.type) {
+                case 'number':
+                    return (
+                        <input
+                            ref={ref as React.RefObject<HTMLInputElement>}
+                            type="number"
+                            className={baseClasses}
+                            value={value as string || ''}
+                            onChange={(e) => onChange(e.target.valueAsNumber || 0)}
+                            onKeyDown={onKeyDown}
+                            placeholder={`Enter ${field.name}`}
+                        />
+                    );
+                case 'date':
+                    return (
+                        <input
+                            ref={ref as React.RefObject<HTMLInputElement>}
+                            type="date"
+                            className={baseClasses}
+                            value={value as string || ''}
+                            onChange={(e) => onChange(e.target.value)}
+                            onKeyDown={onKeyDown}
+                        />
+                    );
+                case 'relation':
+                    return (
+                        <RelationCombobox
+                            ref={ref as React.RefObject<HTMLButtonElement>}
+                            entries={targetEntries[field.name] || []}
+                            value={value as string | string[]}
+                            onChange={(newValue) => onChange(newValue)}
+                            placeholder={`Select ${field.name}...`}
+                            allowMultiple={true}
+                            getDisplayValue={(entry) => {
+                                // Get first non-ID field value for display
+                                const data = entry.data || {};
+                                const firstValue = Object.values(data)[0];
+                                return firstValue ? String(firstValue) : entry._id.slice(-8);
+                            }}
+                        />
+                    );
+                default: // text
+                    return (
+                        <input
+                            ref={ref as React.RefObject<HTMLInputElement>}
+                            type="text"
+                            className={baseClasses}
+                            value={value as string || ''}
+                            onChange={(e) => onChange(e.target.value)}
+                            onKeyDown={onKeyDown}
+                            placeholder={`Enter ${field.name}`}
+                        />
+                    );
+            }
+        };
+
+        return (
+            <div className="relative">
+                {renderInput()}
+                {error && (
+                    <span className="absolute left-0 -bottom-4 text-[10px] text-red-500 font-medium">
+                        {error}
+                    </span>
+                )}
+            </div>
+        );
     }
 );
 

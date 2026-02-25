@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { LedgerTable } from './LedgerTable';
-import { useLedgerStore } from '../../stores/useLedgerStore';
-import { useProfileStore } from '../../stores/useProfileStore';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { LedgerTable } from '../src/features/ledger/LedgerTable';
+import { useLedgerStore } from '../src/stores/useLedgerStore';
+import { useProfileStore } from '../src/stores/useProfileStore';
 
 // Mock stores
-vi.mock('../../stores/useLedgerStore', () => ({
+vi.mock('../src/stores/useLedgerStore', () => ({
     useLedgerStore: vi.fn(),
 }));
 
-vi.mock('../../stores/useProfileStore', () => ({
+vi.mock('../src/stores/useProfileStore', () => ({
     useProfileStore: vi.fn(),
 }));
 

@@ -15,7 +15,7 @@ interface RelationComboboxProps {
  * Combobox for selecting related entries.
  * Supports single or multiple selection with search/filter.
  */
-export const RelationCombobox: React.FC<RelationComboboxProps> = ({
+export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComboboxProps>(({
     entries,
     value,
     onChange,
@@ -27,7 +27,7 @@ export const RelationCombobox: React.FC<RelationComboboxProps> = ({
         const firstValue = Object.values(data)[0];
         return firstValue ? String(firstValue) : entry._id;
     },
-}) => {
+}, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -97,6 +97,7 @@ export const RelationCombobox: React.FC<RelationComboboxProps> = ({
         <div className="relative" ref={containerRef}>
             {/* Trigger */}
             <button
+                ref={ref}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className="w-full flex items-center justify-between gap-2 px-2 py-1 bg-transparent border border-zinc-700 rounded text-sm text-zinc-100 hover:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -165,4 +166,6 @@ export const RelationCombobox: React.FC<RelationComboboxProps> = ({
             )}
         </div>
     );
-};
+});
+
+RelationCombobox.displayName = 'RelationCombobox';

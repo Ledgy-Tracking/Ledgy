@@ -1,6 +1,6 @@
 # Story 3.2: Ledger Data Table & Inline Entry Routing
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -14,6 +14,12 @@ Status: review
 ### Review Follow-ups (AI) - Code Review 2026-02-23
 - [x] [AI-Review][High] Sidebar "+ New Ledger" Functional: Now has onClick handler with setSchemaBuilderOpen. [src/components/Layout/AppShell.tsx:154-159]
 - [x] [AI-Review][Medium] Story File List vs Git Mismatch: Implementation fixes committed. [git diff]
+
+### Review Follow-ups (AI) - Adversarial Review 2026-02-25
+- [x] [AI-Review][High] AC4 Implementation: Implemented inline editing mode in `LedgerTable.tsx` and `InlineEntryRow.tsx` (Triggered via double-click or Enter).
+- [x] [AI-Review][High] Standards Violation: Moved all ledger tests to `/tests` directory.
+- [x] [AI-Review][High] Keyboard Navigation: Fixed broken `Enter` key navigation for Relation fields by correctly passing `ref` to `RelationCombobox`.
+- [x] [AI-Review][Medium] UI/UX: Added validation error text display to `FieldInput`.
 
 ## Story
 

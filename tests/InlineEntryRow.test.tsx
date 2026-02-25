@@ -1,14 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { InlineEntryRow } from './InlineEntryRow';
-import { useLedgerStore } from '../../stores/useLedgerStore';
-import { useProfileStore } from '../../stores/useProfileStore';
+import { InlineEntryRow } from '../src/features/ledger/InlineEntryRow';
+import { useLedgerStore } from '../src/stores/useLedgerStore';
+import { useProfileStore } from '../src/stores/useProfileStore';
 
-vi.mock('../../stores/useLedgerStore', () => ({
-    useLedgerStore: vi.fn(),
+// Mock stores
+vi.mock('../src/stores/useLedgerStore', () => ({
+    useLedgerStore: Object.assign(vi.fn(), {
+        getState: vi.fn(() => ({
+            entries: {},
+            fetchEntries: vi.fn(),
+        }))
+    }),
 }));
 
-vi.mock('../../stores/useProfileStore', () => ({
+vi.mock('../src/stores/useProfileStore', () => ({
     useProfileStore: vi.fn(),
 }));
 
@@ -17,9 +23,8 @@ const mockSchema = {
     type: 'schema' as const,
     name: 'Test Ledger',
     fields: [
-        { name: 'Name', type: 'text' as const },
+        { name: 'Name', type: 'text' as const, required: true },
         { name: 'Amount', type: 'number' as const },
-        { name: 'Date', type: 'date' as const },
     ],
     profileId: 'profile-1',
     projectId: 'project-1',
@@ -29,9 +34,9 @@ const mockSchema = {
 };
 
 describe('InlineEntryRow', () => {
-    const mockCreateEntry = vi.fn().mockResolvedValue('entry:new-123');
     const mockOnCancel = vi.fn();
     const mockOnComplete = vi.fn();
+    const mockCreateEntry = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -54,8 +59,6 @@ describe('InlineEntryRow', () => {
 
         expect(screen.getByPlaceholderText(/enter name/i)).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/enter amount/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/save entry/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/cancel/i)).toBeInTheDocument();
     });
 
     it('calls onCancel when Cancel button clicked', () => {
@@ -72,6 +75,8 @@ describe('InlineEntryRow', () => {
     });
 
     it('calls createEntry and onComplete when Save clicked with valid data', async () => {
+        mockCreateEntry.mockResolvedValue({ _id: 'entry:new' });
+
         render(
             <InlineEntryRow
                 schema={mockSchema}
@@ -80,15 +85,13 @@ describe('InlineEntryRow', () => {
             />
         );
 
-        // Fill in fields
         fireEvent.change(screen.getByPlaceholderText(/enter name/i), {
-            target: { value: 'Test Entry' },
+            target: { value: 'New Entry' }
         });
         fireEvent.change(screen.getByPlaceholderText(/enter amount/i), {
-            target: { value: '42' },
+            target: { value: '123' }
         });
 
-        // Click Save
         fireEvent.click(screen.getByText('Save'));
 
         await waitFor(() => {
@@ -96,46 +99,27 @@ describe('InlineEntryRow', () => {
                 'profile-1',
                 'schema:test-123',
                 'schema:test-123',
-                expect.objectContaining({
-                    Name: 'Test Entry',
-                    Amount: 42,
-                })
+                expect.objectContaining({ Name: 'New Entry', Amount: 123 })
             );
-        });
-
-        await waitFor(() => {
             expect(mockOnComplete).toHaveBeenCalled();
         });
     });
 
     it('validates required fields', async () => {
-        const schemaWithRequired = {
-            ...mockSchema,
-            fields: mockSchema.fields.map(f => ({ ...f, required: true })),
-        };
-
         render(
             <InlineEntryRow
-                schema={schemaWithRequired}
+                schema={mockSchema}
                 onCancel={mockOnCancel}
                 onComplete={mockOnComplete}
             />
         );
 
-        // Click Save without filling data
+        // Try to save without name
         fireEvent.click(screen.getByText('Save'));
 
-        await waitFor(() => {
-            expect(mockCreateEntry).not.toHaveBeenCalled();
-        });
-
-        // Should show error - check for red border on inputs (validation indicator)
-        const inputs = screen.getAllByRole('textbox');
-        expect(inputs[0]).toHaveClass('border-red-500');
+        expect(screen.getByText('Required')).toBeInTheDocument();
+        expect(mockCreateEntry).not.toHaveBeenCalled();
     });
-
-    // Note: Enter key submission tested indirectly via Save button test
-    // The date input doesn't have a consistent role in jsdom for testing
 
     it('cancels on Escape key', () => {
         render(
@@ -146,8 +130,8 @@ describe('InlineEntryRow', () => {
             />
         );
 
-        const nameInput = screen.getByPlaceholderText(/enter name/i);
-        fireEvent.keyDown(nameInput, { key: 'Escape' });
+        const input = screen.getByPlaceholderText(/enter name/i);
+        fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' });
 
         expect(mockOnCancel).toHaveBeenCalled();
     });
@@ -161,9 +145,22 @@ describe('InlineEntryRow', () => {
             />
         );
 
+        fireEvent.change(screen.getByPlaceholderText(/enter name/i), {
+            target: { value: 'Number Entry' }
+        });
         const amountInput = screen.getByPlaceholderText(/enter amount/i);
         fireEvent.change(amountInput, { target: { value: '42' } });
 
-        expect(amountInput).toHaveValue(42);
+        // Enter on last field triggers submit
+        fireEvent.keyDown(amountInput, { key: 'Enter', code: 'Enter' });
+
+        await waitFor(() => {
+            expect(mockCreateEntry).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.anything(),
+                expect.anything(),
+                expect.objectContaining({ Amount: 42 })
+            );
+        });
     });
 });

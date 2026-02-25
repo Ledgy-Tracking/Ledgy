@@ -15,6 +15,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     const { schemas, entries, fetchEntries, allEntries } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
     const [isAddingEntry, setIsAddingEntry] = useState(false);
+    const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
     const [selectedRow, setSelectedRow] = useState<number>(-1);
 
     const schema = schemas.find(s => s._id === schemaId);
@@ -123,6 +124,20 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                 {/* Entry Rows */}
                 {ledgerEntries.map((entry, index) => {
                     const isHighlighted = highlightEntryId && entry._id === highlightEntryId;
+                    const isEditing = editingEntryId === entry._id;
+
+                    if (isEditing) {
+                        return (
+                            <InlineEntryRow
+                                key={entry._id}
+                                schema={schema}
+                                entry={entry}
+                                onCancel={() => setEditingEntryId(null)}
+                                onComplete={() => setEditingEntryId(null)}
+                            />
+                        );
+                    }
+
                     return (
                         <div
                             key={entry._id}
@@ -130,10 +145,11 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                 } ${isHighlighted ? 'ring-2 ring-emerald-500/50 bg-emerald-50 dark:bg-emerald-900/10' : ''}`}
                             role="row"
                             onClick={() => setSelectedRow(index)}
+                            onDoubleClick={() => setEditingEntryId(entry._id)}
                             tabIndex={0}
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
-                                    // Could trigger inline edit mode
+                                    setEditingEntryId(entry._id);
                                 }
                             }}
                         >
