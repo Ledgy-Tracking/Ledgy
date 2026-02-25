@@ -13,6 +13,7 @@ import { useUIStore } from "./stores/useUIStore";
 import { useEffect } from "react";
 import { LedgerView } from "./features/ledger/LedgerView";
 import { TrashView } from "./features/ledger/TrashView";
+import { ProjectDashboard } from "./features/projects/ProjectDashboard";
 
 function App() {
   const theme = useUIStore((state) => state.theme);
@@ -68,7 +69,9 @@ function App() {
             </AuthGuard>
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route index element={<Navigate to="projects" replace />} />
+          <Route path="projects" element={<ProjectDashboard />} />
+          <Route path="project/:projectId" element={<Dashboard />} />
           <Route path="settings" element={<div>Settings Placeholder</div>} />
           <Route path="ledger/:ledgerId" element={<LedgerView />} />
           <Route path="trash" element={<TrashView />} />

@@ -79,7 +79,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                     <h2 className="text-lg font-semibold text-zinc-50">{schema.name}</h2>
                     <button
                         onClick={() => setIsAddingEntry(true)}
-                        className="px-3 py-1.5 text-sm bg-emerald-600 hover:bg-emerald-500 text-white rounded transition-colors"
+                        className="px-3 py-1.5 text-sm bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
                         aria-label="Add new entry"
                     >
                         Add Entry (N)
@@ -124,31 +124,30 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                 {ledgerEntries.map((entry, index) => {
                     const isHighlighted = highlightEntryId && entry._id === highlightEntryId;
                     return (
-                    <div
-                        key={entry._id}
-                        className={`flex border-b border-zinc-800 hover:bg-zinc-800/30 transition-colors ${
-                            selectedRow === index ? 'bg-zinc-800/50' : ''
-                        } ${isHighlighted ? 'ring-2 ring-emerald-500/50 bg-emerald-900/10' : ''}`}
-                        role="row"
-                        onClick={() => setSelectedRow(index)}
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                // Could trigger inline edit mode
-                            }
-                        }}
-                    >
-                        {schema.fields.map((field) => (
-                            <div
-                                key={`${entry._id}-${field.name}`}
-                                className="flex-1 px-3 py-2.5 text-sm text-zinc-300 border-r border-zinc-800 last:border-r-0"
-                                role="gridcell"
-                            >
-                                {renderFieldValue(entry.data[field.name], field.type, entry, field, schemaId, allEntries ? Object.values(allEntries).flat() : undefined)}
-                            </div>
-                        ))}
-                    </div>
-                );
+                        <div
+                            key={entry._id}
+                            className={`flex border-b border-zinc-800 hover:bg-zinc-800/30 transition-colors ${selectedRow === index ? 'bg-zinc-800/50' : ''
+                                } ${isHighlighted ? 'ring-2 ring-emerald-500/50 bg-emerald-900/10' : ''}`}
+                            role="row"
+                            onClick={() => setSelectedRow(index)}
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    // Could trigger inline edit mode
+                                }
+                            }}
+                        >
+                            {schema.fields.map((field) => (
+                                <div
+                                    key={`${entry._id}-${field.name}`}
+                                    className="flex-1 px-3 py-2.5 text-sm text-zinc-300 border-r border-zinc-800 last:border-r-0"
+                                    role="gridcell"
+                                >
+                                    {renderFieldValue(entry.data[field.name], field.type, entry, field, schemaId, allEntries ? Object.values(allEntries).flat() : undefined)}
+                                </div>
+                            ))}
+                        </div>
+                    );
                 })}
             </div>
 
@@ -180,7 +179,7 @@ function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, fie
                 ? new Set(allEntries.filter(e => e.isDeleted).map(e => e._id))
                 : new Set<string>();
             const hasDeletedTarget = values.some(v => deletedEntryIds.has(v));
-            
+
             // Render as Tag Chip with navigation (Story 3-3)
             return (
                 <RelationTagChip

@@ -14,7 +14,7 @@ vi.mock('../../stores/useProfileStore', () => ({
 
 const mockSchema = {
     _id: 'schema:test-123',
-    _type: 'schema' as const,
+    type: 'schema' as const,
     name: 'Test Ledger',
     fields: [
         { name: 'Name', type: 'text' as const },
@@ -22,7 +22,8 @@ const mockSchema = {
         { name: 'Date', type: 'date' as const },
     ],
     profileId: 'profile-1',
-    schema_version: 1,
+    projectId: 'project-1',
+    schemaVersion: 1,
     createdAt: '2026-02-23T00:00:00Z',
     updatedAt: '2026-02-23T00:00:00Z',
 };

@@ -34,7 +34,7 @@ export const LedgerView: React.FC = () => {
         return <div className="p-4 text-zinc-500">No ledger selected</div>;
     }
 
-    const schema = schemas.find(s => s._id === ledgerId || s.ledgerId === ledgerId);
+    const schema = schemas.find(s => s._id === ledgerId);
 
     if (!schema) {
         return <div className="p-4 text-zinc-500">Ledger not found</div>;

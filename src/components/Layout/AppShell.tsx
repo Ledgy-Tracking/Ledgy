@@ -72,7 +72,7 @@ export const AppShell: React.FC = () => {
     if (!mounted) return null;
 
     return (
-        <div className="h-screen w-full flex bg-zinc-50 dark:bg-black overflow-hidden select-none">
+        <div className="h-screen w-full flex bg-zinc-50 dark:bg-zinc-950 overflow-hidden select-none">
             {/* Left Sidebar */}
             <aside
                 className={`flex flex-col bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${leftSidebarOpen ? 'w-64' : 'w-0 border-r-0'
@@ -122,9 +122,9 @@ export const AppShell: React.FC = () => {
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 h-full flex flex-col min-w-0 bg-white dark:bg-black relative">
+            <main className="flex-1 h-full flex flex-col min-w-0 bg-white dark:bg-zinc-900 relative">
                 {/* Header / Toolbar */}
-                <header className="h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white/50 dark:bg-black/50 backdrop-blur-md z-10 shrink-0">
+                <header className="h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md z-10 shrink-0">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={toggleLeftSidebar}
@@ -149,10 +149,32 @@ export const AppShell: React.FC = () => {
                 </header>
 
                 {/* Viewport Content */}
-                <div className="flex-1 overflow-auto bg-zinc-50 dark:bg-black p-6">
+                <div className="flex-1 overflow-auto bg-zinc-50 dark:bg-zinc-950 p-6">
                     <Outlet />
                 </div>
             </main>
+
+            {/* Right Inspector Panel */}
+            <aside
+                className={`h-full bg-zinc-50 dark:bg-zinc-950 border-l border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${rightInspectorOpen ? 'w-[280px]' : 'w-0 border-l-0'
+                    }`}
+            >
+                <div className="p-4 flex flex-col h-full">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-500">Inspector</h2>
+                        <button
+                            onClick={toggleRightInspector}
+                            className="p-1 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded text-zinc-500"
+                        >
+                            <PanelRightClose size={16} />
+                        </button>
+                    </div>
+
+                    <div className="flex-1 text-zinc-400 text-xs italic">
+                        Select an item to view properties...
+                    </div>
+                </div>
+            </aside>
 
             {/* Sync Configuration Dialog */}
             <SyncConfigDialog

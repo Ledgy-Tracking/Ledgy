@@ -174,7 +174,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                     <button
                         type="submit"
                         disabled={!remoteUrl || isLoading}
-                        className="px-6 py-2.5 rounded-xl font-medium bg-emerald-500 text-white dark:text-zinc-950 hover:bg-emerald-600 dark:hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
+                        className="px-6 py-2.5 rounded-xl font-bold bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
                     >
                         {isLoading ? (
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

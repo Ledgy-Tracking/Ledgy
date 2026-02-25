@@ -9,9 +9,12 @@ import { LedgerTable } from '../ledger/LedgerTable';
 import { ExportTemplateButton } from '../templates/ExportTemplateButton';
 
 export const Dashboard: React.FC = () => {
-    const { profileId } = useParams<{ profileId: string }>();
+    const { profileId, projectId } = useParams<{ profileId: string, projectId: string }>();
     const { toggleRightInspector, rightInspectorOpen, schemaBuilderOpen, setSchemaBuilderOpen } = useUIStore();
     const { schemas, fetchSchemas } = useLedgerStore();
+
+    // Scoped schemas for this project
+    const projectSchemas = schemas.filter(s => s.projectId === projectId);
     const [selectedLedgerId, setSelectedLedgerId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -32,8 +35,8 @@ export const Dashboard: React.FC = () => {
             {/* Toolbar */}
             <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-800 bg-zinc-900 shrink-0">
                 <div className="flex-1 flex items-baseline gap-2">
-                    <h1 className="text-sm font-semibold">Dashboard</h1>
-                    {hasLedgers && (
+                    <h1 className="text-sm font-semibold">Project Dashboard</h1>
+                    {projectSchemas.length > 0 && (
                         <select
                             value={selectedLedgerId || ''}
                             onChange={(e) => handleSelectLedger(e.target.value)}
@@ -41,7 +44,7 @@ export const Dashboard: React.FC = () => {
                             aria-label="Select ledger"
                         >
                             <option value="">Select a ledger...</option>
-                            {schemas.map(schema => (
+                            {projectSchemas.map(schema => (
                                 <option key={schema._id} value={schema._id}>
                                     {schema.name}
                                 </option>
@@ -52,11 +55,11 @@ export const Dashboard: React.FC = () => {
 
                 <div className="flex items-center gap-2">
                     {hasLedgers && <ExportTemplateButton />}
-                    
+
                     {!rightInspectorOpen && (
-                        <button 
-                            onClick={toggleRightInspector} 
-                            className="ml-2 text-zinc-400 hover:text-zinc-200" 
+                        <button
+                            onClick={toggleRightInspector}
+                            className="ml-2 text-zinc-400 hover:text-zinc-200"
                             title="Open Inspector"
                             aria-label="Open inspector panel"
                         >
@@ -68,7 +71,7 @@ export const Dashboard: React.FC = () => {
 
             {/* Table Area / Main Content */}
             <div className="flex-1 overflow-hidden">
-                {!hasLedgers ? (
+                {projectSchemas.length === 0 ? (
                     <div className="h-full flex items-center justify-center">
                         <EmptyDashboard onActionClick={() => setSchemaBuilderOpen(true)} />
                     </div>
@@ -81,8 +84,11 @@ export const Dashboard: React.FC = () => {
                 )}
             </div>
 
-            {schemaBuilderOpen && (
-                <SchemaBuilder onClose={() => setSchemaBuilderOpen(false)} />
+            {schemaBuilderOpen && profileId && projectId && (
+                <SchemaBuilder
+                    projectId={projectId}
+                    onClose={() => setSchemaBuilderOpen(false)}
+                />
             )}
         </div>
     );

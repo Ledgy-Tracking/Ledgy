@@ -28,17 +28,17 @@ export async function deleteRemoteDatabase(
         // For CouchDB: DELETE /{database_name}
         // For now, we simulate the operation
         console.log(`Deleting remote database at: ${remoteConfig.url}`);
-        
+
         // Simulate network request
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         // Check if remote is reachable (simulated)
         const isReachable = true; // In production: try { await fetch(remoteConfig.url); } catch { return false; }
-        
+
         if (!isReachable) {
             throw new Error('NETWORK_UNREACHABLE');
         }
-        
+
         // Remote deletion successful
         console.log('Remote database deleted successfully');
     } catch (err: any) {
@@ -110,7 +110,7 @@ export async function resolveConflict(
     conflict: ConflictEntry
 ): Promise<void> {
     const db = getProfileDb(profileId);
-    
+
     // Get the winning version data
     const winner = winningVersion === 'local'
         ? conflict.localVersion.data
@@ -119,13 +119,13 @@ export async function resolveConflict(
     try {
         // Get the current document to get the latest _rev
         const currentDoc = await db.getDocument<any>(entryId);
-        
+
         // Update with winning version data, preserving envelope
         await db.updateDocument(entryId, {
             ...winner,
             // Preserve document envelope fields
-            _type: currentDoc._type,
-            schema_version: currentDoc.schema_version,
+            type: currentDoc.type,
+            schemaVersion: currentDoc.schemaVersion,
         });
 
         // Trigger a sync to propagate the resolution
@@ -185,13 +185,13 @@ export async function resolveConflictWithCustomData(
     try {
         // Get the current document
         const currentDoc = await db.getDocument<any>(entryId);
-        
+
         // Update with custom merged data
         await db.updateDocument(entryId, {
             ...customData,
             // Preserve document envelope fields
-            _type: currentDoc._type,
-            schema_version: currentDoc.schema_version,
+            type: currentDoc.type,
+            schemaVersion: currentDoc.schemaVersion,
         });
 
         console.log(`Conflict resolved for ${entryId} with merged data`);

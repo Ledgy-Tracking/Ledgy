@@ -19,7 +19,6 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
     const { activeProfileId } = useProfileStore();
     const [formData, setFormData] = useState<Record<string, unknown>>({});
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [currentFieldIndex, setCurrentFieldIndex] = useState(0);
     const inputRefs = useRef<(HTMLInputElement | HTMLSelectElement | null)[]>([]);
     const [targetEntries, setTargetEntries] = useState<Record<string, LedgerEntry[]>>({});
 
@@ -32,8 +31,7 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
             const entriesMap: Record<string, LedgerEntry[]> = {};
             for (const field of relationFields) {
                 try {
-                    // relationTarget is the target ledger/schema ID
-                    const entries = await useLedgerStore.getState().fetchEntries(activeProfileId, field.relationTarget!);
+                    await useLedgerStore.getState().fetchEntries(activeProfileId, field.relationTarget!);
                     entriesMap[field.name] = useLedgerStore.getState().entries[field.relationTarget!] || [];
                 } catch (e) {
                     console.warn(`Failed to load entries for ${field.relationTarget}`);
@@ -123,7 +121,7 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
                     className="flex-1 px-3 py-2 border-r border-zinc-800 last:border-r-0"
                 >
                     <FieldInput
-                        ref={el => inputRefs.current[index] = el}
+                        ref={el => { inputRefs.current[index] = el; }}
                         field={field}
                         value={formData[field.name]}
                         onChange={(value) => handleFieldChange(field.name, value)}
@@ -137,7 +135,7 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
             <div className="px-3 py-2 flex items-center gap-2 bg-zinc-900/50">
                 <button
                     onClick={handleSubmit}
-                    className="px-3 py-1 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded transition-colors"
+                    className="px-3 py-1 text-xs bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
                     aria-label="Save entry"
                 >
                     Save

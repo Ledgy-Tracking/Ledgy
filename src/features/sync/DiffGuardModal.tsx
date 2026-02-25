@@ -181,7 +181,7 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                         <button
                             onClick={handleAcceptRemote}
                             disabled={isResolving}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 rounded font-bold transition-colors"
                         >
                             <RotateCcw size={14} />
                             Accept Remote

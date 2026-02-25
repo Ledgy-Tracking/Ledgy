@@ -19,8 +19,8 @@ export interface EncryptedProfileMetadata {
 export interface LedgyDocument {
     _id: string; // "{type}:{uuid}"
     _rev?: string;
-    type: string; // "profile" | "entry" | "schema" | "node"
-    schema_version: number;
+    type: string; // "profile" | "project" | "entry" | "schema" | "node"
+    schemaVersion: number;
     createdAt: string; // ISO 8601
     updatedAt: string; // ISO 8601
     deletedAt?: string; // Ghost Reference soft-delete

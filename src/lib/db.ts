@@ -20,12 +20,12 @@ export class Database {
      * Create a new document with the standard Ledgy envelope.
      * ID Scheme: {type}:{uuid}
      */
-    async createDocument<T extends object>(type: string, data: T): Promise<PouchDB.Core.Response> {
+    async createDocument<T extends LedgyDocument>(type: string, data: Omit<T, keyof LedgyDocument>): Promise<PouchDB.Core.Response> {
         const now = new Date().toISOString();
-        const doc: LedgyDocument & T = {
+        const doc: any = {
             _id: `${type}:${uuidv4()}`,
             type: type,
-            schema_version: 1,
+            schemaVersion: 1,
             createdAt: now,
             updatedAt: now,
             ...data,
@@ -41,7 +41,7 @@ export class Database {
         const existing = await this.db.get<LedgyDocument>(id);
 
         // Prevent overwriting immutable envelope fields
-        const { _id, _rev, createdAt, schema_version, type, ...restData } = data as any;
+        const { _id, _rev, createdAt, schemaVersion, type, ...restData } = data as any;
 
         const updatedDoc = {
             ...existing,
@@ -225,6 +225,55 @@ export async function decryptProfileMetadata(
     return profiles;
 }
 
+// ==================== PROJECT OPERATIONS ====================
+
+import { ProjectDocument } from '../types/project';
+
+/**
+ * Creates a new project document.
+ */
+export async function create_project(
+    db: Database,
+    name: string,
+    description: string | undefined,
+    profileId: string
+): Promise<string> {
+    const response = await db.createDocument<ProjectDocument>('project', {
+        name,
+        description,
+        profileId,
+    });
+    if (!response.ok) {
+        throw new Error('Failed to create project document');
+    }
+    return response.id;
+}
+
+/**
+ * Lists all projects for a profile.
+ */
+export async function list_projects(db: Database): Promise<ProjectDocument[]> {
+    const projectDocs = await db.getAllDocuments<ProjectDocument>('project');
+    return projectDocs.filter(doc => !doc.isDeleted);
+}
+
+/**
+ * Gets a single project by ID.
+ */
+export async function get_project(db: Database, projectId: string): Promise<ProjectDocument> {
+    return await db.getDocument<ProjectDocument>(projectId);
+}
+
+/**
+ * Soft-deletes a project.
+ */
+export async function delete_project(db: Database, projectId: string): Promise<void> {
+    await db.updateDocument(projectId, {
+        isDeleted: true,
+        deletedAt: new Date().toISOString(),
+    });
+}
+
 // ==================== LEDGER SCHEMA OPERATIONS ====================
 
 import { LedgerSchema, SchemaField, EncryptedLedgerSchemaMetadata, LedgerEntry } from '../types/ledger';
@@ -240,12 +289,14 @@ export async function create_schema(
     db: Database,
     name: string,
     fields: SchemaField[],
-    profileId: string
+    profileId: string,
+    projectId: string
 ): Promise<string> {
     const response = await db.createDocument<LedgerSchema>('schema', {
         name,
         fields,
         profileId,
+        projectId,
     });
     if (!response.ok) {
         throw new Error('Failed to create schema document');
@@ -271,7 +322,7 @@ export async function update_schema(
     await db.updateDocument(schemaId, {
         name,
         fields,
-        schema_version: schema.schema_version + 1,
+        schemaVersion: schema.schemaVersion + 1,
     });
 }
 
@@ -395,7 +446,6 @@ export async function find_entries_with_relation_to(
  * @param entryId - Entry document ID
  */
 export async function delete_entry(db: Database, entryId: string): Promise<void> {
-    const entry = await db.getDocument<LedgerEntry>(entryId);
     await db.updateDocument(entryId, {
         isDeleted: true,
         deletedAt: new Date().toISOString(),
@@ -408,7 +458,6 @@ export async function delete_entry(db: Database, entryId: string): Promise<void>
  * @param entryId - Entry document ID to restore
  */
 export async function restore_entry(db: Database, entryId: string): Promise<void> {
-    const entry = await db.getDocument<LedgerEntry>(entryId);
     await db.updateDocument(entryId, {
         isDeleted: false,
         deletedAt: undefined,
@@ -444,8 +493,8 @@ export async function decryptSchemaMetadata(
 
         schemas.push({
             _id: doc._id,
-            _type: 'schema',
-            schema_version: doc.schema_version,
+            type: 'schema',
+            schemaVersion: doc.schemaVersion,
             createdAt: doc.createdAt,
             updatedAt: doc.updatedAt,
             name_enc: doc.name_enc,
@@ -484,7 +533,7 @@ export async function save_canvas(
 
     try {
         // Try to get existing canvas
-        const existing = await db.getDocument<NodeCanvas>(canvasDocId);
+        await db.getDocument<NodeCanvas>(canvasDocId);
         await db.updateDocument(canvasDocId, {
             nodes,
             edges,
@@ -531,20 +580,12 @@ export async function load_canvas(
 // Dashboard Layout Functions (Story 4-5)
 // ============================================================================
 
-import { WidgetConfig } from '../features/dashboard/widgets';
+import { WidgetConfig, DashboardLayout } from '../types/dashboard';
 
 /**
  * Dashboard Layout document structure.
  */
-export interface DashboardLayout {
-    profileId: string;
-    dashboardId: string;
-    widgets: WidgetConfig[];
-    layout: {
-        columns: number;
-        rows: number;
-    };
-}
+// export interface DashboardLayout { ... } removed as it's now in types/dashboard.ts
 
 /**
  * Saves dashboard layout configuration.
@@ -565,7 +606,7 @@ export async function save_dashboard_layout(
 
     try {
         // Try to get existing dashboard
-        const existing = await db.getDocument<DashboardLayout>(dashboardDocId);
+        await db.getDocument<DashboardLayout>(dashboardDocId);
         await db.updateDocument(dashboardDocId, {
             widgets,
         });
@@ -628,7 +669,7 @@ export async function save_sync_config(
 
     // 1. Encrypt sensitive fields
     const encrypted: any = {
-        _type: 'sync_config',
+        type: 'sync_config',
         profileId,
         syncDirection: config.syncDirection || 'two-way',
         continuous: config.continuous !== undefined ? config.continuous : true,
@@ -672,7 +713,7 @@ export async function save_sync_config(
             const doc = {
                 _id: docId,
                 type: 'sync_config',
-                schema_version: 1,
+                schemaVersion: 1,
                 createdAt: now,
                 updatedAt: now,
                 ...encrypted

@@ -62,7 +62,7 @@ export const TrashView: React.FC = () => {
     };
 
     const getSchemaName = (ledgerId: string): string => {
-        const schema = schemas.find((s) => s._id === ledgerId || s.ledgerId === ledgerId);
+        const schema = schemas.find((s) => s._id === ledgerId);
         return schema?.name || ledgerId;
     };
 
@@ -116,7 +116,7 @@ export const TrashView: React.FC = () => {
                             {/* Deleted Entries */}
                             {deletedEntries.map((entry) => {
                                 const schema = schemas.find(
-                                    (s) => s._id === entry.ledgerId || s.ledgerId === entry.ledgerId
+                                    (s) => s._id === entry.ledgerId
                                 );
                                 const deletedAt = entry.deletedAt
                                     ? new Date(entry.deletedAt).toLocaleString()
@@ -141,7 +141,7 @@ export const TrashView: React.FC = () => {
                                         <div className="w-24 px-3 py-2 flex items-center justify-center">
                                             <button
                                                 onClick={() => handleRestore(entry._id)}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-500 text-white rounded transition-colors"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
                                                 title="Restore entry"
                                             >
                                                 <RotateCcw size={12} />

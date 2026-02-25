@@ -4,7 +4,7 @@ import { LedgyDocument } from './profile';
  * Sync configuration document
  */
 export interface SyncConfig extends LedgyDocument {
-    _type: 'sync_config';
+    type: 'sync_config';
     profileId: string;
     remoteUrl_enc?: {
         iv: number[];

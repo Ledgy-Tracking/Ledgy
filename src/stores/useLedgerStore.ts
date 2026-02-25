@@ -28,7 +28,7 @@ interface LedgerState {
 
     // Actions
     fetchSchemas: (profileId: string) => Promise<void>;
-    createSchema: (profileId: string, name: string, fields: SchemaField[]) => Promise<string>;
+    createSchema: (profileId: string, projectId: string, name: string, fields: SchemaField[]) => Promise<string>;
     updateSchema: (schemaId: string, name: string, fields: SchemaField[]) => Promise<void>;
     fetchEntries: (profileId: string, ledgerId: string) => Promise<void>;
     fetchBackLinks: (profileId: string, targetEntryId: string) => Promise<void>;
@@ -65,7 +65,7 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
         }
     },
 
-    createSchema: async (profileId: string, name: string, fields: SchemaField[]) => {
+    createSchema: async (profileId: string, projectId: string, name: string, fields: SchemaField[]) => {
         set({ isLoading: true, error: null });
         try {
             const authState = useAuthStore.getState();
@@ -74,7 +74,7 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            const schemaId = await create_schema(db, name, fields, profileId);
+            const schemaId = await create_schema(db, name, fields, profileId, projectId);
             await get().fetchSchemas(profileId);
             return schemaId;
         } catch (err: any) {
@@ -162,14 +162,14 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             const db = getProfileDb(profileId);
             const entryId = await create_entry(db, schemaId, ledgerId, data, profileId);
             await get().fetchEntries(profileId, ledgerId);
-            
+
             // Fire on-create trigger event
             const state = get();
             if (state.onEntryEvent) {
                 const entry = await db.getDocument<any>(entryId);
                 state.onEntryEvent('on-create', entry);
             }
-            
+
             return entryId;
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to create entry';
@@ -199,7 +199,7 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
 
             // Refresh entries for the ledger
             const schema = await get_schema(db, (await db.getDocument<any>(entryId)).schemaId);
-            await get().fetchEntries(state.activeProfileId, schema.ledgerId);
+            await get().fetchEntries(state.activeProfileId, schema._id);
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to update entry';
             set({ error: errorMsg, isLoading: false });

@@ -13,7 +13,7 @@ export interface NodeData {
  * Node canvas document
  */
 export interface NodeCanvas extends LedgyDocument {
-    _type: 'canvas';
+    type: 'canvas';
     profileId: string;
     canvasId: string; // e.g., 'default' for main canvas
     nodes: CanvasNode[];

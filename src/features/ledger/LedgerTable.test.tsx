@@ -15,7 +15,7 @@ vi.mock('../../stores/useProfileStore', () => ({
 
 const mockSchema = {
     _id: 'schema:test-123',
-    _type: 'schema' as const,
+    type: 'schema' as const,
     name: 'Test Ledger',
     fields: [
         { name: 'Name', type: 'text' as const },
@@ -23,7 +23,8 @@ const mockSchema = {
         { name: 'Date', type: 'date' as const },
     ],
     profileId: 'profile-1',
-    schema_version: 1,
+    projectId: 'project-1',
+    schemaVersion: 1,
     createdAt: '2026-02-23T00:00:00Z',
     updatedAt: '2026-02-23T00:00:00Z',
 };
@@ -31,12 +32,12 @@ const mockSchema = {
 const mockEntries = [
     {
         _id: 'entry:1',
-        _type: 'entry' as const,
+        type: 'entry' as const,
         schemaId: 'schema:test-123',
         ledgerId: 'schema:test-123',
         data: { Name: 'Test Entry 1', Amount: 100, Date: '2026-02-23' },
         profileId: 'profile-1',
-        schema_version: 1,
+        schemaVersion: 1,
         createdAt: '2026-02-23T00:00:00Z',
         updatedAt: '2026-02-23T00:00:00Z',
     },
@@ -108,7 +109,7 @@ describe('LedgerTable', () => {
 
         // First open the inline row
         fireEvent.click(screen.getByText(/add entry/i));
-        
+
         // Find an input and type 'n'
         const input = screen.getByPlaceholderText(/enter name/i);
         fireEvent.keyDown(input, { key: 'n', code: 'KeyN' });

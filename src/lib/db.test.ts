@@ -63,7 +63,7 @@ describe('Database Isolation', () => {
         const doc = docs[0];
 
         expect(doc.type).toBe('entry');
-        expect(doc.schema_version).toBe(1);
+        expect(doc.schemaVersion).toBe(1);
         expect(doc.createdAt).toBeDefined();
         expect(doc.updatedAt).toBeDefined();
         expect(new Date(doc.createdAt).getTime()).not.toBeNaN();

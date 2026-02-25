@@ -27,11 +27,12 @@ describe('templateExport', () => {
             vi.mocked(list_schemas).mockResolvedValue([
                 {
                     _id: 'schema:1',
-                    _type: 'schema',
+                    type: 'schema',
                     name: 'Test Schema',
                     fields: [{ name: 'Field1', type: 'text' }],
                     profileId: 'profile-1',
-                    schema_version: 1,
+                    projectId: 'project-1',
+                    schemaVersion: 1,
                     createdAt: '2026-02-23T00:00:00Z',
                     updatedAt: '2026-02-23T00:00:00Z',
                 },
@@ -53,6 +54,13 @@ describe('templateExport', () => {
             const { list_schemas, load_canvas } = await import('./db');
             vi.mocked(list_schemas).mockResolvedValue([]);
             vi.mocked(load_canvas).mockResolvedValue({
+                _id: 'canvas:default',
+                type: 'canvas',
+                profileId: 'profile-1',
+                canvasId: 'default',
+                schemaVersion: 1,
+                createdAt: '2026-02-23T00:00:00Z',
+                updatedAt: '2026-02-23T00:00:00Z',
                 nodes: [{ id: 'node-1', type: 'source', position: { x: 0, y: 0 }, data: { label: 'Test' } }],
                 edges: [],
                 viewport: { x: 0, y: 0, zoom: 1 },
@@ -79,20 +87,20 @@ describe('templateExport', () => {
         it('generates filename with profile name and date', () => {
             const date = new Date('2026-02-23T10:00:00Z');
             const filename = generateTemplateFilename('My Profile', date);
-            
+
             expect(filename).toBe('my-profile-2026-02-23.ledgy.json');
         });
 
         it('sanitizes special characters in profile name', () => {
             const date = new Date('2026-02-23T10:00:00Z');
             const filename = generateTemplateFilename('Test @#$ Profile!', date);
-            
+
             expect(filename).toBe('test-profile-2026-02-23.ledgy.json');
         });
 
         it('uses current date when not provided', () => {
             const filename = generateTemplateFilename('Test');
-            
+
             expect(filename).toMatch(/test-\d{4}-\d{2}-\d{2}\.ledgy\.json/);
         });
     });
@@ -113,8 +121,8 @@ describe('templateExport', () => {
             createElementSpy.mockReturnValue(mockLink as any);
 
             // Mock body methods to avoid jsdom issues
-            const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation();
-            const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation();
+            const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => ({} as any));
+            const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => ({} as any));
 
             downloadTemplateBrowser(template, filename);
 

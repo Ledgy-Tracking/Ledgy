@@ -192,7 +192,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
                                 const localDoc = await (profile_db as any).db.get(doc._id);
                                 const remoteDoc = await (profile_db as any).db.get(doc._id, { rev: doc._conflicts[0] });
 
-                                const fields = Object.keys({ ...localDoc, ...remoteDoc }).filter(f => !f.startsWith('_') && f !== 'type' && f !== 'schema_version');
+                                const fields = Object.keys({ ...localDoc, ...remoteDoc }).filter(f => !f.startsWith('_') && f !== 'type' && f !== 'schemaVersion');
                                 const conflictingFields = fields.filter(f => JSON.stringify(localDoc[f]) !== JSON.stringify(remoteDoc[f]));
 
                                 get().addConflict({
