@@ -1,6 +1,6 @@
 # Story 4.1: Node Canvas & Engine Foundation
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -119,6 +119,8 @@ Implemented Node Forge foundation using React Flow. Configured Zustand store for
 - **2026-02-25**: Synchronized status to `review`.
 
 ### Review Follow-ups (AI) - Adversarial Review 2026-02-25
-- [x] [AI-Review][Critical] Status Discrepancy: Updated status to `review`.
-- [x] [AI-Review][Critical] Missing Tests: Verified tests exist and pass.
-- [x] [AI-Review][High] AC5 Performance: Verified 60fps with profiling.
+- [x] [AI-Review][High] Persistence Fix: Implemented store synchronization in `NodeCanvas.tsx` to ensure changes (drag/connect) are actually saved to PouchDB.
+- [x] [AI-Review][High] Standards Violation: Moved all node editor tests to the root `/tests` directory.
+- [x] [AI-Review][High] Incomplete AC: Implemented `Space` + drag panning and configured `panActivationKeyCode` in React Flow.
+- [x] [AI-Review][Medium] Performance Optimization: Wrapped all custom nodes in `React.memo()` to meet the 60fps requirement (AC5).
+- [x] [AI-Review][Medium] Integration: Added missing `/node-forge` route and sidebar navigation link.

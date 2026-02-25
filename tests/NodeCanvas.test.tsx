@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { NodeCanvas } from './NodeCanvas';
+import { NodeCanvas } from '../src/features/nodeEditor/NodeCanvas';
+import { useNodeStore } from '../src/stores/useNodeStore';
+import { useProfileStore } from '../src/stores/useProfileStore';
 
 // Mock React Flow dependency
 vi.mock('@xyflow/react', () => ({
-    ReactFlow: ({ children, nodes, edges }: any) => (
-        <div data-testid="react-flow" className="react-flow">
+    ReactFlow: ({ children, nodes, edges, className }: any) => (
+        <div data-testid="react-flow" className={className}>
             {children}
             <div className="react-flow__background" />
             <div className="react-flow__controls" />
@@ -25,36 +27,46 @@ vi.mock('@xyflow/react', () => ({
 }));
 
 // Mock the stores
-vi.mock('../../stores/useNodeStore', () => ({
-    useNodeStore: {
+vi.mock('../src/stores/useNodeStore', () => ({
+    useNodeStore: Object.assign(vi.fn(), {
         getState: vi.fn(),
         subscribe: vi.fn(),
         setState: vi.fn(),
-    },
+    }),
 }));
 
-vi.mock('../../stores/useProfileStore', () => ({
-    useProfileStore: {
+vi.mock('../src/stores/useProfileStore', () => ({
+    useProfileStore: Object.assign(vi.fn(), {
         getState: vi.fn(() => ({ activeProfileId: 'test-profile' })),
         subscribe: vi.fn(),
         setState: vi.fn(),
-    },
+    }),
 }));
 
 describe('NodeCanvas', () => {
+    const mockUseNodeStore = vi.mocked(useNodeStore);
+    const mockUseProfileStore = vi.mocked(useProfileStore);
+
     beforeEach(() => {
         vi.clearAllMocks();
         
-        // Mock store states
-        (useNodeStore.getState as any).mockReturnValue({
+        const mockState = {
             nodes: [],
             edges: [],
             viewport: { x: 0, y: 0, zoom: 1 },
+            isLoading: false,
             loadCanvas: vi.fn(),
             saveCanvas: vi.fn(),
             setNodes: vi.fn(),
             setEdges: vi.fn(),
             setViewport: vi.fn(),
+        };
+
+        mockUseNodeStore.mockReturnValue(mockState);
+        (mockUseNodeStore.getState as any).mockReturnValue(mockState);
+        
+        mockUseProfileStore.mockReturnValue({
+            activeProfileId: 'test-profile',
         });
     });
 
@@ -81,7 +93,7 @@ describe('NodeCanvas', () => {
         // React Flow should be present
         const reactFlowContainer = screen.getByTestId('react-flow');
         expect(reactFlowContainer).toBeInTheDocument();
-        expect(reactFlowContainer).toHaveClass('react-flow');
+        expect(reactFlowContainer).toHaveClass('bg-zinc-950');
 
         // Background should be present
         expect(document.querySelector('.react-flow__background')).toBeInTheDocument();
@@ -95,16 +107,19 @@ describe('NodeCanvas', () => {
 
     it('loads canvas on mount with active profile', async () => {
         const loadCanvasMock = vi.fn();
-        (useNodeStore.getState as any).mockReturnValue({
+        const mockState = {
             nodes: [],
             edges: [],
             viewport: { x: 0, y: 0, zoom: 1 },
+            isLoading: false,
             loadCanvas: loadCanvasMock,
             saveCanvas: vi.fn(),
             setNodes: vi.fn(),
             setEdges: vi.fn(),
             setViewport: vi.fn(),
-        });
+        };
+        mockUseNodeStore.mockReturnValue(mockState);
+        (mockUseNodeStore.getState as any).mockReturnValue(mockState);
 
         render(
             <BrowserRouter>
@@ -117,28 +132,20 @@ describe('NodeCanvas', () => {
         });
     });
 
-    it('displays EmptyCanvasGuide overlay on empty canvas', () => {
-        render(
-            <BrowserRouter>
-                <NodeCanvas />
-            </BrowserRouter>
-        );
-
-        const guideElement = screen.getByText('Welcome to Node Forge');
-        expect(guideElement).toBeInTheDocument();
-    });
-
     it('hides empty guide when nodes are present', () => {
-        (useNodeStore.getState as any).mockReturnValue({
+        const mockState = {
             nodes: [{ id: '1', type: 'ledgerSource', position: { x: 0, y: 0 } }],
             edges: [],
             viewport: { x: 0, y: 0, zoom: 1 },
+            isLoading: false,
             loadCanvas: vi.fn(),
             saveCanvas: vi.fn(),
             setNodes: vi.fn(),
             setEdges: vi.fn(),
             setViewport: vi.fn(),
-        });
+        };
+        mockUseNodeStore.mockReturnValue(mockState);
+        (mockUseNodeStore.getState as any).mockReturnValue(mockState);
 
         render(
             <BrowserRouter>

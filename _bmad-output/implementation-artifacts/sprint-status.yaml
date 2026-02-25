@@ -63,7 +63,7 @@ development_status:
   epic-3-retrospective: optional
 
   epic-4: in-progress
-  4-1-node-canvas-engine-foundation: review
+  4-1-node-canvas-engine-foundation: done
   4-2-ledger-source-nodes-basic-wiring: review
   4-3-correlation-compute-nodes: review
   4-4-autonomous-triggers-on-create-on-edit: review

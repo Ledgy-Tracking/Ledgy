@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { computationService } from '../../services/computationService';
+import { computationService } from '../../../services/computationService';
 import { Calculator, AlertCircle } from 'lucide-react';
 
 export interface CorrelationNodeData {
@@ -18,7 +18,7 @@ export interface CorrelationNodeData {
  * Correlation Node - Computes Pearson correlation between two numeric streams
  * Story 4-3: Correlation & Compute Nodes
  */
-export const CorrelationNode: React.FC<NodeProps> = ({ id, data, selected }) => {
+export const CorrelationNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
     const nodeData = data as CorrelationNodeData;
     const [result, setResult] = useState<number | null>(nodeData.result || null);
     const [error, setError] = useState<string | undefined>(nodeData.error);
@@ -168,4 +168,4 @@ export const CorrelationNode: React.FC<NodeProps> = ({ id, data, selected }) => 
             </div>
         </div>
     );
-};
+});

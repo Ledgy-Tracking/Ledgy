@@ -106,6 +106,17 @@ export const AppShell: React.FC = () => {
                         <Trash2 size={18} className="group-hover:text-zinc-900 dark:group-hover:text-zinc-100" />
                         <span className="text-sm font-medium">Trash</span>
                     </button>
+
+                    <button
+                        onClick={() => navigate(`/app/${profileId}/node-forge`)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group ${window.location.pathname.includes('/node-forge')
+                            ? 'bg-zinc-200 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100'
+                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-900'
+                            }`}
+                    >
+                        <Network size={18} className="group-hover:text-zinc-900 dark:group-hover:text-zinc-100" />
+                        <span className="text-sm font-medium">Node Forge</span>
+                    </button>
                     {/* Placeholder for other navigation if needed */}
                 </nav>
 

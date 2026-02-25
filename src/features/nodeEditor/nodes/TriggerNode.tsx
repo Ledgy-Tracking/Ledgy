@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { useLedgerStore } from '../../stores/useLedgerStore';
-import { useProfileStore } from '../../stores/useProfileStore';
+import { useLedgerStore } from '../../../stores/useLedgerStore';
+import { useProfileStore } from '../../../stores/useProfileStore';
 import { Zap, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export interface TriggerNodeData {
@@ -18,7 +18,7 @@ export interface TriggerNodeData {
  * Trigger Node - Listens for ledger events (On-Create / On-Edit)
  * Story 4-4: Autonomous Triggers
  */
-export const TriggerNode: React.FC<NodeProps> = ({ id, data, selected }) => {
+export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
     const { schemas, fetchSchemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
     const [isConfigOpen, setIsConfigOpen] = useState(true);
@@ -167,4 +167,4 @@ export const TriggerNode: React.FC<NodeProps> = ({ id, data, selected }) => {
             </div>
         </div>
     );
-};
+});

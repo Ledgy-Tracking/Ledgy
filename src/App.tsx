@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import { LedgerView } from "./features/ledger/LedgerView";
 import { TrashView } from "./features/ledger/TrashView";
 import { ProjectDashboard } from "./features/projects/ProjectDashboard";
+import { NodeCanvas } from "./features/nodeEditor/NodeCanvas";
 
 function App() {
   const theme = useUIStore((state) => state.theme);
@@ -83,6 +84,7 @@ function App() {
           <Route path="settings" element={<div>Settings Placeholder</div>} />
           <Route path="ledger/:ledgerId" element={<LedgerView />} />
           <Route path="trash" element={<TrashView />} />
+          <Route path="node-forge" element={<NodeCanvas />} />
           {/* Add more profile-scoped routes here */}
         </Route>
 

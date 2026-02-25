@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { useProfileStore } from '../../stores/useProfileStore';
+import { useProfileStore } from '../../../stores/useProfileStore';
 import { BarChart3, TrendingUp, Type } from 'lucide-react';
 
 export interface DashboardOutputNodeData {
@@ -14,7 +14,7 @@ export interface DashboardOutputNodeData {
  * Dashboard Output Node - Publishes computation results to dashboard widgets
  * Story 4-5: Dashboard Widgets
  */
-export const DashboardOutputNode: React.FC<NodeProps> = ({ id, data, selected }) => {
+export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
     const { activeProfileId } = useProfileStore();
     const nodeData = data as DashboardOutputNodeData;
 
@@ -131,4 +131,4 @@ export const DashboardOutputNode: React.FC<NodeProps> = ({ id, data, selected })
             )}
         </div>
     );
-};
+});

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { EmptyCanvasGuide } from './EmptyCanvasGuide';
+import { EmptyCanvasGuide } from '../src/features/nodeEditor/EmptyCanvasGuide';
 
 describe('EmptyCanvasGuide', () => {
     it('renders welcome message', () => {
@@ -37,14 +37,14 @@ describe('EmptyCanvasGuide', () => {
     });
 
     it('has proper styling with emerald accent color', () => {
-        const { container } = render(<EmptyCanvasGuide />);
+        render(<EmptyCanvasGuide />);
         
         const title = screen.getByText('Welcome to Node Forge');
         expect(title).toHaveClass('text-emerald-400');
     });
 
     it('has dark theme styling', () => {
-        const { container } = render(<EmptyCanvasGuide />);
+        render(<EmptyCanvasGuide />);
         
         const guideCard = screen.getByText('Welcome to Node Forge').closest('div');
         expect(guideCard).toHaveClass('bg-zinc-900/90');

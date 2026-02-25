@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { useLedgerStore } from '../../stores/useLedgerStore';
-import { useProfileStore } from '../../stores/useProfileStore';
+import { useLedgerStore } from '../../../stores/useLedgerStore';
+import { useProfileStore } from '../../../stores/useProfileStore';
 import { LedgerSchema } from '../../types/ledger';
 import { ChevronDown, ChevronUp, Database } from 'lucide-react';
 
@@ -20,7 +20,7 @@ export interface LedgerSourceNodeData {
  * Ledger Source Node - represents a ledger schema as a data source
  * Story 4-2: Ledger Source Nodes & Basic Wiring
  */
-export const LedgerSourceNode: React.FC<NodeProps> = ({ id, data, selected }) => {
+export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
     const { schemas, fetchSchemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
     const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -155,7 +155,7 @@ export const LedgerSourceNode: React.FC<NodeProps> = ({ id, data, selected }) =>
             )}
         </div>
     );
-};
+});
 
 const PortTypeIcon: React.FC<{ type: string }> = ({ type }) => {
     const colors: Record<string, string> = {

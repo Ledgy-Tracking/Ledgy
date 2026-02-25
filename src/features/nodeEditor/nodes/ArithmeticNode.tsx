@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { computationService } from '../../services/computationService';
+import { computationService } from '../../../services/computationService';
 import { Calculator, AlertCircle } from 'lucide-react';
 
 export interface ArithmeticNodeData {
@@ -18,7 +18,7 @@ export interface ArithmeticNodeData {
  * Arithmetic Node - Performs sum, average, min, max on numeric input
  * Story 4-3: Correlation & Compute Nodes
  */
-export const ArithmeticNode: React.FC<NodeProps> = ({ id, data, selected }) => {
+export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
     const nodeData = data as ArithmeticNodeData;
     const [result, setResult] = useState<number | null>(nodeData.result || null);
     const [error, setError] = useState<string | undefined>(nodeData.error);
@@ -164,4 +164,4 @@ export const ArithmeticNode: React.FC<NodeProps> = ({ id, data, selected }) => {
             </div>
         </div>
     );
-};
+});

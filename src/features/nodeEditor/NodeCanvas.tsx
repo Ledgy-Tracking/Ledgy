@@ -38,10 +38,19 @@ const edgeTypes = {
 
 export const NodeCanvas: React.FC = () => {
     const { activeProfileId } = useProfileStore();
-    const { nodes, edges, viewport, loadCanvas, saveCanvas, setNodes, setEdges, setViewport } = useNodeStore();
+    const { nodes, edges, viewport, isLoading, loadCanvas, saveCanvas, setNodes, setEdges, setViewport } = useNodeStore();
 
     const [rfNodes, setRfNodes, onNodesChange] = useNodesState(nodes);
     const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(edges);
+
+    // Sync React Flow changes back to Zustand store for persistence
+    useEffect(() => {
+        setNodes(rfNodes as any);
+    }, [rfNodes, setNodes]);
+
+    useEffect(() => {
+        setEdges(rfEdges as any);
+    }, [rfEdges, setEdges]);
 
     // Load canvas on mount
     useEffect(() => {
@@ -53,12 +62,12 @@ export const NodeCanvas: React.FC = () => {
     // Auto-save on changes (debounced)
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (activeProfileId && rfNodes.length > 0 || rfEdges.length > 0) {
+            if (activeProfileId && (nodes.length > 0 || edges.length > 0)) {
                 saveCanvas(activeProfileId, 'default');
             }
         }, 1000);
         return () => clearTimeout(timer);
-    }, [rfNodes, rfEdges, activeProfileId, saveCanvas]);
+    }, [nodes, edges, activeProfileId, saveCanvas]);
 
     const onConnect = useCallback(
         (params: Connection) => {
@@ -86,17 +95,21 @@ export const NodeCanvas: React.FC = () => {
         [setViewport]
     );
 
-    // Sync React Flow state with store
+    // Initial sync from store to React Flow state
     useEffect(() => {
-        setRfNodes(nodes as Node[]);
-    }, [nodes, setRfNodes]);
+        if (rfNodes.length === 0 && nodes.length > 0) {
+            setRfNodes(nodes as Node[]);
+        }
+    }, [nodes, setRfNodes, rfNodes.length]);
 
     useEffect(() => {
-        setRfEdges(edges);
-    }, [edges, setRfEdges]);
+        if (rfEdges.length === 0 && edges.length > 0) {
+            setRfEdges(edges);
+        }
+    }, [edges, setRfEdges, rfEdges.length]);
 
     // Show empty state guide when no nodes
-    if (nodes.length === 0 && edges.length === 0) {
+    if (nodes.length === 0 && edges.length === 0 && !isLoading) {
         return (
             <div className="w-full h-full bg-zinc-950 relative">
                 <EmptyCanvasGuide />
@@ -107,6 +120,8 @@ export const NodeCanvas: React.FC = () => {
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
                     onViewportChange={onViewportChange}
+                    panActivationKeyCode="Space"
+                    selectionKeyCode="Shift"
                     fitView
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
@@ -134,8 +149,9 @@ export const NodeCanvas: React.FC = () => {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onViewportChange={onViewportChange}
-                viewport={viewport}
-                fitView
+                defaultViewport={viewport}
+                panActivationKeyCode="Space"
+                selectionKeyCode="Shift"
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={{ type: 'data' }}
