@@ -111,7 +111,7 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ id, data, sele
                     <Handle
                         type="target"
                         position={Position.Left}
-                        id="input-x"
+                        id="target-number-x"
                         className="!w-3 !h-3 !bg-blue-500 !border-2 !border-zinc-900 hover:!bg-blue-400"
                         style={{ left: '-6px' }}
                     />
@@ -121,7 +121,7 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ id, data, sele
                     <Handle
                         type="target"
                         position={Position.Left}
-                        id="input-y"
+                        id="target-number-y"
                         className="!w-3 !h-3 !bg-amber-500 !border-2 !border-zinc-900 hover:!bg-amber-400"
                         style={{ left: '-6px', top: 'auto', bottom: '0' }}
                     />
@@ -160,7 +160,7 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ id, data, sele
                     <Handle
                         type="source"
                         position={Position.Right}
-                        id="output-result"
+                        id="source-number-result"
                         className="!w-3 !h-3 !bg-purple-500 !border-2 !border-zinc-900 hover:!bg-purple-400"
                         style={{ right: '-6px' }}
                     />

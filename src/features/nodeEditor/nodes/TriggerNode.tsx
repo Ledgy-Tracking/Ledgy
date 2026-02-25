@@ -159,7 +159,7 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
                     <Handle
                         type="source"
                         position={Position.Right}
-                        id="output-trigger"
+                        id="source-trigger-event"
                         className="!w-3 !h-3 !bg-amber-500 !border-2 !border-zinc-900 hover:!bg-amber-400"
                         style={{ right: '-6px' }}
                     />

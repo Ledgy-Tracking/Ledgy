@@ -120,7 +120,7 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
                     <Handle
                         type="target"
                         position={Position.Left}
-                        id="input-values"
+                        id="target-number-values"
                         className="!w-3 !h-3 !bg-emerald-500 !border-2 !border-zinc-900 hover:!bg-emerald-400"
                         style={{ left: '-6px' }}
                     />
@@ -156,7 +156,7 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
                     <Handle
                         type="source"
                         position={Position.Right}
-                        id="output-result"
+                        id="source-number-result"
                         className="!w-3 !h-3 !bg-emerald-500 !border-2 !border-zinc-900 hover:!bg-emerald-400"
                         style={{ right: '-6px' }}
                     />

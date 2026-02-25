@@ -113,7 +113,7 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
                     <Handle
                         type="target"
                         position={Position.Left}
-                        id="input-data"
+                        id="target-any-data"
                         className="!w-3 !h-3 !bg-purple-500 !border-2 !border-zinc-900 hover:!bg-purple-400"
                         style={{ left: '-6px' }}
                     />

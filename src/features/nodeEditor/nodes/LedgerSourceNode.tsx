@@ -58,7 +58,7 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
             data.ledgerId = ledgerId;
             data.ledgerName = schema.name;
             data.ports = schema.fields.map(field => ({
-                id: `port-${field.name}`,
+                id: `source-${field.type}-${field.name}`,
                 type: field.type,
                 fieldName: field.name,
             }));

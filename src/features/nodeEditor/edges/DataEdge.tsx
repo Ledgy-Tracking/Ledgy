@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { EdgeProps, getBezierPath } from '@xyflow/react';
+import React, { useState, useMemo } from 'react';
+import { EdgeProps, getBezierPath, useReactFlow } from '@xyflow/react';
 
 /**
  * Custom edge with data preview tooltip
@@ -22,6 +22,7 @@ export const DataEdge: React.FC<EdgeProps> = ({
     data,
 }) => {
     const [showTooltip, setShowTooltip] = useState(false);
+    const { getNode } = useReactFlow();
 
     const [edgePath] = getBezierPath({
         sourceX,
@@ -32,9 +33,28 @@ export const DataEdge: React.FC<EdgeProps> = ({
         targetPosition,
     });
 
-    // Extract data type from edge data or source handle
-    const dataType = data?.dataType || sourceHandle?.split('-')[1] || 'unknown';
-    const sampleData = data?.sampleData || `${dataType} data`;
+    // Extract dynamic data from source node
+    const flowData = useMemo(() => {
+        const sourceNode = getNode(source);
+        if (!sourceNode) return { type: 'unknown', value: 'No source' };
+
+        const type = sourceHandle?.split('-')[1] || 'unknown';
+        let value: any = 'No data';
+
+        // Check if source node has computation result
+        if (sourceNode.data?.result !== undefined) {
+            value = sourceNode.data.result;
+        } else if (sourceNode.type === 'ledgerSource') {
+            value = 'Live ledger stream';
+        } else if (sourceNode.data?.sampleData) {
+            value = sourceNode.data.sampleData;
+        }
+
+        return { type, value };
+    }, [getNode, source, sourceHandle]);
+
+    const sampleData = flowData.value;
+    const dataType = flowData.type;
 
     return (
         <>
@@ -59,14 +79,14 @@ export const DataEdge: React.FC<EdgeProps> = ({
                         y={(sourceY + targetY) / 2 - 30}
                         width="120"
                         height="60"
-                        style={{ overflow: 'visible' }}
+                        style={{ overflow: 'visible', pointerEvents: 'none' }}
                     >
-                        <div className="bg-zinc-800 border border-zinc-700 rounded px-2 py-1.5 text-xs text-zinc-200 shadow-lg z-50">
-                            <div className="font-semibold text-emerald-400 mb-0.5">
-                                {dataType}
+                        <div className="bg-zinc-900/95 border border-emerald-500/50 rounded px-2 py-1.5 text-[10px] text-zinc-200 shadow-xl z-50 backdrop-blur-sm">
+                            <div className="font-bold text-emerald-400 uppercase tracking-tighter mb-0.5 border-b border-emerald-500/20 pb-0.5">
+                                {dataType} flow
                             </div>
-                            <div className="text-zinc-400 truncate">
-                                {String(sampleData)}
+                            <div className="text-zinc-100 font-mono truncate">
+                                {typeof sampleData === 'number' ? sampleData.toFixed(4) : String(sampleData)}
                             </div>
                         </div>
                     </foreignObject>

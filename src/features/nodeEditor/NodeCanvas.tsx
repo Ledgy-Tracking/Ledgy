@@ -95,6 +95,22 @@ export const NodeCanvas: React.FC = () => {
         [setViewport]
     );
 
+    const isValidConnection = useCallback((connection: Connection) => {
+        const sourceHandle = connection.sourceHandle;
+        const targetHandle = connection.targetHandle;
+
+        if (!sourceHandle || !targetHandle) return false;
+
+        // IDs are formatted as source-{type}-{name} or target-{type}-{name}
+        const sourceType = sourceHandle.split('-')[1];
+        const targetType = targetHandle.split('-')[1];
+
+        // "any" is a wildcard
+        if (targetType === 'any' || sourceType === 'any') return true;
+
+        return sourceType === targetType;
+    }, []);
+
     // Initial sync from store to React Flow state
     useEffect(() => {
         if (rfNodes.length === 0 && nodes.length > 0) {
@@ -120,6 +136,7 @@ export const NodeCanvas: React.FC = () => {
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
                     onViewportChange={onViewportChange}
+                    isValidConnection={isValidConnection}
                     panActivationKeyCode="Space"
                     selectionKeyCode="Shift"
                     fitView
@@ -149,6 +166,7 @@ export const NodeCanvas: React.FC = () => {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onViewportChange={onViewportChange}
+                isValidConnection={isValidConnection}
                 defaultViewport={viewport}
                 panActivationKeyCode="Space"
                 selectionKeyCode="Shift"
