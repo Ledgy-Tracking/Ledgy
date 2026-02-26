@@ -7,7 +7,6 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
-    CommandShortcut,
 } from './ui/command';
 import { useProfileStore } from '../stores/useProfileStore';
 import { useLedgerStore } from '../stores/useLedgerStore';
@@ -36,7 +35,6 @@ export const CommandPalette: React.FC = () => {
         command();
     };
 
-    const activeProfile = profiles.find((p) => p.id === activeProfileId);
     // Depending on routing, projects might just be dashboards or we just navigate to ledger
     // For now we'll support navigating to profiles and active profile ledgers
 
@@ -45,7 +43,7 @@ export const CommandPalette: React.FC = () => {
             <CommandInput placeholder="Type a command or search..." />
             <CommandList>
                 <CommandEmpty>No results found.</CommandEmpty>
-                
+
                 {activeProfileId && (
                     <CommandGroup heading="Active Profile Navigation">
                         <CommandItem onSelect={() => runCommand(() => navigate(`/app/${activeProfileId}/projects`))}>

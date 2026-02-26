@@ -19,8 +19,8 @@ export interface ArithmeticNodeData {
  * Arithmetic Node - Performs sum, average, min, max on numeric input
  * Story 4-3: Correlation & Compute Nodes
  */
-export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
-    const nodeData = data as ArithmeticNodeData;
+export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ data, selected }) => {
+    const nodeData = data as unknown as ArithmeticNodeData;
     const [result, setResult] = useState<number | null>(nodeData.result || null);
     const [error, setError] = useState<string | undefined>(nodeData.error);
     const [isComputing, setIsComputing] = useState(false);
@@ -101,9 +101,8 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
 
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${
-                selected ? 'border-emerald-500' : 'border-zinc-700'
-            } ${error ? 'border-red-500/50' : ''}`}
+            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+                } ${error ? 'border-red-500/50' : ''}`}
         >
             {/* Header */}
             <div className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-t-md">

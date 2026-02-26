@@ -127,7 +127,7 @@ class ComputationService {
     if (this.worker) {
       this.worker.terminate();
       this.worker = null;
-      this.initialized = false;
+      this.initializing = false;
       this.callbacks.clear();
     }
   }

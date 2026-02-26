@@ -2,7 +2,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
 import { useProfileStore } from '../../../stores/useProfileStore';
-import { LedgerSchema } from '../../types/ledger';
 import { ChevronDown, ChevronUp, Database } from 'lucide-react';
 
 export interface LedgerSourceNodeData {
@@ -20,13 +19,13 @@ export interface LedgerSourceNodeData {
  * Ledger Source Node - represents a ledger schema as a data source
  * Story 4-2: Ledger Source Nodes & Basic Wiring
  */
-export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
+export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ data, selected }) => {
     const { schemas, fetchSchemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
     const [isConfigOpen, setIsConfigOpen] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
 
-    const nodeData = data as LedgerSourceNodeData;
+    const nodeData = data as unknown as LedgerSourceNodeData;
 
     // Fetch schemas on mount for ledger selector
     useEffect(() => {
@@ -67,13 +66,10 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
         }
     }, [schemas, data]);
 
-    const selectedSchema = schemas.find(s => s._id === nodeData.ledgerId);
-
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] max-w-[280px] ${
-                selected ? 'border-emerald-500' : 'border-zinc-700'
-            }`}
+            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] max-w-[280px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+                }`}
         >
             {/* Header */}
             <div

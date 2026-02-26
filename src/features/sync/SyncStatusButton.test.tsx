@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
 import { SyncStatusButton } from './SyncStatusButton';
 import { useSyncStore } from '../../stores/useSyncStore';
 import { useAuthStore } from '../auth/useAuthStore';

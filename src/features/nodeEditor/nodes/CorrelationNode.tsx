@@ -18,8 +18,8 @@ export interface CorrelationNodeData {
  * Correlation Node - Computes Pearson correlation between two numeric streams
  * Story 4-3: Correlation & Compute Nodes
  */
-export const CorrelationNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
-    const nodeData = data as CorrelationNodeData;
+export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected }) => {
+    const nodeData = data as unknown as CorrelationNodeData;
     const [result, setResult] = useState<number | null>(nodeData.result || null);
     const [error, setError] = useState<string | undefined>(nodeData.error);
     const [isComputing, setIsComputing] = useState(false);
@@ -98,9 +98,8 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ id, data, sele
 
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[220px] ${
-                selected ? 'border-emerald-500' : 'border-zinc-700'
-            } ${error ? 'border-red-500/50' : ''}`}
+            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[220px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+                } ${error ? 'border-red-500/50' : ''}`}
         >
             {/* Header */}
             <div className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-t-md">

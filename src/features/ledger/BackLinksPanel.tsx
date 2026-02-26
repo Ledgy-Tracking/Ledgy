@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerEntry } from '../../types/ledger';
-import { RelationTagChip } from './RelationTagChip';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 
@@ -19,7 +18,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
     targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
+    const { backLinks, fetchBackLinks } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
 
     useEffect(() => {
@@ -62,13 +61,13 @@ interface BackLinkItemProps {
     targetLedgerId: string;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, targetLedgerId }) => {
+const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
     const { schemas } = useLedgerStore();
     const { profileId } = useParams<{ profileId: string }>();
     const { activeProfileId } = useProfileStore();
 
     // Find the schema for this entry's ledger
-    const entrySchema = schemas.find(s => s.ledgerId === entry.ledgerId || s._id === entry.ledgerId);
+    const entrySchema = schemas.find(s => s._id === entry.ledgerId);
     const ledgerName = entrySchema?.name || entry.ledgerId;
 
     // Find which fields in this entry reference the target

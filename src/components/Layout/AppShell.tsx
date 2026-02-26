@@ -21,7 +21,6 @@ import { SyncStatusSheet } from '../../features/sync/SyncStatusSheet';
 import { ConflictListSheet, ConflictEntry } from '../../features/sync/ConflictListSheet';
 import { DiffGuardModal } from '../../features/sync/DiffGuardModal';
 import { CommandPalette } from '../CommandPalette';
-import { Button } from '../ui/button';
 
 export const AppShell: React.FC = () => {
     const {
@@ -36,7 +35,6 @@ export const AppShell: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 900);
     const [mounted, setMounted] = useState(false);
     const { profileId } = useParams();
     const prevWidthRef = React.useRef(window.innerWidth);
@@ -58,7 +56,6 @@ export const AppShell: React.FC = () => {
         const handleResize = () => {
             const width = window.innerWidth;
             const mobile = width < 900;
-            setIsMobile(mobile);
 
             if (mobile && prevWidthRef.current >= 900) {
                 setLeftSidebar(false);

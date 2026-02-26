@@ -16,11 +16,9 @@ export const DataEdge: React.FC<EdgeProps> = ({
     style = {},
     markerEnd,
     source,
-    target,
-    sourceHandle,
-    targetHandle,
-    data,
+    ..._rest
 }) => {
+    const { sourceHandle } = _rest as any;
     const [showTooltip, setShowTooltip] = useState(false);
     const { getNode } = useReactFlow();
 

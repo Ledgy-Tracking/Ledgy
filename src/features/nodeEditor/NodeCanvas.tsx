@@ -10,6 +10,7 @@ import {
     Connection,
     Edge,
     Node,
+    IsValidConnection,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
@@ -22,7 +23,7 @@ import { ArithmeticNode } from './nodes/ArithmeticNode';
 import { TriggerNode } from './nodes/TriggerNode';
 import { DashboardOutputNode } from './nodes/DashboardOutputNode';
 import { DataEdge } from './edges/DataEdge';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { executeTrigger } from '../../services/triggerEngine';
 import { useErrorStore } from '../../stores/useErrorStore';
 
@@ -69,18 +70,18 @@ export const NodeCanvas: React.FC = () => {
     useEffect(() => {
         setOnEntryEvent(async (eventType, entry) => {
             // Find all matching trigger nodes
-            const matchingTriggers = nodes.filter(n => 
-                n.type === 'trigger' && 
-                n.data.ledgerId === entry.ledgerId && 
-                n.data.eventType === eventType
+            const matchingTriggers = nodes.filter(n =>
+                n.type === 'trigger' &&
+                n.data.ledgerId === entry.ledgerId &&
+                (n.data as any).eventType === eventType
             );
 
             for (const trigger of matchingTriggers) {
                 try {
                     // Update trigger status visually (simulated update)
-                    trigger.data.status = 'fired';
-                    trigger.data.lastFired = new Date().toISOString();
-                    
+                    (trigger.data as any).status = 'fired';
+                    (trigger.data as any).lastFired = new Date().toISOString();
+
                     await executeTrigger(
                         {
                             triggerId: trigger.id,
@@ -95,18 +96,18 @@ export const NodeCanvas: React.FC = () => {
                         trigger.id
                     );
                 } catch (err: any) {
-                    trigger.data.status = 'error';
-                    trigger.data.error = err.message;
+                    (trigger.data as any).status = 'error';
+                    (trigger.data as any).error = err.message;
                     dispatchError(`Trigger failed: ${err.message}`);
                 }
             }
         });
 
         // Cleanup subscriber on unmount
-        return () => setOnEntryEvent(() => {});
+        return () => setOnEntryEvent(() => { });
     }, [nodes, edges, setOnEntryEvent, dispatchError]);
 
-    const [rfNodes, setRfNodes, onNodesChange] = useNodesState(nodes);
+    const [rfNodes, setRfNodes, onNodesChange] = useNodesState(nodes as unknown as Node[]);
     const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(edges);
 
     // Sync React Flow changes back to Zustand store for persistence
@@ -139,7 +140,7 @@ export const NodeCanvas: React.FC = () => {
         (params: Connection) => {
             // Extract data type from source handle
             const dataType = params.sourceHandle?.split('-')[1] || 'unknown';
-            
+
             const newEdge: Edge = {
                 ...params,
                 id: `edge-${params.source}-${params.target}-${params.sourceHandle}-${params.targetHandle}`,
@@ -149,7 +150,7 @@ export const NodeCanvas: React.FC = () => {
                     sampleData: `${dataType} flow`,
                 },
             };
-            setRfEdges((eds) => addEdge(newEdge, eds));
+            setRfEdges((eds) => addEdge(newEdge, eds) as unknown as typeof eds);
         },
         [setRfEdges]
     );
@@ -161,7 +162,7 @@ export const NodeCanvas: React.FC = () => {
         [setViewport]
     );
 
-    const isValidConnection = useCallback((connection: Connection) => {
+    const isValidConnection: IsValidConnection<any> = useCallback((connection) => {
         const sourceHandle = connection.sourceHandle;
         const targetHandle = connection.targetHandle;
 
@@ -180,7 +181,7 @@ export const NodeCanvas: React.FC = () => {
     // Initial sync from store to React Flow state
     useEffect(() => {
         if (rfNodes.length === 0 && nodes.length > 0) {
-            setRfNodes(nodes as Node[]);
+            setRfNodes(nodes as unknown as Node[]);
         }
     }, [nodes, setRfNodes, rfNodes.length]);
 

@@ -19,7 +19,6 @@ interface RelationTagChipProps {
 export const RelationTagChip: React.FC<RelationTagChipProps> = ({
     value,
     targetLedgerId,
-    entryId,
     onClick,
     isGhost = false,
 }) => {
@@ -34,12 +33,12 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
 
     const handleClick = (id: string) => {
         if (isGhost) return;
-        
+
         // Call custom onClick if provided
         if (onClick) {
             onClick();
         }
-        
+
         // Navigate to target ledger (Story 3-3, AC 5)
         if (targetLedgerId) {
             const navProfileId = profileId || activeProfileId;
@@ -59,11 +58,10 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
                 <button
                     key={index}
                     onClick={() => handleClick(val)}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded border transition-colors ${
-                        isGhost
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded border transition-colors ${isGhost
                             ? 'bg-zinc-800 border-zinc-700 text-zinc-500 line-through cursor-not-allowed'
                             : 'bg-emerald-900/30 border-emerald-800 text-emerald-400 hover:bg-emerald-900/50 hover:border-emerald-700 cursor-pointer'
-                    }`}
+                        }`}
                     title={targetLedgerId ? `Navigate to ${targetLedgerId}` : undefined}
                     disabled={isGhost}
                 >

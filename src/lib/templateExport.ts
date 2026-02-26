@@ -1,6 +1,5 @@
 import { Database, list_schemas, load_canvas } from '../lib/db';
 import { TemplateExport } from '../types/templates';
-import { CanvasNode, CanvasEdge, Viewport } from '../types/nodeEditor';
 
 /**
  * Exports profile schemas and node graph as portable template.
@@ -21,7 +20,7 @@ export async function export_template(
 
     // Get node graph if requested
     let nodeGraph: TemplateExport['nodeGraph'] = undefined;
-    
+
     if (includeNodeGraph) {
         try {
             const canvas = await load_canvas(db, 'default');
@@ -64,7 +63,7 @@ export function generateTemplateFilename(profileName: string, date = new Date())
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
-    
+
     return `${safeName}-${dateStr}.ledgy.json`;
 }
 
@@ -85,7 +84,7 @@ export function downloadTemplateBrowser(template: TemplateExport, filename: stri
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     // Cleanup
     URL.revokeObjectURL(url);
 }
@@ -107,10 +106,10 @@ export async function saveTemplateTauri(
         // This is safe because we're importing from known Tauri packages
         const importTauriDialog = new Function('return import("@tauri-apps/api/dialog")') as () => Promise<any>;
         const importTauriFs = new Function('return import("@tauri-apps/api/fs")') as () => Promise<any>;
-        
+
         const dialogModule = await importTauriDialog();
         const fsModule = await importTauriFs();
-        
+
         const filePath = await dialogModule.save({
             filters: [{
                 name: 'Ledgy Template',

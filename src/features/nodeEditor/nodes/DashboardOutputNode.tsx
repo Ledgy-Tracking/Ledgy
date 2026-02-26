@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { useProfileStore } from '../../../stores/useProfileStore';
 import { useDashboardStore } from '../../../stores/useDashboardStore';
@@ -18,18 +18,18 @@ export interface DashboardOutputNodeData {
 export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
     const { activeProfileId } = useProfileStore();
     const { addWidget, updateWidget, widgets } = useDashboardStore();
-    const nodeData = data as DashboardOutputNodeData;
+    const nodeData = data as unknown as DashboardOutputNodeData;
 
     // Ensure widget exists on dashboard when node is added
     useEffect(() => {
         if (!activeProfileId) return;
 
         const existingWidget = widgets.find(w => w.id === nodeData.widgetId || w.nodeId === id);
-        
+
         if (!existingWidget) {
             const newWidgetId = nodeData.widgetId || `widget-${id}`;
-            data.widgetId = newWidgetId;
-            
+            (data as any).widgetId = newWidgetId;
+
             addWidget({
                 id: newWidgetId,
                 nodeId: id,
@@ -39,19 +39,20 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
                 data: { value: 0 }
             });
         }
+        return () => { /* cleanup if needed */ };
     }, [id, activeProfileId, addWidget, nodeData.widgetId, widgets]);
 
     const handleWidgetTypeChange = (type: 'chart' | 'trend' | 'text') => {
-        data.widgetType = type;
-        if (data.widgetId) {
-            updateWidget(data.widgetId, { type });
+        (data as any).widgetType = type;
+        if ((data as any).widgetId) {
+            updateWidget((data as any).widgetId, { type });
         }
     };
 
     const handleTitleChange = (title: string) => {
-        data.title = title;
-        if (data.widgetId) {
-            updateWidget(data.widgetId, { title });
+        (data as any).title = title;
+        if ((data as any).widgetId) {
+            updateWidget((data as any).widgetId, { title });
         }
     };
 
@@ -68,9 +69,8 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
 
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${
-                selected ? 'border-emerald-500' : 'border-zinc-700'
-            }`}
+            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+                }`}
         >
             {/* Header */}
             <div className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-t-md">
@@ -88,33 +88,30 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
                     <div className="flex gap-1">
                         <button
                             onClick={() => handleWidgetTypeChange('chart')}
-                            className={`flex-1 p-1.5 rounded border transition-colors ${
-                                nodeData.widgetType === 'chart'
-                                    ? 'bg-blue-600 border-blue-500 text-white'
-                                    : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                            }`}
+                            className={`flex-1 p-1.5 rounded border transition-colors ${nodeData.widgetType === 'chart'
+                                ? 'bg-blue-600 border-blue-500 text-white'
+                                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                }`}
                             title="Chart"
                         >
                             <BarChart3 size={14} />
                         </button>
                         <button
                             onClick={() => handleWidgetTypeChange('trend')}
-                            className={`flex-1 p-1.5 rounded border transition-colors ${
-                                nodeData.widgetType === 'trend'
-                                    ? 'bg-emerald-600 border-emerald-500 text-white'
-                                    : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                            }`}
+                            className={`flex-1 p-1.5 rounded border transition-colors ${nodeData.widgetType === 'trend'
+                                ? 'bg-emerald-600 border-emerald-500 text-white'
+                                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                }`}
                             title="Trend"
                         >
                             <TrendingUp size={14} />
                         </button>
                         <button
                             onClick={() => handleWidgetTypeChange('text')}
-                            className={`flex-1 p-1.5 rounded border transition-colors ${
-                                nodeData.widgetType === 'text'
-                                    ? 'bg-purple-600 border-purple-500 text-white'
-                                    : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                            }`}
+                            className={`flex-1 p-1.5 rounded border transition-colors ${nodeData.widgetType === 'text'
+                                ? 'bg-purple-600 border-purple-500 text-white'
+                                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                }`}
                             title="Text"
                         >
                             <Type size={14} />

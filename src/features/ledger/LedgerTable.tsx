@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
-import { LedgerSchema, LedgerEntry, SchemaField } from '../../types/ledger';
+import { LedgerEntry, SchemaField } from '../../types/ledger';
 import { InlineEntryRow } from './InlineEntryRow';
 import { RelationTagChip } from './RelationTagChip';
 import { BackLinksPanel } from './BackLinksPanel';
@@ -171,9 +171,8 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                     <TableRow
                                         key={entry._id}
                                         data-state={isSelected ? "selected" : undefined}
-                                        className={`cursor-pointer transition-colors ${
-                                            isHighlighted ? 'bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30' : ''
-                                        }`}
+                                        className={`cursor-pointer transition-colors ${isHighlighted ? 'bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30' : ''
+                                            }`}
                                         onClick={() => setSelectedRow(index)}
                                         onDoubleClick={() => setEditingEntryId(entry._id)}
                                         tabIndex={0}
@@ -185,7 +184,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                     >
                                         {schema.fields.map(field => (
                                             <TableCell key={`${entry._id}-${field.name}`}>
-                                                {renderFieldValue(entry.data[field.name], field.type, entry, field, schemaId, deletedEntryIds)}
+                                                {renderFieldValue(entry.data[field.name], field.type, entry, field, deletedEntryIds)}
                                             </TableCell>
                                         ))}
                                     </TableRow>
@@ -209,7 +208,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     );
 };
 
-function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, field?: SchemaField, schemaId?: string, deletedEntryIds?: Set<string>): React.ReactNode {
+function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, field?: SchemaField, deletedEntryIds?: Set<string>): React.ReactNode {
     if (value === null || value === undefined || value === '') {
         return <span className="text-zinc-400 dark:text-zinc-600 italic">-</span>;
     }

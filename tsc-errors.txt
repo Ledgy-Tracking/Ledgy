@@ -1,0 +1,1 @@
+src/stores/usePluginStore.ts(97,57): error TS2552: Cannot find name 'PluginPermission'. Did you mean 'PluginPermissions'?

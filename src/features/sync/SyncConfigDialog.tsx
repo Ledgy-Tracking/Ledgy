@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, RefreshCw, Shield, Globe, User, Key, ArrowRightLeft, Upload } from 'lucide-react';
 import { useSyncStore } from '../../stores/useSyncStore';
-import { useAuthStore } from '../auth/useAuthStore';
 
 interface SyncConfigDialogProps {
     profileId: string;

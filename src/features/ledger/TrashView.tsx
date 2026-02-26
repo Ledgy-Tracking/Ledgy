@@ -24,7 +24,6 @@ export const TrashView: React.FC = () => {
                 await fetchSchemas(activeProfileId);
 
                 // Fetch entries for each schema to get soft-deleted ones
-                const allDeleted: LedgerEntry[] = [];
                 for (const schema of schemas) {
                     await fetchEntries(activeProfileId, schema._id);
                 }

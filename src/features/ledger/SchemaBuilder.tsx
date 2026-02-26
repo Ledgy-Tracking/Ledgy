@@ -3,7 +3,7 @@ import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useErrorStore } from '../../stores/useErrorStore';
 import { SchemaField, FieldType } from '../../types/ledger';
-import { X, Plus, Trash2, ChevronUp, ChevronDown, Save } from 'lucide-react';
+import { Plus, Trash2, ChevronUp, ChevronDown, Save } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Responsive, WidthProvider } from 'react-grid-layout';
+// react-grid-layout v2 ships a proper ESM build with named exports.
+// WidthProvider was removed — use the useContainerWidth hook instead.
+import { ResponsiveGridLayout, useContainerWidth, type Layout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { useProfileStore } from '../../stores/useProfileStore';
@@ -9,8 +11,6 @@ import { TextWidget, TrendWidget, ChartWidget, WidgetConfig } from './widgets';
 import { Plus, Trash2, BarChart3, TrendingUp, Type, Settings } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { WidgetConfigSheet } from './WidgetConfigSheet';
-
-const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardViewProps {
     dashboardId?: string;
@@ -28,10 +28,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     dashboardId = 'default',
 }) => {
     const { activeProfileId } = useProfileStore();
-    const { widgets, fetchWidgets, saveWidgets, addWidget, removeWidget } = useDashboardStore();
+    const { widgets, fetchWidgets, saveWidgets, addWidget, removeWidget, updateWidget } = useDashboardStore();
     const [isAddingWidget, setIsAddingWidget] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
     const [selectedWidget, setSelectedWidget] = useState<WidgetConfig | null>(null);
+    const { width, containerRef, mounted } = useContainerWidth();
 
     // Load widgets on mount
     useEffect(() => {
@@ -65,7 +66,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         setIsAddingWidget(false);
     };
 
-    const onLayoutChange = (layout: any[]) => {
+    const onLayoutChange = (layout: Layout, _layouts: Record<string, Layout>) => {
         layout.forEach(l => {
             const widget = widgets.find(w => w.id === l.i);
             if (widget && (widget.position.x !== l.x || widget.position.y !== l.y || widget.position.w !== l.w || widget.position.h !== l.h)) {
@@ -135,7 +136,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             {/* Widget Grid */}
-            <div className="flex-1 overflow-auto p-4">
+            <div ref={containerRef} className="flex-1 overflow-auto p-4">
                 {!isLoaded ? (
                     <div className="h-full flex items-center justify-center text-zinc-500">
                         Loading dashboard...
@@ -145,17 +146,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         <p className="text-lg font-medium mb-2">No widgets yet</p>
                         <p className="text-sm">Click "Add Widget" to create your first dashboard widget</p>
                     </div>
-                ) : (
+                ) : mounted && (
                     <ResponsiveGridLayout
                         className="layout"
+                        width={width}
                         layouts={{ lg: generateLayout() }}
                         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
                         cols={{ lg: 4, md: 3, sm: 2, xs: 1, xxs: 1 }}
                         rowHeight={180}
-                        onLayoutChange={onLayoutChange}
-                        isDraggable={true}
-                        isResizable={true}
-                        draggableHandle=".widget-drag-handle"
+                        onLayoutChange={onLayoutChange as any}
+                        dragConfig={{ handle: '.widget-drag-handle' }}
                     >
                         {widgets.map((widget) => (
                             <div key={widget.id} className="relative group bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden flex flex-col">
@@ -179,7 +179,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                         </button>
                                     </div>
                                 </div>
-                                
+
                                 {/* Widget Content */}
                                 <div className="flex-1 overflow-hidden pointer-events-none">
                                     <WidgetContent widget={widget} />
@@ -207,12 +207,12 @@ interface WidgetContentProps {
 
 const WidgetContent: React.FC<WidgetContentProps> = ({ widget }) => {
     const { nodes } = useNodeStore();
-    
+
     // Find the source node for this widget (Story 4-5, AC 1 & 3)
     const sourceNode = nodes.find(n => n.id === widget.nodeId);
-    
+
     // Extract data from the source node (prefer live computation result)
-    const nodeData = sourceNode?.data || {};
+    const nodeData = (sourceNode?.data || {}) as any;
     const displayValue = nodeData.result !== undefined ? nodeData.result : (widget.data?.value || 0);
     const chartData = nodeData.chartData || widget.data?.chartData || [];
     const trend = nodeData.trend || widget.data?.trend || 'neutral';

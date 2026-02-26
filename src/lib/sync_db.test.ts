@@ -47,6 +47,6 @@ describe('Sync Database Operations', () => {
         expect(loadedConfig?.password).toBe(config.password);
         expect(loadedConfig?.syncDirection).toBe(config.syncDirection);
         expect(loadedConfig?.continuous).toBe(config.continuous);
-        expect(loadedConfig?._type).toBe('sync_config');
+        expect(loadedConfig?.type).toBe('sync_config');
     });
 });

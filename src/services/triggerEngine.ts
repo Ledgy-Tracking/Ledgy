@@ -95,7 +95,7 @@ async function executeComputeNode(
     // 1. Fetch input data from connected ledger sources
     // 2. Run computation via computationService
     // 3. Pass result to downstream nodes
-    
+
     // For now, just continue the chain
     const outgoingEdges = allEdges.filter(e => e.source === node.id);
     for (const edge of outgoingEdges) {
@@ -130,7 +130,7 @@ async function executeLedgerSource(
  */
 export function wouldCreateLoop(
     triggerLedgerId: string,
-    triggerEventType: string,
+    _triggerEventType: string,
     actionCreatesEntry: boolean,
     actionLedgerId: string
 ): boolean {

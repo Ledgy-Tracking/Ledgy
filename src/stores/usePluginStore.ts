@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { useErrorStore } from './useErrorStore';
-import { PluginManifest, PluginPermissions } from '../types/plugin';
+import { PluginManifest, PluginPermission, PluginPermissions } from '../types/plugin';
 
 interface PluginState {
     plugins: PluginManifest[];
@@ -18,7 +18,7 @@ interface PluginState {
     grantPermissions: (pluginId: string, permissions: string[]) => Promise<void>;
 }
 
-export const usePluginStore = create<PluginState>((set, get) => ({
+export const usePluginStore = create<PluginState>((set) => ({
     plugins: [],
     enabledPlugins: [],
     permissions: [],
@@ -94,7 +94,7 @@ export const usePluginStore = create<PluginState>((set, get) => ({
             set((state) => ({
                 permissions: [
                     ...state.permissions.filter((p) => p.pluginId !== pluginId),
-                    { pluginId, granted: permissions, denied: [] },
+                    { pluginId, granted: permissions as PluginPermission[], denied: [] },
                 ],
             }));
         } catch (err: any) {

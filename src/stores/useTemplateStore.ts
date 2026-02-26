@@ -21,7 +21,7 @@ interface TemplateState {
     importTemplate: (template: TemplateExport, profileId: string) => Promise<TemplateImportResult>;
 }
 
-export const useTemplateStore = create<TemplateState>((set, get) => ({
+export const useTemplateStore = create<TemplateState>((set) => ({
     isExporting: false,
     isImporting: false,
     error: null,
@@ -66,7 +66,7 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
         }
     },
 
-    importTemplate: async (template: TemplateExport, profileId: string) => {
+    importTemplate: async (_template: TemplateExport, _profileId: string) => {
         set({ isImporting: true, error: null });
         try {
             // TODO: Implement import_schema_graph in db.ts
