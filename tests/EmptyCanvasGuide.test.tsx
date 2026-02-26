@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { EmptyCanvasGuide } from '../src/features/nodeEditor/EmptyCanvasGuide';
 
 describe('EmptyCanvasGuide', () => {
@@ -15,11 +15,21 @@ describe('EmptyCanvasGuide', () => {
         expect(screen.getByText(/Create visual automations/)).toBeInTheDocument();
     });
 
-    it('shows "Add Your First Node" guidance', () => {
+    it('shows interactive "Drop a Ledger Node" button when callback provided', () => {
+        const mockOnAdd = vi.fn();
+        render(<EmptyCanvasGuide onAddFirstNode={mockOnAdd} />);
+        
+        const btn = screen.getByRole('button', { name: /Drop a Ledger Node/i });
+        expect(btn).toBeInTheDocument();
+        
+        fireEvent.click(btn);
+        expect(mockOnAdd).toHaveBeenCalled();
+    });
+
+    it('hides button when no callback provided', () => {
         render(<EmptyCanvasGuide />);
         
-        expect(screen.getByText('Add Your First Node')).toBeInTheDocument();
-        expect(screen.getByText(/Drag a ledger source node/)).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /Drop a Ledger Node/i })).not.toBeInTheDocument();
     });
 
     it('shows "Connect Nodes" guidance', () => {
@@ -33,7 +43,7 @@ describe('EmptyCanvasGuide', () => {
         render(<EmptyCanvasGuide />);
         
         expect(screen.getByText('Navigate Canvas')).toBeInTheDocument();
-        expect(screen.getByText('Space')).toBeInTheDocument();
+        expect(screen.getByText(/Space/)).toBeInTheDocument();
     });
 
     it('has proper styling with emerald accent color', () => {
@@ -47,21 +57,15 @@ describe('EmptyCanvasGuide', () => {
         render(<EmptyCanvasGuide />);
         
         const guideCard = screen.getByText('Welcome to Node Forge').closest('div');
-        expect(guideCard).toHaveClass('bg-zinc-900/90');
+        expect(guideCard).toHaveClass('bg-zinc-950/90');
         expect(guideCard).toHaveClass('border-zinc-800');
     });
 
-    it('displays helper note about guide disappearing', () => {
-        render(<EmptyCanvasGuide />);
-        
-        expect(screen.getByText(/This guide will disappear/)).toBeInTheDocument();
-    });
-
-    it('uses pointer-events-none to allow canvas interaction', () => {
+    it('uses pointer-events-auto to allow button interaction', () => {
         const { container } = render(<EmptyCanvasGuide />);
         
         const overlay = container.firstChild;
-        expect(overlay).toHaveClass('pointer-events-none');
+        expect(overlay).toHaveClass('pointer-events-auto');
     });
 
     it('has proper z-index to appear above canvas', () => {
@@ -71,11 +75,11 @@ describe('EmptyCanvasGuide', () => {
         expect(overlay).toHaveClass('z-10');
     });
 
-    it('renders three guidance cards', () => {
+    it('renders two guidance cards', () => {
         render(<EmptyCanvasGuide />);
         
-        const guidanceCards = screen.getAllByText(/^(Add Your First Node|Connect Nodes|Navigate Canvas)$/);
-        expect(guidanceCards).toHaveLength(3);
+        const guidanceCards = screen.getAllByText(/^(Connect Nodes|Navigate Canvas)$/);
+        expect(guidanceCards).toHaveLength(2);
     });
 
     it('displays keyboard shortcut hint', () => {
@@ -83,6 +87,6 @@ describe('EmptyCanvasGuide', () => {
         
         const kbdElement = screen.getByText('Space');
         expect(kbdElement.tagName).toBe('KBD');
-        expect(kbdElement).toHaveClass('bg-zinc-700');
+        expect(kbdElement).toHaveClass('bg-zinc-800');
     });
 });

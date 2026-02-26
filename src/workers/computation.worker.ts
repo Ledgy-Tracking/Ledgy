@@ -20,6 +20,9 @@ interface ComputeResponse {
   id: string;
   result: number | null;
   error?: string;
+  chartData?: { label: string; value: number }[];
+  trend?: 'up' | 'down' | 'neutral';
+  changePercent?: number;
 }
 
 /**
@@ -82,6 +85,9 @@ self.onmessage = function(e: MessageEvent<ComputeRequest>) {
   const { id, type, data, operation } = e.data;
   let result: number | null = null;
   let error: string | undefined;
+  let chartData: { label: string; value: number }[] | undefined;
+  let trend: 'up' | 'down' | 'neutral' | undefined;
+  let changePercent: number | undefined;
 
   try {
     switch (type) {
@@ -93,6 +99,13 @@ self.onmessage = function(e: MessageEvent<ComputeRequest>) {
         if (isNaN(result)) {
           error = 'Insufficient data or constant values';
           result = null;
+        } else {
+            // Generate scatter plot like data or paired data
+            chartData = data.x.slice(0, Math.min(data.x.length, data.y.length)).map((vx, i) => ({
+                label: `Point ${i + 1}`,
+                value: vx * (data.y![i] || 0) // Just a visual representation
+            }));
+            trend = result > 0.5 ? 'up' : result < -0.5 ? 'down' : 'neutral';
         }
         break;
 
@@ -104,6 +117,20 @@ self.onmessage = function(e: MessageEvent<ComputeRequest>) {
         if (isNaN(result)) {
           error = 'Invalid or empty data';
           result = null;
+        } else {
+            chartData = data.values.map((v, i) => ({
+                label: `V${i + 1}`,
+                value: v
+            }));
+            
+            if (data.values.length > 1) {
+                const first = data.values[0];
+                const last = data.values[data.values.length - 1];
+                if (first !== 0) {
+                    changePercent = ((last - first) / Math.abs(first)) * 100;
+                    trend = changePercent > 0 ? 'up' : changePercent < 0 ? 'down' : 'neutral';
+                }
+            }
         }
         break;
 
@@ -119,6 +146,9 @@ self.onmessage = function(e: MessageEvent<ComputeRequest>) {
     id,
     result,
     error,
+    chartData,
+    trend,
+    changePercent
   };
 
   self.postMessage(response);

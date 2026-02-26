@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { NodeCanvas } from '../src/features/nodeEditor/NodeCanvas';
 import { useNodeStore } from '../src/stores/useNodeStore';
 import { useProfileStore } from '../src/stores/useProfileStore';
@@ -72,22 +72,26 @@ describe('NodeCanvas', () => {
 
     it('renders empty canvas guide when no nodes exist', () => {
         render(
-            <BrowserRouter>
-                <NodeCanvas />
-            </BrowserRouter>
+            <MemoryRouter initialEntries={['/project/test-project/node-forge']}>
+                <Routes>
+                    <Route path="/project/:projectId/node-forge" element={<NodeCanvas />} />
+                </Routes>
+            </MemoryRouter>
         );
 
         expect(screen.getByText('Welcome to Node Forge')).toBeInTheDocument();
-        expect(screen.getByText('Add Your First Node')).toBeInTheDocument();
+        expect(screen.getByText(/Drop a Ledger Node/i)).toBeInTheDocument();
         expect(screen.getByText('Connect Nodes')).toBeInTheDocument();
         expect(screen.getByText('Navigate Canvas')).toBeInTheDocument();
     });
 
     it('renders React Flow canvas with background and controls', () => {
         render(
-            <BrowserRouter>
-                <NodeCanvas />
-            </BrowserRouter>
+            <MemoryRouter initialEntries={['/project/test-project/node-forge']}>
+                <Routes>
+                    <Route path="/project/:projectId/node-forge" element={<NodeCanvas />} />
+                </Routes>
+            </MemoryRouter>
         );
 
         // React Flow should be present
@@ -122,13 +126,15 @@ describe('NodeCanvas', () => {
         (mockUseNodeStore.getState as any).mockReturnValue(mockState);
 
         render(
-            <BrowserRouter>
-                <NodeCanvas />
-            </BrowserRouter>
+            <MemoryRouter initialEntries={['/project/test-project/node-forge']}>
+                <Routes>
+                    <Route path="/project/:projectId/node-forge" element={<NodeCanvas />} />
+                </Routes>
+            </MemoryRouter>
         );
 
         await waitFor(() => {
-            expect(loadCanvasMock).toHaveBeenCalledWith('test-profile', 'default');
+            expect(loadCanvasMock).toHaveBeenCalledWith('test-profile', 'test-project');
         });
     });
 
@@ -148,9 +154,11 @@ describe('NodeCanvas', () => {
         (mockUseNodeStore.getState as any).mockReturnValue(mockState);
 
         render(
-            <BrowserRouter>
-                <NodeCanvas />
-            </BrowserRouter>
+            <MemoryRouter initialEntries={['/project/test-project/node-forge']}>
+                <Routes>
+                    <Route path="/project/:projectId/node-forge" element={<NodeCanvas />} />
+                </Routes>
+            </MemoryRouter>
         );
 
         expect(screen.queryByText('Welcome to Node Forge')).not.toBeInTheDocument();
@@ -158,9 +166,11 @@ describe('NodeCanvas', () => {
 
     it('has proper canvas styling', () => {
         render(
-            <BrowserRouter>
-                <NodeCanvas />
-            </BrowserRouter>
+            <MemoryRouter initialEntries={['/project/test-project/node-forge']}>
+                <Routes>
+                    <Route path="/project/:projectId/node-forge" element={<NodeCanvas />} />
+                </Routes>
+            </MemoryRouter>
         );
 
         const reactFlowContainer = screen.getByTestId('react-flow');

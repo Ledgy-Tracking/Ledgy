@@ -21,6 +21,9 @@ interface ComputeResponse {
   id: string;
   result: number | null;
   error?: string;
+  chartData?: { label: string; value: number }[];
+  trend?: 'up' | 'down' | 'neutral';
+  changePercent?: number;
 }
 
 type ComputeCallback = (response: ComputeResponse) => void;

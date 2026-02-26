@@ -15,6 +15,14 @@ vi.mock('../src/stores/useDashboardStore');
 vi.mock('../src/stores/useNodeStore');
 vi.mock('../src/stores/useProfileStore');
 
+// Mock react-grid-layout
+vi.mock('react-grid-layout', () => {
+    return {
+        Responsive: ({ children }: any) => <div>{children}</div>,
+        WidthProvider: (Component: any) => Component,
+    };
+});
+
 describe('Dashboard Component', () => {
     const mockSetSchemaBuilderOpen = vi.fn();
     const mockFetchSchemas = vi.fn();

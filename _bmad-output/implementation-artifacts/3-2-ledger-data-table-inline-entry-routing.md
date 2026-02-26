@@ -92,7 +92,7 @@ So that tracking data feels as fast as thought.
 - All data operations go through `useLedgerStore` — no direct PouchDB calls in components
 - Error handling: catch in async handlers → dispatch to `useErrorStore` → display via `<ErrorToast />`
 - Loading state: `useLedgerStore().isLoading` — no local `useState` for async loading
-- Document envelope: All entries must have `_id: entry:${uuid}`, `type: 'entry'`, `schema_version`, `createdAt`, `updatedAt`
+- Document envelope: All entries must have `_id: entry:${uuid}`, `type: 'entry'`, `schemaVersion`, `createdAt`, `updatedAt`
 
 **Code Patterns from Story 3.1:**
 - Follow `SchemaBuilder.tsx` component structure for consistency
@@ -156,8 +156,8 @@ src/features/ledger/
   ```typescript
   {
     _id: `schema:${uuid}`,
-    _type: 'schema',
-    schema_version: 1,
+    type: 'schema',
+    schemaVersion: 1,
     createdAt: ISO8601,
     updatedAt: ISO8601,
     name: string,
@@ -172,8 +172,8 @@ src/features/ledger/
   ```typescript
   {
     _id: `entry:${uuid}`,
-    _type: 'entry',
-    schema_version: 1,
+    type: 'entry',
+    schemaVersion: 1,
     createdAt: ISO8601,
     updatedAt: ISO8601,
     ledgerId: string,
@@ -216,7 +216,7 @@ Recent work on Epic 3 (Story 3-1) established:
 - No local `useState` for async loading
 - Errors dispatched to `useErrorStore` → `<ErrorToast />`
 - Auth guard wraps all routes except `/setup` and `/unlock`
-- PouchDB envelope: `_id: {type}:{uuid}`, `type`, `schema_version`, `createdAt`, `updatedAt`
+- PouchDB envelope: `_id: {type}:{uuid}`, `type`, `schemaVersion`, `createdAt`, `updatedAt`
 - Ghost References: `isDeleted: true`, `deletedAt: timestamp`
 - Plugin isolation: No direct PouchDB access from plugins
 - Zero telemetry — no analytics libraries

@@ -51,8 +51,8 @@ So that I can see how data flows between different domains of my life.
   ```typescript
   {
     _id: `canvas:${profileId}:default`,
-    _type: 'canvas',
-    schema_version: 1,
+    type: 'canvas',
+    schemaVersion: 1,
     createdAt: ISO8601,
     updatedAt: ISO8601,
     nodes: Node[],

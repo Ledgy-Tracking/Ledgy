@@ -15,7 +15,7 @@ so that profile data is never accessible across profile boundaries.
 1. **Profile Creation:** `create_profile` is invoked via `src/lib/db.ts`. [Source: epics.md#Story 2.1]
 2. **Database Isolation:** A dedicated PouchDB (IndexedDB) database is initialized for each profile. [Source: epics.md#Story 2.1]
 3. **ID Scheme:** All documents use the `{type}:{uuid}` ID scheme. [Source: epics.md#Story 2.1]
-4. **Document Metadata:** All documents include `schema_version`, `createdAt`, and `updatedAt` (ISO 8601). [Source: epics.md#Story 2.1, Architecture.md#PouchDB Document Envelope]
+4. **Document Metadata:** All documents include `schemaVersion`, `createdAt`, and `updatedAt` (ISO 8601). [Source: epics.md#Story 2.1, Architecture.md#PouchDB Document Envelope]
 5. **Profile Listing:** `list_profiles` returns all profile metadata and persists correctly across app browser sessions. [Source: epics.md#Story 2.1]
 6. **Security/Isolation:** No profile's PouchDB instance can be accessed from another profile's context. [Source: epics.md#Story 2.1]
 
@@ -99,7 +99,7 @@ Antigravity (Gemini 2.0 Flash Thinking)
 
 - ✅ Database infrastructure initialized with `src/lib/db.ts` supporting profile isolation.
 - ✅ Standardized document ID scheme `{type}:{uuid}` implemented.
-- ✅ All documents include `schema_version`, `createdAt`, and `updatedAt`.
+- ✅ All documents include `schemaVersion`, `createdAt`, and `updatedAt`.
 - ✅ `useProfileStore` implemented with `fetchProfiles`, `createProfile`, and `deleteProfile`.
 - ✅ Unit tests verify profile DB isolation and envelope requirements.
 - ✅ Auth integration complete - all profile operations (`fetchProfiles`, `createProfile`, `deleteProfile`) now enforce auth guard.

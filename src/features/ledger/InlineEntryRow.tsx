@@ -3,6 +3,7 @@ import { LedgerSchema, SchemaField, LedgerEntry } from '../../types/ledger';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { RelationCombobox } from './RelationCombobox';
+import { TableRow, TableCell } from '../../components/ui/table';
 
 interface InlineEntryRowProps {
     schema: LedgerSchema;
@@ -120,11 +121,11 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
     };
 
     return (
-        <div className="flex border-b border-zinc-800 bg-emerald-900/10 animate-in slide-in-from-top-2 duration-150">
+        <TableRow className="bg-emerald-50 dark:bg-emerald-900/10 animate-in slide-in-from-top-2 duration-150">
             {schema.fields.map((field, index) => (
-                <div
+                <TableCell
                     key={field.name}
-                    className="flex-1 px-3 py-2 border-r border-zinc-800 last:border-r-0"
+                    className="p-2 relative border-r border-zinc-200 dark:border-zinc-800 last:border-r-0"
                 >
                     <FieldInput
                         ref={el => { inputRefs.current[index] = el; }}
@@ -135,31 +136,35 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
                         error={errors[field.name]}
                         targetEntries={targetEntries}
                     />
-                </div>
+                </TableCell>
             ))}
-            {/* Action buttons */}
-            <div className="px-3 py-2 flex items-center gap-2 bg-zinc-900/50">
-                <button
-                    onClick={handleSubmit}
-                    className="px-3 py-1 text-xs bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
-                    aria-label="Save entry"
-                >
-                    Save
-                </button>
-                <button
-                    onClick={onCancel}
-                    className="px-3 py-1 text-xs bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
-                    aria-label="Cancel"
-                >
-                    Cancel
-                </button>
-            </div>
-            {errors._form && (
-                <div className="absolute top-0 left-0 right-0 bg-red-900/90 text-red-100 text-xs px-3 py-2">
-                    {errors._form}
+            {/* Action buttons/Error display cell */}
+            <TableCell className="p-2 w-[150px]">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={handleSubmit}
+                            className="px-3 py-1 text-xs bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
+                            aria-label="Save entry"
+                        >
+                            Save
+                        </button>
+                        <button
+                            onClick={onCancel}
+                            className="px-3 py-1 text-xs bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
+                            aria-label="Cancel"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                    {errors._form && (
+                        <div className="text-red-500 text-[10px] font-medium leading-tight mt-1">
+                            {errors._form}
+                        </div>
+                    )}
                 </div>
-            )}
-        </div>
+            </TableCell>
+        </TableRow>
     );
 };
 

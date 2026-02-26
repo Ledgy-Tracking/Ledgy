@@ -64,7 +64,7 @@ So that I can capture cross-domain relationships (e.g., linking a "Coffee" entry
 {
   _id: `entry:${uuid}`,
   type: 'entry',
-  schema_version: 1,
+  schemaVersion: 1,
   ledgerId: string,
   fields: {
     fieldName: string | number | Date | string[] // string[] for multiple relations

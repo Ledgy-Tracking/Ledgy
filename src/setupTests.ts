@@ -12,4 +12,7 @@ if (!globalThis.crypto) {
 // @ts-ignore
 globalThis.process = { ...globalThis.process, browser: true };
 
+// Mock scrollIntoView for Radix UI select components
+HTMLElement.prototype.scrollIntoView = () => {};
+
 PouchDB.plugin(PouchDBAdapterMemory);

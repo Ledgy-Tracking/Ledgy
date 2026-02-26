@@ -61,7 +61,7 @@ So that my system doesn't crash or break when a related entry is removed or hasn
 {
   _id: `entry:${uuid}`,
   type: 'entry',
-  schema_version: 1,
+  schemaVersion: 1,
   isDeleted: true,
   deletedAt: '2026-02-23T10:30:00+08:00', // ISO 8601
   // ... other fields preserved

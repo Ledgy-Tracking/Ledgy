@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { Responsive, WidthProvider } from 'react-grid-layout';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useDashboardStore } from '../../stores/useDashboardStore';
 import { useNodeStore } from '../../stores/useNodeStore';
 import { TextWidget, TrendWidget, ChartWidget, WidgetConfig } from './widgets';
-import { Plus, Trash2, BarChart3, TrendingUp, Type } from 'lucide-react';
+import { Plus, Trash2, BarChart3, TrendingUp, Type, Settings } from 'lucide-react';
+import { Button } from '../../components/ui/button';
+import { WidgetConfigSheet } from './WidgetConfigSheet';
+
+const ResponsiveGridLayout = WidthProvider(Responsive);
 
 interface DashboardViewProps {
     dashboardId?: string;
@@ -24,6 +31,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     const { widgets, fetchWidgets, saveWidgets, addWidget, removeWidget } = useDashboardStore();
     const [isAddingWidget, setIsAddingWidget] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [selectedWidget, setSelectedWidget] = useState<WidgetConfig | null>(null);
 
     // Load widgets on mount
     useEffect(() => {
@@ -57,12 +65,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         setIsAddingWidget(false);
     };
 
-    // Calculate grid layout based on widget positions
-    const getGridStyle = (widget: WidgetConfig): React.CSSProperties => {
-        return {
-            gridColumn: `span ${widget.position.w}`,
-            gridRow: `span ${widget.position.h}`,
-        };
+    const onLayoutChange = (layout: any[]) => {
+        layout.forEach(l => {
+            const widget = widgets.find(w => w.id === l.i);
+            if (widget && (widget.position.x !== l.x || widget.position.y !== l.y || widget.position.w !== l.w || widget.position.h !== l.h)) {
+                updateWidget(widget.id, {
+                    position: { x: l.x, y: l.y, w: l.w, h: l.h }
+                });
+            }
+        });
+    };
+
+    const generateLayout = () => {
+        return widgets.map(w => ({
+            i: w.id,
+            x: w.position.x || 0,
+            y: w.position.y || 0,
+            w: w.position.w || 2,
+            h: w.position.h || 1,
+            minW: 1,
+            minH: 1
+        }));
     };
 
     return (
@@ -71,13 +94,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-900">
                 <h1 className="text-lg font-semibold">Dashboard</h1>
                 <div className="relative">
-                    <button
+                    <Button
                         onClick={() => setIsAddingWidget(!isAddingWidget)}
-                        className="flex items-center gap-2 px-3 py-1.5 text-sm bg-emerald-600 hover:bg-emerald-500 text-white rounded transition-colors"
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white"
+                        size="sm"
                     >
-                        <Plus size={16} />
+                        <Plus size={16} className="mr-2" />
                         Add Widget
-                    </button>
+                    </Button>
 
                     {/* Widget Type Selector Dropdown */}
                     {isAddingWidget && (
@@ -122,31 +146,57 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         <p className="text-sm">Click "Add Widget" to create your first dashboard widget</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-min">
+                    <ResponsiveGridLayout
+                        className="layout"
+                        layouts={{ lg: generateLayout() }}
+                        breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+                        cols={{ lg: 4, md: 3, sm: 2, xs: 1, xxs: 1 }}
+                        rowHeight={180}
+                        onLayoutChange={onLayoutChange}
+                        isDraggable={true}
+                        isResizable={true}
+                        draggableHandle=".widget-drag-handle"
+                    >
                         {widgets.map((widget) => (
-                            <div
-                                key={widget.id}
-                                style={getGridStyle(widget)}
-                                className="relative group"
-                            >
+                            <div key={widget.id} className="relative group bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden flex flex-col">
+                                {/* Widget Drag Handle & Actions */}
+                                <div className="absolute top-0 left-0 right-0 h-8 opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-center px-2 bg-gradient-to-b from-black/50 to-transparent z-10">
+                                    <div className="widget-drag-handle flex-1 h-full cursor-grab active:cursor-grabbing" />
+                                    <div className="flex items-center gap-1">
+                                        <button
+                                            onClick={() => setSelectedWidget(widget)}
+                                            className="p-1 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 rounded transition-colors"
+                                            title="Widget settings"
+                                        >
+                                            <Settings size={14} />
+                                        </button>
+                                        <button
+                                            onClick={() => removeWidget(widget.id)}
+                                            className="p-1 hover:bg-red-900/50 text-zinc-400 hover:text-red-400 rounded transition-colors"
+                                            title="Remove widget"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                </div>
+                                
                                 {/* Widget Content */}
-                                <WidgetContent widget={widget} />
-
-                                {/* Widget Actions (hover) */}
-                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                                    <button
-                                        onClick={() => removeWidget(widget.id)}
-                                        className="p-1.5 bg-zinc-800 hover:bg-red-900/50 text-zinc-400 hover:text-red-400 rounded transition-colors"
-                                        title="Remove widget"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
+                                <div className="flex-1 overflow-hidden pointer-events-none">
+                                    <WidgetContent widget={widget} />
                                 </div>
                             </div>
                         ))}
-                    </div>
+                    </ResponsiveGridLayout>
                 )}
             </div>
+
+            <WidgetConfigSheet
+                widget={selectedWidget}
+                open={selectedWidget !== null}
+                onOpenChange={(open) => {
+                    if (!open) setSelectedWidget(null);
+                }}
+            />
         </div>
     );
 };

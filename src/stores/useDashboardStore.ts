@@ -11,8 +11,8 @@ interface DashboardState {
     error: string | null;
 
     // Actions
-    fetchWidgets: (profileId: string, dashboardId?: string) => Promise<void>;
-    saveWidgets: (profileId: string, widgets: WidgetConfig[], dashboardId?: string) => Promise<void>;
+    fetchWidgets: (profileId: string, projectId: string) => Promise<void>;
+    saveWidgets: (profileId: string, widgets: WidgetConfig[], projectId: string) => Promise<void>;
     addWidget: (widget: WidgetConfig) => void;
     updateWidget: (widgetId: string, updates: Partial<WidgetConfig>) => void;
     removeWidget: (widgetId: string) => void;
@@ -23,7 +23,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     isLoading: false,
     error: null,
 
-    fetchWidgets: async (profileId: string, dashboardId = 'default') => {
+    fetchWidgets: async (profileId: string, projectId: string) => {
         set({ isLoading: true, error: null });
         try {
             const authState = useAuthStore.getState();
@@ -32,7 +32,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            const layout = await load_dashboard_layout(db, dashboardId);
+            const layout = await load_dashboard_layout(db, projectId);
             
             if (layout) {
                 set({ widgets: layout.widgets, isLoading: false });
@@ -46,7 +46,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         }
     },
 
-    saveWidgets: async (profileId: string, widgets: WidgetConfig[], dashboardId = 'default') => {
+    saveWidgets: async (profileId: string, widgets: WidgetConfig[], projectId: string) => {
         set({ isLoading: true, error: null });
         try {
             const authState = useAuthStore.getState();
@@ -55,7 +55,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            await save_dashboard_layout(db, dashboardId, widgets, profileId);
+            await save_dashboard_layout(db, projectId, widgets, profileId);
             set({ widgets, isLoading: false });
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to save dashboard';

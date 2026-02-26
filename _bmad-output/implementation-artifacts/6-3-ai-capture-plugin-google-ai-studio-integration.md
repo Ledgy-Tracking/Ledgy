@@ -69,7 +69,7 @@ async function extractFromImage(
         contents: [{
           parts: [
             { text: prompt },
-            { inline_data: { mime_type: image.type, data: await fileToBase64(image) } }
+            { inline_data: { mimetype: image.type, data: await fileToBase64(image) } }
           ]
         }]
       })

@@ -52,6 +52,9 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ id, data, sele
                 data.result = response.result;
                 data.error = response.error;
                 data.isComputing = false;
+                data.chartData = response.chartData;
+                data.trend = response.trend;
+                data.changePercent = response.changePercent;
             });
         }, 300); // 300ms debounce
     }, [data]);

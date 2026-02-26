@@ -17,7 +17,7 @@ So that my ledger structure perfectly matches the real-world data I am tracking.
 3. **Field Management:** User can add, reorder, and remove fields from the schema. [Source: epics.md#Story 3.1]
 4. **Relation Target:** Relation fields can target any other existing ledger in the same project. [Source: epics.md#Story 3.1]
 5. **Schema Persistence:** Saving the schema creates or updates the schema document in PouchDB with proper envelope. [Source: epics.md#Story 3.1]
-6. **Version Migration:** Updating an existing schema increments its `schema_version` to support JIT migrations (NFR9). [Source: epics.md#Story 3.1]
+6. **Version Migration:** Updating an existing schema increments its `schemaVersion` to support JIT migrations (NFR9). [Source: epics.md#Story 3.1]
 
 ## Tasks / Subtasks
 
@@ -33,7 +33,7 @@ So that my ledger structure perfectly matches the real-world data I am tracking.
 - [x] Task 3: Schema Persistence (AC: 5, 6)
   - [x] Implement `create_schema` and `update_schema` in `src/lib/db.ts`.
   - [x] Ensure schema documents follow `{type}:{uuid}` ID scheme.
-  - [x] Implement `schema_version` increment on updates.
+  - [x] Implement `schemaVersion` increment on updates.
   - [x] Add error handling via `useErrorStore`.
 - [x] Task 4: Integration & Testing
   - [x] Wire Schema Builder to Dashboard "Create Ledger" CTA (replace placeholder from Story 2.4).
@@ -47,8 +47,8 @@ So that my ledger structure perfectly matches the real-world data I am tracking.
   ```typescript
   {
     _id: `schema:${uuid}`,
-    _type: 'schema',
-    schema_version: 1,
+    type: 'schema',
+    schemaVersion: 1,
     createdAt: ISO8601,
     updatedAt: ISO8601,
     name: string,

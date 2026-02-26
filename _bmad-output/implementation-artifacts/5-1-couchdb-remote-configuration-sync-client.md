@@ -52,8 +52,8 @@ So that my data can replicate across devices when I choose to enable sync.
 ```typescript
 {
   _id: `sync_config:${profileId}`,
-  _type: 'sync_config',
-  schema_version: 1,
+  type: 'sync_config',
+  schemaVersion: 1,
   createdAt: ISO8601,
   updatedAt: ISO8601,
   remoteUrl_enc: EncryptedData, // CouchDB URL

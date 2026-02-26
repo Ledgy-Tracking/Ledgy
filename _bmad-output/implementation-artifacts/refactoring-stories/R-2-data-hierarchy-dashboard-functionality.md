@@ -1,6 +1,6 @@
 # Refactoring Story: Data Hierarchy & Dashboard Functionality
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -18,15 +18,47 @@ So that users can build multiple isolated projects within their profiles and arr
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Refactor `useNodeStore` & `useDashboardStore`
-  - [ ] Add `projectId` parameters to `loadCanvas`, `saveCanvas`, `fetchWidgets`, and `saveWidgets`.
-  - [ ] Update `App.tsx` routing and `Dashboard.tsx` parameters to correctly pass `projectId`.
-- [ ] Task 2: Implement Draggable Dashboard Grid
-  - [ ] Integrate `react-grid-layout` (or similar) into `DashboardView.tsx`.
-  - [ ] Wire layout change events to `useDashboardStore.updateWidget` position state.
-- [ ] Task 3: Build Node-to-Widget Translation Layer
-  - [ ] Expand `computeCorrelation` and `computeArithmetic` output models to include historical array data or trend vectors.
-  - [ ] Update `ChartWidget` and `TrendWidget` to consume and render this new structured data payload.
-- [ ] Task 4: Widget Configuration UI
-  - [ ] Create a `WidgetConfigSheet.tsx` (using Shadcn Sheet) triggered by a "settings" icon on each dashboard widget.
-  - [ ] Allow editing title and type natively from the dashboard.
+- [x] Task 1: Refactor `useNodeStore` & `useDashboardStore`
+  - [x] Add `projectId` parameters to `loadCanvas`, `saveCanvas`, `fetchWidgets`, and `saveWidgets`.
+  - [x] Update `App.tsx` routing and `Dashboard.tsx` parameters to correctly pass `projectId`.
+- [x] Task 2: Implement Draggable Dashboard Grid
+  - [x] Integrate `react-grid-layout` (or similar) into `DashboardView.tsx`.
+  - [x] Wire layout change events to `useDashboardStore.updateWidget` position state.
+- [x] Task 3: Build Node-to-Widget Translation Layer
+  - [x] Expand `computeCorrelation` and `computeArithmetic` output models to include historical array data or trend vectors.
+  - [x] Update `ChartWidget` and `TrendWidget` to consume and render this new structured data payload.
+- [x] Task 4: Widget Configuration UI
+  - [x] Create a `WidgetConfigSheet.tsx` (using Shadcn Sheet) triggered by a "settings" icon on each dashboard widget.
+  - [x] Allow editing title and type natively from the dashboard.
+
+## Dev Agent Record
+
+### Agent Model Used
+Antigravity (Gemini 2.0 Flash Thinking)
+
+### Completion Notes List
+- ✅ Added `projectId` parameter to `useNodeStore` and `useDashboardStore`
+- ✅ Updated `App.tsx` routing to pass `projectId` to `node-forge` route
+- ✅ Integrated `react-grid-layout` for draggable and resizable dashboard widgets
+- ✅ Implemented data translation layer in `computation.worker.ts` and `computationService.ts` to output chartData, trend, and changePercent
+- ✅ Created `WidgetConfigSheet.tsx` to configure widgets from the dashboard
+- ✅ Refactored `Dashboard.tsx` and `DashboardView.tsx` to integrate Grid/Table view toggling
+
+### File List
+- `src/stores/useNodeStore.ts` - MODIFIED
+- `src/stores/useDashboardStore.ts` - MODIFIED
+- `src/App.tsx` - MODIFIED
+- `src/features/nodeEditor/NodeCanvas.tsx` - MODIFIED
+- `src/features/dashboard/Dashboard.tsx` - MODIFIED
+- `src/features/dashboard/DashboardView.tsx` - MODIFIED
+- `src/features/dashboard/WidgetConfigSheet.tsx` - NEW
+- `src/types/dashboard.ts` - MODIFIED
+- `src/workers/computation.worker.ts` - MODIFIED
+- `src/services/computationService.ts` - MODIFIED
+- `src/features/nodeEditor/nodes/ArithmeticNode.tsx` - MODIFIED
+- `src/features/nodeEditor/nodes/CorrelationNode.tsx` - MODIFIED
+- `tests/NodeCanvas.test.tsx` - MODIFIED
+- `tests/Dashboard.test.tsx` - MODIFIED
+
+### Change Log
+- **2026-02-25**: Story R-2 implementation complete - Fixed project scoping, integrated `react-grid-layout`, added widget config UI, and completed data translation layer. 147 tests passing.

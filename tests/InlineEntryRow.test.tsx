@@ -50,11 +50,13 @@ describe('InlineEntryRow', () => {
 
     it('renders input fields for each schema field', () => {
         render(
-            <InlineEntryRow
-                schema={mockSchema}
-                onCancel={mockOnCancel}
-                onComplete={mockOnComplete}
-            />
+            <table><tbody>
+                <InlineEntryRow
+                    schema={mockSchema}
+                    onCancel={mockOnCancel}
+                    onComplete={mockOnComplete}
+                />
+            </tbody></table>
         );
 
         expect(screen.getByPlaceholderText(/enter name/i)).toBeInTheDocument();
@@ -63,11 +65,13 @@ describe('InlineEntryRow', () => {
 
     it('calls onCancel when Cancel button clicked', () => {
         render(
-            <InlineEntryRow
-                schema={mockSchema}
-                onCancel={mockOnCancel}
-                onComplete={mockOnComplete}
-            />
+            <table><tbody>
+                <InlineEntryRow
+                    schema={mockSchema}
+                    onCancel={mockOnCancel}
+                    onComplete={mockOnComplete}
+                />
+            </tbody></table>
         );
 
         fireEvent.click(screen.getByText('Cancel'));
@@ -78,11 +82,13 @@ describe('InlineEntryRow', () => {
         mockCreateEntry.mockResolvedValue({ _id: 'entry:new' });
 
         render(
-            <InlineEntryRow
-                schema={mockSchema}
-                onCancel={mockOnCancel}
-                onComplete={mockOnComplete}
-            />
+            <table><tbody>
+                <InlineEntryRow
+                    schema={mockSchema}
+                    onCancel={mockOnCancel}
+                    onComplete={mockOnComplete}
+                />
+            </tbody></table>
         );
 
         fireEvent.change(screen.getByPlaceholderText(/enter name/i), {
@@ -107,11 +113,13 @@ describe('InlineEntryRow', () => {
 
     it('validates required fields', async () => {
         render(
-            <InlineEntryRow
-                schema={mockSchema}
-                onCancel={mockOnCancel}
-                onComplete={mockOnComplete}
-            />
+            <table><tbody>
+                <InlineEntryRow
+                    schema={mockSchema}
+                    onCancel={mockOnCancel}
+                    onComplete={mockOnComplete}
+                />
+            </tbody></table>
         );
 
         // Try to save without name
@@ -123,11 +131,13 @@ describe('InlineEntryRow', () => {
 
     it('cancels on Escape key', () => {
         render(
-            <InlineEntryRow
-                schema={mockSchema}
-                onCancel={mockOnCancel}
-                onComplete={mockOnComplete}
-            />
+            <table><tbody>
+                <InlineEntryRow
+                    schema={mockSchema}
+                    onCancel={mockOnCancel}
+                    onComplete={mockOnComplete}
+                />
+            </tbody></table>
         );
 
         const input = screen.getByPlaceholderText(/enter name/i);
@@ -138,11 +148,13 @@ describe('InlineEntryRow', () => {
 
     it('handles number input correctly', async () => {
         render(
-            <InlineEntryRow
-                schema={mockSchema}
-                onCancel={mockOnCancel}
-                onComplete={mockOnComplete}
-            />
+            <table><tbody>
+                <InlineEntryRow
+                    schema={mockSchema}
+                    onCancel={mockOnCancel}
+                    onComplete={mockOnComplete}
+                />
+            </tbody></table>
         );
 
         fireEvent.change(screen.getByPlaceholderText(/enter name/i), {

@@ -5,6 +5,15 @@ import { LedgerSchema, LedgerEntry, SchemaField } from '../../types/ledger';
 import { InlineEntryRow } from './InlineEntryRow';
 import { RelationTagChip } from './RelationTagChip';
 import { BackLinksPanel } from './BackLinksPanel';
+import { Button } from '../../components/ui/button';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '../../components/ui/table';
 
 interface LedgerTableProps {
     schemaId: string;
@@ -12,7 +21,7 @@ interface LedgerTableProps {
 }
 
 export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEntryId }) => {
-    const { schemas, entries, fetchEntries, allEntries } = useLedgerStore();
+    const { schemas, entries, fetchEntries, allEntries, deleteEntry } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
     const [isAddingEntry, setIsAddingEntry] = useState(false);
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
@@ -52,147 +61,156 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
         }
     }, [highlightEntryId, ledgerEntries]);
 
-    // Handle keyboard shortcuts
+    // Keyboard navigation (Story 3-2, AC 3)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Only trigger if not in an input field
-            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-                return;
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement || e.target instanceof HTMLTextAreaElement) {
+                return; // Don't steal focus from inputs
             }
 
-            // N key - new entry
             if (e.key === 'n' || e.key === 'N') {
                 e.preventDefault();
                 setIsAddingEntry(true);
-            }
-
-            // Arrow key navigation
-            if (e.key === 'ArrowDown' && selectedRow < ledgerEntries.length - 1) {
+            } else if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                setSelectedRow(selectedRow + 1);
-            }
-            if (e.key === 'ArrowUp' && selectedRow > 0) {
+                setSelectedRow(prev => Math.min(prev + 1, ledgerEntries.length - 1));
+            } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                setSelectedRow(selectedRow - 1);
+                setSelectedRow(prev => Math.max(prev - 1, 0));
+            } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRow >= 0) {
+                e.preventDefault();
+                const entryToDelete = ledgerEntries[selectedRow];
+                if (entryToDelete && confirm(`Are you sure you want to delete this entry?`)) {
+                    deleteEntry(entryToDelete._id);
+                    setSelectedRow(-1);
+                }
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [ledgerEntries.length, selectedRow]);
+    }, [ledgerEntries, selectedRow, deleteEntry]);
 
     if (!schema) {
         return <div className="p-4 text-zinc-500 dark:text-zinc-500">Schema not found</div>;
     }
 
     return (
-        <div className="w-full overflow-auto" role="grid" aria-label={`${schema.name} entries`}>
+        <div className="w-full h-full flex flex-col" aria-label={`${schema.name} entries`}>
             {/* Header */}
-            <div className="sticky top-0 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
+            <div className="sticky top-0 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
                 <div className="flex items-center justify-between p-3">
                     <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">{schema.name}</h2>
-                    <button
+                    <Button
                         onClick={() => setIsAddingEntry(true)}
-                        className="px-3 py-1.5 text-sm bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
+                        className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold"
+                        size="sm"
                         aria-label="Add new entry"
                     >
                         Add Entry (N)
-                    </button>
+                    </Button>
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="min-w-full">
-                {/* Column Headers */}
-                <div className="flex border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                    {schema.fields.map((field) => (
-                        <div
-                            key={field.name}
-                            className="flex-1 px-3 py-2 text-left border-r border-zinc-200 dark:border-zinc-800 last:border-r-0"
-                            role="columnheader"
-                        >
-                            {field.name}
-                            <span className="ml-1 text-zinc-400 dark:text-zinc-600">({field.type})</span>
-                        </div>
-                    ))}
+            {/* Content area: Table + Split View */}
+            <div className="flex-1 flex overflow-hidden">
+                {/* Table */}
+                <div className="flex-1 overflow-auto bg-white dark:bg-zinc-950">
+                    <Table>
+                        <TableHeader className="bg-zinc-50 dark:bg-zinc-900 sticky top-0 z-10">
+                            <TableRow>
+                                {schema.fields.map((field) => (
+                                    <TableHead key={field.name} className="whitespace-nowrap">
+                                        {field.name}
+                                        <span className="ml-1 text-zinc-400 dark:text-zinc-500 font-normal">({field.type})</span>
+                                    </TableHead>
+                                ))}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {/* Inline Add Row */}
+                            {isAddingEntry && (
+                                <InlineEntryRow
+                                    schema={schema}
+                                    onCancel={() => setIsAddingEntry(false)}
+                                    onComplete={() => setIsAddingEntry(false)}
+                                />
+                            )}
+
+                            {/* Empty State */}
+                            {ledgerEntries.length === 0 && !isAddingEntry && (
+                                <TableRow>
+                                    <TableCell colSpan={schema.fields.length} className="text-center h-32">
+                                        <div className="flex flex-col items-center justify-center text-zinc-500 dark:text-zinc-400">
+                                            <p className="mb-2">No entries yet.</p>
+                                            <p className="text-sm">Press <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded font-mono text-zinc-900 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">N</kbd> or click "Add Entry" to create your first entry.</p>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            )}
+
+                            {/* Entry Rows */}
+                            {ledgerEntries.map((entry, index) => {
+                                const isHighlighted = highlightEntryId && entry._id === highlightEntryId;
+                                const isEditing = editingEntryId === entry._id;
+                                const isSelected = selectedRow === index;
+
+                                if (isEditing) {
+                                    return (
+                                        <InlineEntryRow
+                                            key={entry._id}
+                                            schema={schema}
+                                            entry={entry}
+                                            onCancel={() => setEditingEntryId(null)}
+                                            onComplete={() => setEditingEntryId(null)}
+                                        />
+                                    );
+                                }
+
+                                return (
+                                    <TableRow
+                                        key={entry._id}
+                                        data-state={isSelected ? "selected" : undefined}
+                                        className={`cursor-pointer transition-colors ${
+                                            isHighlighted ? 'bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30' : ''
+                                        }`}
+                                        onClick={() => setSelectedRow(index)}
+                                        onDoubleClick={() => setEditingEntryId(entry._id)}
+                                        tabIndex={0}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                setEditingEntryId(entry._id);
+                                            }
+                                        }}
+                                    >
+                                        {schema.fields.map(field => (
+                                            <TableCell key={`${entry._id}-${field.name}`}>
+                                                {renderFieldValue(entry.data[field.name], field.type, entry, field, schemaId, deletedEntryIds)}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
                 </div>
 
-                {/* Inline Add Row */}
-                {isAddingEntry && (
-                    <InlineEntryRow
-                        schema={schema}
-                        onCancel={() => setIsAddingEntry(false)}
-                        onComplete={() => setIsAddingEntry(false)}
-                    />
-                )}
-
-                {/* Empty State */}
-                {ledgerEntries.length === 0 && !isAddingEntry && (
-                    <div className="p-8 text-center text-zinc-400 dark:text-zinc-500">
-                        <p className="mb-2">No entries yet.</p>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-600">Press <kbd className="px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700">N</kbd> to create your first entry</p>
+                {/* Split View for Back-links (Story 3-3, AC 4) */}
+                {selectedEntry && (
+                    <div className="w-[300px] shrink-0 border-l border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 overflow-y-auto">
+                        <BackLinksPanel
+                            targetEntryId={selectedEntry._id}
+                            targetLedgerId={schemaId}
+                        />
                     </div>
                 )}
-
-                {/* Entry Rows */}
-                {ledgerEntries.map((entry, index) => {
-                    const isHighlighted = highlightEntryId && entry._id === highlightEntryId;
-                    const isEditing = editingEntryId === entry._id;
-
-                    if (isEditing) {
-                        return (
-                            <InlineEntryRow
-                                key={entry._id}
-                                schema={schema}
-                                entry={entry}
-                                onCancel={() => setEditingEntryId(null)}
-                                onComplete={() => setEditingEntryId(null)}
-                            />
-                        );
-                    }
-
-                    return (
-                        <div
-                            key={entry._id}
-                            className={`flex border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800/30 transition-colors ${selectedRow === index ? 'bg-zinc-100 dark:bg-zinc-800/50' : ''
-                                } ${isHighlighted ? 'ring-2 ring-emerald-500/50 bg-emerald-50 dark:bg-emerald-900/10' : ''}`}
-                            role="row"
-                            onClick={() => setSelectedRow(index)}
-                            onDoubleClick={() => setEditingEntryId(entry._id)}
-                            tabIndex={0}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                    setEditingEntryId(entry._id);
-                                }
-                            }}
-                        >
-                            {schema.fields.map((field) => (
-                                <div
-                                    key={`${entry._id}-${field.name}`}
-                                    className="flex-1 px-3 py-2.5 text-sm text-zinc-700 dark:text-zinc-300 border-r border-zinc-200 dark:border-zinc-800 last:border-r-0"
-                                    role="gridcell"
-                                >
-                                    {renderFieldValue(entry.data[field.name], field.type, entry, field, schemaId, deletedEntryIds)}
-                                </div>
-                            ))}
-                        </div>
-                    );
-                })}
             </div>
-
-            {/* Back-Links Panel - Shows when entry is selected (Story 3-3, AC 4) */}
-            {selectedEntry && (
-                <BackLinksPanel
-                    targetEntryId={selectedEntry._id}
-                    targetLedgerId={schemaId}
-                />
-            )}
         </div>
     );
 };
 
 function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, field?: SchemaField, schemaId?: string, deletedEntryIds?: Set<string>): React.ReactNode {
-    if (value === null || value === undefined) {
+    if (value === null || value === undefined || value === '') {
         return <span className="text-zinc-400 dark:text-zinc-600 italic">-</span>;
     }
 

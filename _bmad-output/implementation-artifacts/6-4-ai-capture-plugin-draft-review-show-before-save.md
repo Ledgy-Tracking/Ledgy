@@ -71,7 +71,7 @@ async function commitDraft(draft: DraftEntryState): Promise<void> {
   await create_entry({
     _id: `entry:${uuid()}`,
     type: 'entry',
-    schema_version: 1,
+    schemaVersion: 1,
     ledgerId: draft.ledgerId,
     fields: draft.fields,
     createdAt: new Date().toISOString(),

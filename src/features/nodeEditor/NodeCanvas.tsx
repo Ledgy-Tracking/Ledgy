@@ -22,6 +22,7 @@ import { ArithmeticNode } from './nodes/ArithmeticNode';
 import { TriggerNode } from './nodes/TriggerNode';
 import { DashboardOutputNode } from './nodes/DashboardOutputNode';
 import { DataEdge } from './edges/DataEdge';
+import { useNavigate, useParams } from 'react-router-dom';
 import { executeTrigger } from '../../services/triggerEngine';
 import { useErrorStore } from '../../stores/useErrorStore';
 
@@ -41,9 +42,28 @@ const edgeTypes = {
 
 export const NodeCanvas: React.FC = () => {
     const { activeProfileId } = useProfileStore();
+    const { projectId } = useParams<{ projectId: string }>();
     const { nodes, edges, viewport, isLoading, loadCanvas, saveCanvas, setNodes, setEdges, setViewport } = useNodeStore();
     const { setOnEntryEvent } = useLedgerStore();
     const { dispatchError } = useErrorStore();
+
+    // Global shortcut for evaluation (Story R-3, Task 2)
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+                return;
+            }
+            if (e.key === 'r' || e.key === 'R') {
+                e.preventDefault();
+                // Stub for manual re-evaluation
+                console.log('Manual re-evaluation triggered');
+                // In future: triggerEngine.reevaluateAll()
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     // Wire trigger engine to ledger events (Story 4-4)
     useEffect(() => {
@@ -100,20 +120,20 @@ export const NodeCanvas: React.FC = () => {
 
     // Load canvas on mount
     useEffect(() => {
-        if (activeProfileId) {
-            loadCanvas(activeProfileId, 'default');
+        if (activeProfileId && projectId) {
+            loadCanvas(activeProfileId, projectId);
         }
-    }, [activeProfileId, loadCanvas]);
+    }, [activeProfileId, projectId, loadCanvas]);
 
     // Auto-save on changes (debounced)
     useEffect(() => {
         const timer = setTimeout(() => {
-            if (activeProfileId && (nodes.length > 0 || edges.length > 0)) {
-                saveCanvas(activeProfileId, 'default');
+            if (activeProfileId && projectId && (nodes.length > 0 || edges.length > 0)) {
+                saveCanvas(activeProfileId, projectId);
             }
         }, 1000);
         return () => clearTimeout(timer);
-    }, [nodes, edges, activeProfileId, saveCanvas]);
+    }, [nodes, edges, activeProfileId, projectId, saveCanvas]);
 
     const onConnect = useCallback(
         (params: Connection) => {
@@ -170,11 +190,21 @@ export const NodeCanvas: React.FC = () => {
         }
     }, [edges, setRfEdges, rfEdges.length]);
 
+    const handleAddFirstNode = () => {
+        const newNode: Node = {
+            id: `node-${Date.now()}`,
+            type: 'ledgerSource',
+            position: { x: window.innerWidth / 2 - 100, y: window.innerHeight / 2 - 100 },
+            data: { label: 'New Ledger Source' }
+        };
+        setRfNodes(nds => [...nds, newNode]);
+    };
+
     // Show empty state guide when no nodes
     if (nodes.length === 0 && edges.length === 0 && !isLoading) {
         return (
             <div className="w-full h-full bg-zinc-950 relative">
-                <EmptyCanvasGuide />
+                <EmptyCanvasGuide onAddFirstNode={handleAddFirstNode} />
                 <ReactFlow
                     nodes={[]}
                     edges={[]}

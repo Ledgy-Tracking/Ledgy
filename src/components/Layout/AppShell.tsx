@@ -20,6 +20,8 @@ import { SyncConfigDialog } from '../../features/sync/SyncConfigDialog';
 import { SyncStatusSheet } from '../../features/sync/SyncStatusSheet';
 import { ConflictListSheet, ConflictEntry } from '../../features/sync/ConflictListSheet';
 import { DiffGuardModal } from '../../features/sync/DiffGuardModal';
+import { CommandPalette } from '../CommandPalette';
+import { Button } from '../ui/button';
 
 export const AppShell: React.FC = () => {
     const {
@@ -273,6 +275,8 @@ export const AppShell: React.FC = () => {
             >
                 {`Sync status changed to ${syncStatus.status}`}
             </div>
+
+            <CommandPalette />
         </div>
     );
 };

@@ -81,10 +81,10 @@ function App() {
           <Route index element={<Navigate to="projects" replace />} />
           <Route path="projects" element={<ProjectDashboard />} />
           <Route path="project/:projectId" element={<Dashboard />} />
+          <Route path="project/:projectId/node-forge" element={<NodeCanvas />} />
           <Route path="settings" element={<div>Settings Placeholder</div>} />
           <Route path="ledger/:ledgerId" element={<LedgerView />} />
           <Route path="trash" element={<TrashView />} />
-          <Route path="node-forge" element={<NodeCanvas />} />
           {/* Add more profile-scoped routes here */}
         </Route>
 

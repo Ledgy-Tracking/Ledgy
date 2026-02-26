@@ -13,8 +13,8 @@ interface NodeState {
     error: string | null;
 
     // Actions
-    loadCanvas: (profileId: string, canvasId?: string) => Promise<void>;
-    saveCanvas: (profileId: string, canvasId?: string) => Promise<void>;
+    loadCanvas: (profileId: string, projectId: string) => Promise<void>;
+    saveCanvas: (profileId: string, projectId: string) => Promise<void>;
     setNodes: (nodes: CanvasNode[]) => void;
     setEdges: (edges: CanvasEdge[]) => void;
     setViewport: (viewport: Viewport) => void;
@@ -29,7 +29,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
     isLoading: false,
     error: null,
 
-    loadCanvas: async (profileId: string, canvasId = 'default') => {
+    loadCanvas: async (profileId: string, projectId: string) => {
         set({ isLoading: true, error: null });
         try {
             const authState = useAuthStore.getState();
@@ -38,7 +38,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            const canvas = await load_canvas(db, canvasId);
+            const canvas = await load_canvas(db, projectId);
 
             if (canvas) {
                 set({
@@ -63,7 +63,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         }
     },
 
-    saveCanvas: async (profileId: string, canvasId = 'default') => {
+    saveCanvas: async (profileId: string, projectId: string) => {
         set({ isLoading: true, error: null });
         try {
             const authState = useAuthStore.getState();
@@ -73,7 +73,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
 
             const { nodes, edges, viewport } = get();
             const db = getProfileDb(profileId);
-            await save_canvas(db, canvasId, nodes, edges, viewport, profileId);
+            await save_canvas(db, projectId, nodes, edges, viewport, profileId);
             set({ isLoading: false });
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to save canvas';

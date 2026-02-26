@@ -350,6 +350,18 @@ export async function list_schemas(db: Database): Promise<LedgerSchema[]> {
 }
 
 /**
+ * Soft-deletes a ledger schema.
+ * @param db - Profile database instance
+ * @param schemaId - Schema document ID
+ */
+export async function delete_schema(db: Database, schemaId: string): Promise<void> {
+    await db.updateDocument(schemaId, {
+        isDeleted: true,
+        deletedAt: new Date().toISOString(),
+    });
+}
+
+/**
  * Gets a single schema by ID.
  * @param db - Profile database instance
  * @param schemaId - Schema document ID

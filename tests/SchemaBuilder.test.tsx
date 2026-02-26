@@ -84,21 +84,29 @@ describe('SchemaBuilder Component', () => {
 
         fireEvent.click(screen.getByText('Add Field'));
         
-        const typeSelect = screen.getByRole('combobox');
-        fireEvent.change(typeSelect, { target: { value: 'relation' } });
+        // Find the type select trigger (it will have the value "Text" by default)
+        const typeSelects = screen.getAllByRole('combobox');
+        fireEvent.click(typeSelects[0]);
+
+        // Click the Relation option
+        const relationOption = await screen.findByRole('option', { name: 'Relation' });
+        fireEvent.click(relationOption);
 
         // Check if the relation target selector appeared
-        const targetSelects = screen.getAllByRole('combobox');
-        const targetSelect = targetSelects.find(s => s.innerHTML.includes('Select Target...'));
+        const targetSelects = await screen.findAllByRole('combobox');
+        const targetSelect = targetSelects.find(s => s.textContent?.includes('Select Target...'));
         expect(targetSelect).toBeInTheDocument();
 
-        // Check if only ledgers from the same project are shown
-        expect(screen.getByText('Existing Ledger')).toBeInTheDocument();
-        expect(screen.queryByText('Other Project Ledger')).not.toBeInTheDocument();
-
-        // Select target
+        // Check if only ledgers from the same project are shown by opening the target select
         if (targetSelect) {
-            fireEvent.change(targetSelect, { target: { value: 'ledger-1' } });
+            fireEvent.click(targetSelect);
+            
+            expect(await screen.findByRole('option', { name: 'Existing Ledger' })).toBeInTheDocument();
+            expect(screen.queryByRole('option', { name: 'Other Project Ledger' })).not.toBeInTheDocument();
+
+            // Select target
+            const existingLedgerOption = screen.getByRole('option', { name: 'Existing Ledger' });
+            fireEvent.click(existingLedgerOption);
         }
 
         // Try to save
@@ -139,14 +147,17 @@ describe('SchemaBuilder Component', () => {
             target: { value: 'Ref' }
         });
         
-        const typeSelect = screen.getByRole('combobox');
-        fireEvent.change(typeSelect, { target: { value: 'relation' } });
+        const typeSelects = screen.getAllByRole('combobox');
+        fireEvent.click(typeSelects[0]);
 
-        // Save without selecting target
+        const relationOption = await screen.findByRole('option', { name: 'Relation' });
+        fireEvent.click(relationOption);
+
+        // Save without selecting target (the second combobox now exists but is empty)
         const saveButton = screen.getByRole('button', { name: /Create Schema/i });
         fireEvent.click(saveButton);
 
-        expect(screen.getByText(/Relation target required/)).toBeInTheDocument();
+        expect(await screen.findByText(/Relation target required/)).toBeInTheDocument();
         expect(mockDispatchError).toHaveBeenCalledWith('Relation target required for field "Ref"');
     });
 
