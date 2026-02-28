@@ -14,14 +14,14 @@ This document provides the deeply granular epic and atomic story breakdown for l
 
 ## Epic List
 
-1. **Epic 1: App Foundation & Core Security** (10 Stories)
+1. **Epic 1: App Foundation & Core Security** (11 Stories)
 2. **Epic 2: Profiles & Project Management** (8 Stories)
-3. **Epic 3: Relational Ledger Engine** (15 Stories)
+3. **Epic 3: Relational Ledger Engine** (16 Stories)
 4. **Epic 4: Node Forge (Visual Scripting Engine)** (15 Stories)
-5. **Epic 5: Dashboard & Live Widgets** (6 Stories)
+5. **Epic 5: Dashboard & Live Widgets** (7 Stories)
 6. **Epic 6: Offline Sync, Conflicts & Data Sovereignty** (10 Stories)
 7. **Epic 7: Plugin Runtime & AI Capture** (8 Stories)
-8. **Epic 8: Technical Debt & System Stability** (4 Stories)
+8. **Epic 8: Technical Debt & System Stability** (5 Stories)
 
 ---
 
@@ -38,6 +38,7 @@ Establish the bare-metal architecture, routing, encryption wrappers, and shell l
 - **1.8 Auth Guard & Session Routing:** Wrap all routes to bounce unauthenticated users back to the `/unlock` screen.
 - **1.9 Global App Settings Store:** Allow toggle of Dark/Light modes and UI density.
 - **1.10 GitHub Actions CI/CD Automations:** Configure the yaml workflows for native Windows/macOS/Linux builds on tag pushes.
+- **1.11 Auth Rate Limiting & Escalating Delays:** Implementing exponential temporal delays on failed login attempts to thwart brute-force guessing.
 
 ---
 
@@ -106,6 +107,7 @@ Where the computed Node outputs become glanceable health indicators.
 - **5.4 Metric Counter & Delta Components:** Simple text-based widgets showing "Total Sleep: -5% from last week".
 - **5.5 Widget to Node Forge Data Piping:** The listener hooks subscribing widgets to specific Node Store `Output` handles.
 - **5.6 Dashboard Read-Only Safeguard:** Ensuring no ledger mutations can occur from the dashboard grid.
+- **5.7 Pinned Views Navigation Sidebar:** Pin frequently accessed ledger views, node graphs, or dashboards to a persistent sidebar.
 
 ---
 
