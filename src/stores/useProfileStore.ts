@@ -5,6 +5,8 @@ import { getProfileDb, closeProfileDb, create_profile_encrypted, list_profiles, 
 import { useErrorStore } from './useErrorStore';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { encryptPayload, decryptPayload } from '../lib/crypto';
+import { deleteProfileWithRemote, RemoteSyncConfig } from '../services/syncService';
+import { get_sync_config } from '../lib/db';
 
 interface ProfileState {
     profiles: ProfileMetadata[];
@@ -16,7 +18,7 @@ interface ProfileState {
     fetchProfiles: () => Promise<void>;
     setActiveProfile: (id: string) => void;
     createProfile: (name: string, description?: string) => Promise<string>;
-    deleteProfile: (id: string) => Promise<void>;
+    deleteProfile: (id: string, forceLocalOnly?: boolean) => Promise<{ success: boolean; remoteDeleted: boolean; error?: string }>;
 }
 
 export const useProfileStore = create<ProfileState>()(
@@ -50,13 +52,13 @@ export const useProfileStore = create<ProfileState>()(
                     // Refined Error Handling: Specific error messages based on PouchDB error codes
                     const status = err.status || err.name || 'UnknownError';
                     let errorMsg = err.message || `Failed to fetch profiles (${status})`;
-                    
+
                     if (status === 404) {
                         errorMsg = 'Profile database not found. Please create a new profile.';
                     } else if (status === 'unauthorized' || err.message?.includes('unlock')) {
                         errorMsg = 'Authentication required. Please unlock the vault.';
                     }
-                    
+
                     set({ error: errorMsg, isLoading: false });
                     useErrorStore.getState().dispatchError(errorMsg);
                 }
@@ -94,7 +96,7 @@ export const useProfileStore = create<ProfileState>()(
                     // Check for duplicate names by decrypting encrypted profiles OR checking legacy plain names
                     for (const doc of existingProfiles) {
                         let existingName: string | null = null;
-                        
+
                         if (doc.name_enc && key) {
                             // Encrypted profile - decrypt for comparison
                             try {
@@ -108,7 +110,7 @@ export const useProfileStore = create<ProfileState>()(
                             // Legacy unencrypted profile
                             existingName = doc.name;
                         }
-                        
+
                         if (existingName && existingName.toLowerCase() === name.toLowerCase()) {
                             throw new Error(`A profile with the name "${name}" already exists.`);
                         }
@@ -120,7 +122,7 @@ export const useProfileStore = create<ProfileState>()(
                         iv: nameEnc.iv,
                         ciphertext: Array.from(new Uint8Array(nameEnc.ciphertext))
                     };
-                    
+
                     let encryptedDescription = undefined;
                     if (description) {
                         const descEnc = await encryptPayload(encryptionKey, description);
@@ -140,9 +142,9 @@ export const useProfileStore = create<ProfileState>()(
                         name_enc: encryptedName,
                         description_enc: encryptedDescription
                     });
-                    
+
                     await get().fetchProfiles();
-                    
+
                     // Return the profile ID so UI can auto-select it
                     return profileId;
                 } catch (err: any) {
@@ -154,44 +156,55 @@ export const useProfileStore = create<ProfileState>()(
                 }
             },
 
-            deleteProfile: async (id: string) => {
+            deleteProfile: async (id: string, forceLocalOnly: boolean = false) => {
                 set({ isLoading: true, error: null });
                 try {
-                    // Auth Guard: Ensure vault is unlocked before deleting profile data
                     const authState = useAuthStore.getState();
-                    if (!authState.isUnlocked) {
+                    if (!authState.isUnlocked || !authState.encryptionKey) {
                         throw new Error('Vault must be unlocked to delete a profile.');
                     }
 
                     const masterDb = getProfileDb('master');
-
-                    // NFR12 Compliance: Close and destroy actual profile database FIRST
-                    // If this fails, we MUST NOT mark as deleted in master (rollback safety)
-                    await closeProfileDb(id);
                     const profileDb = getProfileDb(id);
-                    await profileDb.destroy();
-                    // Note: destroy() already calls delete profileDatabases[this.profileId]
 
-                    // NFR12 Compliance: Hard-delete the profile record from master DB
-                    await hard_delete_profile(masterDb, id);
+                    // 1. Fetch sync config if exists for this profile
+                    let remoteConfig: RemoteSyncConfig | undefined;
+                    const syncConfig = await get_sync_config(profileDb, id, authState.encryptionKey);
 
-                    await get().fetchProfiles();
-                    if (get().activeProfileId === id) {
-                        set({ activeProfileId: null });
+                    if (syncConfig && syncConfig.remoteUrl) {
+                        remoteConfig = {
+                            url: syncConfig.remoteUrl,
+                            username: syncConfig.username,
+                            password: syncConfig.password
+                        };
                     }
+
+                    // 2. Use syncService to perform deletion (Remote then Local)
+                    const result = await deleteProfileWithRemote(id, remoteConfig, forceLocalOnly);
+
+                    if (result.success) {
+                        // 3. Hard-delete the profile record from master DB
+                        await hard_delete_profile(masterDb, id);
+                        await get().fetchProfiles();
+
+                        if (get().activeProfileId === id) {
+                            set({ activeProfileId: null });
+                        }
+                    } else {
+                        // Handle failure (e.g. remote unreachable)
+                        if (result.error) {
+                            set({ error: result.error, isLoading: false });
+                            useErrorStore.getState().dispatchError(result.error);
+                        }
+                    }
+
+                    return result;
                 } catch (err: any) {
-                    // Refined Error Handling: Specific error messages
                     const status = err.status || err.name || 'UnknownError';
-                    let errorMsg = err.message || `Failed to delete profile (${status})`;
-                    
-                    if (status === 404) {
-                        errorMsg = 'Profile not found. It may have already been deleted.';
-                    } else if (status === 'unauthorized' || err.message?.includes('unlock')) {
-                        errorMsg = 'Authentication required. Please unlock the vault.';
-                    }
-                    
+                    const errorMsg = err.message || `Failed to delete profile (${status})`;
                     set({ error: errorMsg, isLoading: false });
                     useErrorStore.getState().dispatchError(errorMsg);
+                    return { success: false, remoteDeleted: false, error: errorMsg };
                 }
             },
         }),

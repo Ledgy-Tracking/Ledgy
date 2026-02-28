@@ -9,7 +9,7 @@ interface InlineEntryRowProps {
     schema: LedgerSchema;
     entry?: LedgerEntry;
     onCancel: () => void;
-    onComplete: () => void;
+    onComplete: (id?: string) => void;
 }
 
 export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
@@ -105,16 +105,17 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
         try {
             if (entry) {
                 await updateEntry(entry._id, formData);
+                onComplete(entry._id);
             } else {
-                await createEntry(
+                const newEntryId = await createEntry(
                     activeProfileId,
                     schema._id,
                     schema._id, // ledgerId same as schemaId for now
                     formData
                 );
+                onComplete(newEntryId);
             }
             setFormData({});
-            onComplete();
         } catch (err: any) {
             setErrors({ _form: err.message || 'Failed to save entry' });
         }

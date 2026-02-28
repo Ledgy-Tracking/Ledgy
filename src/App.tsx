@@ -15,6 +15,8 @@ import { LedgerView } from "./features/ledger/LedgerView";
 import { TrashView } from "./features/ledger/TrashView";
 import { ProjectDashboard } from "./features/projects/ProjectDashboard";
 import { NodeCanvas } from "./features/nodeEditor/NodeCanvas";
+import { ReactFlowProvider } from "@xyflow/react";
+import { SettingsPage } from "./features/settings/SettingsPage";
 
 function App() {
   const theme = useUIStore((state) => state.theme);
@@ -74,7 +76,9 @@ function App() {
           path="/app/:profileId"
           element={
             <AuthGuard>
-              <AppShell />
+              <ReactFlowProvider>
+                <AppShell />
+              </ReactFlowProvider>
             </AuthGuard>
           }
         >
@@ -82,8 +86,8 @@ function App() {
           <Route path="projects" element={<ProjectDashboard />} />
           <Route path="project/:projectId" element={<Dashboard />} />
           <Route path="project/:projectId/node-forge" element={<NodeCanvas />} />
-          <Route path="settings" element={<div>Settings Placeholder</div>} />
-          <Route path="ledger/:ledgerId" element={<LedgerView />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="project/:projectId/ledger/:ledgerId" element={<LedgerView />} />
           <Route path="trash" element={<TrashView />} />
           {/* Add more profile-scoped routes here */}
         </Route>

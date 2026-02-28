@@ -17,7 +17,15 @@ export interface NodeCanvas extends LedgyDocument {
     profileId: string;
     canvasId: string; // e.g., 'default' for main canvas
     nodes: CanvasNode[];
+    nodes_enc?: {
+        iv: number[];
+        ciphertext: number[];
+    };
     edges: CanvasEdge[];
+    edges_enc?: {
+        iv: number[];
+        ciphertext: number[];
+    };
     viewport: Viewport;
 }
 

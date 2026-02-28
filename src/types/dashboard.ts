@@ -21,6 +21,10 @@ export interface DashboardLayout extends LedgyDocument {
     profileId: string;
     dashboardId: string;
     widgets: WidgetConfig[];
+    widgets_enc?: {
+        iv: number[];
+        ciphertext: number[];
+    };
     layout: {
         columns: number;
         rows: number;

@@ -1,8 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { Handle, Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
 import { useProfileStore } from '../../../stores/useProfileStore';
 import { ChevronDown, ChevronUp, Database } from 'lucide-react';
+
 
 export interface LedgerSourceNodeData {
     label: string;
@@ -19,13 +20,18 @@ export interface LedgerSourceNodeData {
  * Ledger Source Node - represents a ledger schema as a data source
  * Story 4-2: Ledger Source Nodes & Basic Wiring
  */
-export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ data, selected }) => {
-    const { schemas, fetchSchemas } = useLedgerStore();
-    const { activeProfileId } = useProfileStore();
+export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
+    const schemas = useLedgerStore(s => s.schemas);
+    const fetchSchemas = useLedgerStore(s => s.fetchSchemas);
+    const activeProfileId = useProfileStore(s => s.activeProfileId);
     const [isConfigOpen, setIsConfigOpen] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
 
     const nodeData = data as unknown as LedgerSourceNodeData;
+
+    // Track previous ledgerId to avoid unnecessary updates
+    const prevLedgerIdRef = useRef<string | undefined>(undefined);
+    const { updateNodeData } = useReactFlow();
 
     // Fetch schemas on mount for ledger selector
     useEffect(() => {
@@ -34,37 +40,36 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ data, selecte
         }
     }, [activeProfileId, schemas.length, fetchSchemas]);
 
-    // Update ports when ledger changes
+    // Update ports only when ledgerId genuinely changes
     useEffect(() => {
-        if (nodeData.ledgerId) {
-            const schema = schemas.find(s => s._id === nodeData.ledgerId);
-            if (schema) {
-                const ports = schema.fields.map(field => ({
-                    id: `port-${field.name}`,
-                    type: field.type,
-                    fieldName: field.name,
-                }));
-                // Update node data with ports
-                data.ports = ports;
-                data.ledgerName = schema.name;
-            }
+        if (!nodeData.ledgerId) return;
+        // Only run if the ledgerId actually changed since last time
+        if (prevLedgerIdRef.current === nodeData.ledgerId) return;
+        prevLedgerIdRef.current = nodeData.ledgerId;
+
+        const schema = schemas.find(s => s._id === nodeData.ledgerId);
+        if (schema) {
+            const ports = schema.fields.map(field => ({
+                id: `source-${field.type}-${field.name}`,
+                type: field.type as 'text' | 'number' | 'date' | 'relation',
+                fieldName: field.name,
+            }));
+            updateNodeData(id, { ports, ledgerName: schema.name });
         }
-    }, [nodeData.ledgerId, schemas, data]);
+    }, [nodeData.ledgerId, schemas, id, updateNodeData]);
 
     const handleLedgerChange = useCallback((ledgerId: string) => {
         const schema = schemas.find(s => s._id === ledgerId);
         if (schema) {
-            data.ledgerId = ledgerId;
-            data.ledgerName = schema.name;
-            data.ports = schema.fields.map(field => ({
+            const ports = schema.fields.map(field => ({
                 id: `source-${field.type}-${field.name}`,
-                type: field.type,
+                type: field.type as 'text' | 'number' | 'date' | 'relation',
                 fieldName: field.name,
             }));
-            // Force re-render
+            updateNodeData(id, { ledgerId, ledgerName: schema.name, ports });
             setIsConfigOpen(false);
         }
-    }, [schemas, data]);
+    }, [schemas, id, updateNodeData]);
 
     return (
         <div

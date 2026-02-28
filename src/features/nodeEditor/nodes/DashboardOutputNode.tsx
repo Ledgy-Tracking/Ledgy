@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { useProfileStore } from '../../../stores/useProfileStore';
 import { useDashboardStore } from '../../../stores/useDashboardStore';
+import { useNodeStore } from '../../../stores/useNodeStore';
 import { BarChart3, TrendingUp, Type } from 'lucide-react';
 
 export interface DashboardOutputNodeData {
@@ -13,46 +13,23 @@ export interface DashboardOutputNodeData {
 
 /**
  * Dashboard Output Node - Publishes computation results to dashboard widgets
- * Story 4-5: Dashboard Widgets
+ * Refactored to be passive (Story 4-5 cleanup)
  */
 export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
-    const { activeProfileId } = useProfileStore();
-    const { addWidget, updateWidget, widgets } = useDashboardStore();
     const nodeData = data as unknown as DashboardOutputNodeData;
-
-    // Ensure widget exists on dashboard when node is added
-    useEffect(() => {
-        if (!activeProfileId) return;
-
-        const existingWidget = widgets.find(w => w.id === nodeData.widgetId || w.nodeId === id);
-
-        if (!existingWidget) {
-            const newWidgetId = nodeData.widgetId || `widget-${id}`;
-            (data as any).widgetId = newWidgetId;
-
-            addWidget({
-                id: newWidgetId,
-                nodeId: id,
-                type: nodeData.widgetType || 'text',
-                title: nodeData.title || 'New Widget',
-                position: { x: 0, y: 0, w: 1, h: 1 },
-                data: { value: 0 }
-            });
-        }
-        return () => { /* cleanup if needed */ };
-    }, [id, activeProfileId, addWidget, nodeData.widgetId, widgets]);
+    const { updateWidget } = useDashboardStore();
 
     const handleWidgetTypeChange = (type: 'chart' | 'trend' | 'text') => {
-        (data as any).widgetType = type;
-        if ((data as any).widgetId) {
-            updateWidget((data as any).widgetId, { type });
+        useNodeStore.getState().updateNodeData(id, { widgetType: type });
+        if (nodeData.widgetId) {
+            updateWidget(nodeData.widgetId, { type });
         }
     };
 
     const handleTitleChange = (title: string) => {
-        (data as any).title = title;
-        if ((data as any).widgetId) {
-            updateWidget((data as any).widgetId, { title });
+        useNodeStore.getState().updateNodeData(id, { title });
+        if (nodeData.widgetId) {
+            updateWidget(nodeData.widgetId, { title });
         }
     };
 
@@ -63,6 +40,8 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
             case 'trend':
                 return <TrendingUp size={14} className="text-emerald-400" />;
             case 'text':
+                return <Type size={14} className="text-purple-400" />;
+            default:
                 return <Type size={14} className="text-purple-400" />;
         }
     };

@@ -24,28 +24,35 @@ export async function deleteRemoteDatabase(
     remoteConfig: RemoteSyncConfig
 ): Promise<void> {
     try {
-        // In production, this would make an HTTP request to delete the remote database
-        // For CouchDB: DELETE /{database_name}
-        // For now, we simulate the operation
         console.log(`Deleting remote database at: ${remoteConfig.url}`);
 
-        // Simulate network request
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Check if remote is reachable (simulated)
-        const isReachable = true; // In production: try { await fetch(remoteConfig.url); } catch { return false; }
-
-        if (!isReachable) {
-            throw new Error('NETWORK_UNREACHABLE');
+        const headers: HeadersInit = {};
+        if (remoteConfig.username && remoteConfig.password) {
+            // Use Basic Auth for CouchDB
+            const authString = btoa(`${remoteConfig.username}:${remoteConfig.password}`);
+            headers['Authorization'] = `Basic ${authString}`;
         }
 
-        // Remote deletion successful
+        const response = await fetch(remoteConfig.url, {
+            method: 'DELETE',
+            headers,
+        });
+
+        if (!response.ok) {
+            // CouchDB returns 404 if DB doesn't exist, which is fine for deletion
+            if (response.status !== 404) {
+                const errorText = await response.text();
+                throw new Error(`Remote server returned ${response.status}: ${errorText}`);
+            }
+        }
+
         console.log('Remote database deleted successfully');
     } catch (err: any) {
-        if (err.message === 'NETWORK_UNREACHABLE') {
-            throw new Error('Remote server is unreachable. Please check your connection.');
+        // Check for network errors
+        if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+            throw new Error('NETWORK_UNREACHABLE');
         }
-        throw new Error(`Failed to delete remote database: ${err.message}`);
+        throw err;
     }
 }
 
@@ -109,32 +116,12 @@ export async function resolveConflict(
     winningVersion: 'local' | 'remote',
     conflict: ConflictEntry
 ): Promise<void> {
-    const db = getProfileDb(profileId);
-
-    // Get the winning version data
     const winner = winningVersion === 'local'
         ? conflict.localVersion.data
         : conflict.remoteVersion.data;
 
-    try {
-        // Get the current document to get the latest _rev
-        const currentDoc = await db.getDocument<any>(entryId);
-
-        // Update with winning version data, preserving envelope
-        await db.updateDocument(entryId, {
-            ...winner,
-            // Preserve document envelope fields
-            type: currentDoc.type,
-            schemaVersion: currentDoc.schemaVersion,
-        });
-
-        // Trigger a sync to propagate the resolution
-        // In production, this would use PouchDB replication
-        console.log(`Conflict resolved for ${entryId}: ${winningVersion} version accepted`);
-    } catch (err: any) {
-        console.error('Failed to resolve conflict:', err);
-        throw new Error(`Failed to resolve conflict: ${err.message}`);
-    }
+    await resolveConflictWithCustomData(profileId, entryId, winner);
+    console.log(`Conflict resolved for ${entryId}: ${winningVersion} version accepted`);
 }
 
 /**
@@ -183,10 +170,23 @@ export async function resolveConflictWithCustomData(
     const db = getProfileDb(profileId);
 
     try {
-        // Get the current document
-        const currentDoc = await db.getDocument<any>(entryId);
+        // 1. Get the current document with conflicts list
+        const currentDoc = await db.getDocument<any>(entryId, { conflicts: true });
 
-        // Update with custom merged data
+        // 2. Remove all conflicting revisions
+        if (currentDoc._conflicts) {
+            for (const rev of currentDoc._conflicts) {
+                try {
+                    await db.removeRevision(entryId, rev);
+                } catch (e) {
+                    // Ignore if revision already gone
+                    console.warn(`Could not remove revision ${rev} for ${entryId}:`, e);
+                }
+            }
+        }
+
+        // 3. Update with custom merged data, preserving envelope
+        // Note: We use updateDocument which handles the _rev of the winner
         await db.updateDocument(entryId, {
             ...customData,
             // Preserve document envelope fields
@@ -194,10 +194,10 @@ export async function resolveConflictWithCustomData(
             schemaVersion: currentDoc.schemaVersion,
         });
 
-        console.log(`Conflict resolved for ${entryId} with merged data`);
+        console.log(`Conflict resolved for ${entryId} with specified data`);
     } catch (err: any) {
-        console.error('Failed to resolve merged conflict:', err);
-        throw new Error(`Failed to resolve merged conflict: ${err.message}`);
+        console.error('Failed to resolve conflict with custom data:', err);
+        throw new Error(`Failed to resolve conflict: ${err.message}`);
     }
 }
 

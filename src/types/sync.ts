@@ -24,15 +24,16 @@ export interface SyncConfig extends LedgyDocument {
     syncDirection: 'upload' | 'two-way';
     continuous: boolean;
     lastSyncAt?: string;
-    syncStatus: 'idle' | 'syncing' | 'pending' | 'conflict' | 'offline';
+    syncStatus: 'idle' | 'syncing' | 'pending' | 'conflict' | 'offline' | 'error';
 }
 
 /**
  * Sync status for UI
  */
 export interface SyncStatus {
-    status: 'idle' | 'syncing' | 'pending' | 'conflict' | 'offline' | 'synced';
+    status: 'idle' | 'syncing' | 'pending' | 'conflict' | 'offline' | 'synced' | 'error';
     lastSync?: string;
+    lastError?: string;
     pendingChanges?: number;
     conflictCount?: number;
 }

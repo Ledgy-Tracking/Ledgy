@@ -60,6 +60,14 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                     bg: 'bg-zinc-400/10',
                     icon: <Wifi size={20} className="animate-pulse" />
                 };
+            case 'error':
+                return {
+                    label: 'Sync Error',
+                    description: syncStatus.lastError || 'An error occurred during verification or synchronization.',
+                    color: 'text-red-500',
+                    bg: 'bg-red-500/10',
+                    icon: <AlertCircle size={20} />
+                };
             default:
                 return {
                     label: 'Not Configured',

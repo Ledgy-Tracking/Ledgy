@@ -8,6 +8,8 @@ interface UIState {
     rightInspectorOpen: boolean;
     theme: Theme;
     schemaBuilderOpen: boolean;
+    selectedNodeId: string | null;
+    selectedEntryId: string | null;
 
     toggleLeftSidebar: () => void;
     setLeftSidebar: (open: boolean) => void;
@@ -16,6 +18,8 @@ interface UIState {
     toggleTheme: () => void;
     setTheme: (theme: Theme) => void;
     setSchemaBuilderOpen: (open: boolean) => void;
+    setSelectedNodeId: (id: string | null) => void;
+    setSelectedEntryId: (id: string | null) => void;
 }
 
 export const useUIStore = create<UIState>()(
@@ -25,6 +29,8 @@ export const useUIStore = create<UIState>()(
             rightInspectorOpen: true,
             theme: 'dark',
             schemaBuilderOpen: false,
+            selectedNodeId: null,
+            selectedEntryId: null,
 
             toggleLeftSidebar: () => set((state) => ({ leftSidebarOpen: !state.leftSidebarOpen })),
             setLeftSidebar: (open) => set({ leftSidebarOpen: open }),
@@ -35,6 +41,8 @@ export const useUIStore = create<UIState>()(
             toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
             setTheme: (theme) => set({ theme }),
             setSchemaBuilderOpen: (open) => set({ schemaBuilderOpen: open }),
+            setSelectedNodeId: (id) => set({ selectedNodeId: id, selectedEntryId: null }),
+            setSelectedEntryId: (id) => set({ selectedEntryId: id, selectedNodeId: null }),
         }),
         {
             name: 'ledgy-ui-storage',

@@ -9,7 +9,7 @@ import { useProfileStore } from '../../stores/useProfileStore';
  * Supports navigation from relation tag chips with entry highlighting (Story 3-3, AC 5).
  */
 export const LedgerView: React.FC = () => {
-    const { ledgerId } = useParams<{ ledgerId: string }>();
+    const { profileId, projectId, ledgerId } = useParams<{ profileId: string; projectId: string; ledgerId: string }>();
     const location = useLocation();
     const { schemas, fetchSchemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();

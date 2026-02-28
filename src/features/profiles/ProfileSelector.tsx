@@ -16,6 +16,8 @@ export const ProfileSelector: React.FC = () => {
 
     const [deleteProfileId, setDeleteProfileId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [purgeRemote, setPurgeRemote] = useState(true);
+    const [showForceLocal, setShowForceLocal] = useState(false);
 
     useEffect(() => {
         fetchProfiles();
@@ -52,14 +54,20 @@ export const ProfileSelector: React.FC = () => {
     const handleOpenDelete = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
         setDeleteProfileId(id);
+        setPurgeRemote(true);
+        setShowForceLocal(false);
     };
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = async (forceLocal: boolean = false) => {
         if (deleteProfileId) {
             setIsDeleting(true);
             try {
-                await deleteProfile(deleteProfileId);
-                setDeleteProfileId(null);
+                const result = await deleteProfile(deleteProfileId, forceLocal);
+                if (result.success) {
+                    setDeleteProfileId(null);
+                } else if (result.error?.includes('NETWORK_UNREACHABLE')) {
+                    setShowForceLocal(true);
+                }
             } catch (err) {
                 // Error already handled by store
             } finally {
@@ -210,15 +218,38 @@ export const ProfileSelector: React.FC = () => {
                             <div>
                                 <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Delete Profile "{profileToDelete.name}"?</h2>
                                 <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4">
-                                    <span className="font-semibold text-red-600 dark:text-red-400">This will permanently delete all local data for this profile.</span> This operation cannot be undone.
+                                    <span className="font-semibold text-red-600 dark:text-red-400">This will permanently delete local data for this profile.</span>
                                 </p>
-                                {/* Sync Warning - Only shown if profile has remote sync configured (AC5) */}
-                                {profileToDelete.remoteSyncEndpoint && (
-                                    <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-3">
-                                        <p className="text-amber-700 dark:text-amber-500 text-sm font-medium">
-                                            Warning: This profile has a configured sync endpoint. You must purge remote data separately.
-                                        </p>
+
+                                {profileToDelete.remoteSyncEndpoint ? (
+                                    <div className="space-y-4">
+                                        <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-3">
+                                            <p className="text-amber-700 dark:text-amber-500 text-sm font-medium mb-2">
+                                                This profile is synced to a remote server.
+                                            </p>
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={purgeRemote}
+                                                    onChange={(e) => setPurgeRemote(e.target.checked)}
+                                                    className="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                                />
+                                                <span className="text-sm text-amber-800 dark:text-amber-400">Also delete data from remote server (Right to be Forgotten)</span>
+                                            </label>
+                                        </div>
+
+                                        {showForceLocal && (
+                                            <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-3">
+                                                <p className="text-red-700 dark:text-red-400 text-sm font-medium">
+                                                    Remote server is unreachable. You can continue with a local-only deletion if you wish.
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
+                                ) : (
+                                    <p className="text-zinc-500 dark:text-zinc-400 text-sm">
+                                        This operation cannot be undone.
+                                    </p>
                                 )}
                             </div>
                         </div>
@@ -231,16 +262,30 @@ export const ProfileSelector: React.FC = () => {
                             >
                                 Cancel
                             </button>
-                            <button
-                                onClick={handleConfirmDelete}
-                                disabled={isDeleting}
-                                className="px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                            >
-                                {isDeleting && (
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                )}
-                                Permanently Delete
-                            </button>
+
+                            {showForceLocal ? (
+                                <button
+                                    onClick={() => handleConfirmDelete(true)}
+                                    disabled={isDeleting}
+                                    className="px-4 py-2 rounded-lg font-medium bg-amber-600 text-white hover:bg-amber-700 transition-colors focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {isDeleting && (
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    )}
+                                    Force Delete Locally
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => handleConfirmDelete(false)}
+                                    disabled={isDeleting}
+                                    className="px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    {isDeleting && (
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    )}
+                                    {purgeRemote && profileToDelete.remoteSyncEndpoint ? 'Delete Local & Remote' : 'Permanently Delete'}
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

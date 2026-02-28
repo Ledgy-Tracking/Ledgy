@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-// react-grid-layout v2 ships a proper ESM build with named exports.
-// WidthProvider was removed — use the useContainerWidth hook instead.
-import { ResponsiveGridLayout, useContainerWidth, type Layout } from 'react-grid-layout';
+import { ResponsiveGridLayout } from 'react-grid-layout';
+import { useContainerWidth } from '../../hooks/useContainerWidth';
+
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { useProfileStore } from '../../stores/useProfileStore';
@@ -66,10 +66,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         setIsAddingWidget(false);
     };
 
-    const onLayoutChange = (layout: Layout, _layouts: Record<string, Layout>) => {
-        layout.forEach(l => {
+    const onLayoutChange = (layout: any) => {
+        layout.forEach((l: any) => {
             const widget = widgets.find(w => w.id === l.i);
-            if (widget && (widget.position.x !== l.x || widget.position.y !== l.y || widget.position.w !== l.w || widget.position.h !== l.h)) {
+            if (widget && (
+                widget.position.x !== l.x ||
+                widget.position.y !== l.y ||
+                widget.position.w !== l.w ||
+                widget.position.h !== l.h
+            )) {
                 updateWidget(widget.id, {
                     position: { x: l.x, y: l.y, w: l.w, h: l.h }
                 });

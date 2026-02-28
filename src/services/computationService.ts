@@ -79,10 +79,15 @@ class ComputationService {
   /**
    * Compute correlation between two numeric arrays
    */
-  computeCorrelation(x: number[], y: number[], callback: ComputeCallback): string {
+  computeCorrelation(x: number[], y: number[], callback?: ComputeCallback): Promise<ComputeResponse> {
     const id = `corr-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    this.queueCompute({ id, type: 'correlation', data: { x, y } }, callback);
-    return id;
+    return new Promise((resolve) => {
+      const internalCallback: ComputeCallback = (res) => {
+        if (callback) callback(res);
+        resolve(res);
+      };
+      this.queueCompute({ id, type: 'correlation', data: { x, y } }, internalCallback);
+    });
   }
 
   /**
@@ -91,11 +96,16 @@ class ComputationService {
   computeArithmetic(
     values: number[],
     operation: ArithmeticOperation,
-    callback: ComputeCallback
-  ): string {
+    callback?: ComputeCallback
+  ): Promise<ComputeResponse> {
     const id = `arith-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    this.queueCompute({ id, type: 'arithmetic', data: { values }, operation }, callback);
-    return id;
+    return new Promise((resolve) => {
+      const internalCallback: ComputeCallback = (res) => {
+        if (callback) callback(res);
+        resolve(res);
+      };
+      this.queueCompute({ id, type: 'arithmetic', data: { values }, operation }, internalCallback);
+    });
   }
 
   /**

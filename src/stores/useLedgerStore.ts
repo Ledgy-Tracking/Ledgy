@@ -7,7 +7,6 @@ import {
     create_schema,
     update_schema,
     list_schemas,
-    get_schema,
     create_entry,
     update_entry,
     list_entries,
@@ -15,6 +14,7 @@ import {
     delete_entry,
     restore_entry,
     find_entries_with_relation_to,
+    decryptLedgerEntry,
 } from '../lib/db';
 
 interface LedgerState {
@@ -56,7 +56,7 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            const schemas = await list_schemas(db);
+            const schemas = await list_schemas(db, authState.encryptionKey || undefined);
             set({ schemas, isLoading: false });
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to fetch schemas';
@@ -74,7 +74,7 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            const schemaId = await create_schema(db, name, fields, profileId, projectId);
+            const schemaId = await create_schema(db, name, fields, profileId, projectId, authState.encryptionKey || undefined);
             await get().fetchSchemas(profileId);
             return schemaId;
         } catch (err: any) {
@@ -97,7 +97,8 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             }
 
             const db = getProfileDb(state.activeProfileId);
-            await update_schema(db, schemaId, name, fields);
+            const authState = useAuthStore.getState();
+            await update_schema(db, schemaId, name, fields, authState.encryptionKey || undefined);
             await get().fetchSchemas(state.activeProfileId);
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to update schema';
@@ -116,8 +117,8 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            const entries = await list_entries(db, ledgerId);
-            const allEntries = await list_all_entries(db, ledgerId);
+            const entries = await list_entries(db, ledgerId, authState.encryptionKey || undefined);
+            const allEntries = await list_all_entries(db, ledgerId, authState.encryptionKey || undefined);
             set({
                 entries: { ...get().entries, [ledgerId]: entries },
                 allEntries: { ...get().allEntries, [ledgerId]: allEntries },
@@ -139,7 +140,7 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            const backLinks = await find_entries_with_relation_to(db, targetEntryId);
+            const backLinks = await find_entries_with_relation_to(db, targetEntryId, authState.encryptionKey || undefined);
             set({
                 backLinks: { ...get().backLinks, [targetEntryId]: backLinks },
                 isLoading: false
@@ -160,13 +161,17 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            const entryId = await create_entry(db, schemaId, ledgerId, data, profileId);
+            const entryId = await create_entry(db, schemaId, ledgerId, data, profileId, authState.encryptionKey || undefined);
             await get().fetchEntries(profileId, ledgerId);
 
             // Fire on-create trigger event
             const state = get();
             if (state.onEntryEvent) {
-                const entry = await db.getDocument<any>(entryId);
+                const rawEntry = await db.getDocument<any>(entryId);
+                // Decrypt for trigger engine convenience
+                const entry = authState.encryptionKey
+                    ? await decryptLedgerEntry(rawEntry, authState.encryptionKey)
+                    : rawEntry;
                 state.onEntryEvent('on-create', entry);
             }
 
@@ -188,18 +193,23 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             }
 
             const db = getProfileDb(state.activeProfileId);
-            await update_entry(db, entryId, data);
+            const authState = useAuthStore.getState();
+            await update_entry(db, entryId, data, authState.encryptionKey || undefined);
 
             // Fire on-edit trigger event
             const ledgerState = get();
             if (ledgerState.onEntryEvent) {
-                const entry = await db.getDocument<any>(entryId);
+                const rawEntry = await db.getDocument<any>(entryId);
+                // Decrypt for trigger engine convenience
+                const entry = authState.encryptionKey
+                    ? await decryptLedgerEntry(rawEntry, authState.encryptionKey)
+                    : rawEntry;
                 ledgerState.onEntryEvent('on-edit', entry);
             }
 
             // Refresh entries for the ledger
-            const schema = await get_schema(db, (await db.getDocument<any>(entryId)).schemaId);
-            await get().fetchEntries(state.activeProfileId, schema._id);
+            const entryDoc = await db.getDocument<any>(entryId);
+            await get().fetchEntries(state.activeProfileId, entryDoc.ledgerId);
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to update entry';
             set({ error: errorMsg, isLoading: false });

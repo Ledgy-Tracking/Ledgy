@@ -62,7 +62,8 @@ export const SyncStatusButton: React.FC<SyncStatusButtonProps> = ({ profileId, o
     return (
         <button
             onClick={onClick}
-            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition-all group shrink-0"
+            className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition-all group shrink-0 ${(isLoading || syncStatus.status === 'syncing') ? 'ring-2 ring-emerald-500/20 animate-pulse' : ''
+                }`}
             title="Open Sync Settings"
         >
             <div className="flex items-center justify-center">

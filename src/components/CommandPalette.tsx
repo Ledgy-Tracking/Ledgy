@@ -10,13 +10,20 @@ import {
 } from './ui/command';
 import { useProfileStore } from '../stores/useProfileStore';
 import { useLedgerStore } from '../stores/useLedgerStore';
-import { FolderKanban, Network, Database, Settings } from 'lucide-react';
+import { useProjectStore } from '../stores/useProjectStore';
+import { useUIStore } from '../stores/useUIStore';
+import { FolderKanban, Network, Database, Plus, LayoutGrid } from 'lucide-react';
+
+import { useParams } from 'react-router-dom';
 
 export const CommandPalette: React.FC = () => {
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
-    const { profiles, activeProfileId } = useProfileStore();
+    const { profileId, projectId, ledgerId } = useParams<{ profileId: string; projectId: string; ledgerId: string }>();
+    const { profiles } = useProfileStore();
     const { schemas } = useLedgerStore();
+    const { projects, setActiveProject } = useProjectStore();
+    const { setSchemaBuilderOpen } = useUIStore();
 
     useEffect(() => {
         const down = (e: KeyboardEvent) => {
@@ -35,47 +42,83 @@ export const CommandPalette: React.FC = () => {
         command();
     };
 
-    // Depending on routing, projects might just be dashboards or we just navigate to ledger
-    // For now we'll support navigating to profiles and active profile ledgers
-
     return (
         <CommandDialog open={open} onOpenChange={setOpen}>
-            <CommandInput placeholder="Type a command or search..." />
-            <CommandList>
+            <CommandInput placeholder="Search projects, ledgers, or type a command..." />
+            <CommandList className="custom-scrollbar">
                 <CommandEmpty>No results found.</CommandEmpty>
 
-                {activeProfileId && (
-                    <CommandGroup heading="Active Profile Navigation">
-                        <CommandItem onSelect={() => runCommand(() => navigate(`/app/${activeProfileId}/projects`))}>
-                            <FolderKanban className="mr-2 h-4 w-4" />
-                            <span>Projects Dashboard</span>
+                {profileId && (
+                    <CommandGroup heading="Actions">
+                        {projectId && (
+                            <CommandItem onSelect={() => runCommand(() => navigate(`/app/${profileId}/project/${projectId}/node-forge`))}>
+                                <Network className="mr-2 h-4 w-4 text-zinc-400" />
+                                <span>Open Node Forge for this Project</span>
+                            </CommandItem>
+                        )}
+                        {ledgerId && (
+                            <CommandItem onSelect={() => runCommand(() => {
+                                // We'd need to trigger the "Add Entry" UI in LedgerTable
+                                // For now, focus the shortcut N
+                                console.log('New Entry triggered');
+                            })}>
+                                <Plus className="mr-2 h-4 w-4 text-zinc-400" />
+                                <span>New Entry in this Ledger (N)</span>
+                            </CommandItem>
+                        )}
+                        <CommandItem onSelect={() => runCommand(() => setSchemaBuilderOpen(true))}>
+                            <Database className="mr-2 h-4 w-4 text-zinc-400" />
+                            <span>Create New Ledger Schema...</span>
                         </CommandItem>
-                        <CommandItem onSelect={() => runCommand(() => navigate(`/app/${activeProfileId}/node-forge`))}>
-                            <Network className="mr-2 h-4 w-4" />
-                            <span>Node Forge</span>
-                        </CommandItem>
-                        <CommandItem onSelect={() => runCommand(() => navigate(`/app/${activeProfileId}/settings`))}>
-                            <Settings className="mr-2 h-4 w-4" />
-                            <span>Settings</span>
+                        <CommandItem onSelect={() => runCommand(() => navigate(`/app/${profileId}/projects`))}>
+                            <FolderKanban className="mr-2 h-4 w-4 text-zinc-400" />
+                            <span>Create New Project...</span>
                         </CommandItem>
                     </CommandGroup>
                 )}
 
-                {activeProfileId && schemas.length > 0 && (
+                {profileId && projects.length > 0 && (
+                    <CommandGroup heading="Projects">
+                        {projects.map((project) => (
+                            <CommandItem
+                                key={project._id}
+                                onSelect={() => runCommand(() => {
+                                    setActiveProject(project._id);
+                                    navigate(`/app/${profileId}/project/${project._id}`);
+                                })}
+                            >
+                                <LayoutGrid className="mr-2 h-4 w-4 text-zinc-400" />
+                                <span>{project.name}</span>
+                                {projectId === project._id && (
+                                    <span className="ml-auto text-[10px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-bold uppercase">Active</span>
+                                )}
+                            </CommandItem>
+                        ))}
+                    </CommandGroup>
+                )}
+
+                {profileId && schemas.length > 0 && (
                     <CommandGroup heading="Ledgers">
                         {schemas.map((schema) => (
                             <CommandItem
                                 key={schema._id}
-                                onSelect={() => runCommand(() => navigate(`/app/${activeProfileId}/ledger/${schema._id}`))}
+                                onSelect={() => runCommand(() => {
+                                    const targetProjectId = schema.projectId || projectId;
+                                    if (targetProjectId) {
+                                        navigate(`/app/${profileId}/project/${targetProjectId}/ledger/${schema._id}`);
+                                    } else {
+                                        navigate(`/app/${profileId}/ledger/${schema._id}`);
+                                    }
+                                })}
                             >
-                                <Database className="mr-2 h-4 w-4" />
+                                <Database className="mr-2 h-4 w-4 text-zinc-400" />
                                 <span>{schema.name}</span>
                             </CommandItem>
                         ))}
                     </CommandGroup>
                 )}
 
-                <CommandGroup heading="Switch Profile">
+                <CommandGroup heading="Profiles">
                     {profiles.map((profile) => (
                         <CommandItem
                             key={profile.id}
@@ -86,12 +129,10 @@ export const CommandPalette: React.FC = () => {
                                 });
                             }}
                         >
+                            <div className={`w-2 h-2 rounded-full mr-3 ${profile.id === profileId ? 'bg-emerald-500' : 'bg-zinc-700'}`} />
                             <span>{profile.name}</span>
                         </CommandItem>
                     ))}
-                    <CommandItem onSelect={() => runCommand(() => navigate('/profiles'))}>
-                        <span>View All Profiles...</span>
-                    </CommandItem>
                 </CommandGroup>
             </CommandList>
         </CommandDialog>

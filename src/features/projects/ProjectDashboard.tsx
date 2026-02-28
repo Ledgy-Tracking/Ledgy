@@ -6,7 +6,7 @@ import { Plus, Folder, Trash2, ArrowRight } from 'lucide-react';
 export const ProjectDashboard: React.FC = () => {
     const { profileId } = useParams<{ profileId: string }>();
     const navigate = useNavigate();
-    const { projects, fetchProjects, createProject, deleteProject, isLoading } = useProjectStore();
+    const { projects, fetchProjects, createProject, deleteProject, isLoading, setActiveProject } = useProjectStore();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newProjectName, setNewProjectName] = useState('');
     const [newProjectDesc, setNewProjectDesc] = useState('');
@@ -35,6 +35,7 @@ export const ProjectDashboard: React.FC = () => {
     };
 
     const handleProjectClick = (projectId: string) => {
+        setActiveProject(projectId);
         navigate(`/app/${profileId}/project/${projectId}`);
     };
 
@@ -65,14 +66,19 @@ export const ProjectDashboard: React.FC = () => {
                         </div>
                     </div>
                 ) : projects.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl m-4">
-                        <Folder size={48} className="mb-4 text-zinc-300 dark:text-zinc-700" />
-                        <h2 className="text-xl font-medium text-zinc-800 dark:text-zinc-300">No projects yet</h2>
-                        <p className="max-w-xs text-center mt-2 mb-6">Create your first project to organize your tracking ledgers and node automations.</p>
+                    <div className="h-full flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl m-4 p-8">
+                        <div className="p-4 bg-emerald-500/10 rounded-full mb-6">
+                            <Folder size={48} className="text-emerald-500" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">Welcome to Ledgy!</h2>
+                        <p className="max-w-md text-center text-zinc-500 dark:text-zinc-400 mb-8">
+                            Create your first project to organize your tracking ledgers and build your data automation ecosystem. Projects are secure, local containers for all your ledgers.
+                        </p>
                         <button
                             onClick={() => setIsCreateModalOpen(true)}
-                            className="px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-md font-bold transition-all shadow-lg shadow-emerald-900/20"
+                            className="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded-lg font-bold transition-all shadow-lg shadow-emerald-900/40 hover:scale-105 active:scale-95 flex items-center gap-2"
                         >
+                            <Plus size={20} />
                             Get Started
                         </button>
                     </div>

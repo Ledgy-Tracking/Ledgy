@@ -32,8 +32,8 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            const layout = await load_dashboard_layout(db, projectId);
-            
+            const layout = await load_dashboard_layout(db, projectId, authState.encryptionKey || undefined);
+
             if (layout) {
                 set({ widgets: layout.widgets, isLoading: false });
             } else {
@@ -55,7 +55,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
             }
 
             const db = getProfileDb(profileId);
-            await save_dashboard_layout(db, projectId, widgets, profileId);
+            await save_dashboard_layout(db, projectId, widgets, profileId, authState.encryptionKey || undefined);
             set({ widgets, isLoading: false });
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to save dashboard';

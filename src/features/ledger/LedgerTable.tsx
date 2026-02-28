@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLedgerStore } from '../../stores/useLedgerStore';
+import { useUIStore } from '../../stores/useUIStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerEntry, SchemaField } from '../../types/ledger';
 import { InlineEntryRow } from './InlineEntryRow';
@@ -23,9 +24,11 @@ interface LedgerTableProps {
 export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEntryId }) => {
     const { schemas, entries, fetchEntries, allEntries, deleteEntry } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
+    const { setSelectedEntryId, setRightInspector } = useUIStore();
     const [isAddingEntry, setIsAddingEntry] = useState(false);
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
     const [selectedRow, setSelectedRow] = useState<number>(-1);
+    const [recentlyCommittedId, setRecentlyCommittedId] = useState<string | null>(null);
 
     const schema = schemas.find(s => s._id === schemaId);
 
@@ -133,7 +136,13 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                 <InlineEntryRow
                                     schema={schema}
                                     onCancel={() => setIsAddingEntry(false)}
-                                    onComplete={() => setIsAddingEntry(false)}
+                                    onComplete={(id?: string) => {
+                                        setIsAddingEntry(false);
+                                        if (id) {
+                                            setRecentlyCommittedId(id);
+                                            setTimeout(() => setRecentlyCommittedId(null), 2000);
+                                        }
+                                    }}
                                 />
                             )}
 
@@ -162,7 +171,13 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                             schema={schema}
                                             entry={entry}
                                             onCancel={() => setEditingEntryId(null)}
-                                            onComplete={() => setEditingEntryId(null)}
+                                            onComplete={(id?: string) => {
+                                                setEditingEntryId(null);
+                                                if (id) {
+                                                    setRecentlyCommittedId(id);
+                                                    setTimeout(() => setRecentlyCommittedId(null), 2000);
+                                                }
+                                            }}
                                         />
                                     );
                                 }
@@ -171,9 +186,15 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                     <TableRow
                                         key={entry._id}
                                         data-state={isSelected ? "selected" : undefined}
-                                        className={`cursor-pointer transition-colors ${isHighlighted ? 'bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30' : ''
+                                        className={`cursor-pointer transition-all duration-300 ${isHighlighted ? 'bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30' :
+                                            recentlyCommittedId === entry._id ? 'bg-emerald-500/20 dark:bg-emerald-500/20 ring-1 ring-emerald-500/50 animate-slide-down-row' :
+                                                ''
                                             }`}
-                                        onClick={() => setSelectedRow(index)}
+                                        onClick={() => {
+                                            setSelectedRow(index);
+                                            setSelectedEntryId(entry._id);
+                                            setRightInspector(true);
+                                        }}
                                         onDoubleClick={() => setEditingEntryId(entry._id)}
                                         tabIndex={0}
                                         onKeyDown={(e) => {

@@ -1,85 +1,25 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { computationService } from '../../../services/computationService';
 import { Calculator, AlertCircle } from 'lucide-react';
 
 export interface CorrelationNodeData {
     label: string;
     result: number | null;
     error?: string;
-    isComputing: boolean;
-    inputData?: {
-        x?: number[];
-        y?: number[];
-    };
+    isComputing?: boolean;
+    changePercent?: number;
+    trend?: 'up' | 'down' | 'neutral';
 }
 
 /**
  * Correlation Node - Computes Pearson correlation between two numeric streams
- * Story 4-3: Correlation & Compute Nodes
+ * Refactored to be passive (Story 4-3 cleanup)
  */
 export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected }) => {
     const nodeData = data as unknown as CorrelationNodeData;
-    const [result, setResult] = useState<number | null>(nodeData.result || null);
-    const [error, setError] = useState<string | undefined>(nodeData.error);
-    const [isComputing, setIsComputing] = useState(false);
-    const inputDataRef = useRef<{ x?: number[]; y?: number[] }>({});
-    const computeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Trigger computation when input data changes (debounced)
-    const triggerComputation = useCallback((xData?: number[], yData?: number[]) => {
-        if (computeTimerRef.current) {
-            clearTimeout(computeTimerRef.current);
-        }
-
-        computeTimerRef.current = setTimeout(() => {
-            if (!xData || !yData || xData.length === 0 || yData.length === 0) {
-                setResult(null);
-                setError('Waiting for input data...');
-                setIsComputing(false);
-                return;
-            }
-
-            setIsComputing(true);
-            setError(undefined);
-
-            computationService.computeCorrelation(xData, yData, (response) => {
-                setResult(response.result);
-                setError(response.error);
-                setIsComputing(false);
-
-                // Update node data
-                data.result = response.result;
-                data.error = response.error;
-                data.isComputing = false;
-                data.chartData = response.chartData;
-                data.trend = response.trend;
-                data.changePercent = response.changePercent;
-            });
-        }, 300); // 300ms debounce
-    }, [data]);
-
-    // Listen for data changes via custom event (simplified - in production would use proper data flow)
-    useEffect(() => {
-        // Simulate receiving data from connected nodes
-        // In production, this would be wired through the node editor data flow
-        const xData = nodeData.inputData?.x;
-        const yData = nodeData.inputData?.y;
-
-        if (xData !== inputDataRef.current.x || yData !== inputDataRef.current.y) {
-            inputDataRef.current = { x: xData, y: yData };
-            triggerComputation(xData, yData);
-        }
-
-        return () => {
-            if (computeTimerRef.current) {
-                clearTimeout(computeTimerRef.current);
-            }
-        };
-    }, [nodeData.inputData, triggerComputation]);
-
-    const getCorrelationColor = (value: number | null) => {
-        if (value === null) return 'text-zinc-500';
+    const getCorrelationColor = (value: number | null | undefined) => {
+        if (typeof value !== 'number') return 'text-zinc-500';
         if (value >= 0.7) return 'text-emerald-400';
         if (value >= 0.3) return 'text-amber-400';
         if (value >= -0.3) return 'text-zinc-400';
@@ -87,8 +27,8 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected
         return 'text-red-400';
     };
 
-    const getCorrelationLabel = (value: number | null) => {
-        if (value === null) return '-';
+    const getCorrelationLabel = (value: number | null | undefined) => {
+        if (typeof value !== 'number') return '-';
         if (value >= 0.7) return 'Strong +';
         if (value >= 0.3) return 'Moderate +';
         if (value >= -0.3) return 'Weak';
@@ -99,7 +39,7 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected
     return (
         <div
             className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[220px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
-                } ${error ? 'border-red-500/50' : ''}`}
+                } ${nodeData.error ? 'border-red-500/50' : ''}`}
         >
             {/* Header */}
             <div className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-t-md">
@@ -135,20 +75,20 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected
             <div className="px-3 pb-3">
                 <div className="bg-zinc-800/50 rounded p-2 border border-zinc-700">
                     <div className="text-xs text-zinc-500 mb-1">Pearson r</div>
-                    {error ? (
+                    {nodeData.error ? (
                         <div className="flex items-center gap-1.5 text-red-400 text-xs">
                             <AlertCircle size={12} />
-                            <span>{error}</span>
+                            <span>{nodeData.error}</span>
                         </div>
-                    ) : isComputing ? (
+                    ) : nodeData.isComputing ? (
                         <div className="text-amber-400 text-xs animate-pulse">Computing...</div>
                     ) : (
                         <div className="flex items-baseline gap-2">
-                            <span className={`text-lg font-bold ${getCorrelationColor(result)}`}>
-                                {result !== null ? result.toFixed(3) : '-'}
+                            <span className={`text-lg font-bold ${getCorrelationColor(nodeData.result)}`}>
+                                {typeof nodeData.result === 'number' ? nodeData.result.toFixed(3) : '-'}
                             </span>
                             <span className="text-xs text-zinc-500">
-                                {getCorrelationLabel(result)}
+                                {getCorrelationLabel(nodeData.result)}
                             </span>
                         </div>
                     )}

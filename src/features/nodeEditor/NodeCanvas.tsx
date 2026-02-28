@@ -1,21 +1,23 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import {
     ReactFlow,
     Background,
     Controls,
     MiniMap,
+    Node,
+    Edge,
+    IsValidConnection,
     useNodesState,
     useEdgesState,
     addEdge,
     Connection,
-    Edge,
-    Node,
-    IsValidConnection,
+    OnConnect,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
-import { useLedgerStore } from '../../stores/useLedgerStore';
+import { useUIStore } from '../../stores/useUIStore';
+import { CanvasNode } from '../../types/nodeEditor';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
@@ -24,10 +26,10 @@ import { TriggerNode } from './nodes/TriggerNode';
 import { DashboardOutputNode } from './nodes/DashboardOutputNode';
 import { DataEdge } from './edges/DataEdge';
 import { useParams } from 'react-router-dom';
-import { executeTrigger } from '../../services/triggerEngine';
-import { useErrorStore } from '../../stores/useErrorStore';
+import { NodeToolbar } from './NodeToolbar';
 
-// Custom node types
+// --- STABLE CONFIGURATION (Outside component to prevent re-renders) ---
+
 const nodeTypes = {
     ledgerSource: LedgerSourceNode,
     correlation: CorrelationNode,
@@ -36,206 +38,151 @@ const nodeTypes = {
     dashboardOutput: DashboardOutputNode,
 };
 
-// Custom edge types
 const edgeTypes = {
     data: DataEdge,
 };
 
+const defaultEdgeOptions = {
+    type: 'data',
+    animated: true
+};
+
+/**
+ * NodeCanvas — The Node Forge editor.
+ * 
+ * Stability Fixes:
+ * 1. Moved all object/array literals outside the component.
+ * 2. Used useNodesState for local rendering state (controlled mode).
+ * 3. Memoized all callbacks passed to ReactFlow.
+ * 4. Precised Zustand selectors to avoid whole-store re-renders.
+ * 5. Added debug logging (visible in dev console).
+ */
 export const NodeCanvas: React.FC = () => {
-    const { activeProfileId } = useProfileStore();
+    // 1. Precise selectors for stable dependencies
+    const activeProfileId = useProfileStore(s => s.activeProfileId);
     const { projectId } = useParams<{ projectId: string }>();
-    const { nodes, edges, viewport, isLoading, loadCanvas, saveCanvas, setNodes, setEdges, setViewport } = useNodeStore();
-    const { setOnEntryEvent } = useLedgerStore();
-    const { dispatchError } = useErrorStore();
 
-    // Global shortcut for evaluation (Story R-3, Task 2)
+    // UI Store actions - use stable selectors
+    const setSelectedNodeId = useUIStore(s => s.setSelectedNodeId);
+    const setRightInspector = useUIStore(s => s.setRightInspector);
+
+    // Node Store - only subscribe to isLoading for the overlay
+    const isLoading = useNodeStore(s => s.isLoading);
+    const initialViewport = useMemo(() => useNodeStore.getState().viewport, []);
+
+    // 2. React Flow State (Local ownership)
+    const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
+    const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
+
+    const loadedRef = useRef(false);
+    const renderCountRef = useRef(0);
+    renderCountRef.current++;
+
+    // DEBUG: Log renders to catch loops early
+    if (renderCountRef.current % 50 === 0) {
+        console.warn(`[NodeCanvas] High render count detected: ${renderCountRef.current}. Nodes: ${rfNodes.length}`);
+    }
+
+    // 3. Initial Load (One-time)
     useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-                return;
-            }
-            if (e.key === 'r' || e.key === 'R') {
-                e.preventDefault();
-                // Stub for manual re-evaluation
-                console.log('Manual re-evaluation triggered');
-                // In future: triggerEngine.reevaluateAll()
-            }
-        };
+        if (!activeProfileId || !projectId || loadedRef.current) return;
 
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, []);
+        console.log('[NodeCanvas] Initial load triggered');
+        loadedRef.current = true;
 
-    // Wire trigger engine to ledger events (Story 4-4)
-    useEffect(() => {
-        setOnEntryEvent(async (eventType, entry) => {
-            // Find all matching trigger nodes
-            const matchingTriggers = nodes.filter(n =>
-                n.type === 'trigger' &&
-                n.data.ledgerId === entry.ledgerId &&
-                (n.data as any).eventType === eventType
-            );
-
-            for (const trigger of matchingTriggers) {
-                try {
-                    // Update trigger status visually (simulated update)
-                    (trigger.data as any).status = 'fired';
-                    (trigger.data as any).lastFired = new Date().toISOString();
-
-                    await executeTrigger(
-                        {
-                            triggerId: trigger.id,
-                            entryId: entry._id,
-                            ledgerId: entry.ledgerId,
-                            eventType,
-                            depth: 0,
-                            data: entry.data
-                        },
-                        nodes,
-                        edges,
-                        trigger.id
-                    );
-                } catch (err: any) {
-                    (trigger.data as any).status = 'error';
-                    (trigger.data as any).error = err.message;
-                    dispatchError(`Trigger failed: ${err.message}`);
-                }
-            }
+        useNodeStore.getState().loadCanvas(activeProfileId, projectId).then(() => {
+            const { nodes, edges } = useNodeStore.getState();
+            setRfNodes(nodes as unknown as Node[]);
+            setRfEdges(edges as unknown as Edge[]);
         });
+    }, [activeProfileId, projectId, setRfNodes, setRfEdges]);
 
-        // Cleanup subscriber on unmount
-        return () => setOnEntryEvent(() => { });
-    }, [nodes, edges, setOnEntryEvent, dispatchError]);
-
-    const [rfNodes, setRfNodes, onNodesChange] = useNodesState(nodes as unknown as Node[]);
-    const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState(edges);
-
-    // Sync React Flow changes back to Zustand store for persistence
+    // 4. Debounced Save
     useEffect(() => {
-        setNodes(rfNodes as any);
-    }, [rfNodes, setNodes]);
+        if (!loadedRef.current || !activeProfileId || !projectId) return;
 
-    useEffect(() => {
-        setEdges(rfEdges as any);
-    }, [rfEdges, setEdges]);
-
-    // Load canvas on mount
-    useEffect(() => {
-        if (activeProfileId && projectId) {
-            loadCanvas(activeProfileId, projectId);
-        }
-    }, [activeProfileId, projectId, loadCanvas]);
-
-    // Auto-save on changes (debounced)
-    useEffect(() => {
         const timer = setTimeout(() => {
-            if (activeProfileId && projectId && (nodes.length > 0 || edges.length > 0)) {
-                saveCanvas(activeProfileId, projectId);
-            }
-        }, 1000);
+            useNodeStore.getState().saveCanvas(
+                activeProfileId,
+                projectId,
+                rfNodes as unknown as CanvasNode[],
+                rfEdges as any
+            );
+        }, 3000); // 3s debounce for stability
+
         return () => clearTimeout(timer);
-    }, [nodes, edges, activeProfileId, projectId, saveCanvas]);
+    }, [rfNodes, rfEdges, activeProfileId, projectId]);
 
-    const onConnect = useCallback(
-        (params: Connection) => {
-            // Extract data type from source handle
-            const dataType = params.sourceHandle?.split('-')[1] || 'unknown';
-
-            const newEdge: Edge = {
-                ...params,
-                id: `edge-${params.source}-${params.target}-${params.sourceHandle}-${params.targetHandle}`,
-                type: 'data',
-                data: {
-                    dataType,
-                    sampleData: `${dataType} flow`,
-                },
-            };
-            setRfEdges((eds) => addEdge(newEdge, eds) as unknown as typeof eds);
-        },
+    // 5. Stable Handlers
+    const onConnect: OnConnect = useCallback(
+        (connection: Connection) => setRfEdges((eds) => addEdge(connection, eds)),
         [setRfEdges]
     );
 
     const onViewportChange = useCallback(
         (vp: { x: number; y: number; zoom: number }) => {
-            setViewport(vp);
+            // Passive update - don't trigger re-render of this component
+            useNodeStore.getState().setViewport(vp);
         },
-        [setViewport]
+        []
     );
 
     const isValidConnection: IsValidConnection<any> = useCallback((connection) => {
-        const sourceHandle = connection.sourceHandle;
-        const targetHandle = connection.targetHandle;
-
+        const { sourceHandle, targetHandle } = connection;
         if (!sourceHandle || !targetHandle) return false;
-
-        // IDs are formatted as source-{type}-{name} or target-{type}-{name}
         const sourceType = sourceHandle.split('-')[1];
         const targetType = targetHandle.split('-')[1];
-
-        // "any" is a wildcard
-        if (targetType === 'any' || sourceType === 'any') return true;
-
-        return sourceType === targetType;
+        return targetType === 'any' || sourceType === 'any' || sourceType === targetType;
     }, []);
 
-    // Initial sync from store to React Flow state
-    useEffect(() => {
-        if (rfNodes.length === 0 && nodes.length > 0) {
-            setRfNodes(nodes as unknown as Node[]);
+    const handleSelectionChange = useCallback(({ nodes: selected }: { nodes: Node[] }) => {
+        const first = selected[0];
+        if (first) {
+            setSelectedNodeId(first.id);
+            setRightInspector(true);
+        } else {
+            setSelectedNodeId(null);
         }
-    }, [nodes, setRfNodes, rfNodes.length]);
+    }, [setSelectedNodeId, setRightInspector]);
 
-    useEffect(() => {
-        if (rfEdges.length === 0 && edges.length > 0) {
-            setRfEdges(edges);
-        }
-    }, [edges, setRfEdges, rfEdges.length]);
-
-    const handleAddFirstNode = () => {
+    const handleAddFirstNode = useCallback(() => {
         const newNode: Node = {
-            id: `node-${Date.now()}`,
+            id: `ledgerSource-${Date.now()}`,
             type: 'ledgerSource',
             position: { x: window.innerWidth / 2 - 100, y: window.innerHeight / 2 - 100 },
             data: { label: 'New Ledger Source' }
         };
-        setRfNodes(nds => [...nds, newNode]);
-    };
+        setRfNodes((nds) => [...nds, newNode]);
+    }, [setRfNodes]);
 
-    // Show empty state guide when no nodes
-    if (nodes.length === 0 && edges.length === 0 && !isLoading) {
+    // --- RENDER ---
+
+    if (rfNodes.length === 0 && !isLoading && loadedRef.current) {
         return (
             <div className="w-full h-full bg-zinc-950 relative">
                 <EmptyCanvasGuide onAddFirstNode={handleAddFirstNode} />
                 <ReactFlow
-                    nodes={[]}
-                    edges={[]}
+                    nodes={rfNodes}
+                    edges={rfEdges}
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
-                    onViewportChange={onViewportChange}
-                    isValidConnection={isValidConnection}
-                    panActivationKeyCode="Space"
-                    selectionKeyCode="Shift"
-                    fitView
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
-                    defaultEdgeOptions={{ type: 'data' }}
+                    defaultEdgeOptions={defaultEdgeOptions}
+                    fitView
                     className="bg-zinc-950"
                 >
+                    <NodeToolbar />
                     <Background color="#3f3f46" gap={20} />
                     <Controls className="bg-zinc-800 border-zinc-700" />
-                    <MiniMap
-                        nodeColor="#10b981"
-                        maskColor="rgba(24, 24, 27, 0.8)"
-                        className="bg-zinc-900 border-zinc-800"
-                    />
                 </ReactFlow>
             </div>
         );
     }
 
     return (
-        <div className="w-full h-full bg-zinc-950">
+        <div className="w-full h-full bg-zinc-950 relative">
             <ReactFlow
                 nodes={rfNodes}
                 edges={rfEdges}
@@ -243,15 +190,17 @@ export const NodeCanvas: React.FC = () => {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onViewportChange={onViewportChange}
+                onSelectionChange={handleSelectionChange}
                 isValidConnection={isValidConnection}
-                defaultViewport={viewport}
-                panActivationKeyCode="Space"
-                selectionKeyCode="Shift"
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
-                defaultEdgeOptions={{ type: 'data' }}
+                defaultEdgeOptions={defaultEdgeOptions}
+                defaultViewport={initialViewport}
+                panActivationKeyCode="Space"
+                selectionKeyCode="Shift"
                 className="bg-zinc-950"
             >
+                <NodeToolbar />
                 <Background color="#3f3f46" gap={20} />
                 <Controls className="bg-zinc-800 border-zinc-700" />
                 <MiniMap
@@ -260,6 +209,14 @@ export const NodeCanvas: React.FC = () => {
                     className="bg-zinc-900 border-zinc-800"
                 />
             </ReactFlow>
+
+            {isLoading && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                    <div className="bg-zinc-900 border border-zinc-700 px-4 py-2 rounded-lg text-zinc-400 text-sm animate-pulse">
+                        Synchronizing Graph...
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

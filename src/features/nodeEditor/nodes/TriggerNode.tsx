@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
-import { useProfileStore } from '../../../stores/useProfileStore';
+import { useNodeStore } from '../../../stores/useNodeStore';
 import { Zap, AlertTriangle, CheckCircle } from 'lucide-react';
 
 export interface TriggerNodeData {
@@ -16,33 +16,30 @@ export interface TriggerNodeData {
 
 /**
  * Trigger Node - Listens for ledger events (On-Create / On-Edit)
- * Story 4-4: Autonomous Triggers
+ * Refactored to be passive (Story 4-4 cleanup)
  */
-export const TriggerNode: React.FC<NodeProps> = React.memo(({ data, selected }) => {
-    const { schemas, fetchSchemas } = useLedgerStore();
-    const { activeProfileId } = useProfileStore();
-    const [isConfigOpen, setIsConfigOpen] = useState(true);
+export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
+    const { schemas } = useLedgerStore();
+    const { updateNodeData } = useNodeStore();
+    const [isConfigOpen, setIsConfigOpen] = useState(false);
 
     const nodeData = data as unknown as TriggerNodeData;
 
-    // Fetch schemas on mount
-    useEffect(() => {
-        if (activeProfileId && schemas.length === 0) {
-            fetchSchemas(activeProfileId);
-        }
-    }, [activeProfileId, schemas.length, fetchSchemas]);
-
-    const handleLedgerChange = useCallback((ledgerId: string) => {
+    const handleLedgerChange = (ledgerId: string) => {
         const schema = schemas.find(s => s._id === ledgerId);
         if (schema) {
-            data.ledgerId = ledgerId;
-            data.ledgerName = schema.name;
+            updateNodeData(id, {
+                ledgerId,
+                ledgerName: schema.name,
+                status: 'armed',
+                error: undefined
+            });
         }
-    }, [schemas, data]);
+    };
 
-    const handleEventTypeChange = useCallback((eventType: 'on-create' | 'on-edit') => {
-        data.eventType = eventType;
-    }, [data]);
+    const handleEventTypeChange = (eventType: 'on-create' | 'on-edit') => {
+        updateNodeData(id, { eventType });
+    };
 
     const getStatusIcon = () => {
         switch (nodeData.status) {
@@ -66,7 +63,7 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ data, selected }) 
             case 'error':
                 return `Error: ${nodeData.error || 'Unknown'}`;
             default:
-                return 'Unknown';
+                return 'Armed';
         }
     };
 
@@ -117,8 +114,8 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ data, selected }) 
                             <button
                                 onClick={() => handleEventTypeChange('on-create')}
                                 className={`flex-1 px-2 py-1.5 text-xs rounded border transition-colors ${nodeData.eventType === 'on-create'
-                                        ? 'bg-emerald-600 border-emerald-500 text-white'
-                                        : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                                    : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
                                     }`}
                             >
                                 On Create
@@ -126,8 +123,8 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ data, selected }) 
                             <button
                                 onClick={() => handleEventTypeChange('on-edit')}
                                 className={`flex-1 px-2 py-1.5 text-xs rounded border transition-colors ${nodeData.eventType === 'on-edit'
-                                        ? 'bg-emerald-600 border-emerald-500 text-white'
-                                        : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                                    : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
                                     }`}
                             >
                                 On Edit
@@ -141,8 +138,8 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ data, selected }) 
             <div className="px-3 py-2 bg-zinc-800/30">
                 <div className="text-xs text-zinc-500 mb-1">Status</div>
                 <div className={`text-sm ${nodeData.status === 'error' ? 'text-red-400' :
-                        nodeData.status === 'fired' ? 'text-amber-400' :
-                            'text-emerald-400'
+                    nodeData.status === 'fired' ? 'text-amber-400' :
+                        'text-emerald-400'
                     }`}>
                     {getStatusText()}
                 </div>

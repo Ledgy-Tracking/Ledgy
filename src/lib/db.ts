@@ -33,13 +33,17 @@ export class Database {
         return await this.db.put(doc);
     }
 
-    async getDocument<T>(id: string): Promise<T & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta> {
-        return await this.db.get<T>(id);
+    async getDocument<T>(id: string, options?: PouchDB.Core.GetOptions): Promise<T & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta> {
+        return await this.db.get<T>(id, options || {});
     }
 
     async hardDeleteDocument(id: string): Promise<PouchDB.Core.Response> {
         const doc = await this.db.get(id);
         return await this.db.remove(doc);
+    }
+
+    async removeRevision(id: string, rev: string): Promise<PouchDB.Core.Response> {
+        return await this.db.remove(id, rev);
     }
 
     async updateDocument<T extends object>(id: string, data: T): Promise<PouchDB.Core.Response> {
@@ -303,14 +307,27 @@ export async function create_schema(
     name: string,
     fields: SchemaField[],
     profileId: string,
-    projectId: string
+    projectId: string,
+    encryptionKey?: CryptoKey
 ): Promise<string> {
-    const response = await db.createDocument<LedgerSchema>('schema', {
-        name,
+    const schemaData: any = {
         fields,
         profileId,
         projectId,
-    });
+    };
+
+    if (encryptionKey) {
+        const result = await encryptPayload(encryptionKey, name);
+        schemaData.name_enc = {
+            iv: result.iv,
+            ciphertext: Array.from(new Uint8Array(result.ciphertext))
+        };
+        schemaData.name = `[Encrypted]`;
+    } else {
+        schemaData.name = name;
+    }
+
+    const response = await db.createDocument<LedgerSchema>('schema', schemaData);
     if (!response.ok) {
         throw new Error('Failed to create schema document');
     }
@@ -329,14 +346,27 @@ export async function update_schema(
     db: Database,
     schemaId: string,
     name: string,
-    fields: SchemaField[]
+    fields: SchemaField[],
+    encryptionKey?: CryptoKey
 ): Promise<void> {
     const schema = await db.getDocument<LedgerSchema>(schemaId);
-    await db.updateDocument(schemaId, {
-        name,
+    const updateData: any = {
         fields,
         schemaVersion: schema.schemaVersion + 1,
-    });
+    };
+
+    if (encryptionKey) {
+        const result = await encryptPayload(encryptionKey, name);
+        updateData.name_enc = {
+            iv: result.iv,
+            ciphertext: Array.from(new Uint8Array(result.ciphertext))
+        };
+        updateData.name = `[Encrypted]`;
+    } else {
+        updateData.name = name;
+    }
+
+    await db.updateDocument(schemaId, updateData);
 }
 
 /**
@@ -344,9 +374,30 @@ export async function update_schema(
  * @param db - Profile database instance
  * @returns Array of schema documents
  */
-export async function list_schemas(db: Database): Promise<LedgerSchema[]> {
+export async function list_schemas(
+    db: Database,
+    encryptionKey?: CryptoKey
+): Promise<LedgerSchema[]> {
     const schemaDocs = await db.getAllDocuments<LedgerSchema>('schema');
-    return schemaDocs.filter(doc => !doc.isDeleted);
+    const activeSchemas = schemaDocs.filter(doc => !doc.isDeleted);
+
+    if (encryptionKey) {
+        return await Promise.all(activeSchemas.map(async schema => {
+            if (schema.name_enc) {
+                try {
+                    const iv = new Uint8Array(schema.name_enc.iv);
+                    const ciphertext = new Uint8Array(schema.name_enc.ciphertext).buffer;
+                    const name = await decryptPayload(encryptionKey, iv, ciphertext);
+                    return { ...schema, name };
+                } catch (e) {
+                    console.error('Failed to decrypt schema name:', schema._id, e);
+                }
+            }
+            return schema;
+        }));
+    }
+
+    return activeSchemas;
 }
 
 /**
@@ -384,14 +435,30 @@ export async function create_entry(
     schemaId: string,
     ledgerId: string,
     data: Record<string, unknown>,
-    profileId: string
+    profileId: string,
+    encryptionKey?: CryptoKey
 ): Promise<string> {
-    const response = await db.createDocument<LedgerEntry>('entry', {
+    const entryData: any = {
         schemaId,
         ledgerId,
-        data,
         profileId,
-    });
+    };
+
+    if (encryptionKey) {
+        // Zero-knowledge sync: Encrypt payload before storage
+        const result = await encryptPayload(encryptionKey, JSON.stringify(data));
+        entryData.data_enc = {
+            iv: result.iv,
+            ciphertext: Array.from(new Uint8Array(result.ciphertext))
+        };
+        // Keep an empty data object for type compatibility
+        entryData.data = {};
+    } else {
+        entryData.data = data;
+    }
+
+    const response = await db.createDocument<LedgerEntry>('entry', entryData);
+
     if (!response.ok) {
         throw new Error('Failed to create entry document');
     }
@@ -403,13 +470,27 @@ export async function create_entry(
  * @param db - Profile database instance
  * @param entryId - Entry document ID
  * @param data - Updated entry data
+ * @param encryptionKey - Optional AES-GCM encryption key
  */
 export async function update_entry(
     db: Database,
     entryId: string,
-    data: Record<string, unknown>
+    data: Record<string, unknown>,
+    encryptionKey?: CryptoKey
 ): Promise<void> {
-    await db.updateDocument(entryId, { data });
+    if (encryptionKey) {
+        const result = await encryptPayload(encryptionKey, JSON.stringify(data));
+        const entryUpdate: any = {
+            data_enc: {
+                iv: result.iv,
+                ciphertext: Array.from(new Uint8Array(result.ciphertext))
+            },
+            data: {} // Clear plaintext data if previously present
+        };
+        await db.updateDocument(entryId, entryUpdate);
+    } else {
+        await db.updateDocument(entryId, { data });
+    }
 }
 
 /**
@@ -419,9 +500,14 @@ export async function update_entry(
  * @param ledgerId - Ledger identifier to filter by
  * @returns Array of entry documents (excluding soft-deleted)
  */
-export async function list_entries(db: Database, ledgerId: string): Promise<LedgerEntry[]> {
+export async function list_entries(
+    db: Database,
+    ledgerId: string,
+    encryptionKey?: CryptoKey
+): Promise<LedgerEntry[]> {
     const entryDocs = await db.getAllDocuments<LedgerEntry>('entry');
-    return entryDocs.filter(doc => !doc.isDeleted && doc.ledgerId === ledgerId);
+    const filtered = entryDocs.filter(doc => !doc.isDeleted && doc.ledgerId === ledgerId);
+    return encryptionKey ? await decryptLedgerEntries(filtered, encryptionKey) : filtered;
 }
 
 /**
@@ -429,11 +515,17 @@ export async function list_entries(db: Database, ledgerId: string): Promise<Ledg
  * Used for ghost reference detection.
  * @param db - Profile database instance
  * @param ledgerId - Ledger identifier to filter by
+ * @param encryptionKey - Optional encryption key
  * @returns Array of all entry documents (including soft-deleted)
  */
-export async function list_all_entries(db: Database, ledgerId: string): Promise<LedgerEntry[]> {
+export async function list_all_entries(
+    db: Database,
+    ledgerId: string,
+    encryptionKey?: CryptoKey
+): Promise<LedgerEntry[]> {
     const entryDocs = await db.getAllDocuments<LedgerEntry>('entry');
-    return entryDocs.filter(doc => doc.ledgerId === ledgerId);
+    const filtered = entryDocs.filter(doc => doc.ledgerId === ledgerId);
+    return encryptionKey ? await decryptLedgerEntries(filtered, encryptionKey) : filtered;
 }
 
 /**
@@ -445,10 +537,15 @@ export async function list_all_entries(db: Database, ledgerId: string): Promise<
  */
 export async function find_entries_with_relation_to(
     db: Database,
-    targetEntryId: string
+    targetEntryId: string,
+    encryptionKey?: CryptoKey
 ): Promise<LedgerEntry[]> {
     const entryDocs = await db.getAllDocuments<LedgerEntry>('entry');
-    return entryDocs.filter(doc => {
+    const decryptedDocs = encryptionKey
+        ? await decryptLedgerEntries(entryDocs, encryptionKey)
+        : entryDocs;
+
+    return decryptedDocs.filter(doc => {
         if (doc.isDeleted) return false;
 
         // Check each field in the entry's data
@@ -463,6 +560,47 @@ export async function find_entries_with_relation_to(
         }
         return false;
     });
+}
+
+/**
+ * Helper to decrypt a batch of ledger entries.
+ */
+export async function decryptLedgerEntries(
+    entries: LedgerEntry[],
+    encryptionKey: CryptoKey
+): Promise<LedgerEntry[]> {
+    const result: LedgerEntry[] = [];
+    for (const entry of entries) {
+        result.push(await decryptLedgerEntry(entry, encryptionKey));
+    }
+    return result;
+}
+
+/**
+ * Helper to decrypt a single ledger entry.
+ */
+export async function decryptLedgerEntry(
+    entry: LedgerEntry,
+    encryptionKey: CryptoKey
+): Promise<LedgerEntry> {
+    if (entry.data_enc) {
+        try {
+            const iv = new Uint8Array(entry.data_enc.iv);
+            const ciphertext = new Uint8Array(entry.data_enc.ciphertext).buffer;
+            const decryptedJson = await decryptPayload(encryptionKey, iv, ciphertext);
+            return {
+                ...entry,
+                data: JSON.parse(decryptedJson)
+            };
+        } catch (e) {
+            console.error('Failed to decrypt entry:', entry._id, e);
+            return {
+                ...entry,
+                data: { error: 'Decryption failed' }
+            };
+        }
+    }
+    return entry;
 }
 
 /**
@@ -552,29 +690,44 @@ export async function save_canvas(
     nodes: CanvasNode[],
     edges: CanvasEdge[],
     viewport: Viewport,
-    profileId: string
+    profileId: string,
+    encryptionKey?: CryptoKey
 ): Promise<string> {
     const canvasDocId = `canvas:${canvasId}`;
+    const canvasData: any = {
+        viewport,
+        profileId,
+        canvasId,
+    };
+
+    if (encryptionKey) {
+        const nodesResult = await encryptPayload(encryptionKey, JSON.stringify(nodes));
+        canvasData.nodes_enc = {
+            iv: nodesResult.iv,
+            ciphertext: Array.from(new Uint8Array(nodesResult.ciphertext))
+        };
+
+        const edgesResult = await encryptPayload(encryptionKey, JSON.stringify(edges));
+        canvasData.edges_enc = {
+            iv: edgesResult.iv,
+            ciphertext: Array.from(new Uint8Array(edgesResult.ciphertext))
+        };
+        canvasData.nodes = [];
+        canvasData.edges = [];
+    } else {
+        canvasData.nodes = nodes;
+        canvasData.edges = edges;
+    }
 
     try {
         // Try to get existing canvas
         await db.getDocument<NodeCanvas>(canvasDocId);
-        await db.updateDocument(canvasDocId, {
-            nodes,
-            edges,
-            viewport,
-        });
+        await db.updateDocument(canvasDocId, canvasData);
         return canvasDocId;
     } catch (e: any) {
         if (e.status === 404) {
             // Canvas doesn't exist, create it
-            const response = await db.createDocument<NodeCanvas>('canvas', {
-                profileId,
-                canvasId,
-                nodes,
-                edges,
-                viewport,
-            });
+            const response = await db.createDocument<NodeCanvas>('canvas', canvasData);
             return response.id;
         }
         throw e;
@@ -589,14 +742,29 @@ export async function save_canvas(
  */
 export async function load_canvas(
     db: Database,
-    canvasId: string
+    canvasId: string,
+    encryptionKey?: CryptoKey
 ): Promise<NodeCanvas | null> {
     try {
-        return await db.getDocument<NodeCanvas>(`canvas:${canvasId}`);
-    } catch (e: any) {
-        if (e.status === 404) {
-            return null;
+        const doc = await db.getDocument<NodeCanvas>(`canvas:${canvasId}`);
+
+        if (encryptionKey) {
+            if (doc.nodes_enc) {
+                const iv = new Uint8Array(doc.nodes_enc.iv);
+                const ciphertext = new Uint8Array(doc.nodes_enc.ciphertext).buffer;
+                const nodesJson = await decryptPayload(encryptionKey, iv, ciphertext);
+                doc.nodes = JSON.parse(nodesJson);
+            }
+            if (doc.edges_enc) {
+                const iv = new Uint8Array(doc.edges_enc.iv);
+                const ciphertext = new Uint8Array(doc.edges_enc.ciphertext).buffer;
+                const edgesJson = await decryptPayload(encryptionKey, iv, ciphertext);
+                doc.edges = JSON.parse(edgesJson);
+            }
         }
+        return doc;
+    } catch (e: any) {
+        if (e.status === 404) return null;
         throw e;
     }
 }
@@ -625,29 +793,39 @@ export async function save_dashboard_layout(
     db: Database,
     dashboardId: string,
     widgets: WidgetConfig[],
-    profileId: string
+    profileId: string,
+    encryptionKey?: CryptoKey
 ): Promise<string> {
     const dashboardDocId = `dashboard:${dashboardId}`;
+    const dashboardData: any = {
+        profileId,
+        dashboardId,
+        layout: {
+            columns: 4,
+            rows: 10,
+        },
+    };
+
+    if (encryptionKey) {
+        const result = await encryptPayload(encryptionKey, JSON.stringify(widgets));
+        dashboardData.widgets_enc = {
+            iv: result.iv,
+            ciphertext: Array.from(new Uint8Array(result.ciphertext))
+        };
+        dashboardData.widgets = [];
+    } else {
+        dashboardData.widgets = widgets;
+    }
 
     try {
         // Try to get existing dashboard
         await db.getDocument<DashboardLayout>(dashboardDocId);
-        await db.updateDocument(dashboardDocId, {
-            widgets,
-        });
+        await db.updateDocument(dashboardDocId, dashboardData);
         return dashboardDocId;
     } catch (e: any) {
         if (e.status === 404) {
             // Dashboard doesn't exist, create it
-            const response = await db.createDocument<DashboardLayout>('dashboard', {
-                profileId,
-                dashboardId,
-                widgets,
-                layout: {
-                    columns: 4,
-                    rows: 10,
-                },
-            });
+            const response = await db.createDocument<DashboardLayout>('dashboard', dashboardData);
             return response.id;
         }
         throw e;
@@ -663,14 +841,20 @@ export async function save_dashboard_layout(
  */
 export async function load_dashboard_layout(
     db: Database,
-    dashboardId: string
+    dashboardId: string,
+    encryptionKey?: CryptoKey
 ): Promise<DashboardLayout | null> {
     try {
-        return await db.getDocument<DashboardLayout>(`dashboard:${dashboardId}`);
-    } catch (e: any) {
-        if (e.status === 404) {
-            return null;
+        const doc = await db.getDocument<DashboardLayout>(`dashboard:${dashboardId}`);
+        if (encryptionKey && doc.widgets_enc) {
+            const iv = new Uint8Array(doc.widgets_enc.iv);
+            const ciphertext = new Uint8Array(doc.widgets_enc.ciphertext).buffer;
+            const widgetsJson = await decryptPayload(encryptionKey, iv, ciphertext);
+            doc.widgets = JSON.parse(widgetsJson);
         }
+        return doc;
+    } catch (e: any) {
+        if (e.status === 404) return null;
         throw e;
     }
 }

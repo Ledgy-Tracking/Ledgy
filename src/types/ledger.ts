@@ -21,6 +21,10 @@ export interface SchemaField {
 export interface LedgerSchema extends LedgyDocument {
     type: 'schema';
     name: string;
+    name_enc?: {
+        iv: number[];
+        ciphertext: number[];
+    };
     fields: SchemaField[];
     profileId: string;
     projectId: string; // Hierarchy: Profile -> Project -> Ledger
@@ -34,6 +38,10 @@ export interface LedgerEntry extends LedgyDocument {
     schemaId: string;
     ledgerId: string;
     data: Record<string, unknown>;
+    data_enc?: {
+        iv: number[];
+        ciphertext: number[];
+    };
     profileId: string;
 }
 

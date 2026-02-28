@@ -1,7 +1,7 @@
 import React from 'react';
 import { Cloud, CloudOff, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 
-export type SyncState = 'synced' | 'syncing' | 'pending' | 'offline' | 'conflict';
+export type SyncState = 'synced' | 'syncing' | 'pending' | 'offline' | 'conflict' | 'error';
 
 interface SyncStatusBadgeProps {
     state: SyncState;
@@ -78,6 +78,13 @@ function getSyncStateConfig(state: SyncState) {
                 label: 'Conflicts',
                 bgClass: 'bg-amber-900/30',
                 textClass: 'text-amber-400',
+                icon: AlertTriangle,
+            };
+        case 'error':
+            return {
+                label: 'Sync Error',
+                bgClass: 'bg-red-900/30',
+                textClass: 'text-red-400',
                 icon: AlertTriangle,
             };
     }
