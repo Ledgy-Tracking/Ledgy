@@ -30,31 +30,36 @@ so that **data from different clients never mixes and I can switch between profi
   - [ ] Implement database naming convention
   - [ ] Create `_profiles` metadata database
   - [ ] Implement profile metadata schema
+  - [ ] Sanitize profile names for DB-safe identifiers (MEDIUM - Sage)
 - [ ] Task 2: Implement profile CRUD operations (AC: #4, #5)
   - [ ] Create profile (with dedicated DB)
   - [ ] Read profile list
   - [ ] Update profile metadata
-  - [ ] Delete profile (with DB cleanup)
+  - [ ] Delete profile (with DB cleanup - destroy, not clear) (HIGH - DB)
   - [ ] Validate profile name uniqueness
+  - [ ] Create default profile on first launch (MEDIUM - Amelia)
 - [ ] Task 3: Implement profile switching (AC: #6)
   - [ ] Unload current profile database
   - [ ] Load target profile database
   - [ ] Update active profile state
-  - [ ] Emit profile switch event
+  - [ ] Emit profile switch event for other stores (HIGH - Amelia)
 - [ ] Task 4: Create useProfileStore integration (AC: #7, #8)
   - [ ] Extend existing useProfileStore (Story 1-3)
   - [ ] Add profile CRUD actions
   - [ ] Add profile switching actions
   - [ ] Add loading states
   - [ ] Add error handling
+  - [ ] Add color/avatar for profile visual distinction (LOW - Winston)
 - [ ] Task 5: Write unit tests (AC: #7, #8)
   - [ ] Test profile creation with DB initialization
   - [ ] Test profile list retrieval
   - [ ] Test profile update
-  - [ ] Test profile deletion with DB cleanup
-  - [ ] Test profile switching
+  - [ ] Test profile deletion with DB destruction (HIGH - DB)
+  - [ ] Test profile switching with event emission
   - [ ] Test database isolation
   - [ ] Test error handling
+  - [ ] Test default profile creation
+  - [ ] Test concurrent profile operations (MEDIUM - Murat)
 - [ ] Task 6: Verify TypeScript and integration (AC: #9, #10)
   - [ ] TypeScript strict mode: no errors
   - [ ] Integration with Story 1-5 PouchDB wrapper
