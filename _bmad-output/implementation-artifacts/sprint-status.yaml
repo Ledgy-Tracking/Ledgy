@@ -52,7 +52,7 @@ development_status:
   1-9-global-app-settings-store: done
   1-10-github-actions-cicd-automations: done
   1-11-auth-rate-limiting-escalating-delays: done
-  epic-1-retrospective: optional
+  epic-1-retrospective: done
 
   epic-2: in-progress
   2-1-profile-db-segregation-logic: backlog
