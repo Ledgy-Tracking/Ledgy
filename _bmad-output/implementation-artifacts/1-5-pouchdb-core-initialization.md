@@ -38,17 +38,20 @@ so that **all data is stored locally with the correct naming conventions and can
 - [ ] Task 3: Implement ghost reference pattern (AC: #4)
   - [ ] Add `isDeleted` and `deletedAt` fields to document interface
   - [ ] Create softDelete function that marks documents without hard deletion
+  - [ ] Create hardDelete function for GDPR "right to be forgotten" (HIGH priority)
   - [ ] Create query helpers that filter out soft-deleted documents by default
   - [ ] Add option to include deleted documents when needed
 - [ ] Task 4: Create profile database functions (AC: #5)
   - [ ] Implement `createProfileDb(profileId: string)` function
-  - [ ] Implement `deleteProfileDb(profileId: string)` function
+  - [ ] Implement `deleteProfileDb(profileId: string)` function with full cleanup
   - [ ] Implement `getProfileDb(profileId: string)` singleton accessor
   - [ ] Add database existence check function
+  - [ ] Ensure true isolation between profile databases (no cross-contamination)
 - [ ] Task 5: Add error handling integration (AC: #10)
   - [ ] Wrap all PouchDB operations in try/catch
   - [ ] Dispatch errors to useErrorStore on failures
   - [ ] Add user-friendly error messages for common failures
+  - [ ] Add explicit error for reserved field violations (_ prefix fields)
 - [ ] Task 6: Write unit tests (AC: #7)
   - [ ] Test document ID pattern validation
   - [ ] Test envelope field enforcement
@@ -152,9 +155,13 @@ PouchDB.plugin(memoryAdapter);
 1. ✅ Document ID follows {type}:{uuid} pattern
 2. ✅ Envelope fields automatically added to new documents
 3. ✅ Soft delete sets isDeleted and deletedAt
-4. ✅ Queries exclude deleted documents by default
-5. ✅ Profile databases are isolated per profile ID
-6. ✅ Errors dispatch to useErrorStore
+4. ✅ Hard delete permanently removes document (GDPR)
+5. ✅ Queries exclude deleted documents by default
+6. ✅ Profile databases are isolated per profile ID
+7. ✅ Errors dispatch to useErrorStore
+8. ✅ PouchDB plugins (memory adapter) properly registered
+9. ✅ Reserved field violations (_ prefix) throw explicit error
+10. ✅ Database cleanup on profile deletion prevents memory leaks
 
 ### Git Branch Strategy
 
