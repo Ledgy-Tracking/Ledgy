@@ -48,7 +48,7 @@ development_status:
   1-5-pouchdb-core-initialization: done
   1-6-totp-registration-ui: done
   1-7-webcrypto-aes-256-engine: done
-  1-8-auth-guard-session-routing: ready-for-dev
+  1-8-auth-guard-session-routing: in-progress
   1-9-global-app-settings-store: backlog
   1-10-github-actions-cicd-automations: backlog
   1-11-auth-rate-limiting-escalating-delays: backlog
