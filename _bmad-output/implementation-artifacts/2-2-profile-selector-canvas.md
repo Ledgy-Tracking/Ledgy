@@ -290,6 +290,21 @@ BMad Method dev-story workflow
 - Profile cards support keyboard navigation (Tab, Enter, Space)
 - Active profile highlighted with animated indicator
 - Density setting affects grid gap (compact: gap-4, comfortable: gap-6)
+- Route constants extracted for maintainability
+- Barrel exports created for clean imports
+
+**Code Review Follow-ups Addressed:**
+
+✅ MEDIUM Priority (3/3 fixed):
+- Added ErrorBoundary documentation note (route-level wrapping)
+- Extracted dashboard route to constant: DEFAULT_REDIRECT_ROUTE
+- Added CSS variables for density gap with fallback
+
+✅ LOW Priority (4/4 fixed):
+- Created barrel export file: src/features/profile/index.ts
+- Documented ProfileMetadata extension with @remarks
+- Test spy cleanup verified (already correct)
+- Added git branch note to story (in Dev Notes)
 
 ### File List
 
@@ -302,11 +317,12 @@ BMad Method dev-story workflow
 - `src/features/profile/ProfileCard.test.tsx` - ProfileCard tests (14 tests)
 - `src/features/profile/ProfileSelectorCanvas.tsx` - Profile grid canvas
 - `src/features/profile/ProfileSelectorCanvas.test.tsx` - Canvas tests (14 tests)
+- `src/features/profile/index.ts` - Barrel exports
 
 **Modified Types:**
-- `src/types/profile.ts` - Extended ProfileMetadata with color, avatar, lastOpened
+- `src/types/profile.ts` - Extended ProfileMetadata with color, avatar, lastOpened (documented)
 
-**Total:** 9 files created/modified, 46 tests passing
+**Total:** 10 files created/modified, 46 tests passing
 
 ---
 

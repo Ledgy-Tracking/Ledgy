@@ -1,3 +1,12 @@
+/**
+ * Profile metadata for display in UI components
+ * 
+ * @remarks
+ * - `color` and `avatar` are user-provided during profile creation (Story 2-3)
+ * - `lastOpened` is updated automatically when profile is selected
+ * - If `avatar` is not provided, first letter of `name` is used
+ * - If `color` is not provided, default gray is used
+ */
 export interface ProfileMetadata {
     id: string;
     name: string;
@@ -5,8 +14,8 @@ export interface ProfileMetadata {
     createdAt: string | number;
     updatedAt: string | number;
     lastOpened?: number; // Unix timestamp for last opened time
-    color?: string; // Tailwind CSS color class for avatar background
-    avatar?: string; // Initials or icon to display
+    color?: string; // Tailwind CSS color class for avatar background (e.g., 'bg-blue-500')
+    avatar?: string; // Initials or icon to display in avatar circle
     remoteSyncEndpoint?: string;
 }
 

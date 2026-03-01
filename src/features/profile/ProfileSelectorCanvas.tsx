@@ -7,6 +7,12 @@ import { ProfileCard } from './ProfileCard';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { LoadingSkeleton } from '../../components/ui/LoadingSkeleton';
 
+// Note: ErrorBoundary is applied at route level (Story 1-2 pattern)
+// This component assumes it's wrapped by <ErrorBoundary> in the route definition
+
+// Route constants
+const DEFAULT_REDIRECT_ROUTE = '/dashboard';
+
 interface ProfileSelectorCanvasProps {
     /** Optional callback when profile is selected */
     onProfileSelect?: (profileId: string) => void;
@@ -53,7 +59,7 @@ export function ProfileSelectorCanvas({
             onProfileSelect?.(profileId);
 
             // Navigate to home dashboard
-            navigate('/dashboard');
+            navigate(DEFAULT_REDIRECT_ROUTE);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to select profile';
             dispatchError(errorMessage, 'error');
@@ -147,11 +153,14 @@ export function ProfileSelectorCanvas({
                 Select Profile
             </h2>
             <div
-                className={`grid gap-${density === 'compact' ? '4' : '6'} ${
+                className={`grid ${
                     density === 'compact'
-                        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-                        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                        ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
+                        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
                 }`}
+                style={{
+                    gap: density === 'compact' ? 'var(--spacing-4, 1rem)' : 'var(--spacing-6, 1.5rem)',
+                }}
             >
                 {profiles.map((profile) => (
                     <ProfileCard
