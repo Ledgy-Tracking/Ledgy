@@ -2,6 +2,16 @@ import PouchDB from 'pouchdb';
 import { v4 as uuidv4 } from 'uuid';
 import { LedgyDocument, ProfileMetadata } from '../types/profile';
 import { decryptPayload, encryptPayload } from '../lib/crypto';
+import { useErrorStore } from '../stores/useErrorStore';
+
+// Validation: Reject fields starting with _ (reserved for PouchDB)
+function validateDocumentFields(doc: Partial<LedgyDocument>): void {
+    for (const key of Object.keys(doc)) {
+        if (key.startsWith('_') && !['_id', '_rev', '_deleted'].includes(key)) {
+            throw new Error(`Invalid field "${key}": Fields starting with "_" are reserved for PouchDB internal use`);
+        }
+    }
+}
 
 // We use the 'pouchdb-browser' which includes the IndexedDB adapter by default
 export class Database {
@@ -21,25 +31,75 @@ export class Database {
      * ID Scheme: {type}:{uuid}
      */
     async createDocument<T extends LedgyDocument>(type: string, data: Omit<T, keyof LedgyDocument>): Promise<PouchDB.Core.Response> {
-        const now = new Date().toISOString();
-        const doc: any = {
-            _id: `${type}:${uuidv4()}`,
-            type: type,
-            schemaVersion: 1,
-            createdAt: now,
-            updatedAt: now,
-            ...data,
-        };
-        return await this.db.put(doc);
+        try {
+            // Validate no reserved fields
+            validateDocumentFields(data as Partial<LedgyDocument>);
+
+            const now = new Date().toISOString();
+            const doc: any = {
+                _id: `${type}:${uuidv4()}`,
+                type: type,
+                schema_version: 1,
+                createdAt: now,
+                updatedAt: now,
+                ...data,
+            };
+            return await this.db.put(doc);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to create document';
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
+            throw error;
+        }
     }
 
     async getDocument<T>(id: string, options?: PouchDB.Core.GetOptions): Promise<T & PouchDB.Core.IdMeta & PouchDB.Core.GetMeta> {
-        return await this.db.get<T>(id, options || {});
+        try {
+            return await this.db.get<T>(id, options || {});
+        } catch (error) {
+            if ((error as PouchDB.Core.Error).status === 404) {
+                return null as any;
+            }
+            const errorMessage = error instanceof Error ? error.message : 'Failed to get document';
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
+            throw error;
+        }
+    }
+
+    /**
+     * Soft delete a document (ghost reference pattern)
+     * Marks document as deleted without removing from database
+     */
+    async softDeleteDocument(id: string): Promise<PouchDB.Core.Response> {
+        try {
+            const doc = await this.db.get<LedgyDocument>(id);
+            const updatedDoc = {
+                ...doc,
+                isDeleted: true,
+                deletedAt: new Date().toISOString(),
+            };
+            return await this.db.put(updatedDoc);
+        } catch (error) {
+            if ((error as PouchDB.Core.Error).status === 404) {
+                throw new Error(`Document ${id} not found`);
+            }
+            const errorMessage = error instanceof Error ? error.message : 'Failed to soft delete document';
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
+            throw error;
+        }
     }
 
     async hardDeleteDocument(id: string): Promise<PouchDB.Core.Response> {
-        const doc = await this.db.get(id);
-        return await this.db.remove(doc);
+        try {
+            const doc = await this.db.get(id);
+            return await this.db.remove(doc);
+        } catch (error) {
+            if ((error as PouchDB.Core.Error).status === 404) {
+                throw new Error(`Document ${id} not found`);
+            }
+            const errorMessage = error instanceof Error ? error.message : 'Failed to hard delete document';
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
+            throw error;
+        }
     }
 
     async removeRevision(id: string, rev: string): Promise<PouchDB.Core.Response> {
@@ -50,7 +110,7 @@ export class Database {
         const existing = await this.db.get<LedgyDocument>(id);
 
         // Prevent overwriting immutable envelope fields
-        const { _id, _rev, createdAt, schemaVersion, type, ...restData } = data as any;
+        const { _id, _rev, createdAt, schema_version, type, ...restData } = data as any;
 
         const updatedDoc = {
             ...existing,
@@ -58,6 +118,30 @@ export class Database {
             updatedAt: new Date().toISOString(),
         };
         return await this.db.put(updatedDoc);
+    }
+
+    /**
+     * Query documents, excluding soft-deleted by default
+     */
+    async queryDocuments<T>(options?: {
+        type?: string;
+        includeDeleted?: boolean;
+    }): Promise<T[]> {
+        const result = await this.db.allDocs({
+            include_docs: true,
+            startkey: options?.type ? `${options.type}:` : undefined,
+            endkey: options?.type ? `${options.type}:\ufff0` : undefined,
+        });
+        return result.rows
+            .map(row => row.doc as unknown as T)
+            .filter(doc => {
+                if (!doc) return false;
+                // Exclude soft-deleted unless explicitly included
+                if (!options?.includeDeleted && (doc as any).isDeleted) {
+                    return false;
+                }
+                return true;
+            });
     }
 
     async getAllDocuments<T>(type?: string): Promise<T[]> {
