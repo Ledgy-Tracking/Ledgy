@@ -51,7 +51,7 @@ development_status:
   1-8-auth-guard-session-routing: done
   1-9-global-app-settings-store: done
   1-10-github-actions-cicd-automations: done
-  1-11-auth-rate-limiting-escalating-delays: backlog
+  1-11-auth-rate-limiting-escalating-delays: ready-for-dev
   epic-1-retrospective: optional
 
   epic-2: in-progress
