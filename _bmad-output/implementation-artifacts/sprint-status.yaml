@@ -50,7 +50,7 @@ development_status:
   1-7-webcrypto-aes-256-engine: done
   1-8-auth-guard-session-routing: done
   1-9-global-app-settings-store: done
-  1-10-github-actions-cicd-automations: ready-for-dev
+  1-10-github-actions-cicd-automations: in-progress
   1-11-auth-rate-limiting-escalating-delays: backlog
   epic-1-retrospective: optional
 
