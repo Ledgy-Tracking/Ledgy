@@ -22,6 +22,7 @@ import { AppShell } from "./features/shell/AppShell";
 
 function App() {
   const theme = useUIStore((state) => state.theme);
+  const density = useUIStore((state) => state.density);
 
   useEffect(() => {
     const html = window.document.documentElement;
@@ -39,6 +40,18 @@ function App() {
       html.style.colorScheme = 'light';
     }
   }, [theme]);
+
+  // Apply density class to body
+  useEffect(() => {
+    const body = window.document.body;
+    if (density === 'compact') {
+      body.classList.add('density-compact');
+      body.classList.remove('density-comfortable');
+    } else {
+      body.classList.add('density-comfortable');
+      body.classList.remove('density-compact');
+    }
+  }, [density]);
 
   return (
     <>
