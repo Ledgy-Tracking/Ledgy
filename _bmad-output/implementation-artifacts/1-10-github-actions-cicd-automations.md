@@ -29,25 +29,28 @@ so that **code changes are automatically tested, built, and deployed with native
   - [ ] Create `.github/workflows/ci.yml`
   - [ ] Trigger on: push to main, pull_request
   - [ ] Setup Node.js environment
-  - [ ] Install dependencies with caching
+  - [ ] Install dependencies with caching (npm and cargo)
   - [ ] Run TypeScript type-check
   - [ ] Run ESLint/linting
-  - [ ] Run Vitest test suite
+  - [ ] Run Vitest test suite with coverage (80% threshold - MEDIUM Murat)
+  - [ ] Run security scans: npm audit, cargo audit (HIGH - Sage)
   - [ ] Upload coverage report
 - [ ] Task 2: Create CD workflow (AC: #2, #4, #5, #6)
   - [ ] Create `.github/workflows/cd.yml`
   - [ ] Trigger on: git tag push (v*.*.*)
-  - [ ] Build for Windows (.exe)
+  - [ ] Build for Windows (.exe/.msi)
   - [ ] Build for macOS (.dmg)
-  - [ ] Build for Linux (.AppImage)
+  - [ ] Build for Linux (.AppImage/.deb)
   - [ ] Configure artifact retention (30 days)
   - [ ] Upload build artifacts to GitHub Releases
+  - [ ] Pin all action versions (HIGH - Sage)
 - [ ] Task 3: Configure build size verification (AC: #7)
   - [ ] Add build size check script
   - [ ] Fail CI if installer >100MB
   - [ ] Report build sizes in workflow output
 - [ ] Task 4: Optimize CI performance (AC: #10)
   - [ ] Configure npm cache
+  - [ ] Configure cargo/Rust cache (MEDIUM - Flash)
   - [ ] Configure Vite build cache
   - [ ] Parallelize test jobs where possible
 - [ ] Task 5: Test workflows locally (optional)
