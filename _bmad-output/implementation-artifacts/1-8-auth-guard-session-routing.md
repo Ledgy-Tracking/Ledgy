@@ -28,19 +28,24 @@ so that **my sensitive data is never exposed to unauthorized users**.
 - [ ] Task 1: Verify/enhance AuthGuard (AC: #1, #2, #8, #9)
   - [ ] Review existing AuthGuard from Story 1-2
   - [ ] Ensure integration with useAuthStore.isUnlocked
+  - [ ] Check BOTH isUnlocked AND rememberMeExpiry (HIGH - Sage)
   - [ ] Verify redirect to /unlock for locked sessions
   - [ ] Verify redirect to /setup for unregistered users
   - [ ] Add error dispatch for auth failures
+  - [ ] Show 'Session expired' notification before redirect (MEDIUM - UXora)
 - [ ] Task 2: Implement session persistence (AC: #3, #5)
   - [ ] Verify zustand persist middleware configuration
   - [ ] Implement session expiry check on app init
   - [ ] Implement auto-lock on tab close (beforeunload event)
+  - [ ] Implement auto-lock on visibilitychange (HIGH - Sage/Chronos)
+  - [ ] Create useInactivityTimer hook (MEDIUM - Amelia)
   - [ ] Implement inactivity timer (configurable timeout)
 - [ ] Task 3: Implement session expiry (AC: #4)
   - [ ] Verify expiry options: 15m, 1h, 8h, 1d, 7d, 30d, never
-  - [ ] Check expiry on every protected route access
+  - [ ] Check expiry on EVERY protected route access (HIGH - Sage/Chronos)
   - [ ] Auto-logout when session expires
   - [ ] Show session expiry warning (optional UX enhancement)
+  - [ ] Use Date.now() for server-time independence (LOW - Chronos)
 - [ ] Task 4: Implement GuestGuard (AC: #10)
   - [ ] Create GuestGuard component for /setup and /unlock
   - [ ] Redirect authenticated users away from auth pages
@@ -48,10 +53,14 @@ so that **my sensitive data is never exposed to unauthorized users**.
 - [ ] Task 5: Write unit tests (AC: #6, #7)
   - [ ] Test AuthGuard redirects unauthenticated users
   - [ ] Test AuthGuard allows authenticated users
+  - [ ] Test AuthGuard checks session expiry
   - [ ] Test GuestGuard redirects authenticated users
-  - [ ] Test session expiry enforcement
+  - [ ] Test GuestGuard renders children when not authenticated
+  - [ ] Test session expiry enforcement (use fake timers)
   - [ ] Test remember-me persistence
-  - [ ] Test auto-lock on tab close
+  - [ ] Test auto-lock on beforeunload
+  - [ ] Test auto-lock on visibilitychange
+  - [ ] Test inactivity timer hook
 - [ ] Task 6: Verify TypeScript and integration (AC: #6, #8)
   - [ ] TypeScript strict mode: no errors
   - [ ] Error dispatch to useErrorStore
