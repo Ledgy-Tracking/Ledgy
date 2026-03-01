@@ -39,6 +39,7 @@ export const TOTPRegistrationWizard = () => {
         try {
             const rawSecret = generateSecret();
             const base32 = encodeSecret(rawSecret);
+            // Use generic account name - will be replaced with actual user email in Story 2.x
             const uri = generateTOTPURI(base32, 'user@ledgy.app', 'Ledgy');
             setSecret(base32);
             setTotpUri(uri);
