@@ -44,7 +44,7 @@ development_status:
   1-1-scaffold-dependency-tree: done
   1-2-react-router-error-boundaries: done
   1-3-zustand-store-topology: done
-  1-4-three-panel-shell-layout: ready-for-dev
+  1-4-three-panel-shell-layout: done
   1-5-pouchdb-core-initialization: backlog
   1-6-totp-registration-ui: backlog
   1-7-webcrypto-aes-256-engine: backlog
