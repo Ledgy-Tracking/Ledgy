@@ -42,17 +42,22 @@ so that **my sensitive information is protected with industry-standard encryptio
   - [ ] Use 100,000 iterations minimum (OWASP recommendation)
   - [ ] Generate random 16-byte salt per derivation
   - [ ] Integrate with remember-me + passphrase feature
+  - [ ] Add loading indicator for PBKDF2 operations (HIGH - Amelia/Flash)
 - [ ] Task 4: Add error handling integration (AC: #8)
   - [ ] Wrap all crypto operations in try/catch
   - [ ] Dispatch errors to useErrorStore
   - [ ] User-friendly error messages for crypto failures
+  - [ ] NEVER log keys or ciphertexts (HIGH - Sage)
 - [ ] Task 5: Write unit tests (AC: #5, #6)
   - [ ] Test AES key generation (256-bit)
   - [ ] Test encrypt/decrypt round-trip
   - [ ] Test HKDF key derivation from TOTP secret
   - [ ] Test PBKDF2 key derivation from passphrase
-  - [ ] Test IV uniqueness (never reuse IV with same key)
+  - [ ] Test IV uniqueness (statistical randomness test)
+  - [ ] Test GCM auth tag (tampering detection)
+  - [ ] Test decrypt fails with wrong key
   - [ ] Test error handling flows
+  - [ ] Add RFC 5869 HKDF test vectors (LOW - Murat)
 - [ ] Task 6: Verify TypeScript and security (AC: #5, #10)
   - [ ] TypeScript strict mode: no errors
   - [ ] Keys cleared from memory after use
