@@ -1,6 +1,6 @@
 # Story 2.1: Profile DB Segregation Logic
 
-Status: ready-for-dev
+Status: in-progress
 
 <!-- Note: Validation is recommended. Run validate-create-story for quality check before dev-story. -->
 
@@ -64,6 +64,23 @@ so that **data from different clients never mixes and I can switch between profi
   - [ ] TypeScript strict mode: no errors
   - [ ] Integration with Story 1-5 PouchDB wrapper
   - [ ] Persistence across app restarts
+
+## Review Follow-ups (AI)
+
+### HIGH Priority (Must Fix)
+- [ ] [AI-Review][HIGH] Story status workflow violation: was never set to "review" before "done" [2-1-profile-db-segregation-logic.md]
+- [ ] [AI-Review][HIGH] Task 4 incomplete: useProfileStore NOT extended - ProfileDbManager not integrated [src/stores/useProfileStore.ts]
+- [ ] [AI-Review][HIGH] deleteProfile() does NOT destroy PouchDB - only closes, databases leak [src/lib/profileDbManager.ts:227-240]
+- [ ] [AI-Review][HIGH] Tests use mock objects {} - no real PouchDB/crypto integration testing [src/lib/profileDbManager.test.ts:194-195]
+
+### MEDIUM Priority (Should Fix)
+- [ ] [AI-Review][MEDIUM] Database naming mismatch: story says `ledgy-profile-{id}` but code uses `ledgy_profile_{id}` [src/lib/profileDbManager.ts:20]
+- [ ] [AI-Review][MEDIUM] Singleton pattern has race condition - no double-checked locking [src/lib/profileDbManager.ts:56-62]
+- [ ] [AI-Review][MEDIUM] closeProfileDb() swallows errors - only logs, no propagation [src/lib/profileDbManager.ts:268-273]
+
+### LOW Priority (Nice to Fix)
+- [ ] [AI-Review][LOW] sanitizeProfileName() exported but never called in createProfile() [src/lib/profileDbManager.ts:28-34]
+- [ ] [AI-Review][LOW] Tests access private members with manager['profileDbCache'] - brittle [src/lib/profileDbManager.test.ts:147]
 
 ## Dev Notes
 
