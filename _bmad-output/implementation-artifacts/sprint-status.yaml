@@ -49,7 +49,7 @@ development_status:
   1-6-totp-registration-ui: done
   1-7-webcrypto-aes-256-engine: done
   1-8-auth-guard-session-routing: done
-  1-9-global-app-settings-store: in-progress
+  1-9-global-app-settings-store: review
   1-10-github-actions-cicd-automations: backlog
   1-11-auth-rate-limiting-escalating-delays: backlog
   epic-1-retrospective: optional
