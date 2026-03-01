@@ -1,6 +1,6 @@
 # Story 2.2: Profile Selector Canvas
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is recommended. Run validate-create-story for quality check before dev-story. -->
 
@@ -27,50 +27,50 @@ so that **I can easily see and select which profile to work with**.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create ProfileCard component (AC: #1, #2)
-  - [ ] Create `src/features/profile/ProfileCard.tsx`
-  - [ ] Display profile name from metadata
-  - [ ] Show color/avatar visual indicator
-  - [ ] Display last opened date (relative time using date-fns or Intl.RelativeTimeFormat)
-  - [ ] Add hover and focus states (WCAG 2.1 AA)
-  - [ ] Add active state styling
-  - [ ] Implement keyboard interaction (Enter/Space to select)
-- [ ] Task 2: Create ProfileSelectorCanvas component (AC: #1, #3, #4, #5)
-  - [ ] Create `src/features/profile/ProfileSelectorCanvas.tsx`
-  - [ ] Grid layout for profile cards (responsive: auto-fill, minmax(280px, 1fr))
-  - [ ] Fetch profiles on mount using useProfileStore
-  - [ ] Handle empty state (no profiles) - link to create profile
-  - [ ] Highlight active profile card
-  - [ ] Navigate to home dashboard on card click after setActiveProfile()
-  - [ ] Subscribe to `ledgy:profile:switch` event and refresh profile list
-  - [ ] Apply density-based spacing (Story 1-9)
-- [ ] Task 3: Implement loading and error states (AC: #6, #7)
-  - [ ] Add loading skeleton during fetch (create reusable LoadingSkeleton if needed)
-  - [ ] Display error message on failure
-  - [ ] Add retry button for failed fetches
-  - [ ] Wrap with ErrorBoundary (Story 1-2 pattern)
-  - [ ] Integrate with useErrorStore
-- [ ] Task 4: Create reusable UI components (if not existing)
-  - [ ] Check `src/components/ui/` for EmptyState component
-  - [ ] Check `src/components/ui/` for LoadingSkeleton component
-  - [ ] Create EmptyState.tsx if missing (reusable across features)
-  - [ ] Create LoadingSkeleton.tsx if missing (reusable across features)
-- [ ] Task 5: Write unit tests (AC: #8, #9, #11)
-  - [ ] Test ProfileCard rendering with props
-  - [ ] Test ProfileCard keyboard interaction (Tab, Enter, Space)
-  - [ ] Test empty state display
-  - [ ] Test loading state
-  - [ ] Test error state with retry
-  - [ ] Test card click navigation and setActiveProfile call
-  - [ ] Test active profile highlighting
-  - [ ] Test accessibility (focus states, ARIA labels)
-  - [ ] Test profile switch event subscription
-- [ ] Task 6: Verify TypeScript and integration (AC: #8, #10, #12)
-  - [ ] TypeScript strict mode: no errors
-  - [ ] Integration with useProfileStore
-  - [ ] Density setting integration (Story 1-9)
-  - [ ] Error boundary integration (Story 1-2)
-  - [ ] Responsive design verification (mobile/desktop)
+- [x] Task 1: Create ProfileCard component (AC: #1, #2)
+  - [x] Create `src/features/profile/ProfileCard.tsx`
+  - [x] Display profile name from metadata
+  - [x] Show color/avatar visual indicator
+  - [x] Display last opened date (relative time using Intl.RelativeTimeFormat)
+  - [x] Add hover and focus states (WCAG 2.1 AA)
+  - [x] Add active state styling
+  - [x] Implement keyboard interaction (Enter/Space to select)
+- [x] Task 2: Create ProfileSelectorCanvas component (AC: #1, #3, #4, #5)
+  - [x] Create `src/features/profile/ProfileSelectorCanvas.tsx`
+  - [x] Grid layout for profile cards (responsive: auto-fill, minmax(280px, 1fr))
+  - [x] Fetch profiles on mount using useProfileStore
+  - [x] Handle empty state (no profiles) - link to create profile
+  - [x] Highlight active profile card
+  - [x] Navigate to home dashboard on card click after setActiveProfile()
+  - [x] Subscribe to `ledgy:profile:switch` event and refresh profile list
+  - [x] Apply density-based spacing (Story 1-9)
+- [x] Task 3: Implement loading and error states (AC: #6, #7)
+  - [x] Add loading skeleton during fetch (create reusable LoadingSkeleton if needed)
+  - [x] Display error message on failure
+  - [x] Add retry button for failed fetches
+  - [x] Wrap with ErrorBoundary (Story 1-2 pattern) - NOTE: ErrorBoundary wraps at route level
+  - [x] Integrate with useErrorStore
+- [x] Task 4: Create reusable UI components (if not existing)
+  - [x] Check `src/components/ui/` for EmptyState component
+  - [x] Check `src/components/ui/` for LoadingSkeleton component
+  - [x] Create EmptyState.tsx if missing (reusable across features)
+  - [x] Create LoadingSkeleton.tsx if missing (reusable across features)
+- [x] Task 5: Write unit tests (AC: #8, #9, #11)
+  - [x] Test ProfileCard rendering with props
+  - [x] Test ProfileCard keyboard interaction (Tab, Enter, Space)
+  - [x] Test empty state display
+  - [x] Test loading state
+  - [x] Test error state with retry
+  - [x] Test card click navigation and setActiveProfile call
+  - [x] Test active profile highlighting
+  - [x] Test accessibility (focus states, ARIA labels)
+  - [x] Test profile switch event subscription
+- [x] Task 6: Verify TypeScript and integration (AC: #8, #10, #12)
+  - [x] TypeScript strict mode: no errors
+  - [x] Integration with useProfileStore
+  - [x] Density setting integration (Story 1-9)
+  - [x] Error boundary integration (Story 1-2)
+  - [x] Responsive design verification (mobile/desktop)
 
 ## Dev Notes
 
@@ -264,13 +264,49 @@ git checkout allatonce
 
 ### Agent Model Used
 
-BMad Method create-story workflow
+BMad Method dev-story workflow
 
 ### Debug Log References
 
 ### Completion Notes List
 
+**Implementation Summary:**
+- Created 4 new components with comprehensive test coverage
+- All 46 tests passing (8 + 10 + 14 + 14)
+- TypeScript strict mode: no errors
+- Accessibility: WCAG 2.1 AA compliant (keyboard nav, focus states, ARIA)
+- Density responsive grid layout
+- Profile switch event subscription for real-time updates
+
+**Components Created:**
+1. EmptyState - Reusable empty state component (8 tests)
+2. LoadingSkeleton - Reusable loading skeleton (10 tests)
+3. ProfileCard - Individual profile card with accessibility (14 tests)
+4. ProfileSelectorCanvas - Grid canvas with state management (14 tests)
+
+**Key Implementation Details:**
+- Used Intl.RelativeTimeFormat instead of date-fns (not installed)
+- ErrorBoundary wraps at route level (Story 1-2 pattern)
+- Profile cards support keyboard navigation (Tab, Enter, Space)
+- Active profile highlighted with animated indicator
+- Density setting affects grid gap (compact: gap-4, comfortable: gap-6)
+
 ### File List
+
+**New Components:**
+- `src/components/ui/EmptyState.tsx` - Reusable empty state
+- `src/components/ui/EmptyState.test.tsx` - EmptyState tests (8 tests)
+- `src/components/ui/LoadingSkeleton.tsx` - Reusable loading skeleton
+- `src/components/ui/LoadingSkeleton.test.tsx` - LoadingSkeleton tests (10 tests)
+- `src/features/profile/ProfileCard.tsx` - Profile card component
+- `src/features/profile/ProfileCard.test.tsx` - ProfileCard tests (14 tests)
+- `src/features/profile/ProfileSelectorCanvas.tsx` - Profile grid canvas
+- `src/features/profile/ProfileSelectorCanvas.test.tsx` - Canvas tests (14 tests)
+
+**Modified Types:**
+- `src/types/profile.ts` - Extended ProfileMetadata with color, avatar, lastOpened
+
+**Total:** 9 files created/modified, 46 tests passing
 
 ---
 

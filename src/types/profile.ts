@@ -2,8 +2,11 @@ export interface ProfileMetadata {
     id: string;
     name: string;
     description?: string;
-    createdAt: string;
-    updatedAt: string;
+    createdAt: string | number;
+    updatedAt: string | number;
+    lastOpened?: number; // Unix timestamp for last opened time
+    color?: string; // Tailwind CSS color class for avatar background
+    avatar?: string; // Initials or icon to display
     remoteSyncEndpoint?: string;
 }
 
