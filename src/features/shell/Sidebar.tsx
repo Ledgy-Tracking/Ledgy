@@ -57,13 +57,14 @@ export const Sidebar = () => {
                     onClick={toggleSidebar}
                     className="md:hidden absolute left-2 top-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors z-30"
                     aria-label="Open sidebar"
+                    aria-expanded="false"
                 >
                     <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
                 </button>
             )}
 
             {/* Navigation Menu */}
-            <nav className={`flex-1 overflow-y-auto p-4 ${!sidebarOpen && 'hidden'}`}>
+            <nav className={`flex-1 overflow-y-auto p-4 ${!sidebarOpen && 'hidden'}`} role="navigation" aria-label="Main navigation">
                 <ul className="space-y-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;

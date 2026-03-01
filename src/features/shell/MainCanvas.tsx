@@ -11,6 +11,10 @@ export const MainCanvas = () => {
         >
             <div className="min-h-full p-6">
                 <Outlet />
+                {/* Loading state placeholder for route transitions */}
+                <div className="hidden" aria-live="polite" aria-busy="false">
+                    <span className="sr-only">Loading content...</span>
+                </div>
             </div>
         </main>
     );
