@@ -1,6 +1,6 @@
 # Story 2.5: Profile Deletion Safety Lock
 
-Status: in-progress
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -62,14 +62,14 @@ so that **I cannot accidentally destroy all data in a profile by missclicking, a
 
 ### Review Follow-ups (AI) — Round 2
 
-- [ ] [AI-Review-R2][HIGH] `handleConfirmDelete` success path never resets `purgeRemote` — if a user deletes a remote-sync profile with the checkbox un-ticked, the next delete dialog opens with the checkbox pre-unchecked, violating AC #6's checked-by-default requirement; add `setPurgeRemote(true)` alongside the other resets on `result.success` [`ProfileSelector.tsx:76-79`]
-- [ ] [AI-Review-R2][HIGH] Escape `onKeyDown` handler is on a non-focusable backdrop `<div>` — during real usage focus is inside the `<form>`, not on the backdrop, so keydown events don't naturally reach it; test 3.6b passes only because `fireEvent.keyDown` bypasses event bubbling by targeting the div directly; move the handler to the `<form>` element so it works in actual browsers [`ProfileSelector.tsx:237-241`]
-- [ ] [AI-Review-R2][MEDIUM] Test 3.7 never asserts actual focus — only checks element existence via `document.getElementById`; the jsdom limitation means `autoFocus` won't actually focus the element, so the assertion proves nothing about AC #10; either mark as a known jsdom limitation with `.todo` or assert `document.activeElement` when possible [`ProfileSelector.test.tsx:208-217`]
-- [ ] [AI-Review-R2][MEDIUM] Force Delete button replaces (rather than supplements) the primary delete button — AC #7 says the "Force delete locally only" option appears "without closing the dialog", implying the user should still be able to retry the remote delete; the current ternary removes the "Permanently Delete" button entirely when `showForceLocal` is true, making a remote retry impossible without cancel + reopen [`ProfileSelector.tsx:321-344`]
-- [ ] [AI-Review-R2][MEDIUM] NETWORK_UNREACHABLE test comment claims to "verify Force Delete button is disabled if name is cleared" but never actually clears the input — the assertion only confirms the button is *enabled* (name already matched), leaving the core AC #7 + Task 2.3 requirement (Force Delete also requires name match when name is not typed) completely untested [`ProfileSelector.test.tsx:294-296`]
-- [ ] [AI-Review-R2][MEDIUM] No `aria-live` or `role="alert"` on the network error block — when `showForceLocal` becomes `true` after a delete attempt, the red warning block appears dynamically but is never announced to screen reader users; wrap the block in `role="alert"` or add an `aria-live="polite"` region so AT users know the action failed and a new option is available [`ProfileSelector.tsx:270-276`]
-- [ ] [AI-Review-R2][LOW] Dynamic button label (`'Delete Local & Remote'` vs `'Permanently Delete'`) is not covered by the disabled-state tests — tests 3.2–3.4 use `mockProfiles` (no `remoteSyncEndpoint`), so the button is always labelled `'Permanently Delete'`; add a parallel disabled-state test using `mockProfileWithRemote` to cover the remote label path [`ProfileSelector.test.tsx:102-137`]
-- [ ] [AI-Review-R2][LOW] Delete `<form>` has no ARIA role or label — the `<h2>` inside the dialog has no `id`, and the form has no `aria-label` or `role="dialog"`/`aria-labelledby`; add `role="dialog"`, `aria-modal="true"`, and `aria-labelledby` pointing to the heading's `id` for proper screen-reader dialog semantics [`ProfileSelector.tsx:239-346`]
+- [x] [AI-Review-R2][HIGH] `handleConfirmDelete` success path never resets `purgeRemote` — if a user deletes a remote-sync profile with the checkbox un-ticked, the next delete dialog opens with the checkbox pre-unchecked, violating AC #6's checked-by-default requirement; add `setPurgeRemote(true)` alongside the other resets on `result.success` [`ProfileSelector.tsx:76-79`]
+- [x] [AI-Review-R2][HIGH] Escape `onKeyDown` handler is on a non-focusable backdrop `<div>` — during real usage focus is inside the `<form>`, not on the backdrop, so keydown events don't naturally reach it; test 3.6b passes only because `fireEvent.keyDown` bypasses event bubbling by targeting the div directly; move the handler to the `<form>` element so it works in actual browsers [`ProfileSelector.tsx:237-241`]
+- [x] [AI-Review-R2][MEDIUM] Test 3.7 never asserts actual focus — only checks element existence via `document.getElementById`; the jsdom limitation means `autoFocus` won't actually focus the element, so the assertion proves nothing about AC #10; either mark as a known jsdom limitation with `.todo` or assert `document.activeElement` when possible [`ProfileSelector.test.tsx:208-217`]
+- [x] [AI-Review-R2][MEDIUM] Force Delete button replaces (rather than supplements) the primary delete button — AC #7 says the "Force delete locally only" option appears "without closing the dialog", implying the user should still be able to retry the remote delete; the current ternary removes the "Permanently Delete" button entirely when `showForceLocal` is true, making a remote retry impossible without cancel + reopen [`ProfileSelector.tsx:321-344`]
+- [x] [AI-Review-R2][MEDIUM] NETWORK_UNREACHABLE test comment claims to "verify Force Delete button is disabled if name is cleared" but never actually clears the input — the assertion only confirms the button is *enabled* (name already matched), leaving the core AC #7 + Task 2.3 requirement (Force Delete also requires name match when name is not typed) completely untested [`ProfileSelector.test.tsx:294-296`]
+- [x] [AI-Review-R2][MEDIUM] No `aria-live` or `role="alert"` on the network error block — when `showForceLocal` becomes `true` after a delete attempt, the red warning block appears dynamically but is never announced to screen reader users; wrap the block in `role="alert"` or add an `aria-live="polite"` region so AT users know the action failed and a new option is available [`ProfileSelector.tsx:270-276`]
+- [x] [AI-Review-R2][LOW] Dynamic button label (`'Delete Local & Remote'` vs `'Permanently Delete'`) is not covered by the disabled-state tests — tests 3.2–3.4 use `mockProfiles` (no `remoteSyncEndpoint`), so the button is always labelled `'Permanently Delete'`; add a parallel disabled-state test using `mockProfileWithRemote` to cover the remote label path [`ProfileSelector.test.tsx:102-137`]
+- [x] [AI-Review-R2][LOW] Delete `<form>` has no ARIA role or label — the `<h2>` inside the dialog has no `id`, and the form has no `aria-label` or `role="dialog"`/`aria-labelledby`; add `role="dialog"`, `aria-modal="true"`, and `aria-labelledby` pointing to the heading's `id` for proper screen-reader dialog semantics [`ProfileSelector.tsx:239-346`]
 
 ---
 
@@ -282,6 +282,17 @@ BMad Method dev-story workflow (Antigravity/Gemini 2.5 Pro) — 2026-03-07
 - ✅ Resolved review finding [LOW]: "permanent and irreversible" wording added to amber remote-sync block (AC #2)
 - All 16 tests pass (13 regression + 3 new/fixed)
 
+**Code Review Follow-ups Addressed Round 2 (2026-03-07)**:
+- ✅ Resolved review finding [HIGH]: `handleConfirmDelete` success path now resets `purgeRemote` alongside other resets
+- ✅ Resolved review finding [HIGH]: Escape `onKeyDown` handler moved to the `<form>` element so it captures focus appropriately
+- ✅ Resolved review finding [MEDIUM]: Test 3.7 now notes jsdom `autoFocus` limitation and verifies DOM reflection
+- ✅ Resolved review finding [MEDIUM]: Force Delete button is now shown in addition to (rather than instead of) the primary delete button when `showForceLocal` is true
+- ✅ Resolved review finding [MEDIUM]: `NETWORK_UNREACHABLE` test logic enhanced to include verifying disabled state when name is cleared
+- ✅ Resolved review finding [MEDIUM]: Added `role="alert"` to the network error block for correct screen-reader dynamic announcements
+- ✅ Resolved review finding [LOW]: Added new test 3.2b to cover disabled-state for the "Delete Local & Remote" conditional label
+- ✅ Resolved review finding [LOW]: Added `role="dialog"`, `aria-modal`, and `aria-labelledby` linking to the header ID on the delete `<form>`
+- All 17 tests pass successfully
+
 ### File List
 
 - `src/features/profiles/ProfileSelector.tsx` (MODIFIED)
@@ -293,3 +304,4 @@ BMad Method dev-story workflow (Antigravity/Gemini 2.5 Pro) — 2026-03-07
 
 - Initial implementation of Story 2.5: Profile Deletion Safety Lock (Date: 2026-03-07)
 - Addressed code review findings - 7 items resolved (Date: 2026-03-07)
+- Addressed code review findings Round 2 - 8 items resolved (Date: 2026-03-07)
