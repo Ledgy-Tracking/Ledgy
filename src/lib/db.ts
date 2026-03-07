@@ -244,11 +244,15 @@ export async function create_profile(
 export async function create_profile_encrypted(
     masterDb: Database,
     encryptedName: { iv: number[]; ciphertext: number[] },
-    encryptedDescription?: { iv: number[]; ciphertext: number[] }
+    encryptedDescription?: { iv: number[]; ciphertext: number[] },
+    color?: string,
+    avatar?: string
 ): Promise<string> {
     const response = await masterDb.createDocument('profile', {
         name_enc: encryptedName,
         description_enc: encryptedDescription,
+        color,
+        avatar
     });
     if (!response.ok) {
         throw new Error('Failed to create profile document');
@@ -320,6 +324,8 @@ export async function decryptProfileMetadata(
             createdAt: doc.createdAt,
             updatedAt: doc.updatedAt,
             remoteSyncEndpoint: doc.remoteSyncEndpoint,
+            color: doc.color,
+            avatar: doc.avatar,
         });
     }
 

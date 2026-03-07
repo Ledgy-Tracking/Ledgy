@@ -17,7 +17,7 @@ interface ProfileState {
     // Actions
     fetchProfiles: () => Promise<void>;
     setActiveProfile: (id: string) => void;
-    createProfile: (name: string, description?: string) => Promise<string>;
+    createProfile: (name: string, description?: string, color?: string, avatar?: string) => Promise<string>;
     deleteProfile: (id: string, forceLocalOnly?: boolean) => Promise<{ success: boolean; remoteDeleted: boolean; error?: string }>;
 }
 
@@ -72,7 +72,7 @@ export const useProfileStore = create<ProfileState>()(
                 set({ activeProfileId: id });
             },
 
-            createProfile: async (name: string, description?: string): Promise<string> => {
+            createProfile: async (name: string, description?: string, color?: string, avatar?: string): Promise<string> => {
                 set({ isLoading: true, error: null });
                 try {
                     const masterDb = getProfileDb('master');
@@ -133,14 +133,16 @@ export const useProfileStore = create<ProfileState>()(
                     }
 
                     // Use the DAL function to create the profile with encrypted metadata
-                    const profileId = await create_profile_encrypted(masterDb, encryptedName, encryptedDescription);
+                    const profileId = await create_profile_encrypted(masterDb, encryptedName, encryptedDescription, color, avatar);
 
                     // Initialize the profile database with encrypted metadata
                     const profileDb = getProfileDb(profileId);
                     await profileDb.createDocument('profile_init', {
                         initialized: true,
                         name_enc: encryptedName,
-                        description_enc: encryptedDescription
+                        description_enc: encryptedDescription,
+                        color,
+                        avatar
                     });
 
                     await get().fetchProfiles();

@@ -51,9 +51,9 @@ describe('useProfileStore Encryption', () => {
         _clearProfileDatabases();
     });
 
-    it('should encrypt profile name on creation', async () => {
+    it('should encrypt profile name on creation and store color/avatar', async () => {
         const store = useProfileStore.getState();
-        await store.createProfile('Secret Profile');
+        await store.createProfile('Secret Profile', 'Desc', 'bg-emerald-500', 'SP');
 
         const masterDb = getProfileDb('master');
         const docs = await masterDb.getAllDocuments<any>('profile');
@@ -61,6 +61,8 @@ describe('useProfileStore Encryption', () => {
         expect(docs).toHaveLength(1);
         expect(docs[0].name_enc).toBeDefined();
         expect(docs[0].name).toBeUndefined(); // Plain name should not be stored
+        expect(docs[0].color).toBe('bg-emerald-500');
+        expect(docs[0].avatar).toBe('SP');
     });
 
     it('should decrypt profile name on fetch', async () => {
@@ -68,7 +70,7 @@ describe('useProfileStore Encryption', () => {
         (decryptPayload as any).mockResolvedValue('Secret Profile');
 
         const store = useProfileStore.getState();
-        await store.createProfile('Secret Profile');
+        await store.createProfile('Secret Profile', undefined, 'bg-emerald-500', 'SP');
 
         // Clear state and fetch
         useProfileStore.setState({ profiles: [] });
@@ -76,6 +78,8 @@ describe('useProfileStore Encryption', () => {
 
         const state = useProfileStore.getState();
         expect(state.profiles[0].name).toBe('Secret Profile');
+        expect(state.profiles[0].color).toBe('bg-emerald-500');
+        expect(state.profiles[0].avatar).toBe('SP');
     });
 
     it('should handle unencrypted profiles (legacy support)', async () => {

@@ -9,6 +9,7 @@ import { AutoLock } from "./features/auth/AutoLock";
 import { ErrorToast } from "./components/ErrorToast";
 import { NotificationToast } from "./components/NotificationToast";
 import { ProfileSelector } from "./features/profiles/ProfileSelector";
+import { ProfileCreationPage } from "./features/profile/ProfileCreationPage";
 import { useUIStore } from "./stores/useUIStore";
 import { useEffect } from "react";
 import { LedgerView } from "./features/ledger/LedgerView";
@@ -82,6 +83,15 @@ function App() {
           />
 
           {/* Protected Routes */}
+          <Route
+            path="/profiles/new"
+            element={
+              <AuthGuard>
+                <ProfileCreationPage />
+              </AuthGuard>
+            }
+          />
+
           <Route
             path="/profiles"
             element={
