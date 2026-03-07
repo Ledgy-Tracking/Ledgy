@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfileStore } from '../../stores/useProfileStore';
-import { Plus, User, Trash2, X, AlertOctagon, Moon, Sun } from 'lucide-react';
+import { Plus, User, Trash2, X, AlertTriangle, Moon, Sun } from 'lucide-react';
 import { useUIStore } from '../../stores/useUIStore';
 import { WelcomePage } from './WelcomePage';
 
@@ -65,6 +65,7 @@ export const ProfileSelector: React.FC = () => {
         setDeleteProfileId(null);
         setDeleteConfirmName('');
         setShowForceLocal(false);
+        setPurgeRemote(true);
     };
 
     const handleConfirmDelete = async (forceLocal: boolean = false) => {
@@ -74,6 +75,8 @@ export const ProfileSelector: React.FC = () => {
                 const result = await deleteProfile(deleteProfileId, forceLocal);
                 if (result.success) {
                     setDeleteProfileId(null);
+                    setDeleteConfirmName('');
+                    setShowForceLocal(false);
                 } else if (result.error?.includes('NETWORK_UNREACHABLE')) {
                     setShowForceLocal(true);
                 }
@@ -229,25 +232,29 @@ export const ProfileSelector: React.FC = () => {
             {/* Delete Profile Dialog */}
             {deleteProfileId && profileToDelete && (
                 <div
+                    data-testid="delete-dialog-backdrop"
                     className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/70 backdrop-blur-sm p-4"
                     onKeyDown={(e) => { if (e.key === 'Escape' && !isDeleting) handleCancelDelete(); }}
                 >
-                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                    <form
+                        onSubmit={(e) => { e.preventDefault(); if (isDeleteConfirmed && !isDeleting) handleConfirmDelete(false); }}
+                        className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+                    >
                         <div className="flex items-start gap-4 mb-6">
                             <div className="p-3 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 shrink-0">
-                                <AlertOctagon size={24} />
+                                <AlertTriangle size={24} />
                             </div>
                             <div>
                                 <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Delete Profile "{profileToDelete.name}"?</h2>
                                 <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4">
-                                    <span className="font-semibold text-red-600 dark:text-red-400">This will permanently delete local data for this profile.</span>
+                                    <span className="font-semibold text-red-600 dark:text-red-400">This action is permanent and irreversible.</span>
                                 </p>
 
                                 {profileToDelete.remoteSyncEndpoint ? (
                                     <div className="space-y-4">
                                         <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg p-3">
                                             <p className="text-amber-700 dark:text-amber-500 text-sm font-medium mb-2">
-                                                This profile is synced to a remote server.
+                                                This profile is synced to a remote server. <span className="font-semibold">This action is permanent and irreversible.</span>
                                             </p>
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input
@@ -276,10 +283,7 @@ export const ProfileSelector: React.FC = () => {
                             </div>
                         </div>
 
-                        <div
-                            id="delete-danger-warning"
-                            className="mt-4"
-                        >
+                        <div className="mt-4">
                             <label
                                 htmlFor="delete-confirm-input"
                                 className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1"
@@ -293,16 +297,20 @@ export const ProfileSelector: React.FC = () => {
                                 value={deleteConfirmName}
                                 onChange={(e) => setDeleteConfirmName(e.target.value)}
                                 aria-label={`Type the profile name ${profileToDelete.name} to confirm deletion`}
-                                aria-describedby="delete-danger-warning"
+                                aria-describedby="delete-danger-description"
                                 className={`w-full bg-zinc-50 dark:bg-zinc-950 border rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 transition-colors ${deleteConfirmName.length > 0 && !isDeleteConfirmed
                                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
                                     : 'border-zinc-200 dark:border-zinc-800 focus:border-red-500 focus:ring-red-500'
                                     }`}
                             />
+                            <span id="delete-danger-description" className="sr-only">
+                                This action is permanent and irreversible. Type the profile name exactly to enable the delete button.
+                            </span>
                         </div>
 
                         <div className="flex justify-end space-x-3 mt-4">
                             <button
+                                type="button"
                                 onClick={handleCancelDelete}
                                 disabled={isDeleting}
                                 className="px-4 py-2 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -312,6 +320,7 @@ export const ProfileSelector: React.FC = () => {
 
                             {showForceLocal ? (
                                 <button
+                                    type="button"
                                     onClick={() => handleConfirmDelete(true)}
                                     disabled={!isDeleteConfirmed || isDeleting}
                                     className="px-4 py-2 rounded-lg font-medium bg-amber-600 text-white hover:bg-amber-700 transition-colors focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
@@ -323,7 +332,7 @@ export const ProfileSelector: React.FC = () => {
                                 </button>
                             ) : (
                                 <button
-                                    onClick={() => handleConfirmDelete(false)}
+                                    type="submit"
                                     disabled={!isDeleteConfirmed || isDeleting}
                                     className="px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
@@ -334,7 +343,7 @@ export const ProfileSelector: React.FC = () => {
                                 </button>
                             )}
                         </div>
-                    </div>
+                    </form>
                 </div>
             )}
         </div>

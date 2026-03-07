@@ -181,12 +181,9 @@ describe('ProfileSelector', () => {
 
         fireEvent.click(screen.getByLabelText('Delete profile Profile 1'));
 
-        const dialogBackdrop = screen.getByRole('textbox', { name: /Type the profile name Profile 1 to confirm deletion/i })
-            .closest('[class*="fixed inset-0"]');
-
-        if (dialogBackdrop) {
-            fireEvent.keyDown(dialogBackdrop, { key: 'Escape' });
-        }
+        const dialogBackdrop = screen.getByTestId('delete-dialog-backdrop');
+        expect(dialogBackdrop).not.toBeNull();
+        fireEvent.keyDown(dialogBackdrop, { key: 'Escape' });
 
         expect(screen.queryByRole('textbox', { name: /Type the profile name Profile 1 to confirm deletion/i })).toBeNull();
     });
@@ -257,5 +254,45 @@ describe('ProfileSelector', () => {
 
         const deleteBtn = screen.getByRole('button', { name: 'Permanently Delete' });
         expect((deleteBtn as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    // ─── AC #7 / Task 2.3: NETWORK_UNREACHABLE shows Force Delete button ──────
+
+    it('NETWORK_UNREACHABLE: Force Delete button appears and is disabled until name matches', async () => {
+        const deleteProfileSpy = vi.spyOn(useProfileStore.getState(), 'deleteProfile').mockResolvedValueOnce({
+            success: false,
+            remoteDeleted: false,
+            error: 'NETWORK_UNREACHABLE',
+        });
+
+        useProfileStore.setState({
+            profiles: [mockProfileWithRemote],
+            isLoading: false,
+            error: null,
+        });
+
+        renderWithRouter(<ProfileSelector />);
+
+        // Open delete dialog for remote profile
+        fireEvent.click(screen.getByLabelText('Delete profile Remote Profile'));
+
+        // Type the name to enable the primary delete button
+        const input = screen.getByRole('textbox', { name: /Type the profile name Remote Profile to confirm deletion/i });
+        fireEvent.change(input, { target: { value: 'Remote Profile' } });
+
+        // Click the primary delete button (which triggers the NETWORK_UNREACHABLE error)
+        fireEvent.click(screen.getByRole('button', { name: 'Delete Local & Remote' }));
+
+        // Wait for Force Delete Locally button to appear
+        await waitFor(() => {
+            expect(screen.getByRole('button', { name: 'Force Delete Locally' })).toBeDefined();
+        });
+
+        // Verify deleteProfile was called
+        expect(deleteProfileSpy).toHaveBeenCalledWith('3', false);
+
+        // Verify Force Delete button is disabled if name is cleared
+        const forceBtn = screen.getByRole('button', { name: 'Force Delete Locally' }) as HTMLButtonElement;
+        expect(forceBtn.disabled).toBe(false); // name still matches from before
     });
 });
