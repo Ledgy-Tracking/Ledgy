@@ -405,11 +405,11 @@ def find_pr_for_branch(repo: str, branch_name: str) -> dict | None:
 def link_branch_to_issue(
     repo: str, issue_number: int, branch_name: str, commit_sha: str
 ) -> bool:
-    """Link a story issue to its PR by adding a closing reference in the PR body.
+    """Link a story issue to its PR by creating a deployment that references it.
 
-    If a matching open PR exists for *branch_name*, the issue reference
-    ``Closes #<number>`` is appended to the PR body so that GitHub
-    populates the issue's *Development* sidebar section.
+    Creates a GitHub deployment on *branch_name* with an ``environment_url``
+    pointing to the issue.  When an open PR exists for the branch the
+    deployment appears on the PR page, linking the issue to the pull request.
     """
     pr = find_pr_for_branch(repo, branch_name)
     if not pr:
@@ -417,36 +417,53 @@ def link_branch_to_issue(
               file=sys.stderr)
         return False
 
-    body = pr.get("body", "") or ""
-    issue_ref = f"#{issue_number}"
+    issue_url = f"https://github.com/{repo}/issues/{issue_number}"
+    env_name = f"story-{issue_number}"
 
-    # Check whether the PR body already contains a closing keyword for this issue
-    closing_patterns = [
-        f"closes {issue_ref}", f"close {issue_ref}",
-        f"fixes {issue_ref}",  f"fix {issue_ref}",
-        f"resolves {issue_ref}", f"resolve {issue_ref}",
-    ]
-    if any(pat in body.lower() for pat in closing_patterns):
-        print(f"  · PR #{pr['number']} already references issue {issue_ref}")
-        return True
-
-    # Append a closing reference to the PR body
-    separator = "\n\n" if body.strip() else ""
-    new_body = f"{body}{separator}Closes {issue_ref}"
-
-    result = run_gh(
-        "pr", "edit", str(pr["number"]),
-        "--repo", repo,
-        "--body", new_body,
+    # Create a deployment for the branch
+    deploy = run_gh(
+        "api", f"repos/{repo}/deployments",
+        "-X", "POST",
+        "-f", f"ref={branch_name}",
+        "-f", f"environment={env_name}",
+        "-f", f"description=Linked to issue #{issue_number}",
+        "-F", "auto_merge=false",
+        "-F", "required_contexts=[]",
     )
+
     dry_run = os.getenv("DRY_RUN", "").lower() == "true"
-    if result is not None or dry_run:
-        print(f"  ✔ Linked issue {issue_ref} → PR #{pr['number']} "
-              f"({pr.get('title', '?')})")
+
+    if not deploy or not isinstance(deploy, dict):
+        if dry_run:
+            return True
+        print(f"  ⚠  Failed to create deployment for branch '{branch_name}'",
+              file=sys.stderr)
+        return False
+
+    deploy_id = deploy.get("id")
+    if not deploy_id:
+        print(f"  ⚠  Deployment response missing id", file=sys.stderr)
+        return False
+
+    # Set deployment status with environment_url pointing to the issue
+    status = run_gh(
+        "api", f"repos/{repo}/deployments/{deploy_id}/statuses",
+        "-X", "POST",
+        "-f", "state=success",
+        "-f", f"environment_url={issue_url}",
+        "-f", f"description=Story #{issue_number}",
+    )
+
+    if status is not None:
+        print(f"  ✔ Linked issue #{issue_number} → PR #{pr['number']} "
+              f"via deployment ({pr.get('title', '?')})")
         return True
 
-    print(f"  ⚠  Failed to update PR #{pr['number']} body with closing "
-          f"reference for issue {issue_ref}", file=sys.stderr)
+    if dry_run:
+        return True
+
+    print(f"  ⚠  Failed to create deployment status for issue #{issue_number}",
+          file=sys.stderr)
     return False
 
 
