@@ -5,10 +5,10 @@ import {
     deriveKeyFromPassphrase,
     encryptPayload,
     decryptPayload,
-    HKDF_SALT,
+    HKDF_SALT_BYTES,
     EncryptedSecret,
 } from '../../lib/crypto';
-import { decodeSecret, verifyTOTP } from '../../lib/totp';
+import { decodeSecret, encodeSecret, verifyTOTP } from '../../lib/totp';
 import {
     canAttempt,
     recordFailedAttempt,
@@ -51,6 +51,8 @@ interface AuthState {
     rememberMeExpiry: number | null;
     /** The original expiry duration in ms chosen at unlock time; used by unlockWithPassphrase to issue a fresh expiry. null = never. */
     rememberMeExpiryMs: number | null;
+    /** User-specific HKDF salt (Base32 encoded). If missing, uses legacy HKDF_SALT. */
+    salt: string | null;
 
     // ----- Volatile (never persisted) -----
     isUnlocked: boolean;
@@ -96,6 +98,7 @@ export const useAuthStore = create<AuthState>()(
             rememberMe: false,
             rememberMeExpiry: null,
             rememberMeExpiryMs: null,
+            salt: null,
             needsPassphrase: false,
             // Zustand store topology (Story 1-3)
             isLoading: false,
@@ -113,6 +116,7 @@ export const useAuthStore = create<AuthState>()(
                     encryptedTotpSecret,
                     encryptionKey,
                     rememberMeExpiry,
+                    salt,
                 } = get();
 
                 // Step 1: Check session expiry
@@ -137,8 +141,8 @@ export const useAuthStore = create<AuthState>()(
                 // Step 3: Plain remember-me — auto-derive encryption key and unlock
                 if (rememberMe && totpSecret && !encryptionKey) {
                     try {
-                        const salt = new TextEncoder().encode(HKDF_SALT);
-                        const key = await deriveKeyFromTotp(decodeSecret(totpSecret), salt);
+                        const hkdfSalt = salt ? decodeSecret(salt) : HKDF_SALT_BYTES;
+                        const key = await deriveKeyFromTotp(decodeSecret(totpSecret), hkdfSalt);
                         set({ isUnlocked: true, encryptionKey: key });
                     } catch (err) {
                         if (import.meta.env.DEV) {
@@ -155,7 +159,7 @@ export const useAuthStore = create<AuthState>()(
                 expiryMs?: number | null,
             ) => {
                 set({ isLoading: true, error: null });
-                const { totpSecret } = get();
+                const { totpSecret, salt } = get();
                 if (!totpSecret) {
                     console.warn('unlock() called but totpSecret is null — a passphrase session may be active');
                     set({ isLoading: false, error: 'No TOTP secret found. Please complete setup first.' });
@@ -184,7 +188,7 @@ export const useAuthStore = create<AuthState>()(
                     if (isValid) {
                         // Reset rate limit on success
                         resetRateLimit('default-account');
-                        const hkdfSalt = new TextEncoder().encode(HKDF_SALT);
+                        const hkdfSalt = salt ? decodeSecret(salt) : HKDF_SALT_BYTES;
                         const key = await deriveKeyFromTotp(rawSecret, hkdfSalt);
 
                         const expiryTimestamp =
@@ -261,7 +265,7 @@ export const useAuthStore = create<AuthState>()(
             },
 
             unlockWithPassphrase: async (passphrase: string) => {
-                const { encryptedTotpSecret, rememberMeExpiryMs } = get();
+                const { encryptedTotpSecret, rememberMeExpiryMs, salt } = get();
                 if (!encryptedTotpSecret) return false;
 
                 try {
@@ -272,7 +276,7 @@ export const useAuthStore = create<AuthState>()(
                     const ciphertext = new Uint8Array(encryptedTotpSecret.ciphertext).buffer;
                     const totpSecret = await decryptPayload(passphraseKey, iv, ciphertext);
 
-                    const hkdfSalt = new TextEncoder().encode(HKDF_SALT);
+                    const hkdfSalt = salt ? decodeSecret(salt) : HKDF_SALT_BYTES;
                     const key = await deriveKeyFromTotp(decodeSecret(totpSecret), hkdfSalt);
 
                     // Compute a fresh expiry using the stored duration so the session
@@ -309,8 +313,9 @@ export const useAuthStore = create<AuthState>()(
                     const isValid = await verifyTOTP(rawSecret, code);
 
                     if (isValid) {
-                        const salt = new TextEncoder().encode(HKDF_SALT);
-                        const key = await deriveKeyFromTotp(rawSecret, salt);
+                        const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+                        const saltBase32 = encodeSecret(saltBytes);
+                        const key = await deriveKeyFromTotp(rawSecret, saltBytes);
 
                         const expiryTimestamp =
                             remember && expiryMs != null ? Date.now() + expiryMs : null;
@@ -331,6 +336,7 @@ export const useAuthStore = create<AuthState>()(
                                 isUnlocked: true,
                                 encryptionKey: key,
                                 rememberMe: remember,
+                                salt: saltBase32,
                                 rememberMeExpiry: expiryTimestamp,
                                 rememberMeExpiryMs: storedExpiryMs,
                                 needsPassphrase: false,
@@ -342,6 +348,7 @@ export const useAuthStore = create<AuthState>()(
                                 isUnlocked: true,
                                 encryptionKey: key,
                                 rememberMe: remember,
+                                salt: saltBase32,
                                 rememberMeExpiry: expiryTimestamp,
                                 rememberMeExpiryMs: storedExpiryMs,
                                 needsPassphrase: false,
@@ -372,6 +379,7 @@ export const useAuthStore = create<AuthState>()(
                     rememberMe: false,
                     rememberMeExpiry: null,
                     rememberMeExpiryMs: null,
+                    salt: null,
                     needsPassphrase: false,
                 });
             },
@@ -390,6 +398,7 @@ export const useAuthStore = create<AuthState>()(
                 rememberMe: state.rememberMe,
                 rememberMeExpiry: state.rememberMeExpiry,
                 rememberMeExpiryMs: state.rememberMeExpiryMs,
+                salt: state.salt,
             } as AuthState),
         }
     )
