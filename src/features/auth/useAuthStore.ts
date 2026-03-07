@@ -155,7 +155,9 @@ export const useAuthStore = create<AuthState>()(
                 set({ isLoading: true, error: null });
                 const { totpSecret } = get();
                 if (!totpSecret) {
-                    console.warn('unlock() called but totpSecret is null — a passphrase session may be active');
+                    if (import.meta.env.DEV) {
+                        console.warn('unlock() called but totpSecret is null — a passphrase session may be active');
+                    }
                     set({ isLoading: false, error: 'No TOTP secret found. Please complete setup first.' });
                     import('../../stores/useErrorStore').then(({ useErrorStore }) => {
                         useErrorStore.getState().dispatchError('No TOTP secret found', 'error');
