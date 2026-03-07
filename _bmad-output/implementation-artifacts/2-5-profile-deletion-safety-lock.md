@@ -1,6 +1,6 @@
 # Story 2.5: Profile Deletion Safety Lock
 
-Status: review
+Status: in-progress
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -48,6 +48,17 @@ so that **I cannot accidentally destroy all data in a profile by missclicking, a
   - [x] 3.6: Test that pressing Escape or clicking Cancel closes the dialog and resets `deleteConfirmName`
   - [x] 3.7: Test that the name confirmation input receives auto-focus when the dialog opens
   - [x] 3.8: (Remote sync) Test that the remote purge checkbox is visible for profiles with `remoteSyncEndpoint` and hidden for those without
+
+### Review Follow-ups (AI)
+
+- [ ] [AI-Review][HIGH] `handleConfirmDelete` success path does not reset `deleteConfirmName` or `showForceLocal` — call `setDeleteConfirmName('')` and `setShowForceLocal(false)` alongside `setDeleteProfileId(null)` on `result.success` [`ProfileSelector.tsx:75-76`]
+- [ ] [AI-Review][MEDIUM] No Enter key submission on delete dialog — AC #9 requires Enter to submit when confirm button is enabled; wrap dialog content in a `<form onSubmit>` so the input triggers submission on Enter [`ProfileSelector.tsx:231-337`]
+- [ ] [AI-Review][MEDIUM] `aria-describedby="delete-danger-warning"` points to the container `<div>` wrapping the input itself, not the danger warning paragraph — move `id` to the red warning `<span>` or `<p>` so screen readers get meaningful context [`ProfileSelector.tsx:280,296`]
+- [ ] [AI-Review][MEDIUM] Escape key test (3.6b) is vacuously passing — uses `.closest('[class*="fixed inset-0"]')` with `if (dialogBackdrop)` guard, so the assertion is silently skipped if the selector fails; replace with a `data-testid` attribute and assert the result is non-null before firing `keyDown` [`ProfileSelector.test.tsx:184-192`]
+- [ ] [AI-Review][MEDIUM] No test for `NETWORK_UNREACHABLE` / Force-Delete path (AC #7, Task 2.3 claimed [x]) — add test: mock `deleteProfile` to return `{ success: false, remoteDeleted: false, error: 'NETWORK_UNREACHABLE' }`, verify Force Delete button appears and is disabled until name matches [`ProfileSelector.test.tsx`]
+- [ ] [AI-Review][LOW] `AlertOctagon` used instead of story-specified `AlertTriangle` (AC #1.2) — swap import and JSX usage [`ProfileSelector.tsx:4,238`]
+- [ ] [AI-Review][LOW] `handleCancelDelete` does not reset `purgeRemote` to `true` — add `setPurgeRemote(true)` for complete cancel-path state hygiene [`ProfileSelector.tsx:64-68`]
+- [ ] [AI-Review][LOW] "Irreversible" wording missing from remote-profile warning — AC #2 requires a "permanent and irreversible" notice; it only appears in the non-remote branch; add it to the remote amber block as well [`ProfileSelector.tsx:248-261`]
 
 ---
 
