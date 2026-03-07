@@ -1,6 +1,6 @@
 # Story 2.5: Profile Deletion Safety Lock
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -26,28 +26,28 @@ so that **I cannot accidentally destroy all data in a profile by missclicking, a
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add name-confirmation input to the existing delete dialog in `ProfileSelector.tsx` (AC: #1, #2, #3, #4, #9, #10)
-  - [ ] 1.1: Add `deleteConfirmName` state variable (string) controlled by the new input
-  - [ ] 1.2: Add the warning dialog header with `AlertTriangle` icon (red), profile name in quotes, and "This action is permanent and irreversible" paragraph
-  - [ ] 1.3: Add the labeled `<input>` for name confirmation with `autoFocus`, correct `aria-label`, and red highlight when non-empty but not matching
-  - [ ] 1.4: Disable the "Permanently Delete" button when `deleteConfirmName !== profileToDelete.name`
-  - [ ] 1.5: Reset `deleteConfirmName` to `''` when the dialog is closed/cancelled
-  - [ ] 1.6: Add `aria-describedby` linking the input to the danger warning paragraph for screen-reader context
+- [x] Task 1: Add name-confirmation input to the existing delete dialog in `ProfileSelector.tsx` (AC: #1, #2, #3, #4, #9, #10)
+  - [x] 1.1: Add `deleteConfirmName` state variable (string) controlled by the new input
+  - [x] 1.2: Add the warning dialog header with `AlertTriangle` icon (red), profile name in quotes, and "This action is permanent and irreversible" paragraph
+  - [x] 1.3: Add the labeled `<input>` for name confirmation with `autoFocus`, correct `aria-label`, and red highlight when non-empty but not matching
+  - [x] 1.4: Disable the "Permanently Delete" button when `deleteConfirmName !== profileToDelete.name`
+  - [x] 1.5: Reset `deleteConfirmName` to `''` when the dialog is closed/cancelled
+  - [x] 1.6: Add `aria-describedby` linking the input to the danger warning paragraph for screen-reader context
 
-- [ ] Task 2: Preserve and integrate the existing remote-sync purge logic (AC: #6, #7, #8)
-  - [ ] 2.1: Keep the existing `purgeRemote` checkbox and amber warning block for `remoteSyncEndpoint` profiles
-  - [ ] 2.2: Keep the existing `showForceLocal` state that shows the "Force Delete Locally" secondary button on `NETWORK_UNREACHABLE`
-  - [ ] 2.3: Ensure both the primary "Permanently Delete" confirm and the "Force Delete Locally" button require `deleteConfirmName === profileToDelete.name` before enabling
+- [x] Task 2: Preserve and integrate the existing remote-sync purge logic (AC: #6, #7, #8)
+  - [x] 2.1: Keep the existing `purgeRemote` checkbox and amber warning block for `remoteSyncEndpoint` profiles
+  - [x] 2.2: Keep the existing `showForceLocal` state that shows the "Force Delete Locally" secondary button on `NETWORK_UNREACHABLE`
+  - [x] 2.3: Ensure both the primary "Permanently Delete" confirm and the "Force Delete Locally" button require `deleteConfirmName === profileToDelete.name` before enabling
 
-- [ ] Task 3: Write tests in `ProfileSelector.test.tsx` (or create `ProfileDeletionDialog.test.tsx`) (AC: #2, #3, #4, #5, #9, #10)
-  - [ ] 3.1: Test that clicking the trash icon opens the delete dialog and shows the profile name
-  - [ ] 3.2: Test that the "Permanently Delete" button is disabled when the input is empty
-  - [ ] 3.3: Test that the button remains disabled when the typed text does not match the profile name exactly (case mismatch)
-  - [ ] 3.4: Test that the button becomes enabled when the typed text matches exactly
-  - [ ] 3.5: Test that submitting with the correct name calls `deleteProfile` from the store
-  - [ ] 3.6: Test that pressing Escape or clicking Cancel closes the dialog and resets `deleteConfirmName`
-  - [ ] 3.7: Test that the name confirmation input receives auto-focus when the dialog opens
-  - [ ] 3.8: (Remote sync) Test that the remote purge checkbox is visible for profiles with `remoteSyncEndpoint` and hidden for those without
+- [x] Task 3: Write tests in `ProfileSelector.test.tsx` (or create `ProfileDeletionDialog.test.tsx`) (AC: #2, #3, #4, #5, #9, #10)
+  - [x] 3.1: Test that clicking the trash icon opens the delete dialog and shows the profile name
+  - [x] 3.2: Test that the "Permanently Delete" button is disabled when the input is empty
+  - [x] 3.3: Test that the button remains disabled when the typed text does not match the profile name exactly (case mismatch)
+  - [x] 3.4: Test that the button becomes enabled when the typed text matches exactly
+  - [x] 3.5: Test that submitting with the correct name calls `deleteProfile` from the store
+  - [x] 3.6: Test that pressing Escape or clicking Cancel closes the dialog and resets `deleteConfirmName`
+  - [x] 3.7: Test that the name confirmation input receives auto-focus when the dialog opens
+  - [x] 3.8: (Remote sync) Test that the remote purge checkbox is visible for profiles with `remoteSyncEndpoint` and hidden for those without
 
 ---
 
@@ -220,9 +220,12 @@ CREATE OR MODIFY: src/features/profiles/ProfileSelector.test.tsx
 
 ### Agent Model Used
 
-BMad Method create-story workflow (Antigravity/Gemini 2.5 Pro) — 2026-03-07
+BMad Method dev-story workflow (Antigravity/Gemini 2.5 Pro) — 2026-03-07
 
 ### Debug Log References
+
+- jsdom does not reflect React's `autoFocus` prop as an HTML `autofocus` attribute; test 3.7 was changed to verify element identity by `id` instead.
+- `useProfileStore.test.ts` has 3 pre-existing failures (confirmed by stash test) unrelated to Story 2.5.
 
 ### Completion Notes List
 
@@ -235,5 +238,24 @@ BMad Method create-story workflow (Antigravity/Gemini 2.5 Pro) — 2026-03-07
 - Git branch confirmed: `allatonce`
 - Key Risk identified: Two `useProfileStore.ts` files exist (features/ = old stub, stores/ = canonical); component uses `stores/` — developer must not confuse them
 
+**Implementation Completed (2026-03-07)**:
+- Added `deleteConfirmName: useState<string>('')` to `ProfileSelector.tsx`
+- Added `handleCancelDelete()` replacing direct `setDeleteProfileId(null)` calls — also resets `deleteConfirmName` and `showForceLocal`
+- Added `setDeleteConfirmName('')` reset inside `handleOpenDelete` (clean state on re-open)
+- Added `isDeleteConfirmed = deleteConfirmName === profileToDelete?.name` derived boolean
+- Added labeled `<input id="delete-confirm-input">` with `autoFocus`, `aria-label`, `aria-describedby`, and red border highlight when non-empty but mismatched
+- Applied `disabled={!isDeleteConfirmed || isDeleting}` to both "Permanently Delete" and "Force Delete Locally" buttons (AC #4, #7)
+- Added `onKeyDown` Escape handler to dialog backdrop (AC #9)
+- Kept all existing remote-sync UX (`purgeRemote` checkbox, amber block, `showForceLocal` red block) completely intact (Tasks 2.1–2.3)
+- Wrote 12 tests in `ProfileSelector.test.tsx` covering all Tasks 3.1–3.8 plus backward-compatible existing tests; all 12 pass
+
 ### File List
 
+- `src/features/profiles/ProfileSelector.tsx` (MODIFIED)
+- `src/features/profiles/ProfileSelector.test.tsx` (MODIFIED)
+- `_bmad-output/implementation-artifacts/2-5-profile-deletion-safety-lock.md` (MODIFIED)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (MODIFIED)
+
+### Change Log
+
+- Initial implementation of Story 2.5: Profile Deletion Safety Lock (Date: 2026-03-07)

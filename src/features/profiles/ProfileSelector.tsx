@@ -19,6 +19,7 @@ export const ProfileSelector: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [purgeRemote, setPurgeRemote] = useState(true);
     const [showForceLocal, setShowForceLocal] = useState(false);
+    const [deleteConfirmName, setDeleteConfirmName] = useState<string>('');
 
     useEffect(() => {
         fetchProfiles();
@@ -57,6 +58,13 @@ export const ProfileSelector: React.FC = () => {
         setDeleteProfileId(id);
         setPurgeRemote(true);
         setShowForceLocal(false);
+        setDeleteConfirmName('');
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteProfileId(null);
+        setDeleteConfirmName('');
+        setShowForceLocal(false);
     };
 
     const handleConfirmDelete = async (forceLocal: boolean = false) => {
@@ -78,6 +86,7 @@ export const ProfileSelector: React.FC = () => {
     };
 
     const profileToDelete = profiles.find(p => p.id === deleteProfileId);
+    const isDeleteConfirmed = deleteConfirmName === profileToDelete?.name;
 
     // AC #1: Show WelcomePage when loading is done and 0 profiles exist
     if (!isLoading && profiles.length === 0) {
@@ -219,7 +228,10 @@ export const ProfileSelector: React.FC = () => {
 
             {/* Delete Profile Dialog */}
             {deleteProfileId && profileToDelete && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/70 backdrop-blur-sm p-4">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/70 backdrop-blur-sm p-4"
+                    onKeyDown={(e) => { if (e.key === 'Escape' && !isDeleting) handleCancelDelete(); }}
+                >
                     <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                         <div className="flex items-start gap-4 mb-6">
                             <div className="p-3 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 shrink-0">
@@ -264,9 +276,34 @@ export const ProfileSelector: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="flex justify-end space-x-3">
+                        <div
+                            id="delete-danger-warning"
+                            className="mt-4"
+                        >
+                            <label
+                                htmlFor="delete-confirm-input"
+                                className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1"
+                            >
+                                Type <span className="font-bold text-zinc-900 dark:text-zinc-100">{profileToDelete.name}</span> to confirm
+                            </label>
+                            <input
+                                id="delete-confirm-input"
+                                type="text"
+                                autoFocus
+                                value={deleteConfirmName}
+                                onChange={(e) => setDeleteConfirmName(e.target.value)}
+                                aria-label={`Type the profile name ${profileToDelete.name} to confirm deletion`}
+                                aria-describedby="delete-danger-warning"
+                                className={`w-full bg-zinc-50 dark:bg-zinc-950 border rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 transition-colors ${deleteConfirmName.length > 0 && !isDeleteConfirmed
+                                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                    : 'border-zinc-200 dark:border-zinc-800 focus:border-red-500 focus:ring-red-500'
+                                    }`}
+                            />
+                        </div>
+
+                        <div className="flex justify-end space-x-3 mt-4">
                             <button
-                                onClick={() => setDeleteProfileId(null)}
+                                onClick={handleCancelDelete}
                                 disabled={isDeleting}
                                 className="px-4 py-2 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
@@ -276,7 +313,7 @@ export const ProfileSelector: React.FC = () => {
                             {showForceLocal ? (
                                 <button
                                     onClick={() => handleConfirmDelete(true)}
-                                    disabled={isDeleting}
+                                    disabled={!isDeleteConfirmed || isDeleting}
                                     className="px-4 py-2 rounded-lg font-medium bg-amber-600 text-white hover:bg-amber-700 transition-colors focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
                                     {isDeleting && (
@@ -287,7 +324,7 @@ export const ProfileSelector: React.FC = () => {
                             ) : (
                                 <button
                                     onClick={() => handleConfirmDelete(false)}
-                                    disabled={isDeleting}
+                                    disabled={!isDeleteConfirmed || isDeleting}
                                     className="px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
                                     {isDeleting && (
