@@ -7,9 +7,6 @@ export const WelcomePage: React.FC = () => {
     const navigate = useNavigate();
     const { theme, toggleTheme } = useUIStore();
 
-    const handleCreateProfile = () => {
-        navigate('/profiles/new');
-    };
 
     return (
         <div
@@ -19,8 +16,8 @@ export const WelcomePage: React.FC = () => {
         >
             {/* Ambient background glows */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-                <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-emerald-500/10 dark:bg-emerald-500/8 rounded-full blur-[120px]" />
-                <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-cyan-500/8 dark:bg-cyan-500/6 rounded-full blur-[100px]" />
+                <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-emerald-500/10 dark:bg-emerald-500/10 rounded-full blur-[120px]" />
+                <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-cyan-500/10 dark:bg-cyan-500/5 rounded-full blur-[100px]" />
             </div>
 
             {/* Theme Toggle */}
@@ -54,7 +51,7 @@ export const WelcomePage: React.FC = () => {
 
                 {/* Headline */}
                 <div className="space-y-4">
-                    <h1 className="text-5xl font-bold tracking-tight leading-tight">
+                    <h1 className="text-4xl sm:text-5xl font-bold tracking-tight leading-tight">
                         <span className="block text-zinc-900 dark:text-zinc-100">Welcome to</span>
                         <span className="block bg-gradient-to-r from-emerald-500 via-emerald-400 to-cyan-500 dark:from-emerald-400 dark:via-emerald-300 dark:to-cyan-400 bg-clip-text text-transparent">
                             Ledgy.
@@ -87,7 +84,7 @@ export const WelcomePage: React.FC = () => {
                 {/* CTA Button */}
                 <button
                     id="create-first-profile-btn"
-                    onClick={handleCreateProfile}
+                    onClick={() => navigate('/profiles/new')}
                     aria-label="Create your first profile"
                     className="group flex items-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-zinc-950 font-bold text-lg rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/35 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-zinc-50 dark:focus:ring-offset-zinc-950"
                 >

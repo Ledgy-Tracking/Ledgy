@@ -58,12 +58,12 @@ development_status:
   2-1-profile-db-segregation-logic: done
   2-2-profile-selector-canvas: done
   2-3-profile-creation-flow: done
-  2-4-first-launch-empty-state-experience: review
+  2-4-first-launch-empty-state-experience: done
   2-5-profile-deletion-safety-lock: backlog
   2-6-cross-profile-storage-memory-sweeps: backlog
   2-7-template-engine-json-export: backlog
   2-8-template-engine-json-import: backlog
-  epic-2-retrospective: optional
+  epic-2-retrospective: optional1
 
   epic-3: in-progress
   3-1-pouchdb-document-adapters: backlog

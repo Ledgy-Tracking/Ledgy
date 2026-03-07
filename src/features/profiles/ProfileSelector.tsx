@@ -89,8 +89,8 @@ export const ProfileSelector: React.FC = () => {
             {/* Theme Toggle Button */}
             <button
                 onClick={toggleTheme}
-                className="absolute top-8 right-8 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/50 transition-all duration-300 shadow-sm"
-                title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                className="absolute top-8 right-8 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/50 transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
             >
                 {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
@@ -104,30 +104,34 @@ export const ProfileSelector: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full">
                 {profiles.map((profile) => (
-                    <div
-                        key={profile.id}
-                        onClick={() => handleSelectProfile(profile.id)}
-                        className="group relative bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 hover:dark:border-emerald-500/50 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/5 dark:hover:shadow-2xl dark:hover:shadow-emerald-500/10"
-                    >
-                        <div className="flex items-start justify-between mb-4">
-                            <div className="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300">
-                                <User size={24} />
+                    <div key={profile.id} className="relative group">
+                        {/* Card button — full clickable area, keyboard accessible */}
+                        <button
+                            onClick={() => handleSelectProfile(profile.id)}
+                            aria-label={`Select profile ${profile.name}`}
+                            className="text-left w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 hover:dark:border-emerald-500/50 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/5 dark:hover:shadow-2xl dark:hover:shadow-emerald-500/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                        >
+                            <div className="flex items-start mb-4">
+                                <div className="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300">
+                                    <User size={24} />
+                                </div>
                             </div>
-                            <button
-                                onClick={(e) => handleOpenDelete(e, profile.id)}
-                                className="p-2 text-zinc-400 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200"
-                                title="Delete Profile"
-                            >
-                                <Trash2 size={18} />
-                            </button>
-                        </div>
-                        <h3 className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-100">{profile.name}</h3>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-4">
-                            {profile.description || 'No description provided'}
-                        </p>
-                        <div className="text-xs text-zinc-400 dark:text-zinc-500">
-                            Created: {new Date(profile.createdAt).toLocaleDateString()}
-                        </div>
+                            <h3 className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-100">{profile.name}</h3>
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-4">
+                                {profile.description || 'No description provided'}
+                            </p>
+                            <div className="text-xs text-zinc-400 dark:text-zinc-500">
+                                Created: {new Date(profile.createdAt).toLocaleDateString()}
+                            </div>
+                        </button>
+                        {/* Delete button — sibling to card button, absolutely positioned in top-right */}
+                        <button
+                            onClick={(e) => handleOpenDelete(e, profile.id)}
+                            aria-label={`Delete profile ${profile.name}`}
+                            className="absolute top-4 right-4 p-2 text-zinc-400 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/50 rounded"
+                        >
+                            <Trash2 size={18} />
+                        </button>
                     </div>
                 ))}
 

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { WelcomePage } from './WelcomePage';
 import { ProfileSelector } from './ProfileSelector';
@@ -20,6 +21,11 @@ vi.mock('react-router-dom', async (importOriginal) => {
 // ─── Helper ───────────────────────────────────────────────────────────────────
 const renderWithRouter = (ui: React.ReactElement) =>
     render(ui, { wrapper: BrowserRouter });
+
+const setup = (ui: React.ReactElement) => ({
+    user: userEvent.setup(),
+    ...renderWithRouter(ui),
+});
 
 // ─── WelcomePage unit tests ───────────────────────────────────────────────────
 
@@ -48,10 +54,10 @@ describe('WelcomePage', () => {
     });
 
     // 3.2 — CTA navigates to /profiles/new
-    it('navigates to /profiles/new when CTA is clicked', () => {
-        renderWithRouter(<WelcomePage />);
+    it('navigates to /profiles/new when CTA is clicked', async () => {
+        const { user } = setup(<WelcomePage />);
         const cta = screen.getByRole('button', { name: /create your first profile/i });
-        fireEvent.click(cta);
+        await user.click(cta);
         expect(mockNavigate).toHaveBeenCalledWith('/profiles/new');
     });
 
@@ -63,12 +69,19 @@ describe('WelcomePage', () => {
         expect((cta as HTMLButtonElement).disabled).toBe(false);
     });
 
-    it('CTA triggers navigate on Enter key press', () => {
-        renderWithRouter(<WelcomePage />);
+    it('CTA triggers navigate on Enter key press', async () => {
+        const { user } = setup(<WelcomePage />);
         const cta = screen.getByRole('button', { name: /create your first profile/i });
-        fireEvent.keyDown(cta, { key: 'Enter', code: 'Enter' });
-        // Native <button> fires click on Enter when focused — simulate click too
-        fireEvent.click(cta);
+        cta.focus();
+        await user.keyboard('{Enter}');
+        expect(mockNavigate).toHaveBeenCalledWith('/profiles/new');
+    });
+
+    it('CTA triggers navigate on Space key press', async () => {
+        const { user } = setup(<WelcomePage />);
+        const cta = screen.getByRole('button', { name: /create your first profile/i });
+        cta.focus();
+        await user.keyboard(' ');
         expect(mockNavigate).toHaveBeenCalledWith('/profiles/new');
     });
 
