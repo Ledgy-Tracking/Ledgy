@@ -68,9 +68,9 @@ export async function deriveKeyFromTotp(totpSecretBytes: Uint8Array, salt: Uint8
 }
 
 /**
- * Derives an AES-256-GCM key from a user-supplied passphrase using PBKDF2 (100 000 iterations).
+ * Derives an AES-256-GCM key from a user-supplied passphrase using PBKDF2 (600 000 iterations).
  * 
- * Performance Note: PBKDF2 with 100k iterations takes ~200-500ms on modern hardware.
+ * Performance Note: PBKDF2 with 600k iterations takes ~1-3s on modern hardware.
  * Show a loading indicator during derivation for better UX.
  * 
  * Security Note: JavaScript cannot manually clear keys from memory.
@@ -95,7 +95,7 @@ export async function deriveKeyFromPassphrase(passphrase: string, salt: Uint8Arr
                 name: 'PBKDF2',
                 hash: 'SHA-256',
                 salt,
-                iterations: 100_000,
+                iterations: 600_000,
             },
             keyMaterial,
             { name: 'AES-GCM', length: 256 },
