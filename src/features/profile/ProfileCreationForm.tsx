@@ -72,8 +72,9 @@ export const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onCanc
             navigate('/dashboard');
 
             onSuccess?.(profileId);
-        } catch (error: any) {
-            dispatchError(error.message || 'Failed to create profile', 'error');
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to create profile';
+            dispatchError(errorMessage, 'error');
         } finally {
             setIsSubmitting(false);
         }

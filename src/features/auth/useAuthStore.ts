@@ -141,7 +141,9 @@ export const useAuthStore = create<AuthState>()(
                         const key = await deriveKeyFromTotp(decodeSecret(totpSecret), salt);
                         set({ isUnlocked: true, encryptionKey: key });
                     } catch (err) {
-                        console.error('Auto-unlock failed:', err);
+                        if (import.meta.env.DEV) {
+                            console.error('Auto-unlock failed:', err);
+                        }
                     }
                 }
             },
@@ -244,7 +246,9 @@ export const useAuthStore = create<AuthState>()(
                     });
                     return false;
                 } catch (error) {
-                    console.error('Unlock failed:', error);
+                    if (import.meta.env.DEV) {
+                        console.error('Unlock failed:', error);
+                    }
                     const errorMessage = error instanceof Error ? error.message : 'Invalid TOTP code';
                     set({ isLoading: false, error: errorMessage });
                     import('../../stores/useErrorStore').then(({ useErrorStore }) => {
@@ -286,7 +290,9 @@ export const useAuthStore = create<AuthState>()(
                     });
                     return true;
                 } catch (err) {
-                    console.error('Passphrase unlock failed:', err);
+                    if (import.meta.env.DEV) {
+                        console.error('Passphrase unlock failed:', err);
+                    }
                     return false;
                 }
             },
@@ -344,7 +350,9 @@ export const useAuthStore = create<AuthState>()(
                         return true;
                     }
                 } catch (error) {
-                    console.error('Registration failed:', error);
+                    if (import.meta.env.DEV) {
+                        console.error('Registration failed:', error);
+                    }
                 }
                 return false;
             },

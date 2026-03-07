@@ -112,8 +112,8 @@ export class ProfileDbManager {
             });
 
             return profileId;
-        } catch (error: any) {
-            const errorMsg = error.message || 'Failed to create default profile';
+        } catch (error: unknown) {
+            const errorMsg = error instanceof Error ? error.message : 'Failed to create default profile';
             useErrorStore.getState().dispatchError(errorMsg, 'error');
             throw error;
         }
@@ -169,8 +169,8 @@ export class ProfileDbManager {
             }
 
             return profiles;
-        } catch (error: any) {
-            const errorMsg = error.message || 'Failed to fetch profiles';
+        } catch (error: unknown) {
+            const errorMsg = error instanceof Error ? error.message : 'Failed to fetch profiles';
             useErrorStore.getState().dispatchError(errorMsg, 'error');
             throw error;
         }
@@ -220,8 +220,8 @@ export class ProfileDbManager {
             this.profileDbCache.set(profileId, profileDb);
 
             return profileId;
-        } catch (error: any) {
-            const errorMsg = error.message || 'Failed to create profile';
+        } catch (error: unknown) {
+            const errorMsg = error instanceof Error ? error.message : 'Failed to create profile';
             useErrorStore.getState().dispatchError(errorMsg, 'error');
             throw error;
         }
@@ -251,8 +251,8 @@ export class ProfileDbManager {
             await hard_delete_profile(masterDb, profileId);
 
             return { success: true };
-        } catch (error: any) {
-            const errorMsg = error.message || 'Failed to delete profile';
+        } catch (error: unknown) {
+            const errorMsg = error instanceof Error ? error.message : 'Failed to delete profile';
             useErrorStore.getState().dispatchError(errorMsg, 'error');
             return { success: false, error: errorMsg };
         }
