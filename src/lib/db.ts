@@ -36,7 +36,7 @@ export class Database {
             validateDocumentFields(data as Partial<LedgyDocument>);
 
             const now = new Date().toISOString();
-            const doc: any = {
+            const doc: Record<string, unknown> = {
                 _id: `${type}:${uuidv4()}`,
                 type: type,
                 schema_version: 1,
