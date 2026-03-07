@@ -16,12 +16,17 @@ interface DashboardState {
     addWidget: (widget: WidgetConfig) => void;
     updateWidget: (widgetId: string, updates: Partial<WidgetConfig>) => void;
     removeWidget: (widgetId: string) => void;
+    clearProfileData: () => void;
 }
 
-export const useDashboardStore = create<DashboardState>((set, get) => ({
+const initialState = {
     widgets: [],
     isLoading: false,
     error: null,
+};
+
+export const useDashboardStore = create<DashboardState>((set, get) => ({
+    ...initialState,
 
     fetchWidgets: async (profileId: string, projectId: string) => {
         set({ isLoading: true, error: null });
@@ -78,5 +83,9 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
     removeWidget: (widgetId: string) => {
         set({ widgets: get().widgets.filter(w => w.id !== widgetId) });
+    },
+
+    clearProfileData: () => {
+        set(initialState);
     },
 }));

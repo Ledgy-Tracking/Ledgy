@@ -23,7 +23,7 @@ describe('GuestGuard', () => {
     });
 
     it('redirects to /profiles when user is authenticated', () => {
-        mockUseAuthStore.mockReturnValue({ isUnlocked: true } as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: true })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -47,7 +47,7 @@ describe('GuestGuard', () => {
     });
 
     it('redirects to /unlock when user is registered but not on auth pages', () => {
-        mockUseAuthStore.mockReturnValue({ isUnlocked: false } as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -71,7 +71,7 @@ describe('GuestGuard', () => {
     });
 
     it('renders children when user is not registered (first-time setup)', () => {
-        mockUseAuthStore.mockReturnValue({ isUnlocked: false } as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
         mockUseIsRegistered.mockReturnValue(false);
 
         render(
@@ -86,7 +86,7 @@ describe('GuestGuard', () => {
     });
 
     it('allows access to /unlock for registered but locked users', () => {
-        mockUseAuthStore.mockReturnValue({ isUnlocked: false } as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -111,7 +111,7 @@ describe('GuestGuard', () => {
 
     it('prevents double-registration scenarios', () => {
         // User is already registered and unlocked
-        mockUseAuthStore.mockReturnValue({ isUnlocked: true } as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: true })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(

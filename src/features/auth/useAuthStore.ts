@@ -75,7 +75,7 @@ interface AuthState {
     unlockWithPassphrase: (passphrase: string) => Promise<boolean>;
     verifyAndRegister: (secret: string, code: string, remember: boolean, passphrase?: string, expiryMs?: number | null) => Promise<boolean>;
     /** Lock the vault — preserves rememberMe preference so the next unlock can restore it. */
-    lock: () => void;
+    lock: () => Promise<void>;
     /** Hard reset: clears all auth state and persisted data. */
     reset: () => void;
     /** Called on app start: auto-unlock remembered sessions or flag that passphrase is needed. */
@@ -227,17 +227,17 @@ export const useAuthStore = create<AuthState>()(
                         }
                         return true;
                     }
-                    
+
                     // Failed attempt - record for rate limiting
                     await recordFailedAttempt('default-account');
                     const remaining = getRemainingLockoutTime('default-account');
-                    
+
                     let errorMessage = 'Invalid TOTP code. Please try again.';
                     if (remaining > 0) {
                         const minutes = Math.ceil(remaining / 60);
                         errorMessage = `Too many failed attempts. Account locked for ${minutes} minute${minutes > 1 ? 's' : ''}.`;
                     }
-                    
+
                     set({ isLoading: false, error: errorMessage });
                     import('../../stores/useErrorStore').then(({ useErrorStore }) => {
                         useErrorStore.getState().dispatchError(errorMessage, 'error');
@@ -349,10 +349,15 @@ export const useAuthStore = create<AuthState>()(
                 return false;
             },
 
-            lock: () => {
+            lock: async () => {
                 // Preserve rememberMe preference so the user's choice persists across locks.
                 // Only clear the active session credentials.
                 set({ isUnlocked: false, encryptionKey: null });
+
+                // Memory Sweep: Clear the global profile registry and dependent stores
+                const { useProfileStore } = await import('../profiles/useProfileStore');
+                useProfileStore.getState().clearActiveProfile();
+                useProfileStore.setState({ profiles: [] });
             },
 
             reset: () => {

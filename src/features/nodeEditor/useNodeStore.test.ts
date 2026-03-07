@@ -5,6 +5,7 @@ import { useErrorStore } from '../../stores/useErrorStore';
 describe('useNodeStore', () => {
     beforeEach(() => {
         useErrorStore.getState().clearError();
+        useNodeStore.getState().clearProfileData();
         localStorage.clear();
         vi.useFakeTimers();
     });
@@ -28,7 +29,7 @@ describe('useNodeStore', () => {
             position: { x: 0, y: 0 },
             data: { label: 'Test Node', type: 'source' },
         });
-        
+
         const state = useNodeStore.getState();
         expect(state.nodes).toHaveLength(1);
         expect(state.nodes[0].id).toBe('node-1');
@@ -41,7 +42,7 @@ describe('useNodeStore', () => {
             position: { x: 0, y: 0 },
             data: { label: 'Test', type: 'source' },
         });
-        
+
         await useNodeStore.getState().updateNodePosition('node-1', 100, 200);
         const state = useNodeStore.getState();
         expect(state.nodes[0].position).toEqual({ x: 100, y: 200 });
@@ -60,13 +61,13 @@ describe('useNodeStore', () => {
             position: { x: 200, y: 0 },
             data: { label: 'Target', type: 'correlation' },
         });
-        
+
         await useNodeStore.getState().addEdge({
             id: 'edge-1',
             source: 'node-1',
             target: 'node-2',
         });
-        
+
         const state = useNodeStore.getState();
         expect(state.edges).toHaveLength(1);
         expect(state.edges[0].source).toBe('node-1');
@@ -91,10 +92,15 @@ describe('useNodeStore', () => {
             source: 'node-1',
             target: 'node-2',
         });
-        
+
         await useNodeStore.getState().deleteNode('node-1');
+        // Let debounce settle
+        vi.runAllTimers();
+
         const state = useNodeStore.getState();
+        console.log(state.nodes);
         expect(state.nodes).toHaveLength(1);
+        expect(state.nodes[0].id).toBe('node-2');
         expect(state.edges).toHaveLength(0);
     });
 
@@ -104,7 +110,7 @@ describe('useNodeStore', () => {
             source: 'node-1',
             target: 'node-2',
         });
-        
+
         await useNodeStore.getState().deleteEdge('edge-1');
         const state = useNodeStore.getState();
         expect(state.edges).toHaveLength(0);
@@ -117,7 +123,7 @@ describe('useNodeStore', () => {
             position: { x: 0, y: 0 },
             data: { label: 'Test', type: 'source' },
         });
-        
+
         await useNodeStore.getState().saveGraph();
         const stored = localStorage.getItem('ledgy-nodes');
         expect(stored).toBeTruthy();
@@ -132,7 +138,7 @@ describe('useNodeStore', () => {
         }];
         localStorage.setItem('ledgy-nodes', JSON.stringify(testNodes));
         localStorage.setItem('ledgy-edges', JSON.stringify([]));
-        
+
         await useNodeStore.getState().loadGraph();
         const state = useNodeStore.getState();
         expect(state.nodes).toHaveLength(1);
@@ -146,16 +152,16 @@ describe('useNodeStore', () => {
             position: { x: 0, y: 0 },
             data: { label: 'Test', type: 'source' },
         });
-        
+
         // Trigger position update (should debounce)
         useNodeStore.getState().updateNodePosition('node-1', 100, 200);
-        
+
         // Check that save hasn't happened yet
         expect(localStorage.getItem('ledgy-nodes')).toBeNull();
-        
+
         // Fast-forward timers
         vi.advanceTimersByTime(1000);
-        
+
         // Now save should have happened
         expect(localStorage.getItem('ledgy-nodes')).toBeTruthy();
     });

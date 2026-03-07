@@ -5,7 +5,7 @@ import { useErrorStore } from '../../stores/useErrorStore';
 describe('useDashboardStore', () => {
     beforeEach(() => {
         useErrorStore.getState().clearError();
-        localStorage.clear();
+        useDashboardStore.getState().clearProfileData();
     });
 
     it('initializes with correct default state', () => {
@@ -27,7 +27,7 @@ describe('useDashboardStore', () => {
             height: 1,
             config: {},
         });
-        
+
         const state = useDashboardStore.getState();
         expect(state.widgets).toHaveLength(1);
         expect(state.widgets[0].title).toBe('Test Widget');
@@ -44,7 +44,7 @@ describe('useDashboardStore', () => {
             height: 1,
             config: {},
         });
-        
+
         await useDashboardStore.getState().updateWidget('widget-1', { title: 'Updated' });
         const state = useDashboardStore.getState();
         expect(state.widgets[0].title).toBe('Updated');
@@ -61,7 +61,7 @@ describe('useDashboardStore', () => {
             height: 1,
             config: {},
         });
-        
+
         await useDashboardStore.getState().removeWidget('widget-1');
         const state = useDashboardStore.getState();
         expect(state.widgets).toHaveLength(0);
@@ -80,7 +80,7 @@ describe('useDashboardStore', () => {
                 config: {},
             }],
         };
-        
+
         await useDashboardStore.getState().updateLayout(newLayout);
         const state = useDashboardStore.getState();
         expect(state.layout.widgets).toHaveLength(1);
@@ -98,7 +98,7 @@ describe('useDashboardStore', () => {
             height: 1,
             config: {},
         });
-        
+
         await useDashboardStore.getState().saveDashboard();
         const stored = localStorage.getItem('ledgy-dashboard');
         expect(stored).toBeTruthy();
@@ -118,7 +118,7 @@ describe('useDashboardStore', () => {
             }],
         };
         localStorage.setItem('ledgy-dashboard', JSON.stringify(testLayout));
-        
+
         await useDashboardStore.getState().loadDashboard();
         const state = useDashboardStore.getState();
         expect(state.widgets).toHaveLength(1);

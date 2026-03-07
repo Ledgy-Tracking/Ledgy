@@ -26,7 +26,7 @@ interface DashboardState {
     layout: DashboardLayout;
     isLoading: boolean;
     error: string | null;
-    
+
     // Actions
     addWidget: (widget: Widget) => Promise<void>;
     updateLayout: (layout: DashboardLayout) => Promise<void>;
@@ -34,10 +34,12 @@ interface DashboardState {
     updateWidget: (widgetId: string, updates: Partial<Widget>) => Promise<void>;
     loadDashboard: () => Promise<void>;
     saveDashboard: () => Promise<void>;
-    
+
     // Subscription to node store outputs (structure only - full wiring in 1.5)
     subscribeToNodeOutput: (nodeId: string) => void;
     unsubscribeFromNodeOutput: (nodeId: string) => void;
+    // Memory Sweep
+    clearProfileData: () => void;
 }
 
 export const useDashboardStore = create<DashboardState>((set, get) => ({
@@ -53,7 +55,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
             const updatedWidgets = [...get().widgets, widget];
             const updatedLayout = { widgets: updatedWidgets };
             set({ widgets: updatedWidgets, layout: updatedLayout, isLoading: false });
-            
+
             // Auto-save
             await get().saveDashboard();
         } catch (error) {
@@ -69,7 +71,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             set({ layout, widgets: layout.widgets, isLoading: false });
-            
+
             // Auto-save
             await get().saveDashboard();
         } catch (error) {
@@ -87,7 +89,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
             const updatedWidgets = get().widgets.filter(w => w.id !== widgetId);
             const updatedLayout = { widgets: updatedWidgets };
             set({ widgets: updatedWidgets, layout: updatedLayout, isLoading: false });
-            
+
             // Auto-save
             await get().saveDashboard();
         } catch (error) {
@@ -107,7 +109,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
             );
             const updatedLayout = { widgets: updatedWidgets };
             set({ widgets: updatedWidgets, layout: updatedLayout, isLoading: false });
-            
+
             // Auto-save
             await get().saveDashboard();
         } catch (error) {
@@ -161,5 +163,14 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     unsubscribeFromNodeOutput: (nodeId: string) => {
         // TODO: Implement actual unsubscription in Story 1.5
         console.log(`[DashboardStore] Unsubscribing from node output: ${nodeId}`);
+    },
+
+    clearProfileData: () => {
+        set({
+            widgets: [],
+            layout: { widgets: [] },
+            isLoading: false,
+            error: null,
+        });
     },
 }));

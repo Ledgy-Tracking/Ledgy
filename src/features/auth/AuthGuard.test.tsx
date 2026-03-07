@@ -23,7 +23,7 @@ describe('AuthGuard', () => {
     });
 
     it('redirects to /setup when user is not registered', () => {
-        mockUseAuthStore.mockReturnValue({} as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
         mockUseIsRegistered.mockReturnValue(false);
 
         render(
@@ -47,7 +47,7 @@ describe('AuthGuard', () => {
     });
 
     it('redirects to /unlock when user is registered but not unlocked', () => {
-        mockUseAuthStore.mockReturnValue({ isUnlocked: false } as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -71,7 +71,7 @@ describe('AuthGuard', () => {
     });
 
     it('renders children when user is authenticated', () => {
-        mockUseAuthStore.mockReturnValue({ isUnlocked: true } as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: true })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(

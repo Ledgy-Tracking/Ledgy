@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useSyncStore } from './useSyncStore';
-import { useAuthStore } from '../features/auth/useAuthStore';
 import * as dbModule from '../lib/db';
 
 vi.mock('../lib/db', () => ({
@@ -9,7 +8,13 @@ vi.mock('../lib/db', () => ({
     get_sync_config: vi.fn(),
     save_sync_config: vi.fn()
 }));
-vi.mock('../features/auth/useAuthStore');
+const mockGetState = vi.fn(() => ({ isUnlocked: true, encryptionKey: {} }));
+vi.mock('../features/auth/useAuthStore', () => ({
+    useAuthStore: Object.assign(
+        vi.fn((selector: any) => selector({ isUnlocked: true, encryptionKey: {} })),
+        { getState: () => mockGetState() }
+    )
+}));
 
 // A simple waitFor utility for Vitest
 async function waitFor(callback: () => void, { timeout = 2000, interval = 50 } = {}) {
@@ -30,7 +35,6 @@ async function waitFor(callback: () => void, { timeout = 2000, interval = 50 } =
 describe('useSyncStore Conflict Detection', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (useAuthStore as any).mockReturnValue({ isUnlocked: true, encryptionKey: {} });
         useSyncStore.getState().clearConflicts();
     });
 
@@ -78,9 +82,12 @@ describe('useSyncStore Conflict Detection', () => {
         // Use waitFor to wait for the async listener to finish processing
         await waitFor(() => {
             const updatedStore = useSyncStore.getState();
-            expect(updatedStore.conflicts.length).toBe(1);
+            expect(updatedStore.conflicts).toHaveLength(1);
             expect(updatedStore.conflicts[0].entryId).toBe('doc1');
-            expect(updatedStore.conflicts[0].conflictingFields).toContain('title');
+
+            // Check that title is one of the conflicting fields
+            const hasTitleConflict = updatedStore.conflicts[0].conflictingFields.includes('title');
+            expect(hasTitleConflict).toBe(true);
         });
     });
 });

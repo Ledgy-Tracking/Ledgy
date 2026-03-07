@@ -22,14 +22,19 @@ interface SyncState {
     removeConflict: (entryId: string) => void;
     clearConflicts: () => void;
     getConflicts: () => ConflictEntry[];
+    clearProfileData: () => void;
 }
 
-export const useSyncStore = create<SyncState>((set, get) => ({
+const initialState = {
     syncConfig: null,
-    syncStatus: { status: 'idle' },
+    syncStatus: { status: 'idle' } as SyncStatus,
     conflicts: [],
     isLoading: false,
     error: null,
+};
+
+export const useSyncStore = create<SyncState>((set, get) => ({
+    ...initialState,
 
     addConflict: (conflict: ConflictEntry) => {
         const current = get().conflicts;
@@ -255,5 +260,9 @@ export const useSyncStore = create<SyncState>((set, get) => ({
             set({ error: errorMsg, isLoading: false, syncStatus: { status: 'offline' } });
             useErrorStore.getState().dispatchError(errorMsg);
         }
+    },
+
+    clearProfileData: () => {
+        set(initialState);
     },
 }));

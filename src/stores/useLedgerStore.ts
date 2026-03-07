@@ -37,15 +37,20 @@ interface LedgerState {
     deleteEntry: (entryId: string) => Promise<void>;
     restoreEntry: (entryId: string) => Promise<void>;
     setOnEntryEvent: (callback: (eventType: 'on-create' | 'on-edit', entry: LedgerEntry) => void) => void;
+    clearProfileData: () => void;
 }
 
-export const useLedgerStore = create<LedgerState>((set, get) => ({
+const initialState = {
     schemas: [],
     entries: {},
     allEntries: {},
     backLinks: {},
     isLoading: false,
     error: null,
+};
+
+export const useLedgerStore = create<LedgerState>((set, get) => ({
+    ...initialState,
 
     fetchSchemas: async (profileId: string) => {
         set({ isLoading: true, error: null });
@@ -264,6 +269,10 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
 
     setOnEntryEvent: (callback: (eventType: 'on-create' | 'on-edit', entry: LedgerEntry) => void) => {
         set({ onEntryEvent: callback });
+    },
+
+    clearProfileData: () => {
+        set({ ...initialState, onEntryEvent: get().onEntryEvent });
     },
 }));
 

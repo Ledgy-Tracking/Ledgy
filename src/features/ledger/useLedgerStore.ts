@@ -44,7 +44,7 @@ interface LedgerState {
     schemas: Schema[];
     isLoading: boolean;
     error: string | null;
-    
+
     // Actions
     loadEntries: (schemaType?: string) => Promise<void>;
     loadSchemas: () => Promise<void>;
@@ -52,6 +52,8 @@ interface LedgerState {
     updateEntry: (id: string, updates: Partial<LedgerEntry>) => Promise<void>;
     deleteEntry: (id: string) => Promise<void>;
     createSchema: (schema: Partial<Schema>) => Promise<void>;
+    // Memory Sweep
+    clearProfileData: () => void;
 }
 
 export const useLedgerStore = create<LedgerState>((set, get) => ({
@@ -68,11 +70,11 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             // For now, mock implementation
             const stored = localStorage.getItem('ledgy-entries');
             const entries: LedgerEntry[] = stored ? JSON.parse(stored) : [];
-            
-            const filtered = schemaType 
+
+            const filtered = schemaType
                 ? entries.filter(e => e.type === schemaType)
                 : entries;
-            
+
             set({ entries: filtered, isLoading: false });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load entries';
@@ -113,7 +115,7 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
                 updatedAt: new Date().toISOString(),
                 ...entry,
             } as LedgerEntry;
-            
+
             const updatedEntries = [...get().entries, newEntry];
             localStorage.setItem('ledgy-entries', JSON.stringify(updatedEntries));
             set({ entries: updatedEntries, isLoading: false });
@@ -130,8 +132,8 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             // TODO: Implement PouchDB integration in Story 1.5
-            const updatedEntries = get().entries.map(entry => 
-                entry._id === id 
+            const updatedEntries = get().entries.map(entry =>
+                entry._id === id
                     ? { ...entry, ...updates, updatedAt: new Date().toISOString() }
                     : entry
             );
@@ -181,7 +183,7 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
                 updatedAt: new Date().toISOString(),
                 ...schema,
             };
-            
+
             const updatedSchemas = [...get().schemas, newSchema];
             localStorage.setItem('ledgy-schemas', JSON.stringify(updatedSchemas));
             set({ schemas: updatedSchemas, isLoading: false });
@@ -192,5 +194,14 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
                 useErrorStore.getState().dispatchError(errorMessage, 'error');
             });
         }
+    },
+
+    clearProfileData: () => {
+        set({
+            entries: [],
+            schemas: [],
+            isLoading: false,
+            error: null,
+        });
     },
 }));

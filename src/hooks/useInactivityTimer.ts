@@ -25,7 +25,6 @@ export function useInactivityTimer(options: UseInactivityTimerOptions = {}) {
         onTimeout,
     } = options;
 
-    const lock = useAuthStore(state => state.lock);
     const isUnlocked = useAuthStore(state => state.isUnlocked);
     const timerRef = useRef<number | null>(null);
     const lastActivityRef = useRef<number>(Date.now());
@@ -43,10 +42,10 @@ export function useInactivityTimer(options: UseInactivityTimerOptions = {}) {
         if (onTimeout) {
             onTimeout();
         } else {
-            // Default: lock the vault
-            lock();
+            // Default: lock the vault using getState to avoid stale closures
+            useAuthStore.getState().lock();
         }
-    }, [onTimeout, lock]);
+    }, [onTimeout]);
 
     // Reset timer on user activity
     const resetTimer = useCallback(() => {
@@ -74,7 +73,7 @@ export function useInactivityTimer(options: UseInactivityTimerOptions = {}) {
         let throttleTimeout: number | null = null;
         const throttledReset = () => {
             if (throttleTimeout !== null) return;
-            
+
             throttleTimeout = window.setTimeout(() => {
                 resetTimer();
                 throttleTimeout = null;

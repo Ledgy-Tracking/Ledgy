@@ -35,19 +35,24 @@ interface NodeState {
     setEdges: (edges: CanvasEdge[]) => void;
     setViewport: (viewport: Viewport) => void;
     updateNodeData: (nodeId: string, data: Record<string, any>) => void;
+    clearProfileData: () => void;
 }
 
 const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 0, zoom: 1 };
 
+const initialState = {
+    nodes: [],
+    edges: [],
+    viewport: DEFAULT_VIEWPORT,
+    isLoading: false,
+    error: null,
+    activeProfileId: null,
+    activeProjectId: null,
+};
+
 export const useNodeStore = create<NodeState>()(
     subscribeWithSelector((set, get) => ({
-        nodes: [],
-        edges: [],
-        viewport: DEFAULT_VIEWPORT,
-        isLoading: false,
-        error: null,
-        activeProfileId: null,
-        activeProjectId: null,
+        ...initialState,
 
         // Official React Flow + Zustand pattern:
         // applyNodeChanges handles internal RF changes (drag, select, resize)
@@ -125,6 +130,10 @@ export const useNodeStore = create<NodeState>()(
                     n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n
                 ),
             });
+        },
+
+        clearProfileData: () => {
+            set(initialState);
         },
     }))
 );

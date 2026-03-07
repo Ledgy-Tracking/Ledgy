@@ -207,6 +207,7 @@ export function getProfileDb(profileId: string): Database {
  */
 export async function closeProfileDb(profileId: string): Promise<void> {
     if (profileDatabases[profileId]) {
+        profileDatabases[profileId].cancelSync();
         await profileDatabases[profileId].close();
     }
 }

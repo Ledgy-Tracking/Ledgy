@@ -3,22 +3,33 @@ import { render, act } from '@testing-library/react';
 import { AutoLock } from './AutoLock';
 import { useAuthStore } from './useAuthStore';
 
-// Mock useAuthStore
+// Create a mock state object that we can update in tests
+const mockState = {
+    lock: vi.fn(),
+    isUnlocked: false,
+};
+
+// Mock useAuthStore to act like a Zustand hook with selectors
 vi.mock('./useAuthStore', async () => {
     const actual = await vi.importActual('./useAuthStore');
     return {
         ...(actual as object),
-        useAuthStore: vi.fn(),
+        useAuthStore: vi.fn().mockImplementation((selector) => {
+            if (typeof selector === 'function') {
+                return selector(mockState);
+            }
+            return mockState;
+        }),
     };
 });
 
 describe('AutoLock', () => {
-    const mockUseAuthStore = vi.mocked(useAuthStore);
-    const mockLock = vi.fn();
 
     beforeEach(() => {
         vi.clearAllMocks();
         vi.useFakeTimers();
+        mockState.lock.mockClear();
+        mockState.isUnlocked = false;
     });
 
     afterEach(() => {
@@ -26,10 +37,7 @@ describe('AutoLock', () => {
     });
 
     it('does not lock when vault is not unlocked', () => {
-        mockUseAuthStore.mockReturnValue({
-            lock: mockLock,
-            isUnlocked: false,
-        } as any);
+        mockState.isUnlocked = false;
 
         render(<AutoLock />);
 
@@ -42,14 +50,11 @@ describe('AutoLock', () => {
             vi.advanceTimersByTime(5000);
         });
 
-        expect(mockLock).not.toHaveBeenCalled();
+        expect(mockState.lock).not.toHaveBeenCalled();
     });
 
     it('locks on beforeunload event', () => {
-        mockUseAuthStore.mockReturnValue({
-            lock: mockLock,
-            isUnlocked: true,
-        } as any);
+        mockState.isUnlocked = true;
 
         render(<AutoLock />);
 
@@ -57,20 +62,17 @@ describe('AutoLock', () => {
             window.dispatchEvent(new Event('beforeunload'));
         });
 
-        expect(mockLock).toHaveBeenCalledTimes(1);
+        expect(mockState.lock).toHaveBeenCalledTimes(1);
     });
 
     it('locks on visibilitychange when tab becomes hidden', () => {
-        mockUseAuthStore.mockReturnValue({
-            lock: mockLock,
-            isUnlocked: true,
-        } as any);
+        mockState.isUnlocked = true;
 
         render(<AutoLock />);
 
         // Simulate tab becoming hidden
         Object.defineProperty(document, 'hidden', { value: true, writable: true });
-        
+
         act(() => {
             document.dispatchEvent(new Event('visibilitychange'));
         });
@@ -80,27 +82,24 @@ describe('AutoLock', () => {
             vi.advanceTimersByTime(5000);
         });
 
-        expect(mockLock).toHaveBeenCalledTimes(1);
+        expect(mockState.lock).toHaveBeenCalledTimes(1);
     });
 
     it('clears timeout if tab becomes visible again', () => {
-        mockUseAuthStore.mockReturnValue({
-            lock: mockLock,
-            isUnlocked: true,
-        } as any);
+        mockState.isUnlocked = true;
 
         render(<AutoLock />);
 
         // Tab becomes hidden
         Object.defineProperty(document, 'hidden', { value: true, writable: true });
-        
+
         act(() => {
             document.dispatchEvent(new Event('visibilitychange'));
         });
 
         // Tab becomes visible again before 5 seconds
         Object.defineProperty(document, 'hidden', { value: false, writable: true });
-        
+
         act(() => {
             vi.advanceTimersByTime(2000);
             document.dispatchEvent(new Event('visibilitychange'));
@@ -111,27 +110,21 @@ describe('AutoLock', () => {
             vi.advanceTimersByTime(5000);
         });
 
-        expect(mockLock).not.toHaveBeenCalled();
+        expect(mockState.lock).not.toHaveBeenCalled();
     });
 
     it('does not add event listeners when not unlocked', () => {
-        mockUseAuthStore.mockReturnValue({
-            lock: mockLock,
-            isUnlocked: false,
-        } as any);
+        mockState.isUnlocked = false;
 
         const { unmount } = render(<AutoLock />);
 
         // Remove listeners should not throw even if none were added
         expect(() => unmount()).not.toThrow();
-        expect(mockLock).not.toHaveBeenCalled();
+        expect(mockState.lock).not.toHaveBeenCalled();
     });
 
     it('cleans up event listeners on unmount', () => {
-        mockUseAuthStore.mockReturnValue({
-            lock: mockLock,
-            isUnlocked: true,
-        } as any);
+        mockState.isUnlocked = true;
 
         const { unmount } = render(<AutoLock />);
 

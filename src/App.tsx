@@ -11,6 +11,11 @@ import { NotificationToast } from "./components/NotificationToast";
 import { ProfileSelector } from "./features/profiles/ProfileSelector";
 import { ProfileCreationPage } from "./features/profile/ProfileCreationPage";
 import { useUIStore } from "./stores/useUIStore";
+import { useProfileStore } from "./features/profiles/useProfileStore";
+import { useLedgerStore } from "./stores/useLedgerStore";
+import { useNodeStore } from "./stores/useNodeStore";
+import { useDashboardStore } from "./stores/useDashboardStore";
+import { useSyncStore } from "./stores/useSyncStore";
 import { useEffect } from "react";
 import { LedgerView } from "./features/ledger/LedgerView";
 import { TrashView } from "./features/ledger/TrashView";
@@ -24,6 +29,16 @@ import { AppShell } from "./features/shell/AppShell";
 function App() {
   const theme = useUIStore((state) => state.theme);
   const density = useUIStore((state) => state.density);
+  const activeProfileId = useProfileStore((state) => state.activeProfileId);
+
+  // Cross-Profile Storage Memory Sweeps
+  useEffect(() => {
+    // When active profile changes, clear the data from all dependent stores
+    useLedgerStore.getState().clearProfileData();
+    useNodeStore.getState().clearProfileData();
+    useDashboardStore.getState().clearProfileData();
+    useSyncStore.getState().clearProfileData();
+  }, [activeProfileId]);
 
   useEffect(() => {
     const html = window.document.documentElement;
@@ -105,7 +120,7 @@ function App() {
           <Route
             path="/app/:profileId"
             element={
-              <ErrorBoundary>
+              <ErrorBoundary key={activeProfileId || 'empty'}>
                 <AuthGuard>
                   <ReactFlowProvider>
                     <AppShell />

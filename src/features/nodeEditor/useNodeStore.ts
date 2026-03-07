@@ -18,7 +18,7 @@ interface NodeState {
     edges: FlowEdge[];
     isLoading: boolean;
     error: string | null;
-    
+
     // Actions
     addNode: (node: FlowNode) => Promise<void>;
     updateNodePosition: (nodeId: string, x: number, y: number) => Promise<void>;
@@ -27,6 +27,8 @@ interface NodeState {
     deleteEdge: (edgeId: string) => Promise<void>;
     loadGraph: () => Promise<void>;
     saveGraph: () => Promise<void>;
+    // Memory Sweep
+    clearProfileData: () => void;
 }
 
 // Debounce helper for persistence
@@ -54,7 +56,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         try {
             const updatedNodes = [...get().nodes, node];
             set({ nodes: updatedNodes, isLoading: false });
-            
+
             // Debounced persistence
             debouncedSave(() => get().saveGraph());
         } catch (error) {
@@ -74,7 +76,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
                     : node
             );
             set({ nodes: updatedNodes });
-            
+
             // Debounced persistence after drag
             debouncedSave(() => get().saveGraph());
         } catch (error) {
@@ -91,7 +93,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         try {
             const updatedEdges = [...get().edges, edge];
             set({ edges: updatedEdges, isLoading: false });
-            
+
             // Debounced persistence
             debouncedSave(() => get().saveGraph());
         } catch (error) {
@@ -107,11 +109,11 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         set({ isLoading: true, error: null });
         try {
             const updatedNodes = get().nodes.filter(node => node.id !== nodeId);
-            const updatedEdges = get().edges.filter(edge => 
+            const updatedEdges = get().edges.filter(edge =>
                 edge.source !== nodeId && edge.target !== nodeId
             );
             set({ nodes: updatedNodes, edges: updatedEdges, isLoading: false });
-            
+
             // Debounced persistence
             debouncedSave(() => get().saveGraph());
         } catch (error) {
@@ -128,7 +130,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         try {
             const updatedEdges = get().edges.filter(edge => edge.id !== edgeId);
             set({ edges: updatedEdges, isLoading: false });
-            
+
             // Debounced persistence
             debouncedSave(() => get().saveGraph());
         } catch (error) {
@@ -147,10 +149,10 @@ export const useNodeStore = create<NodeState>((set, get) => ({
             // For now, mock implementation
             const storedNodes = localStorage.getItem('ledgy-nodes');
             const storedEdges = localStorage.getItem('ledgy-edges');
-            
+
             const nodes: FlowNode[] = storedNodes ? JSON.parse(storedNodes) : [];
             const edges: FlowEdge[] = storedEdges ? JSON.parse(storedEdges) : [];
-            
+
             set({ nodes, edges, isLoading: false });
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load graph';
@@ -175,5 +177,14 @@ export const useNodeStore = create<NodeState>((set, get) => ({
                 useErrorStore.getState().dispatchError(errorMessage, 'error');
             });
         }
+    },
+
+    clearProfileData: () => {
+        set({
+            nodes: [],
+            edges: [],
+            isLoading: false,
+            error: null,
+        });
     },
 }));
