@@ -5,9 +5,11 @@ import { Lock, ShieldAlert, ArrowRight, AlertTriangle, Eye, EyeOff, KeyRound, Lo
 import { useAuthStore, EXPIRY_OPTIONS, RememberMeExpiry, DEFAULT_EXPIRY } from './useAuthStore';
 import { useErrorStore } from '../../stores/useErrorStore';
 
-const getFriendlyErrorMessage = (error: any): string => {
+const getFriendlyErrorMessage = (error: unknown): string => {
     if (!error) return 'An unexpected error occurred.';
-    const msg = (error?.message || String(error)).toLowerCase();
+
+    const message = error instanceof Error ? error.message : String(error);
+    const msg = message.toLowerCase();
 
     if (msg.includes('decryption failed') || msg.includes('mac check failed') || msg.includes('operation failed')) {
         return 'Incorrect passphrase.';
