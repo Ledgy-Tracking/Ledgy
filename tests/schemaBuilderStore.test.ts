@@ -307,4 +307,66 @@ describe('useSchemaBuilderStore', () => {
         expect(draftFields).toHaveLength(1);
         expect(draftFields[0].name).toBe('Original');
     });
+
+    // Story 3-4: type-change from text to number clears text constraints
+    it('updateField type-change from text to number clears minLength, maxLength, pattern', () => {
+        useSchemaBuilderStore.getState().initCreate('project-1');
+        useSchemaBuilderStore.getState().addField();
+        useSchemaBuilderStore.getState().updateField(0, {
+            type: 'text',
+            minLength: 3,
+            maxLength: 50,
+            pattern: '^[A-Z]',
+        });
+
+        useSchemaBuilderStore.getState().updateField(0, { type: 'number' });
+
+        const field = useSchemaBuilderStore.getState().draftFields[0];
+        expect(field.type).toBe('number');
+        expect(field.minLength).toBeUndefined();
+        expect(field.maxLength).toBeUndefined();
+        expect(field.pattern).toBeUndefined();
+        expect(field.min).toBeUndefined();
+        expect(field.max).toBeUndefined();
+    });
+
+    // Story 3-4: type-change from number to text clears min and max
+    it('updateField type-change from number to text clears min and max', () => {
+        useSchemaBuilderStore.getState().initCreate('project-1');
+        useSchemaBuilderStore.getState().addField();
+        useSchemaBuilderStore.getState().updateField(0, { type: 'number', min: 0, max: 100 });
+
+        useSchemaBuilderStore.getState().updateField(0, { type: 'text' });
+
+        const field = useSchemaBuilderStore.getState().draftFields[0];
+        expect(field.type).toBe('text');
+        expect(field.min).toBeUndefined();
+        expect(field.max).toBeUndefined();
+    });
+
+    // Story 3-4: updateField minLength on text field (type not changed) preserves other constraints
+    it('updateField updating minLength on text field preserves other constraints', () => {
+        useSchemaBuilderStore.getState().initCreate('project-1');
+        useSchemaBuilderStore.getState().addField();
+        useSchemaBuilderStore.getState().updateField(0, { type: 'text', maxLength: 50, pattern: '^[A-Z]' });
+
+        useSchemaBuilderStore.getState().updateField(0, { minLength: 3 });
+
+        const field = useSchemaBuilderStore.getState().draftFields[0];
+        expect(field.minLength).toBe(3);
+        expect(field.maxLength).toBe(50);
+        expect(field.pattern).toBe('^[A-Z]');
+    });
+
+    // Story 3-4: updateField clearing minLength by setting undefined
+    it('updateField clearing minLength by setting undefined removes the field', () => {
+        useSchemaBuilderStore.getState().initCreate('project-1');
+        useSchemaBuilderStore.getState().addField();
+        useSchemaBuilderStore.getState().updateField(0, { type: 'text', minLength: 5 });
+
+        useSchemaBuilderStore.getState().updateField(0, { minLength: undefined });
+
+        const field = useSchemaBuilderStore.getState().draftFields[0];
+        expect(field.minLength).toBeUndefined();
+    });
 });

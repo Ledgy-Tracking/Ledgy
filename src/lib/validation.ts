@@ -19,11 +19,23 @@ export function buildZodSchemaFromLedger(
   for (const field of schema.fields) {
     let base: z.ZodTypeAny;
     switch (field.type) {
+      case "long_text":
       case "text":
         base = z.string();
+        if (field.minLength !== undefined) base = (base as z.ZodString).min(field.minLength);
+        if (field.maxLength !== undefined) base = (base as z.ZodString).max(field.maxLength);
+        if (field.pattern !== undefined) {
+          try {
+            base = (base as z.ZodString).regex(new RegExp(field.pattern));
+          } catch {
+            console.warn(`Invalid regex pattern for field "${field.name}": ${field.pattern}`);
+          }
+        }
         break;
       case "number":
         base = z.number();
+        if (field.min !== undefined) base = (base as z.ZodNumber).min(field.min);
+        if (field.max !== undefined) base = (base as z.ZodNumber).max(field.max);
         break;
       case "date":
         base = z.string().refine(

@@ -11,8 +11,16 @@ export type FieldType = 'text' | 'number' | 'date' | 'relation' | 'long_text' | 
 export interface SchemaField {
     name: string;
     type: FieldType;
-    relationTarget?: string; // ledger ID if type is 'relation'
     required?: boolean;
+    // Relation constraint
+    relationTarget?: string; // ledger ID if type is 'relation'
+    // Text / Long Text constraints
+    minLength?: number;
+    maxLength?: number;
+    pattern?: string; // JavaScript RegExp source string (no delimiters)
+    // Number constraints
+    min?: number;
+    max?: number;
 }
 
 /**

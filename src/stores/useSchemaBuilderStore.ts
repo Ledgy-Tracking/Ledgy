@@ -88,6 +88,15 @@ export const useSchemaBuilderStore = create<SchemaBuilderState>((set, get) => ({
         if (updated.type !== 'relation') {
             delete updated.relationTarget;
         }
+        if (updated.type !== 'text' && updated.type !== 'long_text') {
+            delete updated.minLength;
+            delete updated.maxLength;
+            delete updated.pattern;
+        }
+        if (updated.type !== 'number') {
+            delete updated.min;
+            delete updated.max;
+        }
         const newFields = [...draftFields];
         newFields[index] = updated;
         set({ draftFields: newFields, isDirty: true });
