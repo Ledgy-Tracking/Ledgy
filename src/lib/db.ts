@@ -107,6 +107,9 @@ export class Database {
     }
 
     async updateDocument<T extends object>(id: string, data: T): Promise<PouchDB.Core.Response> {
+        // Validate no reserved fields in incoming data
+        validateDocumentFields(data as Partial<LedgyDocument>);
+
         const existing = await this.db.get<LedgyDocument>(id);
 
         // Prevent overwriting immutable envelope fields
@@ -470,7 +473,7 @@ export async function update_schema(
     const schema = await db.getDocument<LedgerSchema>(schemaId);
     const updateData: any = {
         fields,
-        schemaVersion: schema.schemaVersion + 1,
+        schema_version: schema.schema_version + 1,
     };
 
     if (encryptionKey) {
@@ -537,6 +540,20 @@ export async function delete_schema(db: Database, schemaId: string): Promise<voi
  */
 export async function get_schema(db: Database, schemaId: string): Promise<LedgerSchema> {
     return await db.getDocument<LedgerSchema>(schemaId);
+}
+
+/**
+ * Gets a single entry by ID.
+ * Throws a descriptive error (not a raw PouchDB 404) when not found.
+ * @param db - Profile database instance
+ * @param entryId - Entry document ID
+ */
+export async function get_entry(db: Database, entryId: string): Promise<LedgerEntry> {
+    const entry = await db.getDocument<LedgerEntry>(entryId);
+    if (!entry) {
+        throw new Error(`Entry not found: ${entryId}`);
+    }
+    return entry;
 }
 
 /**
@@ -775,7 +792,7 @@ export async function decryptSchemaMetadata(
         schemas.push({
             _id: doc._id,
             type: 'schema',
-            schemaVersion: doc.schemaVersion,
+            schema_version: doc.schema_version,
             createdAt: doc.createdAt,
             updatedAt: doc.updatedAt,
             name_enc: doc.name_enc,
@@ -1040,7 +1057,7 @@ export async function save_sync_config(
             const doc = {
                 _id: docId,
                 type: 'sync_config',
-                schemaVersion: 1,
+                schema_version: 1,
                 createdAt: now,
                 updatedAt: now,
                 ...encrypted

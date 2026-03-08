@@ -4,9 +4,9 @@ import { RelationCombobox } from '../src/features/ledger/RelationCombobox';
 
 describe('RelationCombobox', () => {
     const mockEntries = [
-        { _id: 'entry:1', data: { Name: 'Alpha' }, type: 'entry' as const, schemaId: 's1', ledgerId: 'l1', profileId: 'p1', schemaVersion: 1, createdAt: '', updatedAt: '' },
-        { _id: 'entry:2', data: { Name: 'Beta' }, type: 'entry' as const, schemaId: 's1', ledgerId: 'l1', profileId: 'p1', schemaVersion: 1, createdAt: '', updatedAt: '' },
-        { _id: 'entry:3', data: { Name: 'Gamma' }, type: 'entry' as const, schemaId: 's1', ledgerId: 'l1', profileId: 'p1', schemaVersion: 1, createdAt: '', updatedAt: '' },
+        { _id: 'entry:1', data: { Name: 'Alpha' }, type: 'entry' as const, schemaId: 's1', ledgerId: 'l1', profileId: 'p1', schema_version: 1, createdAt: '', updatedAt: '' },
+        { _id: 'entry:2', data: { Name: 'Beta' }, type: 'entry' as const, schemaId: 's1', ledgerId: 'l1', profileId: 'p1', schema_version: 1, createdAt: '', updatedAt: '' },
+        { _id: 'entry:3', data: { Name: 'Gamma' }, type: 'entry' as const, schemaId: 's1', ledgerId: 'l1', profileId: 'p1', schema_version: 1, createdAt: '', updatedAt: '' },
     ];
 
     it('renders trigger with placeholder initially', () => {

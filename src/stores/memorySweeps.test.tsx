@@ -48,7 +48,7 @@ describe('Memory Sweeps (Story 2.6)', () => {
 
         // Fill stores with dummy data
         act(() => {
-            useLedgerStore.setState({ schemas: [{ _id: 's1', type: 'schema', name: 'Test', fields: [], profileId: 'p1', projectId: 'proj1', schemaVersion: 1, createdAt: '', updatedAt: '' }] });
+            useLedgerStore.setState({ schemas: [{ _id: 's1', type: 'schema', name: 'Test', fields: [], profileId: 'p1', projectId: 'proj1', schema_version: 1, createdAt: '', updatedAt: '' }] });
             useNodeStore.setState({ nodes: [{ id: 'n1', type: 'default', position: { x: 0, y: 0 }, data: { label: 'test' } }] });
             useDashboardStore.setState({ widgets: [{ id: 'w1', type: 'chart', title: 'Test', position: { x: 0, y: 0, w: 2, h: 2 } }] });
             useSyncStore.setState({ syncConfig: { profileId: 'p1', remoteUrl: 'http://test', continuous: true, syncDirection: 'two-way' } as any });

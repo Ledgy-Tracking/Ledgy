@@ -191,7 +191,7 @@ export async function resolveConflictWithCustomData(
             ...customData,
             // Preserve document envelope fields
             type: currentDoc.type,
-            schemaVersion: currentDoc.schemaVersion,
+            schema_version: currentDoc.schema_version,
         });
 
         console.log(`Conflict resolved for ${entryId} with specified data`);

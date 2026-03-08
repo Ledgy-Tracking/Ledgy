@@ -28,7 +28,7 @@ const mockSchema = {
     ],
     profileId: 'profile-1',
     projectId: 'project-1',
-    schemaVersion: 1,
+    schema_version: 1,
     createdAt: '2026-02-23T00:00:00Z',
     updatedAt: '2026-02-23T00:00:00Z',
 };

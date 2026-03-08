@@ -51,7 +51,8 @@ export default defineConfig(async () => ({
     setupFiles: ["./src/setupTests.ts"],
     globals: true,
     include: [
-      "src/**/*.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
+      "src/**/*.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "tests/**/*.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"
     ],
   },
 }));

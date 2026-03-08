@@ -21,8 +21,8 @@ const validTemplate = {
     exportedAt: '2026-03-08T00:00:00Z',
     profileName: 'Test Profile',
     schemas: [
-        { _id: 'schema:1', type: 'schema' as const, schemaVersion: 1, name: 'Assets', fields: [], profileId, projectId, createdAt: '', updatedAt: '' },
-        { _id: 'schema:2', type: 'schema' as const, schemaVersion: 1, name: 'Liabilities', fields: [], profileId, projectId, createdAt: '', updatedAt: '' },
+        { _id: 'schema:1', type: 'schema' as const, schema_version: 1, name: 'Assets', fields: [], profileId, projectId, createdAt: '', updatedAt: '' },
+        { _id: 'schema:2', type: 'schema' as const, schema_version: 1, name: 'Liabilities', fields: [], profileId, projectId, createdAt: '', updatedAt: '' },
     ],
 };
 
@@ -112,7 +112,7 @@ describe('import_template', () => {
 
     it('conflict detection — skips schemas that already exist by name', async () => {
         mockListSchemas.mockResolvedValue([
-            { _id: 'schema:existing', type: 'schema', schemaVersion: 1, name: 'Assets', fields: [], profileId, projectId, createdAt: '', updatedAt: '' },
+            { _id: 'schema:existing', type: 'schema', schema_version: 1, name: 'Assets', fields: [], profileId, projectId, createdAt: '', updatedAt: '' },
         ] as any);
 
         const result = await import_template(mockDb, validTemplate, profileId, projectId);

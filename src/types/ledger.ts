@@ -51,7 +51,7 @@ export interface LedgerEntry extends LedgyDocument {
 export interface EncryptedLedgerSchemaMetadata {
     _id: string;
     type: 'schema';
-    schemaVersion: number;
+    schema_version: number;
     createdAt: string;
     updatedAt: string;
     name_enc?: {

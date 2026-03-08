@@ -32,7 +32,7 @@ export interface LedgyDocument {
     _id: string; // "{type}:{uuid}"
     _rev?: string;
     type: string; // "profile" | "project" | "entry" | "schema" | "node"
-    schemaVersion: number;
+    schema_version: number;
     createdAt: string; // ISO 8601
     updatedAt: string; // ISO 8601
     deletedAt?: string; // Ghost Reference soft-delete

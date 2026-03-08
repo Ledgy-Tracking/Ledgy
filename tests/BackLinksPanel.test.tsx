@@ -32,7 +32,7 @@ const mockBackLinkEntry = {
     },
     schemaId: 'ledger:source',
     profileId: 'profile-1',
-    schemaVersion: 1,
+    schema_version: 1,
     createdAt: '',
     updatedAt: ''
 };
