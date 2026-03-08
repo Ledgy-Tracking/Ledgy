@@ -3,7 +3,7 @@ import { LedgyDocument } from './profile';
 /**
  * Field types supported in ledger schemas
  */
-export type FieldType = 'text' | 'number' | 'date' | 'relation';
+export type FieldType = 'text' | 'number' | 'date' | 'relation' | 'long_text' | 'boolean' | 'select' | 'multi_select';
 
 /**
  * Schema field definition

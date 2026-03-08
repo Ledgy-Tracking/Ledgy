@@ -4,8 +4,9 @@ import { SchemaBuilder } from '../src/features/ledger/SchemaBuilder';
 import { useLedgerStore } from '../src/stores/useLedgerStore';
 import { useProfileStore } from '../src/stores/useProfileStore';
 import { useErrorStore } from '../src/stores/useErrorStore';
+import { useSchemaBuilderStore } from '../src/stores/useSchemaBuilderStore';
 
-// Mock the stores
+// Mock the external stores
 vi.mock('../src/stores/useLedgerStore');
 vi.mock('../src/stores/useProfileStore');
 vi.mock('../src/stores/useErrorStore');
@@ -23,18 +24,29 @@ describe('SchemaBuilder Component', () => {
     beforeEach(() => {
         vi.clearAllMocks();
 
+        // Reset the real useSchemaBuilderStore before each test
+        useSchemaBuilderStore.getState().discard();
+
         (useProfileStore as any).mockReturnValue({
             activeProfileId: 'profile-1',
         });
 
         (useLedgerStore as any).mockReturnValue({
-            createSchema: mockCreateSchema,
             isLoading: false,
             schemas: mockSchemas
+        });
+        // Allow commit() to call useLedgerStore.getState().createSchema(...)
+        (useLedgerStore as any).getState = vi.fn().mockReturnValue({
+            createSchema: mockCreateSchema,
+            schemas: mockSchemas,
         });
 
         (useErrorStore as any).mockReturnValue({
             dispatchError: mockDispatchError
+        });
+        // Allow commit() to call useErrorStore.getState().dispatchError(...)
+        (useErrorStore as any).getState = vi.fn().mockReturnValue({
+            dispatchError: mockDispatchError,
         });
     });
 
@@ -57,7 +69,9 @@ describe('SchemaBuilder Component', () => {
         const saveButton = screen.getByRole('button', { name: /Create Schema/i });
         fireEvent.click(saveButton);
         
-        expect(screen.getByText('At least one field is required')).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText('At least one field is required')).toBeInTheDocument();
+        });
         expect(mockDispatchError).toHaveBeenCalledWith('At least one field is required');
     });
 
@@ -80,6 +94,8 @@ describe('SchemaBuilder Component', () => {
     });
 
     it('handles relation field and populates target selector', async () => {
+        mockCreateSchema.mockResolvedValue('new-schema-id');
+
         render(<SchemaBuilder projectId="project-1" onClose={mockOnClose} />);
 
         fireEvent.click(screen.getByText('Add Field'));
@@ -178,7 +194,6 @@ describe('SchemaBuilder Component', () => {
 
         await waitFor(() => {
             expect(screen.getByText('PouchDB Error')).toBeInTheDocument();
-            // Note: createSchema already calls dispatchError internally in the store
         });
     });
 });
