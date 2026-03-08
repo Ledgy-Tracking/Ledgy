@@ -108,11 +108,11 @@ jobs:
         if: ${{ hashFiles('src-tauri/Cargo.toml') != '' }}
         with:
           path: ~/.cargo/bin/cargo-audit
-          key: ${{ runner.os }}-cargo-audit-0.20.0
+          key: ${{ runner.os }}-cargo-audit-0.21.1
 
       - name: Install cargo-audit
         if: steps.cache-cargo-audit.outputs.cache-hit != 'true' && hashFiles('src-tauri/Cargo.toml') != ''
-        run: cargo install cargo-audit --version 0.20.0 --locked
+        run: cargo install cargo-audit --version 0.21.1 --locked
 
       - name: Run cargo audit
         if: ${{ hashFiles('src-tauri/Cargo.toml') != '' }}
