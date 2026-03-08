@@ -38,7 +38,8 @@ afterAll(async () => {
 describe('AC1 - ID Scheme Enforcement', () => {
     it('creates entry doc with _id matching /^entry:[0-9a-f-]{36}$/', async () => {
         const db = await freshDb();
-        const entryId = await create_entry(db, 'schema:test', 'schema:test', { name: 'Test' }, TEST_PROFILE_ID);
+        const schemaId = await create_schema(db, 'AC1 Schema', [{ name: 'name', type: 'text' }], TEST_PROFILE_ID, 'project:test');
+        const entryId = await create_entry(db, schemaId, schemaId, { name: 'Test' }, TEST_PROFILE_ID);
         expect(entryId).toMatch(/^entry:[0-9a-f-]{36}$/);
     });
 
@@ -68,7 +69,8 @@ describe('AC2 - Envelope Field Completeness', () => {
 
     it('created entry contains all required envelope fields', async () => {
         const db = await freshDb();
-        const entryId = await create_entry(db, 'schema:e', 'schema:e', { value: 42 }, TEST_PROFILE_ID);
+        const schemaId = await create_schema(db, 'AC2 Schema', [{ name: 'value', type: 'number' }], TEST_PROFILE_ID, 'project:test');
+        const entryId = await create_entry(db, schemaId, schemaId, { value: 42 }, TEST_PROFILE_ID);
         const entry = await get_entry(db, entryId);
 
         expect(entry._id).toBe(entryId);
@@ -109,7 +111,8 @@ describe('AC3 - Reserved Field Rejection', () => {
 describe('AC4 - get_entry adapter', () => {
     it('returns the full LedgerEntry when found', async () => {
         const db = await freshDb();
-        const entryId = await create_entry(db, 'schema:x', 'schema:x', { color: 'blue' }, TEST_PROFILE_ID);
+        const schemaId = await create_schema(db, 'AC4 Schema', [{ name: 'color', type: 'text' }], TEST_PROFILE_ID, 'project:test');
+        const entryId = await create_entry(db, schemaId, schemaId, { color: 'blue' }, TEST_PROFILE_ID);
         const entry = await get_entry(db, entryId);
 
         expect(entry._id).toBe(entryId);
@@ -151,7 +154,7 @@ describe('AC5 - Entry and Schema CRUD', () => {
 describe('Soft-delete and restore', () => {
     it('delete_entry soft-deletes and list_entries excludes soft-deleted entries by default', async () => {
         const db = await freshDb();
-        const schemaId = 'schema:soft-test';
+        const schemaId = await create_schema(db, 'SoftDelete Schema', [{ name: 'val', type: 'number' }], TEST_PROFILE_ID, 'project:test');
         await create_entry(db, schemaId, schemaId, { val: 1 }, TEST_PROFILE_ID);
         const entryId = await create_entry(db, schemaId, schemaId, { val: 2 }, TEST_PROFILE_ID);
 
@@ -164,8 +167,8 @@ describe('Soft-delete and restore', () => {
 
     it('restore_entry re-includes entry in list_entries', async () => {
         const db = await freshDb();
-        const schemaId = 'schema:restore-test';
-        const entryId = await create_entry(db, schemaId, schemaId, { restored: true }, TEST_PROFILE_ID);
+        const schemaId = await create_schema(db, 'Restore Schema', [], TEST_PROFILE_ID, 'project:test');
+        const entryId = await create_entry(db, schemaId, schemaId, {}, TEST_PROFILE_ID);
 
         await delete_entry(db, entryId);
         const afterDelete = await list_entries(db, schemaId);

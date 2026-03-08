@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { LedgyDocument, ProfileMetadata } from '../types/profile';
 import { decryptPayload, encryptPayload } from '../lib/crypto';
 import { useErrorStore } from '../stores/useErrorStore';
+import { validateEntryAgainstSchema } from './validation';
 
 // Validation: Reject fields starting with _ (reserved for PouchDB)
 function validateDocumentFields(doc: Partial<LedgyDocument>): void {
@@ -584,6 +585,9 @@ export async function create_entry(
     profileId: string,
     encryptionKey?: CryptoKey
 ): Promise<string> {
+    const schema = await get_schema(db, schemaId);
+    const validatedData = validateEntryAgainstSchema(data, schema);
+
     const entryData: any = {
         schemaId,
         ledgerId,
@@ -592,7 +596,7 @@ export async function create_entry(
 
     if (encryptionKey) {
         // Zero-knowledge sync: Encrypt payload before storage
-        const result = await encryptPayload(encryptionKey, JSON.stringify(data));
+        const result = await encryptPayload(encryptionKey, JSON.stringify(validatedData));
         entryData.data_enc = {
             iv: result.iv,
             ciphertext: Array.from(new Uint8Array(result.ciphertext))
@@ -600,7 +604,7 @@ export async function create_entry(
         // Keep an empty data object for type compatibility
         entryData.data = {};
     } else {
-        entryData.data = data;
+        entryData.data = validatedData;
     }
 
     const response = await db.createDocument<LedgerEntry>('entry', entryData);
@@ -624,8 +628,12 @@ export async function update_entry(
     data: Record<string, unknown>,
     encryptionKey?: CryptoKey
 ): Promise<void> {
+    const existingEntry = await get_entry(db, entryId);
+    const schema = await get_schema(db, existingEntry.schemaId);
+    const validatedData = validateEntryAgainstSchema(data, schema);
+
     if (encryptionKey) {
-        const result = await encryptPayload(encryptionKey, JSON.stringify(data));
+        const result = await encryptPayload(encryptionKey, JSON.stringify(validatedData));
         const entryUpdate: any = {
             data_enc: {
                 iv: result.iv,
@@ -635,7 +643,7 @@ export async function update_entry(
         };
         await db.updateDocument(entryId, entryUpdate);
     } else {
-        await db.updateDocument(entryId, { data });
+        await db.updateDocument(entryId, { data: validatedData });
     }
 }
 
