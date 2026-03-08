@@ -103,7 +103,7 @@ jobs:
         if: ${{ hashFiles('src-tauri/Cargo.toml') != '' }}
 
       - name: Cache cargo-audit
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4
         id: cache-cargo-audit
         if: ${{ hashFiles('src-tauri/Cargo.toml') != '' }}
         with:
