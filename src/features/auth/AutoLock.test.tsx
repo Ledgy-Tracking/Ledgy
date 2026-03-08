@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, act } from '@testing-library/react';
 import { AutoLock } from './AutoLock';
-import { useAuthStore } from './useAuthStore';
 
 // Create a mock state object that we can update in tests
 const mockState = {
