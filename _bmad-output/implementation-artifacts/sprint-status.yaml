@@ -70,7 +70,7 @@ development_status:
   3-2-schema-strict-validation-engine: done
   3-3-schema-builder-type-configuration-store: done
   3-4-schema-builder-text-number-ui: done
-  3-5-schema-builder-date-relation-ui: backlog
+  3-5-schema-builder-date-relation-ui: ready-for-dev
   3-6-schema-migration-jit-engine: backlog
   3-7-data-lab-tanstack-virtualized-core: backlog
   3-8-data-lab-header-custom-sorting: backlog
