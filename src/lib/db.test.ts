@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll, vi } from 'vitest';
 import { getProfileDb, _clearProfileDatabases } from './db';
 import PouchDB from 'pouchdb';
+import { useErrorStore } from '../stores/useErrorStore';
 
 describe('Database Isolation', () => {
     beforeEach(async () => {
@@ -67,5 +68,66 @@ describe('Database Isolation', () => {
         expect(doc.createdAt).toBeDefined();
         expect(doc.updatedAt).toBeDefined();
         expect(new Date(doc.createdAt).getTime()).not.toBeNaN();
+    });
+});
+
+describe('Database.createDocument', () => {
+    beforeEach(async () => {
+        const db1 = new PouchDB('ledgy_profile_test_create');
+        await db1.destroy();
+        _clearProfileDatabases();
+        useErrorStore.setState({ error: null });
+    });
+
+    afterAll(async () => {
+        try {
+            const db = new PouchDB('ledgy_profile_test_create');
+            await db.destroy();
+        } catch (e) {
+            // Ignore errors
+        }
+        _clearProfileDatabases();
+    });
+
+    it('should successfully create a document with standard envelope', async () => {
+        const db = getProfileDb('test_create');
+        const response = await db.createDocument('test_type', { foo: 'bar' });
+
+        expect(response.ok).toBe(true);
+        expect(response.id).toMatch(/^test_type:[0-9a-f-]{36}$/);
+
+        const doc = await db.getDocument<any>(response.id);
+        expect(doc.type).toBe('test_type');
+        expect(doc.foo).toBe('bar');
+        expect(doc.schema_version).toBe(1);
+        expect(doc.createdAt).toBeDefined();
+        expect(doc.updatedAt).toBeDefined();
+    });
+
+    it('should throw an error when data contains reserved PouchDB fields', async () => {
+        const db = getProfileDb('test_create');
+
+        await expect(db.createDocument('test_type', { _invalid: 'value' }))
+            .rejects.toThrow('Invalid field "_invalid": Fields starting with "_" are reserved for PouchDB internal use');
+
+        // Allowed reserved fields should not throw in validation, but createDocument omits them via envelope
+        // Actually the validation function allows _id, _rev, _deleted
+        // but passing them to createDocument could be weird. The requirement is just testing the validation.
+    });
+
+    it('should dispatch error to store and throw on db.put failure', async () => {
+        const db = getProfileDb('test_create');
+
+        // Mock the internal db.put
+        const mockPut = vi.fn().mockRejectedValue(new Error('Simulated DB Error'));
+        (db as any).db.put = mockPut;
+
+        await expect(db.createDocument('test_type', { foo: 'bar' }))
+            .rejects.toThrow('Simulated DB Error');
+
+        const errorState = useErrorStore.getState().error;
+        expect(errorState).not.toBeNull();
+        expect(errorState?.message).toBe('Simulated DB Error');
+        expect(errorState?.type).toBe('error');
     });
 });
