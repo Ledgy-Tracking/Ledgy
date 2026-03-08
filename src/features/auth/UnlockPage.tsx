@@ -71,8 +71,8 @@ export const UnlockPage: React.FC = () => {
                         </button>
 
                         <button
-                            onClick={() => {
-                                reset();
+                            onClick={async () => {
+                                await reset();
                                 navigate('/setup');
                             }}
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50 border border-zinc-700 text-zinc-300 font-semibold rounded-lg transition-all"
@@ -330,8 +330,8 @@ export const UnlockPage: React.FC = () => {
                     <p className="text-xs text-zinc-600 uppercase tracking-widest font-bold">Secure Local-Only Architecture</p>
                     <button
                         type="button"
-                        onClick={() => {
-                            reset();
+                        onClick={async () => {
+                            await reset();
                             navigate('/setup');
                         }}
                         className="text-sm text-zinc-500 hover:text-emerald-400 transition-colors bg-transparent border-none cursor-pointer"

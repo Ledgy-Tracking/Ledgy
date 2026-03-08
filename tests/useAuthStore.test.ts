@@ -21,6 +21,16 @@ vi.mock('../src/lib/totp', () => ({
     verifyTotp: vi.fn().mockResolvedValue(true),
 }));
 
+vi.mock('../src/lib/db', () => ({
+    destroyAllDatabases: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock('../src/stores/useProfileStore', () => ({
+    useProfileStore: {
+        setState: vi.fn(),
+    },
+}));
+
 // Mock crypto.getRandomValues used for PBKDF2 salt generation
 Object.defineProperty(globalThis, 'crypto', {
     value: {
@@ -338,7 +348,7 @@ describe('useAuthStore', () => {
     // reset
     // -----------------------------------------------------------------------
     describe('reset', () => {
-        it('clears all auth state', () => {
+        it('clears all auth state', async () => {
             useAuthStore.setState({
                 totpSecret: 'JBSWY3DPEHPK3PXP',
                 isUnlocked: true,
@@ -348,7 +358,7 @@ describe('useAuthStore', () => {
                 encryptedTotpSecret: { iv: [], ciphertext: [], pbkdf2Salt: [] },
             });
 
-            useAuthStore.getState().reset();
+            await useAuthStore.getState().reset();
 
             const state = useAuthStore.getState();
             expect(state.totpSecret).toBeNull();
@@ -356,6 +366,14 @@ describe('useAuthStore', () => {
             expect(state.isUnlocked).toBe(false);
             expect(state.rememberMe).toBe(false);
             expect(state.rememberMeExpiry).toBeNull();
+        });
+
+        it('calls destroyAllDatabases to wipe profile data from IndexedDB', async () => {
+            const { destroyAllDatabases } = await import('../src/lib/db');
+
+            await useAuthStore.getState().reset();
+
+            expect(destroyAllDatabases).toHaveBeenCalledOnce();
         });
     });
 });

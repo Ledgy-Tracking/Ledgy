@@ -78,8 +78,8 @@ interface AuthState {
     verifyAndRegister: (secret: string, code: string, remember: boolean, passphrase?: string, expiryMs?: number | null) => Promise<boolean>;
     /** Lock the vault — preserves rememberMe preference so the next unlock can restore it. */
     lock: () => Promise<void>;
-    /** Hard reset: clears all auth state and persisted data. */
-    reset: () => void;
+    /** Hard reset: clears all auth state, destroys profile databases, and wipes persisted data. */
+    reset: () => Promise<void>;
     /** Called on app start: auto-unlock remembered sessions or flag that passphrase is needed. */
     initSession: () => Promise<void>;
 }
@@ -377,7 +377,16 @@ export const useAuthStore = create<AuthState>()(
                 useProfileStore.setState({ profiles: [] });
             },
 
-            reset: () => {
+            reset: async () => {
+                // Destroy all IndexedDB profile databases so a new account starts clean
+                const { destroyAllDatabases } = await import('../../lib/db');
+                await destroyAllDatabases();
+
+                // Clear the real profile store (used by ProfileSelector)
+                const { useProfileStore } = await import('../../stores/useProfileStore');
+                useProfileStore.setState({ profiles: [], activeProfileId: null });
+                localStorage.removeItem('ledgy-profile-storage');
+
                 set({
                     totpSecret: null,
                     encryptedTotpSecret: null,

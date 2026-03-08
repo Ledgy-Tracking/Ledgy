@@ -220,6 +220,33 @@ export function _clearProfileDatabases() {
 }
 
 /**
+ * Destroys all active profile databases and the master database from IndexedDB.
+ * Called on vault reset to ensure a new account starts with a clean slate.
+ */
+export async function destroyAllDatabases(): Promise<void> {
+    const ids = Object.keys(profileDatabases);
+    for (const id of ids) {
+        try {
+            profileDatabases[id].cancelSync();
+            await profileDatabases[id].destroy();
+        } catch {
+            // Ignore — DB may already be gone
+        }
+    }
+    profileDatabases = {};
+
+    // Destroy master DB if it was not open in the registry
+    if (!ids.includes('master')) {
+        try {
+            const masterPouchDb = new PouchDB('ledgy_profile_master');
+            await masterPouchDb.destroy();
+        } catch {
+            // Ignore — master DB may not exist yet
+        }
+    }
+}
+
+/**
  * Creates a new profile document in the master database.
  * Returns the profile ID on success.
  */
