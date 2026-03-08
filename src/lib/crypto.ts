@@ -8,6 +8,11 @@ import { useErrorStore } from '../stores/useErrorStore';
  */
 export const HKDF_SALT = 'ledgy-salt-v1';
 
+/**
+ * Pre-encoded HKDF salt for legacy support.
+ */
+export const HKDF_SALT_BYTES = new TextEncoder().encode(HKDF_SALT);
+
 /** Serializable form of a passphrase-encrypted TOTP secret (stored in localStorage). */
 export interface EncryptedSecret {
     iv: number[];
