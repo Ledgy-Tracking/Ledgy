@@ -181,10 +181,10 @@ src/
 
 ### Git Branch Strategy
 
-**Branch Decision**: Using `allatonce` branch for all epic implementation work.
+**Branch Decision**: Using `main` branch for all epic implementation work.
 
 ```bash
-git checkout allatonce
+git checkout main
 ```
 
 ### Previous Story Intelligence
@@ -266,7 +266,7 @@ BMad Method dev-story workflow (code review follow-ups)
 
 ### Mandatory Implementation Standards
 
-1. **Use existing git branch**: You MUST work on the `allatonce` branch.
+1. **Use existing git branch**: You MUST work on the `main` branch.
 
 2. **Database naming**: MUST use `ledgy-profile-{profileId}` convention.
 
@@ -285,6 +285,6 @@ BMad Method dev-story workflow (code review follow-ups)
 ### Next Steps
 
 After completing this story:
-1. Commit all changes to `allatonce` branch
+1. Commit all changes to `main` branch
 2. Update sprint-status.yaml and COMMIT
 3. Proceed to Story 2.2: Profile Selector Canvas

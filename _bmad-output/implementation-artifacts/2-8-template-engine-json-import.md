@@ -24,7 +24,7 @@ so that **I can scaffold a fresh profile with pre-built schema structures and no
 10. If any schema creation throws (non-conflict), the error is recorded in `TemplateImportResult.errors` but processing **continues** for remaining schemas (best-effort import). Errors are dispatched individually via `useErrorStore.dispatchError()`.
 11. The `useTemplateStore.importTemplate()` signature is updated to accept `(template: TemplateExport, profileId: string, projectId: string)` to include the target project context.
 12. During import, `isImporting` is `true`; the **Import Template** button is disabled. After completion (success or error), `isImporting` resets to `false`.
-13. **CRITICAL**: Developer MUST use the existing `allatonce` git branch for this epic.
+13. **CRITICAL**: Developer MUST use the existing `main` git branch for this epic.
 
 ## Tasks / Subtasks
 
@@ -99,7 +99,7 @@ The following are **already available in `src/lib/db.ts`**:
 - **Loading state**: `isImporting` lives in `useTemplateStore` — **never** local component state.
 - **Tauri pattern**: Use `Function()` constructor (same as `saveTemplateTauri`) to avoid Vite static analysis. Copy that exact pattern.
 - **No encryption on import**: Template files carry plaintext schema names/fields. `create_schema` and `save_canvas` are called **without** `encryptionKey`. This is correct — encryption is applied on the fly by the DB layer when the user session is active.
-- **Branch**: Use `allatonce` branch (confirmed active for Epic 2).
+- **Branch**: Use `main` branch (confirmed active for Epic 2).
 
 ### `importTemplate` Stub → Full Implementation
 

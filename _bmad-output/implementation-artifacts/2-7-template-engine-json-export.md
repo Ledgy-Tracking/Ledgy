@@ -20,7 +20,7 @@ so that **I can share my structure with others, back it up, or bootstrap a new p
 6. If the export fails (e.g., Tauri FS write error), the error is dispatched to `useErrorStore.dispatchError()` — no local `useState` error handling.
 7. If the user **cancels** the Tauri Save dialog (returns `null` path), the export silently aborts with no error shown.
 8. The `useTemplateStore` exposes a `reset()` action that sets the store back to its initial state — enabling the memory-sweep pattern established in Story 2.6.
-9. **CRITICAL**: Developer MUST use the existing `allatonce` git branch for this epic.
+9. **CRITICAL**: Developer MUST use the existing `main` git branch for this epic.
 
 ## Tasks / Subtasks
 
@@ -77,7 +77,7 @@ The following UI is **already wired**:
 - **Error handling pattern**: Errors → `useErrorStore.getState().dispatchError(msg)` — **never** local `useState`.
 - **Loading state**: `isExporting` lives in the Zustand store — **never** local component state.
 - **Tauri invoke pattern**: NOT used here. The Tauri FS/dialog calls are direct API calls (the Universal Web API layer note in architecture permits direct Tauri API calls for OS integrations like file save dialogs).
-- **Branch**: Use `allatonce` branch (confirmed active for Epic 2, per Story 2.6 AC#6).
+- **Branch**: Use `main` branch (confirmed active for Epic 2, per Story 2.6 AC#6).
 
 ### Store Modification Pattern (from Story 2.6)
 

@@ -22,7 +22,7 @@ so that **I cannot accidentally destroy all data in a profile by missclicking, a
 8. On successful deletion, the dialog closes, the profile list refreshes, and if the deleted profile was active, `activeProfileId` is set to `null`.
 9. The dialog is fully keyboard navigable: Escape key closes the dialog/cancels; Tab moves between elements correctly; Enter submits the form only when the confirm button is enabled.
 10. The name-confirmation input is auto-focused when the dialog opens.
-11. **CRITICAL**: Developer MUST use the existing `allatonce` git branch for this epic.
+11. **CRITICAL**: Developer MUST use the existing `main` git branch for this epic.
 
 ## Tasks / Subtasks
 
@@ -215,7 +215,7 @@ CREATE OR MODIFY: src/features/profiles/ProfileSelector.test.tsx
 
 ## Git Intelligence Summary
 
-- **Active branch**: `allatonce` (HEAD)
+- **Active branch**: `main` (HEAD)
 - **Last 3 commits relevant to this story**:
   1. `f6863a8` – `fix(story-2.4): address code review findings` — applied code review fixes for the WelcomePage; `ProfileSelector.tsx` changes were part of this commit
   2. `83fabf9` – `feat(story-2.4): first-launch empty state experience` — `WelcomePage.tsx`, `WelcomePage.test.tsx`, and `ProfileSelector.tsx` updated
@@ -257,7 +257,7 @@ BMad Method dev-story workflow (Antigravity/Gemini 2.5 Pro) — 2026-03-07
 - Existing `ProfileSelector.tsx` delete dialog reverse-engineered (lines 220–302)
 - `stores/useProfileStore.ts` `deleteProfile` verified as fully implemented
 - Remote sync UX (purge checkbox + force-local fallback) analyzed and preserved in requirements
-- Git branch confirmed: `allatonce`
+- Git branch confirmed: `main`
 - Key Risk identified: Two `useProfileStore.ts` files exist (features/ = old stub, stores/ = canonical); component uses `stores/` — developer must not confuse them
 
 **Implementation Completed (2026-03-07)**:

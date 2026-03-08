@@ -135,13 +135,13 @@ src/
 
 ### Git Branch Strategy
 
-**Branch Decision**: Using `allatonce` branch for all epic implementation work (user preference).
+**Branch Decision**: Using `main` branch for all epic implementation work (user preference).
 
 **Rationale**: Consolidates all epic stories onto a single branch for streamlined development and easier integration, rather than creating separate `epic/epic-1` branch.
 
 ```bash
 # Working on consolidated branch
-git checkout allatonce
+git checkout main
 ```
 
 All stories in Epic 1 (1-1 through 1-11) are implemented on this branch.
@@ -257,7 +257,7 @@ BMad Method dev-story workflow (YOLO mode - autonomous implementation)
 
 ### Mandatory Implementation Standards
 
-1. **Use existing git branch**: You MUST work on the `allatonce` branch (consolidated epic branch).
+1. **Use existing git branch**: You MUST work on the `main` branch (consolidated epic branch).
 
 2. **Error handling pattern**: All errors MUST be routed through `useErrorStore` and displayed via `<ErrorToast />` - no local error state.
 
@@ -270,6 +270,6 @@ BMad Method dev-story workflow (YOLO mode - autonomous implementation)
 ### Next Steps
 
 After completing this story:
-1. Commit all changes to `allatonce` branch
+1. Commit all changes to `main` branch
 2. Update sprint-status.yaml to mark this story as "done"
 3. Proceed to Story 1.3: Zustand Store Topology
