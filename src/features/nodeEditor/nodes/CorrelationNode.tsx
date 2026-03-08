@@ -1,0 +1,113 @@
+import React from 'react';
+import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Calculator, AlertCircle } from 'lucide-react';
+
+export interface CorrelationNodeData {
+    label: string;
+    result: number | null;
+    error?: string;
+    isComputing?: boolean;
+    changePercent?: number;
+    trend?: 'up' | 'down' | 'neutral';
+}
+
+/**
+ * Correlation Node - Computes Pearson correlation between two numeric streams
+ * Refactored to be passive (Story 4-3 cleanup)
+ */
+export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected }) => {
+    const nodeData = data as unknown as CorrelationNodeData;
+
+    const getCorrelationColor = (value: number | null | undefined) => {
+        if (typeof value !== 'number') return 'text-zinc-500';
+        if (value >= 0.7) return 'text-emerald-400';
+        if (value >= 0.3) return 'text-amber-400';
+        if (value >= -0.3) return 'text-zinc-400';
+        if (value >= -0.7) return 'text-amber-400';
+        return 'text-red-400';
+    };
+
+    const getCorrelationLabel = (value: number | null | undefined) => {
+        if (typeof value !== 'number') return '-';
+        if (value >= 0.7) return 'Strong +';
+        if (value >= 0.3) return 'Moderate +';
+        if (value >= -0.3) return 'Weak';
+        if (value >= -0.7) return 'Moderate -';
+        return 'Strong -';
+    };
+
+    return (
+        <div
+            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[220px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+                } ${nodeData.error ? 'border-red-500/50' : ''}`}
+        >
+            {/* Header */}
+            <div className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-t-md">
+                <Calculator size={14} className="text-purple-400" />
+                <span className="text-sm font-semibold text-zinc-100">Correlation</span>
+            </div>
+
+            {/* Input Ports */}
+            <div className="p-3 space-y-2">
+                <div className="relative">
+                    <Handle
+                        type="target"
+                        position={Position.Left}
+                        id="target-number-x"
+                        className="!w-3 !h-3 !bg-blue-500 !border-2 !border-zinc-900 hover:!bg-blue-400"
+                        style={{ left: '-6px' }}
+                    />
+                    <span className="text-xs text-zinc-400">X (numeric)</span>
+                </div>
+                <div className="relative">
+                    <Handle
+                        type="target"
+                        position={Position.Left}
+                        id="target-number-y"
+                        className="!w-3 !h-3 !bg-amber-500 !border-2 !border-zinc-900 hover:!bg-amber-400"
+                        style={{ left: '-6px', top: 'auto', bottom: '0' }}
+                    />
+                    <span className="text-xs text-zinc-400">Y (numeric)</span>
+                </div>
+            </div>
+
+            {/* Result Display */}
+            <div className="px-3 pb-3">
+                <div className="bg-zinc-800/50 rounded p-2 border border-zinc-700">
+                    <div className="text-xs text-zinc-500 mb-1">Pearson r</div>
+                    {nodeData.error ? (
+                        <div className="flex items-center gap-1.5 text-red-400 text-xs">
+                            <AlertCircle size={12} />
+                            <span>{nodeData.error}</span>
+                        </div>
+                    ) : nodeData.isComputing ? (
+                        <div className="text-amber-400 text-xs animate-pulse">Computing...</div>
+                    ) : (
+                        <div className="flex items-baseline gap-2">
+                            <span className={`text-lg font-bold ${getCorrelationColor(nodeData.result)}`}>
+                                {typeof nodeData.result === 'number' ? nodeData.result.toFixed(3) : '-'}
+                            </span>
+                            <span className="text-xs text-zinc-500">
+                                {getCorrelationLabel(nodeData.result)}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Output Port */}
+            <div className="px-3 pb-3">
+                <div className="relative flex justify-end">
+                    <span className="text-xs text-zinc-400 mr-2">result</span>
+                    <Handle
+                        type="source"
+                        position={Position.Right}
+                        id="source-number-result"
+                        className="!w-3 !h-3 !bg-purple-500 !border-2 !border-zinc-900 hover:!bg-purple-400"
+                        style={{ right: '-6px' }}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+});

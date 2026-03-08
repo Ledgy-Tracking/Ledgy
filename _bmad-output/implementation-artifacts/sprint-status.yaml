@@ -1,4 +1,4 @@
-# generated: 2026-02-21 15:12
+# generated: 2026-02-28 23:30
 # project: ledgy
 # project_key: NOKEY
 # tracking_system: file-system
@@ -33,60 +33,113 @@
 # - SM typically creates next story after previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
-generated: 2026-02-21 15:12
+generated: 2026-02-28 23:30
 project: ledgy
 project_key: NOKEY
 tracking_system: file-system
 story_location: "{project-root}/_bmad-output/implementation-artifacts"
 
 development_status:
-  epic-1: in-progress
-  1-1-project-scaffold-dev-environment: done
-  1-2-totp-registration-encryption-key-derivation: done
-  1-3-app-unlock-flow-auth-guard: in-progress
-  1-4-three-panel-shell-routing-global-error-handling: backlog
-  1-5-github-actions-ci-cd-pipeline: backlog
-  epic-1-retrospective: optional
+  epic-1: done
+  1-1-scaffold-dependency-tree: done
+  1-2-react-router-error-boundaries: done
+  1-3-zustand-store-topology: done
+  1-4-three-panel-shell-layout: done
+  1-5-pouchdb-core-initialization: done
+  1-6-totp-registration-ui: done
+  1-7-webcrypto-aes-256-engine: done
+  1-8-auth-guard-session-routing: done
+  1-9-global-app-settings-store: done
+  1-10-github-actions-cicd-automations: done
+  1-11-auth-rate-limiting-escalating-delays: done
+  epic-1-retrospective: done
 
-  epic-2: backlog
-  2-1-pouchdb-initialization-profile-data-model: backlog
-  2-2-profile-selector-ui: backlog
-  2-3-create-delete-profile: backlog
-  2-4-first-launch-template-picker-onboarding-flow: backlog
+  epic-2: in-progress
+  2-1-profile-db-segregation-logic: done
+  2-2-profile-selector-canvas: done
+  2-3-profile-creation-flow: done
+  2-4-first-launch-empty-state-experience: done
+  2-5-profile-deletion-safety-lock: review
+  2-6-cross-profile-storage-memory-sweeps: done
+  2-7-template-engine-json-export: review
+  2-8-template-engine-json-import: ready-for-dev
   epic-2-retrospective: optional
 
-  epic-3: backlog
-  3-1-schema-builder-ui: backlog
-  3-2-ledger-data-table-inline-entry-routing: backlog
-  3-3-bidirectional-relational-links: backlog
-  3-4-ghost-reference-handling-soft-delete: backlog
+  epic-3: in-progress
+  3-1-pouchdb-document-adapters: backlog
+  3-2-schema-strict-validation-engine: backlog
+  3-3-schema-builder-type-configuration-store: backlog
+  3-4-schema-builder-text-number-ui: backlog
+  3-5-schema-builder-date-relation-ui: backlog
+  3-6-schema-migration-jit-engine: backlog
+  3-7-data-lab-tanstack-virtualized-core: backlog
+  3-8-data-lab-header-custom-sorting: backlog
+  3-9-data-lab-keyboard-first-inline-entry-row: backlog
+  3-10-data-lab-relation-combobox-querying: backlog
+  3-11-data-lab-focus-management: backlog
+  3-12-data-lab-bulk-selection-edit-states: backlog
+  3-13-bidirectional-link-writing: backlog
+  3-14-ghost-reference-fallback-rendering: backlog
+  3-15-local-undo-redo-stack: backlog
+  3-16-relational-data-flattening-engine: backlog
   epic-3-retrospective: optional
 
   epic-4: backlog
-  4-1-node-canvas-engine-foundation: backlog
-  4-2-ledger-source-nodes-basic-wiring: backlog
-  4-3-correlation-compute-nodes: backlog
-  4-4-autonomous-triggers-on-create-on-edit: backlog
-  4-5-dashboard-widgets: backlog
+  4-1-react-flow-canvas-core-viewport: backlog
+  4-2-node-store-debounced-persistence: backlog
+  4-3-minimap-zoom-to-fit-controls: backlog
+  4-4-ledger-source-node-component: backlog
+  4-5-correlation-node-math-component: backlog
+  4-6-complex-edge-connection-snapping: backlog
+  4-7-strict-edge-type-validation: backlog
+  4-8-sub-graph-container-grouping: backlog
+  4-9-graph-pouchdb-hydration-hooks: backlog
+  4-10-web-worker-computation-offloading: backlog
+  4-11-cyclic-dependency-prevention-engine: backlog
+  4-12-autonomous-trigger-nodes-on-create: backlog
+  4-13-autonomous-trigger-action-nodes: backlog
+  4-14-trigger-execution-depth-limiter: backlog
+  4-15-node-engine-keyboard-shortcuts-group-ops: backlog
   epic-4-retrospective: optional
 
   epic-5: backlog
-  5-1-couchdb-remote-configuration-sync-client: backlog
-  5-2-sync-status-indicator-badge: backlog
-  5-3-conflict-detection-diff-guard-layout: backlog
-  5-4-conflict-resolution-accept-reject: backlog
-  5-5-remote-purge-right-to-be-forgotten: backlog
+  5-1-css-grid-layout-serialization: backlog
+  5-2-widget-drag-drop-resizing-shell: backlog
+  5-3-bar-line-trend-component-kernels: backlog
+  5-4-metric-counter-delta-components: backlog
+  5-5-widget-to-node-forge-data-piping: backlog
+  5-6-dashboard-read-only-safeguard: backlog
+  5-7-pinned-views-navigation-sidebar: backlog
   epic-5-retrospective: optional
 
   epic-6: backlog
-  6-1-plugin-runtime-permissions: backlog
-  6-2-ai-capture-plugin-image-ingestion-ephemerality: backlog
-  6-3-ai-capture-plugin-google-ai-studio-integration: backlog
-  6-4-ai-capture-plugin-draft-review-show-before-save: backlog
+  6-1-remote-couchdb-socket-connectors: backlog
+  6-2-delta-chunk-transmission-logic: backlog
+  6-3-sync-status-global-hud-badge: backlog
+  6-4-conflict-detection-store-traversal: backlog
+  6-5-diff-guard-layout-modal: backlog
+  6-6-diff-guard-field-level-merging: backlog
+  6-7-exponential-backoff-network-retry: backlog
+  6-8-total-remote-annihilation-right-to-be-forgotten: backlog
+  6-9-e2e-payload-envelope-wrapping: backlog
+  6-10-manual-html-csv-export-adapters: backlog
   epic-6-retrospective: optional
 
   epic-7: backlog
-  7-1-schema-graph-serialization: backlog
-  7-2-json-file-export-ui: backlog
-  7-3-json-file-import-ui: backlog
+  7-1-plugin-sandbox-isolation-proxy: backlog
+  7-2-ai-capture-overlay-ui-shell: backlog
+  7-3-image-ephemerality-blobs: backlog
+  7-4-google-ai-studio-payload-configurator: backlog
+  7-5-api-key-local-vault: backlog
+  7-6-dynamic-prompt-formulation: backlog
+  7-7-review-draft-card-ui-show-before-save: backlog
+  7-8-draft-committer-adapter: backlog
   epic-7-retrospective: optional
+
+  epic-8: backlog
+  8-1-zustand-react-flow-bridge-standardization: backlog
+  8-2-pouchdb-db-compaction-scheduler: backlog
+  8-3-vite-tree-shaking-guardrails: backlog
+  8-4-vitest-test-coverage-minimums: backlog
+  8-5-accessibility-compliance-engine: backlog
+  epic-8-retrospective: optional

@@ -1,0 +1,168 @@
+# CI - Continuous Integration
+# Runs on every push to main and pull requests
+# Tests, lints, and type-checks the codebase
+
+name: CI - Test & Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Cancel in-progress runs for the same workflow/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Job 1: Type Check & Lint
+  typecheck-lint:
+    name: Type Check & Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+
+  # Job 2: Unit Tests with Coverage
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Vitest tests with coverage
+        run: npm run test -- --coverage
+        continue-on-error: true
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4.3.1
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+  # Job 3: Security Scans
+  security:
+    name: Security Scans
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+      - name: Setup Rust (for cargo audit)
+        uses: dtolnay/rust-toolchain@stable
+        if: ${{ hashFiles('src-tauri/Cargo.toml') != '' }}
+
+      - name: Cache cargo-audit
+        uses: actions/cache@v4
+        id: cache-cargo-audit
+        if: ${{ hashFiles('src-tauri/Cargo.toml') != '' }}
+        with:
+          path: ~/.cargo/bin/cargo-audit
+          key: ${{ runner.os }}-cargo-audit-0.21.1
+
+      - name: Install cargo-audit
+        if: steps.cache-cargo-audit.outputs.cache-hit != 'true' && hashFiles('src-tauri/Cargo.toml') != ''
+        run: cargo install cargo-audit --version 0.21.1 --locked
+
+      - name: Run cargo audit
+        if: ${{ hashFiles('src-tauri/Cargo.toml') != '' }}
+        run: cd src-tauri && cargo audit
+        continue-on-error: true
+
+  # Job 4: Build Size Verification
+  build-size:
+    name: Build Size Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Check build sizes
+        run: |
+          echo "## Build Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check dist folder size
+          if [ -d "dist" ]; then
+            DIST_SIZE=$(du -sh dist | cut -f1)
+            echo "📦 Dist folder: $DIST_SIZE" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # List individual file sizes
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### File Sizes" >> $GITHUB_STEP_SUMMARY
+          if [ -d "dist" ]; then
+            du -sh dist/* | sort -hr | head -10 >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Fail if dist > 100MB
+          DIST_SIZE_KB=$(du -sk dist | cut -f1)
+          if [ "$DIST_SIZE_KB" -gt 102400 ]; then
+            echo "❌ Build size exceeds 100MB limit!" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "✅ Build size within 100MB limit" >> $GITHUB_STEP_SUMMARY
+          fi

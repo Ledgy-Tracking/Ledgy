@@ -1,0 +1,140 @@
+name: GitHub Actions CI/CD Pipeline
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_id: ${{ steps.create_release.outputs.id }}
+      html_url: ${{ steps.create_release.outputs.html_url }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Tag is on Main
+        # AC1: "Given a git tag is pushed to main"
+        # Since tags aren't branch-bound, we verify the commit is reachable from origin/main.
+        run: |
+          if ! git branch -r --contains ${{ github.sha }} | grep -q 'origin/main'; then
+            echo "::error::Tag push detected on a commit not reachable from origin/main. Skipping release."
+            exit 1
+          fi
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: 'Ledgy Release ${{ github.ref_name }}'
+          body: 'Automated release for version ${{ github.ref_name }}.'
+          draft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    needs: create-release
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            target_ext: .dmg
+          - platform: ubuntu-latest
+            target_ext: .AppImage
+          - platform: windows-latest
+            target_ext: .msi
+    runs-on: ${{ matrix.platform }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: "v1-rust"
+          shared-key: "tauri-build"
+
+      - name: Install Linux dependencies
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build Tauri App
+        run: npm run tauri build
+
+      - name: Verify and Locate Binary
+        id: locate
+        shell: bash
+        run: |
+          # 10 MB limit (decimal: 10 * 1000 * 1000 = 10,000,000 bytes)
+          MAX_SIZE=10000000
+          
+          echo "Scanning for artifacts with extension ${{ matrix.target_ext }}..."
+          
+          # Target specific subfolders based on extension to avoid finding old build artifacts or nested bundles
+          case "${{ matrix.target_ext }}" in
+            .msi) SEARCH_DIR="src-tauri/target/release/bundle/msi" ;;
+            .dmg) SEARCH_DIR="src-tauri/target/release/bundle/dmg" ;;
+            .AppImage) SEARCH_DIR="src-tauri/target/release/bundle/appimage" ;;
+            *) SEARCH_DIR="src-tauri/target/release/bundle" ;;
+          esac
+          
+          ARTIFACT=$(find "$SEARCH_DIR" -maxdepth 1 -name "*${{ matrix.target_ext }}" | head -n 1)
+          
+          if [[ -z "$ARTIFACT" ]]; then
+            echo "::error::No artifact found with extension ${{ matrix.target_ext }} in src-tauri/target/release/bundle"
+            exit 1
+          fi
+          
+          echo "Found binary: $ARTIFACT"
+          
+          # Cross-platform size check
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            SIZE=$(stat -f%z "$ARTIFACT")
+          else
+            SIZE=$(stat -c%s "$ARTIFACT")
+          fi
+          
+          echo "Size: $SIZE bytes"
+          
+          if (( SIZE > MAX_SIZE )); then
+            echo "::error::Binary $ARTIFACT size ($SIZE bytes) exceeds the 10 MiB limit!"
+            exit 1
+          fi
+          
+          # Set output for subsequent upload step to avoid glob pollution
+          echo "artifact_path=$ARTIFACT" >> $GITHUB_OUTPUT
+
+      - name: Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.locate.outputs.artifact_path }}
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

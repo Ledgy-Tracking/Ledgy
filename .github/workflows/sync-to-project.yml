@@ -27,6 +27,7 @@ jobs:
 
     permissions:
       issues: write      # create / read issues
+      deployments: write # create deployments to link issues to PRs
       repository-projects: write  # add items to GitHub Project V2
       contents: read     # read planning artifacts
 
@@ -54,7 +55,5 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           PROJECT_NUMBER: ${{ inputs.project_number || '2' }}
           DRY_RUN: ${{ inputs.dry_run || 'false' }}
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-          GITHUB_SHA: ${{ github.sha }}
           BEFORE_SHA: ${{ github.event.before }}
         run: python .github/scripts/sync_to_project.py

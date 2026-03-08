@@ -8,18 +8,10 @@ test('has title', async ({ page }) => {
   await expect(page).toHaveTitle(/Tauri \+ React \+ Typescript/);
 });
 
-test('can interact with tauri greet form', async ({ page }) => {
+test('app redirects unauthenticated users', async ({ page }) => {
   await page.goto('http://localhost:1420/');
 
-  // Verify the h1 exists
-  await expect(page.getByRole('heading', { name: /Welcome to Tauri \+ React/i })).toBeVisible();
-
-  // Test the input
-  const input = page.locator('input#greet-input');
-  await input.fill('Ledgy Tester');
-
-  // Note: we can't fully end-to-end test the Tauri invoke natively inside playwright 
-  // without a mocked backend or a Tauri driver, but we verify the form exists and functions
-  const submitButton = page.getByRole('button', { name: 'Greet' });
-  await expect(submitButton).toBeVisible();
+  // Depending on whether profiles exist, it redirects to /setup or /profiles
+  // We just check that the router kicked in
+  await expect(page).toHaveURL(/http:\/\/localhost:1420\/.+/);
 });
