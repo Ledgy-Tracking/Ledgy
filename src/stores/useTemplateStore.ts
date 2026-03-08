@@ -52,9 +52,7 @@ export const useTemplateStore = create<TemplateState>((set) => ({
             // Save based on environment
             if (isTauri()) {
                 const filePath = await saveTemplateTauri(template, filename);
-                if (filePath) {
-                    console.log('Template saved to:', filePath);
-                } else {
+                if (!filePath) {
                     // User cancelled
                     set({ isExporting: false });
                     return;

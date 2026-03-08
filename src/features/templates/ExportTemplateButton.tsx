@@ -1,7 +1,6 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 import { useTemplateStore } from '../../stores/useTemplateStore';
-import { useErrorStore } from '../../stores/useErrorStore';
 
 /**
  * Export Template button component.
@@ -9,15 +8,9 @@ import { useErrorStore } from '../../stores/useErrorStore';
  */
 export const ExportTemplateButton: React.FC = () => {
     const { exportTemplate, isExporting } = useTemplateStore();
-    const { dispatchError } = useErrorStore();
 
-    const handleExport = async () => {
-        try {
-            await exportTemplate(true);
-            // Success - toast would be shown by store if configured
-        } catch (err: any) {
-            dispatchError(err.message || 'Export failed');
-        }
+    const handleExport = () => {
+        exportTemplate(true);
     };
 
     return (

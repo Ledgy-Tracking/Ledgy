@@ -1,6 +1,6 @@
 # Story 2.7: Template Engine (JSON Export)
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -201,14 +201,17 @@ claude-sonnet-4.6 — 2026-03-08
 - Memory sweep integration cross-referenced with Story 2.6 — `useTemplateStore` holds only transient in-flight state; not added to App.tsx sweep (no profile data to clear)
 - Task 1 complete: Added `useNotificationStore` import and `addNotification('Template exported successfully', 'success')` call after both Tauri and browser save paths
 - Task 2 complete: Added `initialState` constant and `reset: () => set(initialState)` following Story 2.6 pattern
-- Task 3 complete: Created `src/stores/useTemplateStore.test.ts` with 5 tests covering browser success, Tauri success, Tauri cancel, error path, and reset() — all pass
+- Task 3 complete: Created `src/stores/useTemplateStore.test.ts` with 7 tests covering browser success, Tauri success, Tauri cancel, error path, reset(), importTemplate success, and importTemplate error — all pass
 - Task 4 complete: Verified `ExportTemplateButton` has `disabled={isExporting}` and `aria-label="Export template"`; Dashboard renders it conditionally at line 78
 - Task 5 complete: Memory sweep assessed — omission documented in Dev Notes (transient state only, no profile data)
 - Full regression suite run: all pre-existing failures confirmed pre-existing (useSyncStore, auth guards, inactivity timer); no new regressions introduced
+
+- Round 2 code review complete: Fixed double error dispatch in `ExportTemplateButton.tsx` (removed redundant catch/dispatchError — store owns all error handling), removed stale comment, removed `console.log` debug statement from `useTemplateStore.ts`, simplified `if/else` structure. All 7 tests still pass.
 
 ### File List
 
 - `_bmad-output/implementation-artifacts/2-7-template-engine-json-export.md` (CREATED)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (MODIFIED — status: review)
-- `src/stores/useTemplateStore.ts` (MODIFIED — added `useNotificationStore` import, `initialState`, `reset()` action, success notification)
-- `src/stores/useTemplateStore.test.ts` (CREATED — 5 unit tests)
+- `src/stores/useTemplateStore.ts` (MODIFIED — added `useNotificationStore` import, `initialState`, `reset()` action, success notification; removed debug `console.log`)
+- `src/stores/useTemplateStore.test.ts` (CREATED — 7 unit tests)
+- `src/features/templates/ExportTemplateButton.tsx` (MODIFIED — removed double error dispatch, removed stale comment, removed unused `useErrorStore` import)

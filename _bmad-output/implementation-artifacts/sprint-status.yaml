@@ -61,7 +61,7 @@ development_status:
   2-4-first-launch-empty-state-experience: done
   2-5-profile-deletion-safety-lock: done
   2-6-cross-profile-storage-memory-sweeps: done
-  2-7-template-engine-json-export: review
+  2-7-template-engine-json-export: done
   2-8-template-engine-json-import: review
   epic-2-retrospective: optional
 
