@@ -67,7 +67,7 @@ describe('TOTP Library (RFC 6238)', () => {
             expect(uri).toMatch(/^otpauth:\/\/totp\//);
             expect(uri).toContain('secret=JBSWY3DPEHPK3PXP');
             expect(uri).toContain('issuer=Ledgy');
-            expect(uri).toContain('algorithm=SHA1');
+            expect(uri).toContain('algorithm=SHA256');
             expect(uri).toContain('digits=6');
             expect(uri).toContain('period=30');
         });
@@ -84,6 +84,13 @@ describe('TOTP Library (RFC 6238)', () => {
             const raw = generateSecret();
             const base32 = encodeSecret(raw);
             const code = await generateTOTP(base32);
+            expect(code).toMatch(/^\d{6}$/);
+        });
+
+        it('generates 6-digit code with SHA-256', async () => {
+            const raw = generateSecret();
+            const base32 = encodeSecret(raw);
+            const code = await generateTOTP(base32, undefined, 'SHA-256');
             expect(code).toMatch(/^\d{6}$/);
         });
 
@@ -110,6 +117,16 @@ describe('TOTP Library (RFC 6238)', () => {
             const base32 = encodeSecret(raw);
             const currentStep = Math.floor(Date.now() / 1000 / 30);
             const code = await generateTOTP(base32, currentStep);
+
+            const isValid = await verifyTOTP(base32, code);
+            expect(isValid).toBe(true);
+        });
+
+        it('accepts valid code generated with SHA-256', async () => {
+            const raw = generateSecret();
+            const base32 = encodeSecret(raw);
+            const currentStep = Math.floor(Date.now() / 1000 / 30);
+            const code = await generateTOTP(base32, currentStep, 'SHA-256');
 
             const isValid = await verifyTOTP(base32, code);
             expect(isValid).toBe(true);
