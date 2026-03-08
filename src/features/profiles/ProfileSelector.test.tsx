@@ -173,7 +173,40 @@ describe('ProfileSelector', () => {
 
         await waitFor(() => {
             expect(deleteProfileSpy).toHaveBeenCalledWith('1', false);
+            // AC #8: dialog must close on successful deletion
+            expect(screen.queryByRole('dialog')).toBeNull();
         });
+    });
+
+    // ─── Task 3.5b: Success-path state resets ────────────────────────────────
+
+    it('3.5b – after successful deletion, reopening dialog for another profile shows clean state', async () => {
+        vi.spyOn(useProfileStore.getState(), 'deleteProfile').mockResolvedValue({
+            success: true,
+            remoteDeleted: false,
+        });
+
+        renderWithRouter(<ProfileSelector />);
+
+        // Open, type name, confirm Profile 1
+        fireEvent.click(screen.getByLabelText('Delete profile Profile 1'));
+        const input = screen.getByRole('textbox', { name: /Type the profile name Profile 1 to confirm deletion/i });
+        fireEvent.change(input, { target: { value: 'Profile 1' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Permanently Delete' }));
+
+        // Wait for dialog to close (success path)
+        await waitFor(() => {
+            expect(screen.queryByRole('dialog')).toBeNull();
+        });
+
+        // Open delete dialog for Profile 2 — state must be completely reset
+        fireEvent.click(screen.getByLabelText('Delete profile Profile 2'));
+        const newInput = screen.getByRole('textbox', { name: /Type the profile name Profile 2 to confirm deletion/i }) as HTMLInputElement;
+
+        // deleteConfirmName reset to '' (not 'Profile 1')
+        expect(newInput.value).toBe('');
+        // Button disabled because name hasn't been typed yet
+        expect((screen.getByRole('button', { name: 'Permanently Delete' }) as HTMLButtonElement).disabled).toBe(true);
     });
 
     // ─── Task 3.6: Escape / Cancel closes dialog and resets state ────────────
@@ -227,15 +260,16 @@ describe('ProfileSelector', () => {
 
         fireEvent.click(screen.getByLabelText('Delete profile Profile 1'));
 
-        // jsdom does not honour React's autoFocus prop, so we cannot assert document.activeElement.
-        // Instead we verify the element exists and has the autoFocus attribute set in JSX (structural
-        // verification); actual browser focus behaviour is covered by manual / e2e testing.
         const input = document.getElementById('delete-confirm-input') as HTMLInputElement | null;
         expect(input).not.toBeNull();
         expect(input?.tagName).toBe('INPUT');
-        // Confirm the element has the autoFocus prop reflected as a DOM attribute in supporting environments
-        // (jsdom may not reflect it, but this guards against removal of the attribute from the JSX).
-        expect(input?.getAttribute('autofocus') !== undefined || input !== null).toBe(true);
+        // jsdom does not honour React's autoFocus as a DOM focus event, so document.activeElement
+        // cannot be asserted here. Instead verify structural compliance: the confirm input must be
+        // the FIRST focusable element inside the dialog, which is what triggers browser auto-focus
+        // (AC #10). Actual focus behaviour is covered by manual / e2e testing.
+        const form = input?.closest('form[role="dialog"]');
+        const firstFocusable = form?.querySelector('input, button, [tabindex]') as Element | null;
+        expect(firstFocusable).toBe(input);
     });
 
     // ─── Task 3.8: Remote sync checkbox visibility ────────────────────────────
@@ -324,5 +358,47 @@ describe('ProfileSelector', () => {
         // Re-typing the exact name re-enables it
         fireEvent.change(input, { target: { value: 'Remote Profile' } });
         expect(forceBtn.disabled).toBe(false);
+    });
+
+    // ─── AC #9: Enter key submits form when enabled, blocked when disabled ────
+
+    it('AC #9 – form submits on Enter when name matches; blocked when name does not match', async () => {
+        const deleteProfileSpy = vi.spyOn(useProfileStore.getState(), 'deleteProfile').mockResolvedValue({
+            success: true,
+            remoteDeleted: false,
+        });
+
+        renderWithRouter(<ProfileSelector />);
+
+        fireEvent.click(screen.getByLabelText('Delete profile Profile 1'));
+
+        const input = screen.getByRole('textbox', { name: /Type the profile name Profile 1 to confirm deletion/i });
+        const form = input.closest('form')!;
+
+        // Wrong name: form submit should be swallowed by the onSubmit guard
+        fireEvent.change(input, { target: { value: 'wrong name' } });
+        fireEvent.submit(form);
+        expect(deleteProfileSpy).not.toHaveBeenCalled();
+
+        // Correct name: form submit should trigger deleteProfile
+        fireEvent.change(input, { target: { value: 'Profile 1' } });
+        fireEvent.submit(form);
+
+        await waitFor(() => {
+            expect(deleteProfileSpy).toHaveBeenCalledWith('1', false);
+        });
+    });
+
+    // ─── L1: Clicking the backdrop closes the dialog ─────────────────────────
+
+    it('clicking the backdrop overlay closes the delete dialog', () => {
+        renderWithRouter(<ProfileSelector />);
+
+        fireEvent.click(screen.getByLabelText('Delete profile Profile 1'));
+        expect(screen.getByRole('dialog')).toBeDefined();
+
+        fireEvent.click(screen.getByTestId('delete-dialog-backdrop'));
+
+        expect(screen.queryByRole('dialog')).toBeNull();
     });
 });

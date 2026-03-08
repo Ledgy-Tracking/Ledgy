@@ -1,6 +1,6 @@
 # Story 2.5: Profile Deletion Safety Lock
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -60,7 +60,14 @@ so that **I cannot accidentally destroy all data in a profile by missclicking, a
 - [x] [AI-Review][LOW] `handleCancelDelete` does not reset `purgeRemote` to `true` — add `setPurgeRemote(true)` for complete cancel-path state hygiene [`ProfileSelector.tsx:64-68`]
 - [x] [AI-Review][LOW] "Irreversible" wording missing from remote-profile warning — AC #2 requires a "permanent and irreversible" notice; it only appears in the non-remote branch; add it to the remote amber block as well [`ProfileSelector.tsx:248-261`]
 
-### Review Follow-ups (AI) — Round 2
+### Review Follow-ups (AI) — Round 3
+
+- [x] [AI-Review-R3][HIGH] Test 3.5 never verified AC #8 ("dialog closes on success") — added `expect(screen.queryByRole('dialog')).toBeNull()` inside the `waitFor` assertion so a missing `setDeleteProfileId(null)` regresses immediately [`ProfileSelector.test.tsx:158-178`]
+- [x] [AI-Review-R3][MEDIUM] Test 3.7 vacuous assertion — replaced always-true `|| input !== null` expression with a meaningful structural check: verifies the confirm input is the first focusable element inside the dialog `<form>`, which is the structural condition that triggers browser `autoFocus` (AC #10) [`ProfileSelector.test.tsx:223-240`]
+- [x] [AI-Review-R3][MEDIUM] R1/R2 success-path state resets (`setDeleteConfirmName`, `setShowForceLocal`, `setPurgeRemote`) had zero test coverage — added test 3.5b: successfully deletes Profile 1, then reopens dialog for Profile 2 and asserts clean state (empty input, disabled button) [`ProfileSelector.test.tsx:180-210`]
+- [x] [AI-Review-R3][MEDIUM] Dual spinner when Force Delete is visible — both buttons showed `{isDeleting && <spinner />}` simultaneously; added `isDeletingForceLocal: useState<boolean>(false)` state and thread it through `handleConfirmDelete`, `handleCancelDelete`, and both button spinner conditions [`ProfileSelector.tsx:21, 64-69, 71-91, 330-348`]
+- [x] [AI-Review-R3][LOW] Backdrop click did not close dialog — added `onClick={!isDeleting ? handleCancelDelete : undefined}` on backdrop div and `onClick={(e) => e.stopPropagation()}` on the form to prevent click-through; added backdrop-click test [`ProfileSelector.tsx:235-245, ProfileSelector.test.tsx:395-403`]
+- [x] [AI-Review-R3][LOW] AC #9 Enter-key submission had no test — added test that fires `fireEvent.submit` on the form with a non-matching name (blocked) and a matching name (calls `deleteProfile`) [`ProfileSelector.test.tsx:373-393`]
 
 - [x] [AI-Review-R2][HIGH] `handleConfirmDelete` success path never resets `purgeRemote` — if a user deletes a remote-sync profile with the checkbox un-ticked, the next delete dialog opens with the checkbox pre-unchecked, violating AC #6's checked-by-default requirement; add `setPurgeRemote(true)` alongside the other resets on `result.success` [`ProfileSelector.tsx:76-79`]
 - [x] [AI-Review-R2][HIGH] Escape `onKeyDown` handler is on a non-focusable backdrop `<div>` — during real usage focus is inside the `<form>`, not on the backdrop, so keydown events don't naturally reach it; test 3.6b passes only because `fireEvent.keyDown` bypasses event bubbling by targeting the div directly; move the handler to the `<form>` element so it works in actual browsers [`ProfileSelector.tsx:237-241`]
@@ -304,4 +311,4 @@ BMad Method dev-story workflow (Antigravity/Gemini 2.5 Pro) — 2026-03-07
 
 - Initial implementation of Story 2.5: Profile Deletion Safety Lock (Date: 2026-03-07)
 - Addressed code review findings - 7 items resolved (Date: 2026-03-07)
-- Addressed code review findings Round 2 - 8 items resolved (Date: 2026-03-07)
+- Addressed code review findings Round 3 - 6 items resolved, all 20 tests pass, story status done (Date: 2026-03-08)
