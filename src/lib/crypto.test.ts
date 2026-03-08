@@ -185,6 +185,22 @@ describe('WebCrypto AES-256 Engine', () => {
     });
 
     describe('encryptPayload / decryptPayload (AES-GCM)', () => {
+        it('generates an IV of exactly 12 bytes', async () => {
+            const key = await generateAESKey();
+            const plaintext = 'Test length';
+
+            const encrypted = await encryptPayload(key, plaintext);
+
+            expect(encrypted.iv.length).toBe(12);
+        });
+
+        it('successfully encrypts without erroring out', async () => {
+            const key = await generateAESKey();
+            const plaintext = 'Test execution';
+
+            await expect(encryptPayload(key, plaintext)).resolves.toBeDefined();
+        });
+
         it('encrypts and decrypts round-trip', async () => {
             const key = await generateAESKey();
             const plaintext = 'Hello, World!';
