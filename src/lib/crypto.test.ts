@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
     HKDF_SALT,
     generateAESKey,
@@ -19,6 +19,16 @@ describe('WebCrypto AES-256 Engine', () => {
     });
 
     describe('generateAESKey', () => {
+        it('handles errors during generation', async () => {
+            const spy = vi.spyOn(crypto.subtle, 'generateKey').mockRejectedValue(new Error('Generation failed'));
+
+            try {
+                await expect(generateAESKey()).rejects.toThrow('Generation failed');
+            } finally {
+                spy.mockRestore();
+            }
+        });
+
         it('generates 256-bit AES-GCM key', async () => {
             const key = await generateAESKey();
             
@@ -42,6 +52,19 @@ describe('WebCrypto AES-256 Engine', () => {
     });
 
     describe('deriveKeyFromTotp (HKDF)', () => {
+        it('handles errors during derivation', async () => {
+            const rawSecret = generateSecret();
+            const salt = new TextEncoder().encode(HKDF_SALT);
+
+            const spy = vi.spyOn(crypto.subtle, 'importKey').mockRejectedValue(new Error('Import failed'));
+
+            try {
+                await expect(deriveKeyFromTotp(rawSecret, salt)).rejects.toThrow('Import failed');
+            } finally {
+                spy.mockRestore();
+            }
+        });
+
         it('derives 256-bit AES-GCM key from TOTP secret', async () => {
             const rawSecret = generateSecret();
             const salt = new TextEncoder().encode(HKDF_SALT);

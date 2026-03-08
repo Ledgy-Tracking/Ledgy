@@ -69,7 +69,7 @@ so that **code changes are automatically tested, built, and deployed with native
 ```yaml
 on:
   push:
-    branches: [main, allatonce]
+    branches: [main, main]
   pull_request:
     branches: [main]
 ```
@@ -158,10 +158,10 @@ on:
 
 ### Git Branch Strategy
 
-**Branch Decision**: Using `allatonce` branch for all epic implementation work.
+**Branch Decision**: Using `main` branch for all epic implementation work.
 
 ```bash
-git checkout allatonce
+git checkout main
 ```
 
 ### Previous Story Intelligence
@@ -204,7 +204,7 @@ BMad Method create-story workflow
 
 ### Mandatory Implementation Standards
 
-1. **Use existing git branch**: You MUST work on the `allatonce` branch.
+1. **Use existing git branch**: You MUST work on the `main` branch.
 
 2. **CI workflow**: MUST run on every push to main and PRs.
 
@@ -223,6 +223,6 @@ BMad Method create-story workflow
 ### Next Steps
 
 After completing this story:
-1. Commit all changes to `allatonce` branch
+1. Commit all changes to `main` branch
 2. Update sprint-status.yaml and COMMIT
 3. Proceed to Story 1.11: Auth Rate Limiting & Escalating Delays

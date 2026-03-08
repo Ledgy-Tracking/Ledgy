@@ -24,7 +24,7 @@ so that **I can start tracking my data without confusion or overwhelm**.
 10. Integration with useProfileStore and ProfileDbManager (Story 2-1)
 11. Accessibility: Form labels, error announcements, keyboard navigation, WCAG 2.1 AA
 12. Density responsive: Form spacing adjusts based on density setting (Story 1-9)
-13. **CRITICAL**: Developer MUST use the existing `allatonce` git branch for this epic
+13. **CRITICAL**: Developer MUST use the existing `main` git branch for this epic
 
 ## Tasks / Subtasks
 
@@ -226,22 +226,22 @@ src/
 
 ### Git Branch Strategy
 
-**CRITICAL**: You MUST work on the `allatonce` branch for this epic.
+**CRITICAL**: You MUST work on the `main` branch for this epic.
 
 ```bash
-git checkout allatonce
+git checkout main
 ```
 
 **Before starting**:
 ```bash
-git pull origin allatonce
+git pull origin main
 ```
 
 **After completion**:
 ```bash
 git add .
 git commit -m "feat: Profile creation flow (Story 2.3)"
-git push origin allatonce
+git push origin main
 ```
 
 ### Previous Story Intelligence
@@ -324,7 +324,7 @@ BMad Method create-story workflow
 - UX design requirements integrated
 - Technical requirements defined
 - Test scenarios specified
-- Git branch strategy confirmed: `allatonce`
+- Git branch strategy confirmed: `main`
 
 **Key Implementation Guidance**:
 1. Extend useProfileStore with createProfile action (integrates with ProfileDbManager)
@@ -338,7 +338,7 @@ BMad Method create-story workflow
 
 **Developer Next Steps**:
 1. Review this comprehensive story context
-2. Ensure you are on the `allatonce` branch
+2. Ensure you are on the `main` branch
 3. Implement profile creation flow following all specified patterns
 4. Write comprehensive tests
 5. Verify TypeScript strict mode
@@ -362,7 +362,7 @@ BMad Method create-story workflow
 
 ### Mandatory Implementation Standards
 
-1. **Use existing git branch**: You MUST work on the `allatonce` branch.
+1. **Use existing git branch**: You MUST work on the `main` branch.
 
 2. **Component structure**: MUST use functional components with TypeScript interfaces.
 
@@ -385,7 +385,7 @@ BMad Method create-story workflow
 ### Next Steps
 
 After completing this story:
-1. Commit all changes to `allatonce` branch
+1. Commit all changes to `main` branch
 2. Update sprint-status.yaml and COMMIT
 3. Run code-review workflow for validation
 4. Proceed to Story 2.4: First-Launch Empty State Experience
