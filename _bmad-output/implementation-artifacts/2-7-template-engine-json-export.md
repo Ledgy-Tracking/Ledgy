@@ -1,6 +1,6 @@
 # Story 2.7: Template Engine (JSON Export)
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -24,24 +24,24 @@ so that **I can share my structure with others, back it up, or bootstrap a new p
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add success notification to `useTemplateStore.exportTemplate()` (AC: #5)
-  - [ ] 1.1: Import `useNotificationStore` in `src/stores/useTemplateStore.ts`.
-  - [ ] 1.2: After a successful save (both Tauri and browser paths), call `useNotificationStore.getState().addNotification('Template exported successfully', 'success')`.
-- [ ] Task 2: Add `reset()` action to `useTemplateStore` (AC: #8)
-  - [ ] 2.1: Define `initialState` constant (`{ isExporting: false, isImporting: false, error: null }`) above the `create()` call.
-  - [ ] 2.2: Add `reset: () => set(initialState)` to the store, matching the pattern from `useLedgerStore`, `useNodeStore`, etc.
-- [ ] Task 3: Write `useTemplateStore` unit tests (AC: #1–#7)
-  - [ ] 3.1: Create `src/stores/useTemplateStore.test.ts`.
-  - [ ] 3.2: Test success path (browser): mock `isTauri → false`, mock `downloadTemplateBrowser`, assert `isExporting` goes `false → true → false` and `addNotification` is called with `'success'`.
-  - [ ] 3.3: Test success path (Tauri): mock `isTauri → true`, mock `saveTemplateTauri` returning a path, assert notification fired.
-  - [ ] 3.4: Test Tauri cancel path: mock `saveTemplateTauri` returning `null`, assert no notification and no error, `isExporting` resets to `false`.
-  - [ ] 3.5: Test error path: mock `export_template` to throw, assert `useErrorStore.dispatchError` called and `isExporting` resets to `false`.
-  - [ ] 3.6: Test `reset()` action: set `isExporting: true` manually, call `reset()`, assert store returns to `initialState`.
-- [ ] Task 4: Verify `ExportTemplateButton` is correctly integrated (AC: #1)
-  - [ ] 4.1: Confirm `src/features/templates/ExportTemplateButton.tsx` renders with `disabled` state while exporting and passes `aria-label="Export template"`.
-  - [ ] 4.2: Confirm `Dashboard.tsx` conditionally renders `<ExportTemplateButton />` only when `hasLedgers === true` (already wired — verify only).
-- [ ] Task 5: Register `useTemplateStore` in the memory-sweep (AC: #8, Story 2.6 continuity)
-  - [ ] 5.1: Check `src/stores/memorySweeps.test.ts` and `memorySweeps.test.tsx` — if a global sweep registry exists, add `useTemplateStore.getState().reset()` to it. If not, document the omission in Dev Notes.
+- [x] Task 1: Add success notification to `useTemplateStore.exportTemplate()` (AC: #5)
+  - [x] 1.1: Import `useNotificationStore` in `src/stores/useTemplateStore.ts`.
+  - [x] 1.2: After a successful save (both Tauri and browser paths), call `useNotificationStore.getState().addNotification('Template exported successfully', 'success')`.
+- [x] Task 2: Add `reset()` action to `useTemplateStore` (AC: #8)
+  - [x] 2.1: Define `initialState` constant (`{ isExporting: false, isImporting: false, error: null }`) above the `create()` call.
+  - [x] 2.2: Add `reset: () => set(initialState)` to the store, matching the pattern from `useLedgerStore`, `useNodeStore`, etc.
+- [x] Task 3: Write `useTemplateStore` unit tests (AC: #1–#7)
+  - [x] 3.1: Create `src/stores/useTemplateStore.test.ts`.
+  - [x] 3.2: Test success path (browser): mock `isTauri → false`, mock `downloadTemplateBrowser`, assert `isExporting` goes `false → true → false` and `addNotification` is called with `'success'`.
+  - [x] 3.3: Test success path (Tauri): mock `isTauri → true`, mock `saveTemplateTauri` returning a path, assert notification fired.
+  - [x] 3.4: Test Tauri cancel path: mock `saveTemplateTauri` returning `null`, assert no notification and no error, `isExporting` resets to `false`.
+  - [x] 3.5: Test error path: mock `export_template` to throw, assert `useErrorStore.dispatchError` called and `isExporting` resets to `false`.
+  - [x] 3.6: Test `reset()` action: set `isExporting: true` manually, call `reset()`, assert store returns to `initialState`.
+- [x] Task 4: Verify `ExportTemplateButton` is correctly integrated (AC: #1)
+  - [x] 4.1: Confirm `src/features/templates/ExportTemplateButton.tsx` renders with `disabled` state while exporting and passes `aria-label="Export template"`.
+  - [x] 4.2: Confirm `Dashboard.tsx` conditionally renders `<ExportTemplateButton />` only when `hasLedgers === true` (already wired — verify only).
+- [x] Task 5: Register `useTemplateStore` in the memory-sweep (AC: #8, Story 2.6 continuity)
+  - [x] 5.1: Check `src/stores/memorySweeps.test.ts` and `memorySweeps.test.tsx` — if a global sweep registry exists, add `useTemplateStore.getState().reset()` to it. If not, document the omission in Dev Notes.
 
 ## Dev Notes
 
@@ -162,7 +162,7 @@ vi.mock('../lib/db', async () => ({
 
 ### Memory Sweep Verification
 
-Check `src/stores/memorySweeps.test.ts` and `memorySweeps.test.tsx` — Story 2.6 established a memory sweep pattern. If `useTemplateStore.reset()` should be called on profile switch, it should be included in whatever sweep orchestration file exists. The test files suggest there IS a sweep test — verify and add `useTemplateStore` if needed.
+Checked `src/stores/memorySweeps.test.ts` and `memorySweeps.test.tsx`. The existing sweep orchestration calls `clearProfileData()` on stores that hold profile-specific data (schemas, nodes, widgets, syncConfig). `useTemplateStore` only holds transient in-flight state (`isExporting`, `isImporting`, `error`) — no profile data. Adding it to the App.tsx sweep effect is not warranted since there is no profile-scoped data to clear, and the pattern requires `clearProfileData()` not `reset()`. The `reset()` action is available for any future consumer that needs it (e.g., full vault lock flows).
 
 ### Project Structure Notes
 
@@ -188,7 +188,7 @@ Check `src/stores/memorySweeps.test.ts` and `memorySweeps.test.tsx` — Story 2.
 
 ### Agent Model Used
 
-claude-sonnet-4.6 — 2026-03-07
+claude-sonnet-4.6 — 2026-03-08
 
 ### Debug Log References
 
@@ -198,9 +198,17 @@ claude-sonnet-4.6 — 2026-03-07
 - Core export pipeline confirmed fully implemented in `src/lib/templateExport.ts`
 - Three targeted gaps identified: success notification, `reset()` action, store-level tests
 - Architecture compliance verified: correct file locations, naming conventions, error patterns
-- Memory sweep integration cross-referenced with Story 2.6
+- Memory sweep integration cross-referenced with Story 2.6 — `useTemplateStore` holds only transient in-flight state; not added to App.tsx sweep (no profile data to clear)
+- Task 1 complete: Added `useNotificationStore` import and `addNotification('Template exported successfully', 'success')` call after both Tauri and browser save paths
+- Task 2 complete: Added `initialState` constant and `reset: () => set(initialState)` following Story 2.6 pattern
+- Task 3 complete: Created `src/stores/useTemplateStore.test.ts` with 5 tests covering browser success, Tauri success, Tauri cancel, error path, and reset() — all pass
+- Task 4 complete: Verified `ExportTemplateButton` has `disabled={isExporting}` and `aria-label="Export template"`; Dashboard renders it conditionally at line 78
+- Task 5 complete: Memory sweep assessed — omission documented in Dev Notes (transient state only, no profile data)
+- Full regression suite run: all pre-existing failures confirmed pre-existing (useSyncStore, auth guards, inactivity timer); no new regressions introduced
 
 ### File List
 
 - `_bmad-output/implementation-artifacts/2-7-template-engine-json-export.md` (CREATED)
-- `_bmad-output/implementation-artifacts/sprint-status.yaml` (MODIFIED)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (MODIFIED — status: review)
+- `src/stores/useTemplateStore.ts` (MODIFIED — added `useNotificationStore` import, `initialState`, `reset()` action, success notification)
+- `src/stores/useTemplateStore.test.ts` (CREATED — 5 unit tests)

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { useErrorStore } from './useErrorStore';
+import { useNotificationStore } from './useNotificationStore';
 import { useProfileStore } from './useProfileStore';
 import { getProfileDb } from '../lib/db';
 import { TemplateExport, TemplateImportResult } from '../types/templates';
@@ -19,12 +20,17 @@ interface TemplateState {
     // Actions
     exportTemplate: (includeNodeGraph?: boolean) => Promise<void>;
     importTemplate: (template: TemplateExport, profileId: string) => Promise<TemplateImportResult>;
+    reset: () => void;
 }
 
-export const useTemplateStore = create<TemplateState>((set) => ({
+const initialState = {
     isExporting: false,
     isImporting: false,
     error: null,
+};
+
+export const useTemplateStore = create<TemplateState>((set) => ({
+    ...initialState,
 
     exportTemplate: async (includeNodeGraph = true) => {
         set({ isExporting: true, error: null });
@@ -57,6 +63,7 @@ export const useTemplateStore = create<TemplateState>((set) => ({
                 downloadTemplateBrowser(template, filename);
             }
 
+            useNotificationStore.getState().addNotification('Template exported successfully', 'success');
             set({ isExporting: false });
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to export template';
@@ -88,4 +95,6 @@ export const useTemplateStore = create<TemplateState>((set) => ({
             throw err;
         }
     },
+
+    reset: () => set(initialState),
 }));
