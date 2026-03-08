@@ -160,6 +160,37 @@ describe('useTemplateStore', () => {
             expect(mockAddNotification).toHaveBeenCalledWith('Template imported successfully', 'success');
             expect(result.importedSchemas).toBe(2);
         });
+
+        it('does NOT fire success notification when 0 schemas and 0 nodes imported (all conflicts)', async () => {
+            mockImportTemplate.mockResolvedValue({
+                success: true,
+                importedSchemas: 0,
+                importedNodes: 0,
+                conflicts: [{ type: 'schema_exists', itemId: 'Assets', resolution: 'skip' }],
+                errors: [],
+            });
+
+            await useTemplateStore.getState().importTemplate(mockTemplate, 'profile-1', 'project-1');
+
+            expect(mockAddNotification).not.toHaveBeenCalled();
+            expect(useTemplateStore.getState().isImporting).toBe(false);
+        });
+
+        it('dispatches per-schema errors individually via useErrorStore', async () => {
+            mockImportTemplate.mockResolvedValue({
+                success: false,
+                importedSchemas: 1,
+                importedNodes: 0,
+                conflicts: [],
+                errors: ['Failed to import schema "Assets": DB write failed', 'Failed to import schema "Liabilities": DB write failed'],
+            });
+
+            await useTemplateStore.getState().importTemplate(mockTemplate, 'profile-1', 'project-1');
+
+            expect(mockDispatchError).toHaveBeenCalledTimes(2);
+            expect(mockDispatchError).toHaveBeenCalledWith('Failed to import schema "Assets": DB write failed');
+            expect(mockDispatchError).toHaveBeenCalledWith('Failed to import schema "Liabilities": DB write failed');
+        });
     });
 
     describe('importTemplate - error path', () => {

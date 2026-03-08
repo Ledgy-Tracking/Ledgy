@@ -77,7 +77,14 @@ export const useTemplateStore = create<TemplateState>((set) => ({
         try {
             const db = getProfileDb(profileId);
             const result = await import_template(db, template, profileId, projectId);
-            useNotificationStore.getState().addNotification('Template imported successfully', 'success');
+            // Dispatch per-schema errors individually (AC #10)
+            for (const errMsg of result.errors) {
+                useErrorStore.getState().dispatchError(errMsg);
+            }
+            // Only notify success when at least one schema was actually imported (AC #9)
+            if (result.importedSchemas > 0 || result.importedNodes > 0) {
+                useNotificationStore.getState().addNotification('Template imported successfully', 'success');
+            }
             set({ isImporting: false });
             return result;
         } catch (err: any) {

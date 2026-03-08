@@ -60,6 +60,11 @@ describe('validate_template', () => {
         };
         expect(validate_template(bad)).toBe(false);
     });
+
+    it('rejects empty schemas array', () => {
+        const bad = { ...validTemplate, schemas: [] };
+        expect(validate_template(bad)).toBe(false);
+    });
 });
 
 describe('import_template', () => {

@@ -18,16 +18,22 @@ export const ImportTemplateButton: React.FC<ImportTemplateButtonProps> = ({ prof
     const { dispatchError } = useErrorStore();
 
     const handleImport = async () => {
+        let rawData: unknown;
         try {
-            const raw = isTauri() ? await readTemplateTauri() : await readTemplateBrowser();
-            if (!raw) return; // User cancelled
-            if (!validate_template(raw)) {
-                dispatchError('Invalid template file: missing or malformed fields');
-                return;
-            }
-            await importTemplate(raw, profileId, projectId);
+            rawData = isTauri() ? await readTemplateTauri() : await readTemplateBrowser();
         } catch (err: any) {
-            dispatchError(err.message || 'Import failed');
+            dispatchError(err.message || 'Failed to read template file');
+            return;
+        }
+        if (!rawData) return; // User cancelled
+        if (!validate_template(rawData)) {
+            dispatchError('Invalid template file: missing or malformed fields');
+            return;
+        }
+        try {
+            await importTemplate(rawData, profileId, projectId);
+        } catch {
+            // Error already dispatched by useTemplateStore.importTemplate
         }
     };
 

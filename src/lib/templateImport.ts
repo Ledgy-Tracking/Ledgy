@@ -12,7 +12,7 @@ export function validate_template(data: unknown): data is TemplateExport {
     if (typeof data !== 'object' || data === null) return false;
     const d = data as any;
     if (d.exportVersion !== '1.0') return false;
-    if (!Array.isArray(d.schemas)) return false;
+    if (!Array.isArray(d.schemas) || d.schemas.length === 0) return false;
     for (const s of d.schemas) {
         if (typeof s.name !== 'string' || !s.name.trim()) return false;
         if (!Array.isArray(s.fields)) return false;
@@ -92,7 +92,7 @@ export async function readTemplateTauri(): Promise<TemplateExport | null> {
         const fsModule = await importTauriFs();
 
         const filePath = await dialogModule.open({
-            filters: [{ name: 'Ledgy Template', extensions: ['json', 'ledgy.json'] }],
+            filters: [{ name: 'Ledgy Template', extensions: ['json'] }],
             multiple: false,
         });
 
@@ -133,6 +133,17 @@ export function readTemplateBrowser(): Promise<TemplateExport | null> {
         };
 
         input.oncancel = () => resolve(null);
+
+        // Fallback for browsers that don't fire oncancel (e.g. older Firefox/Safari):
+        // detect cancel via window focus returning without a file selection.
+        const onWindowFocus = () => {
+            window.removeEventListener('focus', onWindowFocus);
+            // Give the change event a chance to fire first
+            setTimeout(() => {
+                if (!input.files?.length) resolve(null);
+            }, 300);
+        };
+        window.addEventListener('focus', onWindowFocus, { once: true });
 
         input.click();
     });
