@@ -240,4 +240,71 @@ describe('useSchemaBuilderStore', () => {
         expect(useSchemaBuilderStore.getState().error).toBeNull();
         expect(useSchemaBuilderStore.getState().isLoading).toBe(false);
     });
+
+    // H1: commit in edit mode calls updateSchema with editingSchemaId
+    it('commit in edit mode calls updateSchema and clears dirty/error on success', async () => {
+        mockUpdateSchema.mockResolvedValue(undefined);
+
+        const mockSchema: LedgerSchema = {
+            _id: 'schema-edit-1',
+            type: 'schema',
+            name: 'Existing Schema',
+            fields: [{ name: 'field1', type: 'text', required: false }],
+            profileId: 'profile-1',
+            projectId: 'project-1',
+            schema_version: 1,
+            createdAt: '2024-01-01',
+            updatedAt: '2024-01-01',
+        };
+
+        useSchemaBuilderStore.getState().initEdit(mockSchema);
+        useSchemaBuilderStore.getState().setDraftName('Updated Schema');
+
+        await useSchemaBuilderStore.getState().commit('profile-1');
+
+        expect(mockUpdateSchema).toHaveBeenCalledWith(
+            'schema-edit-1',
+            'Updated Schema',
+            expect.arrayContaining([expect.objectContaining({ name: 'field1', type: 'text' })])
+        );
+        expect(useSchemaBuilderStore.getState().isDirty).toBe(false);
+        expect(useSchemaBuilderStore.getState().error).toBeNull();
+        expect(useSchemaBuilderStore.getState().isLoading).toBe(false);
+    });
+
+    // H2: commit detects orphaned relation target (target deleted from store)
+    it('commit dispatches error when relation target schema no longer exists', async () => {
+        // schemas: [] (default in beforeEach) means target doesn't exist
+        useSchemaBuilderStore.getState().initCreate('project-1');
+        useSchemaBuilderStore.getState().setDraftName('Schema With Orphan');
+        useSchemaBuilderStore.getState().addField();
+        // Set a relation field with a targetId that isn't in useLedgerStore.schemas
+        useSchemaBuilderStore.getState().updateField(0, {
+            name: 'Orphaned Link',
+            type: 'relation',
+            relationTarget: 'deleted-schema-id',
+        });
+
+        await useSchemaBuilderStore.getState().commit('profile-1');
+
+        expect(mockDispatchError).toHaveBeenCalledWith(
+            'Relation target for field "Orphaned Link" no longer exists'
+        );
+        expect(useSchemaBuilderStore.getState().error).toContain('no longer exists');
+        expect(useSchemaBuilderStore.getState().isLoading).toBe(false);
+    });
+
+    // M3: updateField with out-of-bounds index is a no-op
+    it('updateField with out-of-bounds index is a no-op', () => {
+        useSchemaBuilderStore.getState().initCreate('project-1');
+        useSchemaBuilderStore.getState().addField();
+        useSchemaBuilderStore.getState().updateField(0, { name: 'Original' });
+
+        // Index 99 is out of bounds — should not modify any field
+        useSchemaBuilderStore.getState().updateField(99, { name: 'Should Not Appear' });
+
+        const { draftFields } = useSchemaBuilderStore.getState();
+        expect(draftFields).toHaveLength(1);
+        expect(draftFields[0].name).toBe('Original');
+    });
 });

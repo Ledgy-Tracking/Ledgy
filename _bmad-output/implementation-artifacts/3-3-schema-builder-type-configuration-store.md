@@ -1,6 +1,6 @@
 # Story 3.3: Schema Builder - Type Configuration Store
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -29,6 +29,7 @@ so that the `SchemaBuilder.tsx` component is decoupled from local `useState` asy
      // Mode management
      mode: 'create' | 'edit';
      editingSchemaId: string | null;  // null when mode === 'create'
+     projectId: string;               // stored by initCreate/initEdit for use in commit()
      // Status flags
      isDirty: boolean;           // true when draft differs from saved/initial state
      isLoading: boolean;
@@ -134,6 +135,15 @@ so that the `SchemaBuilder.tsx` component is decoupled from local `useState` asy
 - [x] Task 5: Final validation (AC: #15, #16)
   - [x] 5.1 Run `npx tsc --noEmit` — must report 0 errors.
   - [x] 5.2 Run `npx vitest run` — all tests pass including new `schemaBuilderStore.test.ts`. Full suite: 13 failed | 50 passed (matches pre-existing baseline; no regressions).
+
+- [x] Task 6: Code Review Follow-ups (AI)
+  - [x] [AI-Review][HIGH] Add `commit()` edit-mode success test (updateSchema path) [`tests/schemaBuilderStore.test.ts`]
+  - [x] [AI-Review][HIGH] Add orphaned relation target test in `commit()` [`tests/schemaBuilderStore.test.ts`]
+  - [x] [AI-Review][MEDIUM] Fix `useEffect` missing `initCreate` in dependency array [`src/features/ledger/SchemaBuilder.tsx:37`]
+  - [x] [AI-Review][MEDIUM] Add user feedback when `activeProfileId` is null [`src/features/ledger/SchemaBuilder.tsx:handleSave`]
+  - [x] [AI-Review][MEDIUM] Add `updateField` out-of-bounds test [`tests/schemaBuilderStore.test.ts`]
+  - [x] [AI-Review][MEDIUM] Fix AC #3 `SchemaBuilderState` interface missing `projectId` field [story doc]
+  - [x] [AI-Review][LOW] Simplify dual `if` blocks in `commit()` validation loop to `if/else` [`src/stores/useSchemaBuilderStore.ts`]
 
 ## Dev Notes
 
@@ -278,11 +288,34 @@ Claude Sonnet 4.6
 - `src/types/ledger.ts` — extended `FieldType` union from 4 to 8 values
 - `src/stores/useSchemaBuilderStore.ts` — NEW: Zustand store with full schema builder state machine
 - `src/features/ledger/SchemaBuilder.tsx` — refactored from local `useState` to `useSchemaBuilderStore`
-- `tests/schemaBuilderStore.test.ts` — NEW: 14 unit tests for the new store
+- `tests/schemaBuilderStore.test.ts` — NEW: 17 unit tests for the new store (14 original + 3 from code review)
 - `tests/SchemaBuilder.test.tsx` — updated to work with refactored component
+
+### Senior Developer Review (AI)
+
+**Reviewer:** James (AI Code Review) | **Date:** 2026-03-08 | **Outcome:** ✅ Approved after fixes
+
+**Issues Found:** 2 High, 4 Medium, 3 Low — all HIGH and MEDIUM addressed.
+
+**Findings Fixed:**
+
+| Severity | Issue | Fix Applied |
+|---|---|---|
+| HIGH | No test for `commit()` edit-mode success path (`updateSchema`) | Added test in `schemaBuilderStore.test.ts` |
+| HIGH | No test for orphaned relation target validation in `commit()` | Added test in `schemaBuilderStore.test.ts` |
+| MEDIUM | `useEffect` missing `initCreate` in dependency array | Fixed `[projectId, initCreate]` in `SchemaBuilder.tsx` |
+| MEDIUM | Silent failure when `activeProfileId` is null | Added `useSchemaBuilderStore.setState` + `useErrorStore.dispatchError` call |
+| MEDIUM | `updateField` out-of-bounds untested (unlike `removeField`/`reorderField`) | Added bounds-check test in `schemaBuilderStore.test.ts` |
+| MEDIUM | AC #3 `SchemaBuilderState` interface missing `projectId` | Updated story doc interface spec |
+| LOW | Dual `if` blocks in `commit()` validation loop were redundant | Refactored to `if/else` in `useSchemaBuilderStore.ts` |
+
+**Deferred (LOW — future stories):**
+- SchemaBuilder title/button hardcoded for create mode only (edit mode UI is a future story concern)
+- `discard()` resets `projectId` to `''` — safe with remounting pattern; document as invariant if architecture changes
 
 ### Change Log
 
 | Date | Change | Author |
 |---|---|---|
 | 2025-07-10 | Implemented Story 3.3: extended FieldType, created useSchemaBuilderStore, refactored SchemaBuilder.tsx, wrote store unit tests | Amelia (dev agent) |
+| 2026-03-08 | Code review: fixed 2H/4M issues (edit-mode test, orphan test, useEffect deps, null-profile feedback, updateField bounds test, AC#3 doc fix, validation loop refactor) | James (AI review) |

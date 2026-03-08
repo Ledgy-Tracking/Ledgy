@@ -123,20 +123,21 @@ export const useSchemaBuilderStore = create<SchemaBuilderState>((set, get) => ({
         }
 
         for (const field of draftFields) {
-            if (field.type === 'relation' && !field.relationTarget) {
-                const msg = `Relation target required for field "${field.name || 'unnamed'}"`;
-                useErrorStore.getState().dispatchError(msg);
-                set({ error: msg });
-                return;
-            }
-            if (field.type === 'relation' && field.relationTarget) {
-                const schemas = useLedgerStore.getState().schemas;
-                const targetExists = schemas.some(s => s._id === field.relationTarget);
-                if (!targetExists) {
-                    const msg = `Relation target for field "${field.name}" no longer exists`;
+            if (field.type === 'relation') {
+                if (!field.relationTarget) {
+                    const msg = `Relation target required for field "${field.name || 'unnamed'}"`;
                     useErrorStore.getState().dispatchError(msg);
                     set({ error: msg });
                     return;
+                } else {
+                    const schemas = useLedgerStore.getState().schemas;
+                    const targetExists = schemas.some(s => s._id === field.relationTarget);
+                    if (!targetExists) {
+                        const msg = `Relation target for field "${field.name}" no longer exists`;
+                        useErrorStore.getState().dispatchError(msg);
+                        set({ error: msg });
+                        return;
+                    }
                 }
             }
         }

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useSchemaBuilderStore } from '../../stores/useSchemaBuilderStore';
+import { useErrorStore } from '../../stores/useErrorStore';
 import { FieldType } from '../../types/ledger';
 import { Plus, Trash2, ChevronUp, ChevronDown, Save } from 'lucide-react';
 import { Button } from '../../components/ui/button';
@@ -34,7 +35,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
 
     useEffect(() => {
         initCreate(projectId);
-    }, [projectId]);
+    }, [projectId, initCreate]);
 
     // Filter schemas to show as potential relation targets
     const availableLedgers = schemas.filter(s => s.projectId === projectId);
@@ -46,7 +47,12 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!activeProfileId) return;
+        if (!activeProfileId) {
+            const msg = 'No active profile. Please select a profile before saving.';
+            useSchemaBuilderStore.setState({ error: msg });
+            useErrorStore.getState().dispatchError(msg);
+            return;
+        }
         try {
             await commit(activeProfileId);
             // Only close if validation passed (no error set by commit)
