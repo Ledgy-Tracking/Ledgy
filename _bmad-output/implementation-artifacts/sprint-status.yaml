@@ -62,7 +62,7 @@ development_status:
   2-5-profile-deletion-safety-lock: review
   2-6-cross-profile-storage-memory-sweeps: in-progress
   2-7-template-engine-json-export: review
-  2-8-template-engine-json-import: backlog
+  2-8-template-engine-json-import: ready-for-dev
   epic-2-retrospective: optional
 
   epic-3: in-progress
