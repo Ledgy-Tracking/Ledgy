@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Handle, Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
 import { useProfileStore } from '../../../stores/useProfileStore';
-import { ChevronDown, ChevronUp, Database } from 'lucide-react';
+import { ChevronDown, ChevronUp, Database, Settings } from 'lucide-react';
 
 
 export interface LedgerSourceNodeData {
@@ -95,8 +95,10 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                         }}
                         className="p-1 hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-200"
                         title="Configure"
+                        aria-label="Configure node"
+                        aria-expanded={isConfigOpen}
                     >
-                        ⚙️
+                        <Settings size={14} />
                     </button>
                     {isExpanded ? <ChevronUp size={14} className="text-zinc-400" /> : <ChevronDown size={14} className="text-zinc-400" />}
                 </div>

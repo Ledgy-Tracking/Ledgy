@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
 import { useNodeStore } from '../../../stores/useNodeStore';
-import { Zap, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Zap, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
 
 export interface TriggerNodeData {
     label: string;
@@ -82,8 +82,10 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
                     onClick={() => setIsConfigOpen(!isConfigOpen)}
                     className="p-1 hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-200"
                     title="Configure"
+                    aria-label="Configure node"
+                    aria-expanded={isConfigOpen}
                 >
-                    ⚙️
+                    <Settings size={14} />
                 </button>
             </div>
 
