@@ -116,7 +116,6 @@ export const useAuthStore = create<AuthState>()(
                     encryptedTotpSecret,
                     encryptionKey,
                     rememberMeExpiry,
-                    salt,
                 } = get();
 
                 // Step 1: Check session expiry
