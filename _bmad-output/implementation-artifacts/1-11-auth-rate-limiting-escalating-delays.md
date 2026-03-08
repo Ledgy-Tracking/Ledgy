@@ -150,10 +150,10 @@ src/
 
 ### Git Branch Strategy
 
-**Branch Decision**: Using `allatonce` branch for all epic implementation work.
+**Branch Decision**: Using `main` branch for all epic implementation work.
 
 ```bash
-git checkout allatonce
+git checkout main
 ```
 
 ### Previous Story Intelligence
@@ -195,7 +195,7 @@ BMad Method create-story workflow
 
 ### Mandatory Implementation Standards
 
-1. **Use existing git branch**: You MUST work on the `allatonce` branch.
+1. **Use existing git branch**: You MUST work on the `main` branch.
 
 2. **Exponential backoff**: MUST use formula: baseDelay * 2^(attempt-1).
 
@@ -214,7 +214,7 @@ BMad Method create-story workflow
 ### Next Steps
 
 After completing this story:
-1. Commit all changes to `allatonce` branch
+1. Commit all changes to `main` branch
 2. Update sprint-status.yaml and COMMIT
 3. **Complete Epic 1 Retrospective** (optional story)
 4. **Begin Epic 2: Profiles & Project Management**

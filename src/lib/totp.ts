@@ -105,24 +105,24 @@ export function fromBase32(base32: string): Uint8Array {
  * @param accountName - User's account name (email)
  * @param issuer - Service name (e.g., "Ledgy")
  */
-export function generateTOTPURI(secret: string, accountName: string, issuer: string = 'Ledgy'): string {
+export function generateTOTPURI(secret: string, accountName: string, issuer: string = 'Ledgy', algorithm: 'SHA1' | 'SHA256' | 'SHA512' = 'SHA256'): string {
     const encodedAccount = encodeURIComponent(accountName);
     const encodedIssuer = encodeURIComponent(issuer);
     
-    return `otpauth://totp/${encodedIssuer}:${encodedAccount}?secret=${secret}&issuer=${encodedIssuer}&algorithm=SHA1&digits=6&period=30`;
+    return `otpauth://totp/${encodedIssuer}:${encodedAccount}?secret=${secret}&issuer=${encodedIssuer}&algorithm=${algorithm}&digits=6&period=30`;
 }
 
 // Alias for backward compatibility
 export const generateOtpauthUri = generateTOTPURI;
 
 /**
- * HMAC-SHA1 implementation using WebCrypto API
+ * HMAC-SHA implementation using WebCrypto API
  */
-async function hmacSha1(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
+async function hmacSha(key: Uint8Array, data: Uint8Array, algorithm: 'SHA-1' | 'SHA-256' | 'SHA-512' = 'SHA-1'): Promise<Uint8Array> {
     const cryptoKey = await crypto.subtle.importKey(
         'raw',
         key,
-        { name: 'HMAC', hash: 'SHA-1' },
+        { name: 'HMAC', hash: algorithm },
         false,
         ['sign']
     );
@@ -135,7 +135,7 @@ async function hmacSha1(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> 
  * Generate HOTP code (HMAC-based One-Time Password)
  * RFC 4226 compliant
  */
-async function hotp(secret: Uint8Array, counter: number): Promise<string> {
+async function hotp(secret: Uint8Array, counter: number, algorithm: 'SHA-1' | 'SHA-256' | 'SHA-512' = 'SHA-1'): Promise<string> {
     // Convert counter to 8-byte big-endian array
     const counterBytes = new Uint8Array(8);
     for (let i = 7; i >= 0; i--) {
@@ -143,8 +143,8 @@ async function hotp(secret: Uint8Array, counter: number): Promise<string> {
         counter = Math.floor(counter / 256);
     }
     
-    // HMAC-SHA1 hash
-    const hash = await hmacSha1(secret, counterBytes);
+    // HMAC-SHA hash
+    const hash = await hmacSha(secret, counterBytes, algorithm);
     
     // Dynamic truncation (RFC 4226 Section 5.4)
     const offset = hash[hash.length - 1] & 0x0F;
@@ -163,12 +163,13 @@ async function hotp(secret: Uint8Array, counter: number): Promise<string> {
  * RFC 6238 compliant
  * @param secret - Base32 encoded secret or raw bytes
  * @param timeStep - Optional time step (defaults to current time)
+ * @param algorithm - Hash algorithm (defaults to SHA-1 for backwards compatibility in standalone calls)
  */
-export async function generateTOTP(secret: string | Uint8Array, timeStep?: number): Promise<string> {
+export async function generateTOTP(secret: string | Uint8Array, timeStep?: number, algorithm: 'SHA-1' | 'SHA-256' | 'SHA-512' = 'SHA-1'): Promise<string> {
     const secretBytes = typeof secret === 'string' ? fromBase32(secret) : secret;
     const step = timeStep ?? Math.floor(Date.now() / 1000 / 30);
     
-    return await hotp(secretBytes, step);
+    return await hotp(secretBytes, step, algorithm);
 }
 
 /**
@@ -185,13 +186,17 @@ export async function verifyTOTP(
     const secretBytes = typeof secret === 'string' ? fromBase32(secret) : secret;
     const currentStep = Math.floor(Date.now() / 1000 / 30);
     
+    const algorithms: ('SHA-1' | 'SHA-256')[] = ['SHA-1', 'SHA-256'];
+
     // Check current step and surrounding steps (±window)
     for (let i = -window; i <= window; i++) {
-        const expectedCode = await generateTOTP(secretBytes, currentStep + i);
-        
-        // Constant-time comparison to prevent timing attacks
-        if (constantTimeCompare(code, expectedCode)) {
-            return true;
+        for (const alg of algorithms) {
+            const expectedCode = await generateTOTP(secretBytes, currentStep + i, alg);
+
+            // Constant-time comparison to prevent timing attacks
+            if (constantTimeCompare(code, expectedCode)) {
+                return true;
+            }
         }
     }
     

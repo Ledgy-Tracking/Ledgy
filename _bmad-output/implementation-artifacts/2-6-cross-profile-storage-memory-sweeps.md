@@ -17,7 +17,7 @@ so that **there are no data leaks between my distinct life domains and no memory
 3. The PouchDB instance for the previous profile is properly closed and removed from the active connection registry (already mostly implemented in `setActiveProfile`, but must verify no pending listeners remain).
 4. The React UI forcefully unmounts and remounts the main application workspace to ensure any localized component state (e.g., cached React Flow nodes or open dialogs) is completely flushed.
 5. If the user logs out (locks the vault), the same memory sweep occurs, ensuring no decrypted data remains in the stores.
-6. **CRITICAL**: Developer MUST use the existing `allatonce` git branch for this epic.
+6. **CRITICAL**: Developer MUST use the existing `main` git branch for this epic.
 
 ## Tasks / Subtasks
 

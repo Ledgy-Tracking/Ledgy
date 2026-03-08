@@ -43,7 +43,7 @@ so that **I have a working foundation to build the ledgy application with the co
   - [x] Verify binary size is under 10MB (MSI: 3.06 MB, NSIS: 2.05 MB)
   - [x] Document build size in README.md
 - [x] Task 6: Create git branch for epic
-  - [x] Using `allatonce` branch (user preference - consolidates all epic work on single branch)
+  - [x] Using `main` branch (user preference - consolidates all epic work on single branch)
 
 ## Dev Notes
 
@@ -160,13 +160,13 @@ export default {
 
 ### Git Branch Strategy
 
-**Branch Decision**: Using `allatonce` branch for all epic implementation work (user preference).
+**Branch Decision**: Using `main` branch for all epic implementation work (user preference).
 
 **Rationale**: Consolidates all epic stories onto a single branch for streamlined development and easier integration, rather than creating separate `epic/epic-1` branch.
 
 ```bash
 # Working on consolidated branch
-git checkout allatonce
+git checkout main
 ```
 
 All stories in Epic 1 (1-1 through 1-11) are implemented on this branch.
@@ -217,7 +217,7 @@ N/A - Initial scaffold story
 - **Build verified**: Binary size 2.05-3.06 MB (under 10MB PRD requirement)
 - **Tests**: 28 passed, 1 pre-existing failure in useSyncStore.test.ts (unrelated to this story)
 - **Code Review (AI) Follow-ups Fixed**:
-  - Updated Task 6 to document `allatonce` branch decision with rationale
+  - Updated Task 6 to document `main` branch decision with rationale
   - Updated Git Branch Strategy section to reflect actual branch usage
   - Documented 32 deleted story files in Completion Notes (architectural cleanup)
   - Verified TypeScript compilation succeeds (tsc_output.txt was stale)

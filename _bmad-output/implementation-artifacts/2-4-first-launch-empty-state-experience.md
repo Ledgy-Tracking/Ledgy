@@ -19,7 +19,7 @@ so that **I understand the toolkit philosophy and feel guided to create my first
 5. The layout must be fully responsive, handling full desktop width down to 900px minimum window width.
 6. Support dark mode (default) and light mode via Tailwind standard classes.
 7. Accessibility: Keyboard navigable, semantic HTML, and correct ARIA roles for the welcome presentation.
-8. **CRITICAL**: Developer MUST use the existing `allatonce` git branch for this epic.
+8. **CRITICAL**: Developer MUST use the existing `main` git branch for this epic.
 
 ## Developer Context
 
@@ -62,7 +62,7 @@ if (!isLoading && profiles.length === 0) {
 
 ### Previous Story Intelligence
 - Story 2.3 introduced `ProfileCreationPage` at a specific route (e.g., `/profiles/create`). Ensure the Welcome CTA points precisely there.
-- The `allatonce` branch contains all recent changes. Pull the latest before starting to ensure 2.3 changes are present.
+- The `main` branch contains all recent changes. Pull the latest before starting to ensure 2.3 changes are present.
 
 ### Git Intelligence Summary
 Recent commits show that `ProfileSelectorCanvas` (Story 2.2) and Profile Creation Flow (Story 2.3) are completed. This story slots perfectly in between by handling the absolute edge case of a fresh installation before the selector canvas is useful.
@@ -108,7 +108,7 @@ BMad Method create-story workflow
 - Previous stories analyzed (2-2, 2-3)
 - UX design requirements integrated (Empty States & Loading)
 - Technical requirements defined
-- Git branch strategy confirmed: `allatonce`
+- Git branch strategy confirmed: `main`
 
 **Key Implementation Guidance**:
 1. Check profile count on load
