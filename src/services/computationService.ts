@@ -80,7 +80,7 @@ class ComputationService {
    * Compute correlation between two numeric arrays
    */
   computeCorrelation(x: number[], y: number[], callback?: ComputeCallback): Promise<ComputeResponse> {
-    const id = `corr-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const id = `corr-${crypto.randomUUID()}`;
     return new Promise((resolve) => {
       const internalCallback: ComputeCallback = (res) => {
         if (callback) callback(res);
@@ -98,7 +98,7 @@ class ComputationService {
     operation: ArithmeticOperation,
     callback?: ComputeCallback
   ): Promise<ComputeResponse> {
-    const id = `arith-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const id = `arith-${crypto.randomUUID()}`;
     return new Promise((resolve) => {
       const internalCallback: ComputeCallback = (res) => {
         if (callback) callback(res);
