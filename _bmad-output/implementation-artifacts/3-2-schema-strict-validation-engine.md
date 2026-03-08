@@ -1,6 +1,6 @@
 # Story 3.2: Schema Strict Validation Engine
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -323,16 +323,17 @@ Claude Sonnet 4.6 (claude-sonnet-4.6)
 - ✅ `update_entry` in `db.ts` now fetches existing entry for `schemaId`, calls `get_schema` + `validateEntryAgainstSchema`; uses `validatedData` in both paths.
 - ✅ 11 tests in `tests/schemaValidation.test.ts` — all pass.
 - ✅ `npx tsc --noEmit` reports 0 errors.
-- ✅ Updated existing tests in `documentAdapters.test.ts` and `SoftDelete.test.ts` to create real schemas before `create_entry` calls. Pre-existing failure count unchanged (14 files, 35 tests failing vs 47 before — improved by fixing 12 previously-broken tests).
+- ✅ Updated existing tests in `documentAdapters.test.ts` and `SoftDelete.test.ts` to create real schemas before `create_entry` calls. Pre-existing failure count improved (12 files, 31 tests failing vs 47 before — improved by fixing 16 previously-broken tests).
 
 ### File List
 
 - `src/lib/validation.ts` — NEW: Zod-powered validation module
 - `src/lib/db.ts` — MODIFIED: added `validateEntryAgainstSchema` import; wired validation into `create_entry` and `update_entry`
-- `tests/schemaValidation.test.ts` — NEW: validation test suite (11 tests)
+- `tests/schemaValidation.test.ts` — NEW: validation test suite (13 tests including 2 encrypted-path AC7 tests; `makeSchema` uses public `get_schema` API)
 - `tests/documentAdapters.test.ts` — MODIFIED: updated 5 `create_entry` calls to use real schemas
-- `tests/SoftDelete.test.ts` — MODIFIED: added schema creation to both `beforeEach` blocks; replaced hardcoded `'schema:1'` with dynamic `schemaId`
+- `tests/SoftDelete.test.ts` — MODIFIED: added schema creation to both `beforeEach` blocks; replaced hardcoded `'schema:1'` with dynamic `schemaId`; fixed 2 `find_entries_with_relation_to` tests (replaced `db.createDocument` custom `_id` with `create_entry`; replaced unsupported `relations` array field with schema-defined `relation1`/`relation2` fields)
 
 ## Change Log
 
 - 2026-03-08: Implemented story 3-2 — created `src/lib/validation.ts` (Zod schema validation engine), wired validation into `create_entry` and `update_entry` in `src/lib/db.ts`, added `tests/schemaValidation.test.ts` (11 tests), updated `documentAdapters.test.ts` and `SoftDelete.test.ts` to create real schemas before entry creation.
+- 2026-03-08: Code review fixes — added 2 encrypted-path tests (AC7 coverage); fixed `makeSchema` to use public `get_schema` API; fixed 2 `SoftDelete.test.ts` failures (`finds entry with single/multiple relation` tests now use `create_entry` for target entries; `relations` array replaced with schema-defined `relation1`/`relation2` fields); corrected completion notes test-failure count.

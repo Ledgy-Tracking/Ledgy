@@ -4,6 +4,7 @@ import {
     getProfileDb,
     _clearProfileDatabases,
     create_schema,
+    get_schema,
     create_entry,
     update_entry,
     get_entry,
@@ -14,7 +15,7 @@ import {
     buildZodSchemaFromLedger,
     ValidationError,
 } from '../src/lib/validation';
-import type { LedgerSchema, SchemaField } from '../src/types/ledger';
+import type { SchemaField } from '../src/types/ledger';
 
 const TEST_PROFILE_DB_NAME = 'ledgy_profile_test-validation-v1';
 const TEST_PROFILE_ID = 'test-validation-v1';
@@ -38,8 +39,7 @@ afterAll(async () => {
 
 async function makeSchema(db: Awaited<ReturnType<typeof freshDb>>, fields: SchemaField[]) {
     const id = await create_schema(db, 'TestSchema', fields, TEST_PROFILE_ID, 'proj:test');
-    const schema = await db.getDocument<LedgerSchema>(id);
-    return schema!;
+    return get_schema(db, id);
 }
 
 describe('Schema Strict Validation Engine', () => {
@@ -203,5 +203,42 @@ describe('Schema Strict Validation Engine', () => {
             caught = e;
         }
         expect(caught).toBeInstanceOf(ValidationError);
+    });
+
+    // AC7: Encryption paths also validated — validation runs BEFORE encryptPayload
+    it('create_entry with encryptionKey and invalid data: throws ValidationError, not a crypto error', async () => {
+        const db = await freshDb();
+        const schemaId = await create_schema(db, 'Encrypted Strict Schema', [
+            { name: 'amount', type: 'number', required: true },
+        ], TEST_PROFILE_ID, 'proj:test');
+
+        // mockKey is never reached — ValidationError is thrown before encryption
+        const mockKey = {} as unknown as CryptoKey;
+
+        await expect(
+            create_entry(db, schemaId, schemaId, { amount: 'not-a-number' }, TEST_PROFILE_ID, mockKey)
+        ).rejects.toThrow(ValidationError);
+
+        const entries = await list_entries(db, schemaId);
+        expect(entries).toHaveLength(0);
+    });
+
+    it('update_entry with encryptionKey and invalid data: throws ValidationError, original entry unchanged', async () => {
+        const db = await freshDb();
+        const schemaId = await create_schema(db, 'Encrypted Update Schema', [
+            { name: 'price', type: 'number', required: true },
+        ], TEST_PROFILE_ID, 'proj:test');
+
+        const entryId = await create_entry(db, schemaId, schemaId, { price: 50 }, TEST_PROFILE_ID);
+
+        // mockKey is never reached — ValidationError is thrown before encryption
+        const mockKey = {} as unknown as CryptoKey;
+
+        await expect(
+            update_entry(db, entryId, { price: 'wrong' }, mockKey)
+        ).rejects.toThrow(ValidationError);
+
+        const entry = await get_entry(db, entryId);
+        expect((entry.data as any).price).toBe(50);
     });
 });

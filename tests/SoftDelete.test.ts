@@ -36,16 +36,10 @@ describe('find_entries_with_relation_to', () => {
     });
 
     it('finds entry with single relation to target', async () => {
-        const targetEntryId = 'entry:target-123';
-        
-        // Create target entry
-        await db.createDocument('entry', {
-            _id: targetEntryId,
-            schemaId: 'schema:1',
-            ledgerId: 'ledger:1',
-            data: { name: 'Target Entry' },
-            profileId: testProfileId,
-        });
+        // Create target entry via create_entry (db.createDocument with custom _id is rejected by Story 3-1 fix H2)
+        const targetEntryId = await create_entry(db, schemaId, 'ledger:1', {
+            name: 'Target Entry',
+        }, testProfileId);
 
         // Create entry with relation to target
         await create_entry(db, schemaId, 'ledger:1', {
@@ -59,26 +53,24 @@ describe('find_entries_with_relation_to', () => {
     });
 
     it('finds entry with multiple relations including target', async () => {
-        const targetEntryId = 'entry:target-456';
-        const otherEntryId = 'entry:other-789';
-        
-        // Create entries
-        await db.createDocument('entry', {
-            _id: targetEntryId,
-            schemaId: 'schema:1',
-            ledgerId: 'ledger:1',
-            data: { name: 'Target Entry' },
-            profileId: testProfileId,
-        });
+        // Create target and other entries via create_entry
+        const targetEntryId = await create_entry(db, schemaId, 'ledger:1', {
+            name: 'Target Entry',
+        }, testProfileId);
+        const otherEntryId = await create_entry(db, schemaId, 'ledger:1', {
+            name: 'Other Entry',
+        }, testProfileId);
 
+        // Use schema-defined relation1/relation2 fields (array fields not yet supported)
         await create_entry(db, schemaId, 'ledger:1', {
             name: 'Multi-Relation Entry',
-            relations: [targetEntryId, otherEntryId],
+            relation1: targetEntryId,
+            relation2: otherEntryId,
         }, testProfileId);
 
         const result = await find_entries_with_relation_to(db, targetEntryId);
         expect(result).toHaveLength(1);
-        expect(result[0].data.relations).toContain(targetEntryId);
+        expect(result[0].data.relation1).toBe(targetEntryId);
     });
 
     it('excludes soft-deleted entries from results', async () => {
