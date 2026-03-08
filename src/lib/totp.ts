@@ -188,10 +188,16 @@ export async function verifyTOTP(
     
     const algorithms: ('SHA-1' | 'SHA-256')[] = ['SHA-1', 'SHA-256'];
 
-    // Check current step and surrounding steps (±window)
-    for (let i = -window; i <= window; i++) {
+    // Prioritize checking the current time step (0) first,
+    // as it is the most likely to be correct. Then check offsets (-1, 1, -2, 2...)
+    const stepsToCheck = [0];
+    for (let i = 1; i <= window; i++) {
+        stepsToCheck.push(-i, i);
+    }
+
+    for (const stepOffset of stepsToCheck) {
         for (const alg of algorithms) {
-            const expectedCode = await generateTOTP(secretBytes, currentStep + i, alg);
+            const expectedCode = await generateTOTP(secretBytes, currentStep + stepOffset, alg);
 
             // Constant-time comparison to prevent timing attacks
             if (constantTimeCompare(code, expectedCode)) {
