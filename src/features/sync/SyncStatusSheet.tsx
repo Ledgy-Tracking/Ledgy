@@ -197,7 +197,10 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                                         <span className="text-xs text-zinc-900 dark:text-zinc-100 font-medium truncate max-w-[200px]">
                                             {conflict.ledgerName} / {conflict.entryName}
                                         </span>
-                                        <button className="p-1 text-zinc-400 hover:text-red-500 transition-colors">
+                                        <button
+                                            className="p-1 text-zinc-400 hover:text-red-500 transition-colors"
+                                            aria-label={`Delete conflict for ${conflict.ledgerName} ${conflict.entryName}`}
+                                        >
                                             <Trash2 size={12} />
                                         </button>
                                     </div>

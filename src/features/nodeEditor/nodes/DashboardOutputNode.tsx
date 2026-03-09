@@ -72,6 +72,8 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
                                 : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
                                 }`}
                             title="Chart"
+                            aria-label="Chart widget type"
+                            aria-pressed={nodeData.widgetType === 'chart'}
                         >
                             <BarChart3 size={14} />
                         </button>
@@ -82,6 +84,8 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
                                 : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
                                 }`}
                             title="Trend"
+                            aria-label="Trend widget type"
+                            aria-pressed={nodeData.widgetType === 'trend'}
                         >
                             <TrendingUp size={14} />
                         </button>
@@ -92,6 +96,8 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
                                 : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
                                 }`}
                             title="Text"
+                            aria-label="Text widget type"
+                            aria-pressed={nodeData.widgetType === 'text'}
                         >
                             <Type size={14} />
                         </button>
