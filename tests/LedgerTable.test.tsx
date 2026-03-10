@@ -15,6 +15,7 @@ vi.mock('@tanstack/react-virtual', () => ({
             })),
         getTotalSize: () => count * estimateSize(),
         measureElement: vi.fn(),
+        scrollToIndex: vi.fn(),
     })),
 }));
 
@@ -65,6 +66,7 @@ describe('LedgerTable', () => {
             entries: { 'schema:test-123': mockEntries },
             allEntries: { 'schema:test-123': mockEntries },
             fetchEntries: vi.fn(),
+            deleteEntry: vi.fn(),
         });
         (useProfileStore as any).mockReturnValue({
             activeProfileId: 'profile-1',
@@ -77,6 +79,7 @@ describe('LedgerTable', () => {
             entries: {},
             allEntries: {},
             fetchEntries: vi.fn(),
+            deleteEntry: vi.fn(),
         });
 
         render(<LedgerTable schemaId="schema:test-123" />);

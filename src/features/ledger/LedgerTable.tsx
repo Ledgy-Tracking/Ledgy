@@ -55,6 +55,10 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
         overscan: 10,
     });
 
+    // Keep a stable ref to the latest virtualizer instance for use inside the keyboard handler closure
+    const rowVirtualizerRef = useRef(rowVirtualizer);
+    rowVirtualizerRef.current = rowVirtualizer;
+
     // Auto-select highlighted entry on mount (Story 3-3, AC 5)
     useEffect(() => {
         if (highlightEntryId && ledgerEntries.length > 0) {
@@ -77,10 +81,14 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                 setIsAddingEntry(true);
             } else if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                setSelectedRow(prev => Math.min(prev + 1, ledgerEntries.length - 1));
+                const next = Math.min(selectedRow + 1, ledgerEntries.length - 1);
+                setSelectedRow(next);
+                rowVirtualizerRef.current.scrollToIndex(next, { align: 'auto' });
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                setSelectedRow(prev => Math.max(prev - 1, 0));
+                const next = Math.max(selectedRow - 1, 0);
+                setSelectedRow(next);
+                rowVirtualizerRef.current.scrollToIndex(next, { align: 'auto' });
             } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRow >= 0) {
                 e.preventDefault();
                 const entryToDelete = ledgerEntries[selectedRow];
@@ -118,9 +126,13 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
 
             {/* Content area: virtualized grid + split view */}
             <div className="flex-1 flex overflow-hidden">
-                {/* Grid column: sticky column header + scrollable virtualizer body */}
-                <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-zinc-950">
-                    {/* Sticky column header — rendered outside the scroll container */}
+                {/* Grid column: role="grid" wraps BOTH the sticky header and the scroll body (WCAG 2.1 AA grid pattern) */}
+                <div
+                    role="grid"
+                    aria-label={`${schema.name} data grid`}
+                    className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
+                >
+                    {/* Sticky column header — role="rowgroup" is inside role="grid" per WCAG */}
                     <div
                         role="rowgroup"
                         className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shrink-0"
@@ -141,12 +153,10 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                         </div>
                     </div>
 
-                    {/* Scrollable virtualizer body — scroll element for useVirtualizer */}
+                    {/* Scrollable virtualizer body — scroll element for useVirtualizer; no role needed here */}
                     <div
-                        role="grid"
                         ref={scrollContainerRef}
                         style={{ overflowY: 'auto', flex: 1 }}
-                        aria-label={`${schema.name} data grid`}
                     >
                         {/* Inline add-entry row — rendered OUTSIDE the virtualizer loop */}
                         {isAddingEntry && (

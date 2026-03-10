@@ -17,6 +17,7 @@ vi.mock('@tanstack/react-virtual', () => ({
             })),
         getTotalSize: () => count * estimateSize(),
         measureElement: vi.fn(),
+        scrollToIndex: vi.fn(),
     })),
 }));
 
@@ -96,10 +97,13 @@ describe('dataLabVirtualizedCore', () => {
     it('renders exactly the same number of row elements as entries (not 10,000)', () => {
         render(<LedgerTable schemaId="schema:virt-123" />);
 
-        // Rows inside the role="grid" scroll container (excludes the sticky column header row)
+        // role="grid" now wraps both the sticky header row and the virtual data rows.
+        // Filter for data rows only (those containing role="gridcell" children).
         const grid = screen.getByRole('grid');
-        const rows = grid.querySelectorAll('[role="row"]');
-        expect(rows.length).toBe(3);
+        const dataRows = Array.from(grid.querySelectorAll('[role="row"]')).filter(
+            row => row.querySelector('[role="gridcell"]')
+        );
+        expect(dataRows.length).toBe(3);
     });
 
     it('renders InlineEntryRow outside the virtualizer when Add Entry button is clicked', () => {
@@ -112,17 +116,20 @@ describe('dataLabVirtualizedCore', () => {
         expect(screen.getByText('Save')).toBeInTheDocument();
         expect(screen.getByText('Cancel')).toBeInTheDocument();
 
-        // The inline row should appear BEFORE the virtualizer spacer (outside the virtualizer loop)
+        // role="grid" now wraps both the header rowgroup and the scroll container.
+        // The scroll container (no role, second child of grid) contains the InlineEntryRow
+        // wrapper and the virtualizer spacer as direct children.
         const grid = screen.getByRole('grid');
-        const gridChildren = Array.from(grid.children);
-        // First child is the InlineEntryRow wrapper div, not the virtualizer spacer
-        const virtualizerSpacer = gridChildren.find(
+        const scrollContainer = grid.children[1] as HTMLElement;
+        const scrollChildren = Array.from(scrollContainer.children);
+
+        const virtualizerSpacer = scrollChildren.find(
             (el) => (el as HTMLElement).style.position === 'relative'
         ) as HTMLElement | undefined;
-        const inlineWrapper = gridChildren[0] as HTMLElement;
+        const inlineWrapper = scrollChildren[0] as HTMLElement;
         // Inline wrapper should come before the virtualizer spacer in DOM order
-        expect(gridChildren.indexOf(inlineWrapper)).toBeLessThan(
-            gridChildren.indexOf(virtualizerSpacer as Element)
+        expect(scrollChildren.indexOf(inlineWrapper)).toBeLessThan(
+            scrollChildren.indexOf(virtualizerSpacer as Element)
         );
     });
 
@@ -148,5 +155,35 @@ describe('dataLabVirtualizedCore', () => {
         fireEvent.keyDown(window, { key: 'N', code: 'KeyN' });
 
         expect(screen.getByText('Save')).toBeInTheDocument();
+    });
+
+    it('pressing ArrowDown selects the first row and scrollToIndex is called', () => {
+        render(<LedgerTable schemaId="schema:virt-123" />);
+
+        fireEvent.keyDown(window, { key: 'ArrowDown' });
+
+        // First data row should now be selected
+        const selectedRows = document.querySelectorAll('[data-state="selected"]');
+        expect(selectedRows.length).toBe(1);
+        expect(selectedRows[0]).toHaveTextContent('Entry 1');
+
+        // scrollToIndex should have been called on the virtualizer instance
+        const virtualizerInstance = (useVirtualizer as any).mock.results[0].value;
+        expect(virtualizerInstance.scrollToIndex).toHaveBeenCalledWith(0, { align: 'auto' });
+    });
+
+    it('ArrowDown then ArrowUp navigates between rows', () => {
+        render(<LedgerTable schemaId="schema:virt-123" />);
+
+        fireEvent.keyDown(window, { key: 'ArrowDown' }); // selects index 0
+        fireEvent.keyDown(window, { key: 'ArrowDown' }); // selects index 1
+
+        let selected = document.querySelectorAll('[data-state="selected"]');
+        expect(selected[0]).toHaveTextContent('Entry 2');
+
+        fireEvent.keyDown(window, { key: 'ArrowUp' }); // back to index 0
+
+        selected = document.querySelectorAll('[data-state="selected"]');
+        expect(selected[0]).toHaveTextContent('Entry 1');
     });
 });
