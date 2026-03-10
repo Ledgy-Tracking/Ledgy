@@ -8,6 +8,8 @@ import {
     create_entry,
     get_entry,
     list_entries,
+    list_all_entries,
+    delete_entry,
 } from '../src/lib/db';
 import { migrateEntryData } from '../src/lib/migration';
 import type { LedgerSchema, LedgerEntry } from '../src/types/ledger';
@@ -140,14 +142,66 @@ describe('list_entries — JIT migration integration', () => {
         );
         const entryId = await create_entry(db, schemaId, schemaId, { name: 'Bob', temp: 'bye' }, TEST_PROFILE_ID);
 
-        // Remove 'temp' field — increments schema_version
+        // Remove 'temp' field — increments schema_version from 1 to 2
         await update_schema(db, schemaId, 'Write-back Test', [{ name: 'name', type: 'text' }]);
 
         // Trigger JIT migration via list_entries
         await list_entries(db, schemaId);
 
-        // The persisted entry should now have the bumped schema_version
+        // The persisted entry should now have schema_version === 2 (current schema version)
         const updated = await get_entry(db, entryId);
-        expect(updated.schema_version).toBeGreaterThan(1);
+        expect(updated.schema_version).toBe(2);
+    });
+});
+
+// ─── Integration tests: list_all_entries ─────────────────────────────────────
+
+describe('list_all_entries — JIT migration integration', () => {
+    it('applies JIT migration to active entries including bumping schema_version in returned result', async () => {
+        const db = await freshDb();
+        const schemaId = await create_schema(
+            db,
+            'All-entries Migration Test',
+            [{ name: 'title', type: 'text' }, { name: 'stale', type: 'text' }],
+            TEST_PROFILE_ID,
+            'project:test'
+        );
+        await create_entry(db, schemaId, schemaId, { title: 'Alpha', stale: 'old' }, TEST_PROFILE_ID);
+
+        // Remove 'stale' field — increments schema_version from 1 to 2
+        await update_schema(db, schemaId, 'All-entries Migration Test', [{ name: 'title', type: 'text' }]);
+
+        const entries = await list_all_entries(db, schemaId);
+        expect(entries).toHaveLength(1);
+        expect(entries[0].data).not.toHaveProperty('stale');
+        expect(entries[0].data).toHaveProperty('title', 'Alpha');
+        expect(entries[0].schema_version).toBe(2);
+    });
+
+    it('does NOT write back soft-deleted entries — migrates in-memory only', async () => {
+        const db = await freshDb();
+        const schemaId = await create_schema(
+            db,
+            'Soft-delete Migration Test',
+            [{ name: 'name', type: 'text' }, { name: 'gone', type: 'text' }],
+            TEST_PROFILE_ID,
+            'project:test'
+        );
+        const entryId = await create_entry(db, schemaId, schemaId, { name: 'Ghost', gone: 'yes' }, TEST_PROFILE_ID);
+
+        // Soft-delete the entry before schema update
+        await delete_entry(db, entryId);
+
+        // Remove 'gone' field — increments schema_version from 1 to 2
+        await update_schema(db, schemaId, 'Soft-delete Migration Test', [{ name: 'name', type: 'text' }]);
+
+        // list_all_entries should return migrated in-memory view for ghost reference detection
+        const entries = await list_all_entries(db, schemaId);
+        expect(entries).toHaveLength(1);
+        expect(entries[0].data).not.toHaveProperty('gone');
+
+        // The persisted document should NOT have been updated (schema_version remains 1)
+        const persisted = await get_entry(db, entryId);
+        expect(persisted.schema_version).toBe(1);
     });
 });

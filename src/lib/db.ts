@@ -694,11 +694,13 @@ export async function list_entries(
     const schema = await get_schema(db, ledgerId).catch(() => null);
     if (!schema) return decrypted;
     const result: LedgerEntry[] = [];
+    const writeBackPromises: Promise<void>[] = [];
     for (const entry of decrypted) {
         const { migrated, didMigrate } = migrateEntryData(entry, schema);
-        if (didMigrate) await persistMigratedEntry(db, migrated, schema.schema_version, encryptionKey);
+        if (didMigrate) writeBackPromises.push(persistMigratedEntry(db, migrated, schema.schema_version, encryptionKey));
         result.push(migrated);
     }
+    await Promise.all(writeBackPromises);
     return result;
 }
 
@@ -706,6 +708,7 @@ export async function list_entries(
  * Lists all entries for a specific ledger/schema including soft-deleted entries.
  * Used for ghost reference detection.
  * Applies JIT migration to every returned entry (AC #8, #9).
+ * Write-back is skipped for soft-deleted entries — they are returned migrated in-memory only.
  * @param db - Profile database instance
  * @param ledgerId - Ledger identifier to filter by
  * @param encryptionKey - Optional encryption key
@@ -722,11 +725,13 @@ export async function list_all_entries(
     const schema = await get_schema(db, ledgerId).catch(() => null);
     if (!schema) return decrypted;
     const result: LedgerEntry[] = [];
+    const writeBackPromises: Promise<void>[] = [];
     for (const entry of decrypted) {
         const { migrated, didMigrate } = migrateEntryData(entry, schema);
-        if (didMigrate) await persistMigratedEntry(db, migrated, schema.schema_version, encryptionKey);
+        if (didMigrate && !entry.isDeleted) writeBackPromises.push(persistMigratedEntry(db, migrated, schema.schema_version, encryptionKey));
         result.push(migrated);
     }
+    await Promise.all(writeBackPromises);
     return result;
 }
 
