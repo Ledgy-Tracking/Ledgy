@@ -71,7 +71,7 @@ development_status:
   3-3-schema-builder-type-configuration-store: done
   3-4-schema-builder-text-number-ui: done
   3-5-schema-builder-date-relation-ui: done
-  3-6-schema-migration-jit-engine: backlog
+  3-6-schema-migration-jit-engine: ready-for-dev
   3-7-data-lab-tanstack-virtualized-core: backlog
   3-8-data-lab-header-custom-sorting: backlog
   3-9-data-lab-keyboard-first-inline-entry-row: backlog
