@@ -72,10 +72,10 @@ so that browsing 10,000+ entries stays smooth and responsive without DOM bloat.
   - [x] [AI-Review][MEDIUM] Add `scrollToIndex: vi.fn()` to both test file virtualizer mocks [LedgerTable.test.tsx:7, dataLabVirtualizedCore.test.tsx:9]
   - [x] [AI-Review][MEDIUM] Add ArrowDown/ArrowUp keyboard navigation tests (2 new tests; 7 total in dataLabVirtualizedCore.test.tsx) [dataLabVirtualizedCore.test.tsx]
   - [ ] [AI-Review][MEDIUM] `<tr>` inside `<div>` HTML warning from InlineEntryRow in edit/add mode — deferred to Story 3-9 (already documented in Dev Notes)
-  - [ ] [AI-Review][LOW] `window.confirm()` for soft-delete — replace with Zustand confirm-dialog or inline confirmation [LedgerTable.tsx:87]
-  - [ ] [AI-Review][LOW] `deletedEntryIds` useMemo scans all entries across all schemas — scope to current schema's relation targets [LedgerTable.tsx:30-40]
-  - [ ] [AI-Review][LOW] `recentlyCommittedId` flash fires on edit completion as well as new-entry creation [LedgerTable.tsx:235-241]
-  - [ ] [AI-Review][LOW] Empty state check (`ledgerEntries.length === 0`) doesn't account for all-soft-deleted entries [LedgerTable.tsx:169]
+  - [x] [AI-Review][LOW] `window.confirm()` for soft-delete — replace with Zustand confirm-dialog or inline confirmation [LedgerTable.tsx:87]
+  - [x] [AI-Review][LOW] `deletedEntryIds` useMemo scans all entries across all schemas — scope to current schema's relation targets [LedgerTable.tsx:30-40]
+  - [x] [AI-Review][LOW] `recentlyCommittedId` flash fires on edit completion as well as new-entry creation [LedgerTable.tsx:235-241]
+  - [x] [AI-Review][LOW] Empty state check (`ledgerEntries.length === 0`) doesn't account for all-soft-deleted entries [LedgerTable.tsx:169]
 
 ## Dev Notes
 
@@ -330,6 +330,11 @@ Claude Sonnet 4.6 (claude-sonnet-4.6)
 - ✅ [Code Review] Fixed broken ARIA grid structure: `role="grid"` moved to outer wrapper div so `role="rowgroup"` header is nested inside `role="grid"` per WCAG 2.1 AA
 - ✅ [Code Review] Added `rowVirtualizer.scrollToIndex(next, { align: 'auto' })` to ArrowUp/ArrowDown keyboard handler via stable `rowVirtualizerRef`; `scrollToIndex: vi.fn()` added to both test mocks
 - ✅ [Code Review] Added `deleteEntry: vi.fn()` to `LedgerTable.test.tsx` mock store
+- ✅ [LOW] Replaced `window.confirm()` soft-delete with inline confirmation bar (pendingDeleteEntry state + ref pattern; Enter confirms, Escape cancels, buttons for mouse users)
+- ✅ [LOW] `deletedEntryIds` useMemo scoped to relation target schemas only — no longer scans all schemas in `allEntries`
+- ✅ [LOW] `recentlyCommittedId` flash removed from edit `onComplete` — flash now only fires for new-entry creation, not row edits
+- ✅ [LOW] Empty state distinguishes "No entries yet" (no entries at all) from "All entries have been deleted" (all soft-deleted)
+- ✅ 5 new tests added to `dataLabVirtualizedCore.test.tsx` covering all 4 LOW fixes; 572 total passing, 1 skipped, 0 failures
 
 ### File List
 
@@ -343,3 +348,4 @@ Claude Sonnet 4.6 (claude-sonnet-4.6)
 
 - 2026-03-10: Story 3.7 implemented — TanStack virtualizer integrated into LedgerTable; all 13 ACs satisfied; 5 new tests added; 0 regressions
 - 2026-03-10: Code review fixes applied — ARIA grid structure corrected (role="grid" now wraps header rowgroup per WCAG 2.1 AA); scrollToIndex added to ArrowUp/ArrowDown keyboard handler; test mocks hardened (deleteEntry, scrollToIndex); 2 new keyboard navigation tests added (7 total in dataLabVirtualizedCore.test.tsx)
+- 2026-03-10: LOW-priority items resolved — inline delete confirmation bar (replaces window.confirm); deletedEntryIds scoped to relation targets; recentlyCommittedId flash removed from edits; empty state distinguishes all-soft-deleted; 5 new tests (12 total in dataLabVirtualizedCore.test.tsx); 572 passing

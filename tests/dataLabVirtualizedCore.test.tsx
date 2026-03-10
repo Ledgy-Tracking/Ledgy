@@ -186,4 +186,62 @@ describe('dataLabVirtualizedCore', () => {
         selected = document.querySelectorAll('[data-state="selected"]');
         expect(selected[0]).toHaveTextContent('Entry 1');
     });
+
+    it('Delete key on a selected row shows inline confirmation bar', () => {
+        render(<LedgerTable schemaId="schema:virt-123" />);
+
+        // Select first row via click
+        fireEvent.click(screen.getByText('Entry 1'));
+        fireEvent.keyDown(window, { key: 'Delete' });
+
+        expect(screen.getByText(/delete this entry\?/i)).toBeInTheDocument();
+    });
+
+    it('Enter key after Delete confirms deletion and calls deleteEntry', () => {
+        const mockDeleteEntry = vi.fn();
+        (useLedgerStore as any).mockReturnValue({
+            schemas: [mockSchema],
+            entries: { 'schema:virt-123': mockEntries3 },
+            allEntries: { 'schema:virt-123': mockEntries3 },
+            fetchEntries: vi.fn(),
+            deleteEntry: mockDeleteEntry,
+            backLinks: {},
+            fetchBackLinks: vi.fn(),
+        });
+
+        render(<LedgerTable schemaId="schema:virt-123" />);
+
+        fireEvent.click(screen.getByText('Entry 1'));
+        fireEvent.keyDown(window, { key: 'Delete' });
+        fireEvent.keyDown(window, { key: 'Enter' });
+
+        expect(mockDeleteEntry).toHaveBeenCalledWith('entry:virt-1');
+    });
+
+    it('Escape key after Delete cancels confirmation bar', () => {
+        render(<LedgerTable schemaId="schema:virt-123" />);
+
+        fireEvent.click(screen.getByText('Entry 1'));
+        fireEvent.keyDown(window, { key: 'Delete' });
+        expect(screen.getByText(/delete this entry\?/i)).toBeInTheDocument();
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(screen.queryByText(/delete this entry\?/i)).not.toBeInTheDocument();
+    });
+
+    it('shows "all entries deleted" message when allEntries has data but entries is empty', () => {
+        (useLedgerStore as any).mockReturnValue({
+            schemas: [mockSchema],
+            entries: { 'schema:virt-123': [] },
+            allEntries: { 'schema:virt-123': mockEntries3 },
+            fetchEntries: vi.fn(),
+            deleteEntry: vi.fn(),
+            backLinks: {},
+            fetchBackLinks: vi.fn(),
+        });
+
+        render(<LedgerTable schemaId="schema:virt-123" />);
+
+        expect(screen.getByText(/all entries have been deleted/i)).toBeInTheDocument();
+    });
 });

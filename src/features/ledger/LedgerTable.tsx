@@ -22,22 +22,30 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
     const [selectedRow, setSelectedRow] = useState<number>(-1);
     const [recentlyCommittedId, setRecentlyCommittedId] = useState<string | null>(null);
+    const [pendingDeleteEntry, setPendingDeleteEntry] = useState<LedgerEntry | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const pendingDeleteRef = useRef<LedgerEntry | null>(null);
+    pendingDeleteRef.current = pendingDeleteEntry;
 
     const schema = schemas.find(s => s._id === schemaId);
 
     // Memoized set of deleted entry IDs for efficient ghost detection (Story 3-4)
+    // Scoped to relation target schemas only — avoids scanning all schemas on each render
     const deletedEntryIds = useMemo(() => {
         const deleted = new Set<string>();
-        Object.values(allEntries).forEach(ledgerEntries => {
-            ledgerEntries.forEach(entry => {
+        if (!schema) return deleted;
+        const relationTargetIds = schema.fields
+            .filter(f => f.type === 'relation' && f.relationTarget)
+            .map(f => f.relationTarget!);
+        relationTargetIds.forEach(targetSchemaId => {
+            (allEntries[targetSchemaId] || []).forEach(entry => {
                 if (entry.isDeleted) {
                     deleted.add(entry._id);
                 }
             });
         });
         return deleted;
-    }, [allEntries]);
+    }, [allEntries, schema]);
 
     useEffect(() => {
         if (activeProfileId && schemaId) {
@@ -92,10 +100,18 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
             } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRow >= 0) {
                 e.preventDefault();
                 const entryToDelete = ledgerEntries[selectedRow];
-                if (entryToDelete && confirm(`Are you sure you want to delete this entry?`)) {
-                    deleteEntry(entryToDelete._id);
-                    setSelectedRow(-1);
+                if (entryToDelete) {
+                    setPendingDeleteEntry(entryToDelete);
                 }
+            } else if (e.key === 'Enter' && pendingDeleteRef.current) {
+                e.preventDefault();
+                const entry = pendingDeleteRef.current;
+                deleteEntry(entry._id);
+                setSelectedRow(-1);
+                setPendingDeleteEntry(null);
+            } else if (e.key === 'Escape' && pendingDeleteRef.current) {
+                e.preventDefault();
+                setPendingDeleteEntry(null);
             }
         };
 
@@ -122,6 +138,33 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                         Add Entry (N)
                     </Button>
                 </div>
+                {pendingDeleteEntry && (
+                    <div className="flex items-center gap-3 px-3 py-2 bg-red-50 dark:bg-red-900/20 border-t border-red-200 dark:border-red-800 text-sm">
+                        <span className="flex-1 text-red-700 dark:text-red-300">
+                            Delete this entry? Press{' '}
+                            <kbd className="px-1 py-0.5 bg-red-100 dark:bg-red-900 rounded font-mono text-xs border border-red-300 dark:border-red-700">Enter</kbd>
+                            {' '}to confirm or{' '}
+                            <kbd className="px-1 py-0.5 bg-red-100 dark:bg-red-900 rounded font-mono text-xs border border-red-300 dark:border-red-700">Esc</kbd>
+                            {' '}to cancel.
+                        </span>
+                        <button
+                            onClick={() => {
+                                deleteEntry(pendingDeleteEntry._id);
+                                setSelectedRow(-1);
+                                setPendingDeleteEntry(null);
+                            }}
+                            className="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-medium"
+                        >
+                            Delete
+                        </button>
+                        <button
+                            onClick={() => setPendingDeleteEntry(null)}
+                            className="px-2 py-1 bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded text-xs font-medium"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Content area: virtualized grid + split view */}
@@ -176,18 +219,31 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                         )}
 
                         {/* Empty state */}
-                        {ledgerEntries.length === 0 && !isAddingEntry && (
-                            <div className="flex flex-col items-center justify-center h-32 text-zinc-500 dark:text-zinc-400">
-                                <p className="mb-2">No entries yet.</p>
-                                <p className="text-sm">
-                                    Press{' '}
-                                    <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded font-mono text-zinc-900 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
-                                        N
-                                    </kbd>{' '}
-                                    or click "Add Entry" to create your first entry.
-                                </p>
-                            </div>
-                        )}
+                        {ledgerEntries.length === 0 && !isAddingEntry && (() => {
+                            const allEntriesForSchema = allEntries[schemaId] || [];
+                            const allSoftDeleted = allEntriesForSchema.length > 0;
+                            return (
+                                <div className="flex flex-col items-center justify-center h-32 text-zinc-500 dark:text-zinc-400">
+                                    {allSoftDeleted ? (
+                                        <>
+                                            <p className="mb-2">All entries have been deleted.</p>
+                                            <p className="text-sm">Deleted entries can be recovered from the entry inspector.</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="mb-2">No entries yet.</p>
+                                            <p className="text-sm">
+                                                Press{' '}
+                                                <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 rounded font-mono text-zinc-900 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-700">
+                                                    N
+                                                </kbd>{' '}
+                                                or click "Add Entry" to create your first entry.
+                                            </p>
+                                        </>
+                                    )}
+                                </div>
+                            );
+                        })()}
 
                         {/* Virtualizer total-height spacer with absolute-positioned virtual rows */}
                         <div
@@ -242,12 +298,9 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                                 schema={schema}
                                                 entry={entry}
                                                 onCancel={() => setEditingEntryId(null)}
-                                                onComplete={(id?: string) => {
+                                                onComplete={() => {
                                                     setEditingEntryId(null);
-                                                    if (id) {
-                                                        setRecentlyCommittedId(id);
-                                                        setTimeout(() => setRecentlyCommittedId(null), 2000);
-                                                    }
+                                                    // Flash only fires for new entries (add mode), not edits
                                                 }}
                                             />
                                         ) : (
