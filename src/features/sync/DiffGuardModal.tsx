@@ -116,6 +116,7 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                     <button
                         onClick={onClose}
                         className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                        aria-label="Close Conflict Resolution"
                     >
                         <X size={20} />
                     </button>
