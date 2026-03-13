@@ -73,7 +73,7 @@ development_status:
   3-5-schema-builder-date-relation-ui: done
   3-6-schema-migration-jit-engine: done
   3-7-data-lab-tanstack-virtualized-core: done
-  3-8-data-lab-header-custom-sorting: ready-for-dev
+  3-8-data-lab-header-custom-sorting: review
   3-9-data-lab-keyboard-first-inline-entry-row: backlog
   3-10-data-lab-relation-combobox-querying: backlog
   3-11-data-lab-focus-management: backlog

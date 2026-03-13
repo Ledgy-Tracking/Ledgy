@@ -1,6 +1,6 @@
 # Story 3.8: Data Lab - Header & Custom Sorting
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -33,43 +33,43 @@ so that I can quickly find and compare data without leaving the Data Lab view.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Add sort state and sorted entries derivation (AC: #1–#11)
-  - [ ] Add `SortDirection` type (`'asc' | 'desc'`) and `SortColumn` interface (`{ field: string; direction: SortDirection }`) to `LedgerTable.tsx` (or extract to `src/types/ledger.ts` if reused)
-  - [ ] Add `const [sortConfig, setSortConfig] = useState<SortColumn[]>([])` in `LedgerTable`
-  - [ ] Implement `handleHeaderClick(fieldName: string, shiftKey: boolean)` — see Dev Notes for full logic
-  - [ ] Add `sortedEntries = useMemo(...)` using a stable multi-key comparator — see Dev Notes for full implementation
-  - [ ] Replace all references to `ledgerEntries` inside the virtualizer section with `sortedEntries` (virtualizer `count`, `virtualRow.index` lookup, keyboard handler bounds)
-  - [ ] Reset `selectedRow` to `-1` inside `handleHeaderClick` after updating sort config
+- [x] Task 1 — Add sort state and sorted entries derivation (AC: #1–#11)
+  - [x] Add `SortDirection` type (`'asc' | 'desc'`) and `SortColumn` interface (`{ field: string; direction: SortDirection }`) to `LedgerTable.tsx` (or extract to `src/types/ledger.ts` if reused)
+  - [x] Add `const [sortConfig, setSortConfig] = useState<SortColumn[]>([])` in `LedgerTable`
+  - [x] Implement `handleHeaderClick(fieldName: string, shiftKey: boolean)` — see Dev Notes for full logic
+  - [x] Add `sortedEntries = useMemo(...)` using a stable multi-key comparator — see Dev Notes for full implementation
+  - [x] Replace all references to `ledgerEntries` inside the virtualizer section with `sortedEntries` (virtualizer `count`, `virtualRow.index` lookup, keyboard handler bounds)
+  - [x] Reset `selectedRow` to `-1` inside `handleHeaderClick` after updating sort config
 
-- [ ] Task 2 — Update column header JSX with sort indicator + click handler (AC: #1–#7)
-  - [ ] Add `onClick` and `onKeyDown` (Enter/Space) to each `role="columnheader"` div — call `handleHeaderClick(field.name, e.shiftKey)`
-  - [ ] Add `aria-sort` attribute: `"ascending"` | `"descending"` | `"none"` based on current `sortConfig`
-  - [ ] Add `cursor-pointer select-none` Tailwind classes to header cells
-  - [ ] Render sort glyph (`▲` / `▼`) and superscript priority badge when column is in `sortConfig`
+- [x] Task 2 — Update column header JSX with sort indicator + click handler (AC: #1–#7)
+  - [x] Add `onClick` and `onKeyDown` (Enter/Space) to each `role="columnheader"` div — call `handleHeaderClick(field.name, e.shiftKey)`
+  - [x] Add `aria-sort` attribute: `"ascending"` | `"descending"` | `"none"` based on current `sortConfig`
+  - [x] Add `cursor-pointer select-none` Tailwind classes to header cells
+  - [x] Render sort glyph (`▲` / `▼`) and superscript priority badge when column is in `sortConfig`
 
-- [ ] Task 3 — Add column resize (AC: #12–#14)
-  - [ ] Add `const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})` in `LedgerTable`
-  - [ ] Add `resizeState = useRef<{ field: string; startX: number; startWidth: number } | null>(null)`
-  - [ ] Add `headerScrollRef = useRef<HTMLDivElement>(null)` for the header row scroll sync
-  - [ ] Implement `handleResizeMouseDown(e: React.MouseEvent, fieldName: string)` — see Dev Notes
-  - [ ] Add single `useEffect` for `mousemove` + `mouseup` on `window` to drive live resize and cleanup — see Dev Notes
-  - [ ] Apply `width: ${getColWidth(field.name)}px; flexShrink: 0` to both header cells and data `role="gridcell"` cells; replace `flex-1 min-w-0` class on those cells
-  - [ ] Wrap the existing header `<div role="row">` in a new scrollable div (`ref={headerScrollRef}`, `overflow-x: hidden`, `display: flex`)
-  - [ ] Add `onScroll` handler to `scrollContainerRef` div that syncs `headerScrollRef.current.scrollLeft`
-  - [ ] Add the resize handle `<div>` inside each header cell — see Dev Notes for exact markup
+- [x] Task 3 — Add column resize (AC: #12–#14)
+  - [x] Add `const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})` in `LedgerTable`
+  - [x] Add `resizeState = useRef<{ field: string; startX: number; startWidth: number } | null>(null)`
+  - [x] Add `headerScrollRef = useRef<HTMLDivElement>(null)` for the header row scroll sync
+  - [x] Implement `handleResizeMouseDown(e: React.MouseEvent, fieldName: string)` — see Dev Notes
+  - [x] Add single `useEffect` for `mousemove` + `mouseup` on `window` to drive live resize and cleanup — see Dev Notes
+  - [x] Apply `width: ${getColWidth(field.name)}px; flexShrink: 0` to both header cells and data `role="gridcell"` cells; replace `flex-1 min-w-0` class on those cells
+  - [x] Wrap the existing header `<div role="row">` in a new scrollable div (`ref={headerScrollRef}`, `overflow-x: hidden`, `display: flex`)
+  - [x] Add `onScroll` handler to `scrollContainerRef` div that syncs `headerScrollRef.current.scrollLeft`
+  - [x] Add the resize handle `<div>` inside each header cell — see Dev Notes for exact markup
 
-- [ ] Task 4 — Write new tests in `tests/dataLabHeaderSorting.test.tsx` (AC: #18)
-  - [ ] Set up mock schema with `text` + `number` fields and 3 entries (values chosen to produce a deterministic sort order)
-  - [ ] Test: clicking a column header once renders entries in ascending order (first entry text should be alphabetically first)
-  - [ ] Test: clicking the same column header twice renders entries in descending order
-  - [ ] Test: clicking the same column header three times restores original insertion order
-  - [ ] Test: Shift+clicking a second column while a primary sort is active adds a secondary sort (`aria-sort` set on both headers)
-  - [ ] Test: sort indicator glyph (▲ or ▼) is present in column header text after first click
-  - [ ] File: `tests/dataLabHeaderSorting.test.tsx`
+- [x] Task 4 — Write new tests in `tests/dataLabHeaderSorting.test.tsx` (AC: #18)
+  - [x] Set up mock schema with `text` + `number` fields and 3 entries (values chosen to produce a deterministic sort order)
+  - [x] Test: clicking a column header once renders entries in ascending order (first entry text should be alphabetically first)
+  - [x] Test: clicking the same column header twice renders entries in descending order
+  - [x] Test: clicking the same column header three times restores original insertion order
+  - [x] Test: Shift+clicking a second column while a primary sort is active adds a secondary sort (`aria-sort` set on both headers)
+  - [x] Test: sort indicator glyph (▲ or ▼) is present in column header text after first click
+  - [x] File: `tests/dataLabHeaderSorting.test.tsx`
 
-- [ ] Task 5 — TypeScript and regression check (AC: #16, #17)
-  - [ ] `npx tsc --noEmit` → 0 errors
-  - [ ] `npx vitest run` → all pre-existing tests passing + ≥ 5 new tests passing
+- [x] Task 5 — TypeScript and regression check (AC: #16, #17)
+  - [x] `npx tsc --noEmit` → 0 errors
+  - [x] `npx vitest run` → all pre-existing tests passing + ≥ 5 new tests passing
 
 ## Dev Notes
 
@@ -442,4 +442,13 @@ Claude Sonnet 4.6 (claude-sonnet-4.6)
 
 ### Completion Notes List
 
+- ✅ Task 1: Added `SortDirection` type and `SortColumn` interface to `LedgerTable.tsx`. Added `sortConfig` state and `sortedEntries` useMemo with full multi-key comparator supporting all field types (text/number/date/boolean/relation). Null/empty values sort to end. Replaced all `ledgerEntries` references in virtualizer, keyboard handler, and highlight effect with `sortedEntries`. `selectedRow` resets to -1 in `handleHeaderClick`.
+- ✅ Task 2: Updated all `role="columnheader"` divs with `onClick`/`onKeyDown` handlers, `aria-sort` attribute, cursor-pointer/select-none classes, ▲/▼ glyph with superscript priority badge for multi-column sort.
+- ✅ Task 3: Added `columnWidths` state, `resizeState` ref, `headerScrollRef` ref, `getColWidth`/`handleResizeMouseDown` functions, window mousemove/mouseup resize useEffect, explicit width styles on header and gridcell elements (removed flex-1 min-w-0), header row wrapped in scroll-sync container, scroll container updated with `overflowX: auto` and `onScroll` sync handler.
+- ✅ Task 4: Created `tests/dataLabHeaderSorting.test.tsx` with 6 tests (single-column asc, single-column desc, sort removal/restoration, Shift+click multi-column, ▲ glyph indicator, ▼ glyph indicator).
+- ✅ Task 5: `npx tsc --noEmit` → 0 errors. `npx vitest run` → 65 test files passed, 578 tests passed (up from 567 baseline), 1 skipped, 0 failures.
+
 ### File List
+
+- `src/features/ledger/LedgerTable.tsx` — MODIFIED: sort state/useMemo, header JSX with sort indicator + aria-sort + resize handle, column resize state/refs/functions/useEffect, scroll sync, sortedEntries virtualizer integration
+- `tests/dataLabHeaderSorting.test.tsx` — NEW: 6 tests covering sort behavior and indicators

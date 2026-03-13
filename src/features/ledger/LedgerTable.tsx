@@ -9,6 +9,13 @@ import { RelationTagChip } from './RelationTagChip';
 import { BackLinksPanel } from './BackLinksPanel';
 import { Button } from '../../components/ui/button';
 
+type SortDirection = 'asc' | 'desc';
+
+interface SortColumn {
+    field: string;
+    direction: SortDirection;
+}
+
 interface LedgerTableProps {
     schemaId: string;
     highlightEntryId?: string;
@@ -26,6 +33,10 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const pendingDeleteRef = useRef<LedgerEntry | null>(null);
     pendingDeleteRef.current = pendingDeleteEntry;
+    const [sortConfig, setSortConfig] = useState<SortColumn[]>([]);
+    const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+    const resizeState = useRef<{ field: string; startX: number; startWidth: number } | null>(null);
+    const headerScrollRef = useRef<HTMLDivElement>(null);
 
     const schema = schemas.find(s => s._id === schemaId);
 
@@ -54,10 +65,53 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     }, [activeProfileId, schemaId, fetchEntries]);
 
     const ledgerEntries = entries[schemaId] || [];
-    const selectedEntry = selectedRow >= 0 ? ledgerEntries[selectedRow] : null;
+
+    const sortedEntries = useMemo(() => {
+        if (sortConfig.length === 0) return ledgerEntries;
+
+        return [...ledgerEntries].sort((a, b) => {
+            for (const { field, direction } of sortConfig) {
+                const schemaField = schema?.fields.find(f => f.name === field);
+                const aVal = a.data[field];
+                const bVal = b.data[field];
+
+                const aEmpty = aVal === null || aVal === undefined || aVal === '';
+                const bEmpty = bVal === null || bVal === undefined || bVal === '';
+                if (aEmpty && bEmpty) continue;
+                if (aEmpty) return 1;
+                if (bEmpty) return -1;
+
+                let cmp = 0;
+                switch (schemaField?.type) {
+                    case 'number':
+                        cmp = (aVal as number) - (bVal as number);
+                        break;
+                    case 'date':
+                        cmp = String(aVal).localeCompare(String(bVal));
+                        break;
+                    case 'boolean':
+                        cmp = (aVal ? 1 : 0) - (bVal ? 1 : 0);
+                        break;
+                    case 'relation': {
+                        const aFirst = Array.isArray(aVal) ? String(aVal[0] ?? '') : String(aVal);
+                        const bFirst = Array.isArray(bVal) ? String(bVal[0] ?? '') : String(bVal);
+                        cmp = aFirst.localeCompare(bFirst);
+                        break;
+                    }
+                    default:
+                        cmp = String(aVal).localeCompare(String(bVal));
+                }
+
+                if (cmp !== 0) return direction === 'asc' ? cmp : -cmp;
+            }
+            return 0;
+        });
+    }, [ledgerEntries, sortConfig, schema]);
+
+    const selectedEntry = selectedRow >= 0 ? sortedEntries[selectedRow] : null;
 
     const rowVirtualizer = useVirtualizer({
-        count: ledgerEntries.length,
+        count: sortedEntries.length,
         getScrollElement: () => scrollContainerRef.current,
         estimateSize: () => 36,
         overscan: 10,
@@ -69,13 +123,13 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
 
     // Auto-select highlighted entry on mount (Story 3-3, AC 5)
     useEffect(() => {
-        if (highlightEntryId && ledgerEntries.length > 0) {
-            const index = ledgerEntries.findIndex(e => e._id === highlightEntryId);
+        if (highlightEntryId && sortedEntries.length > 0) {
+            const index = sortedEntries.findIndex(e => e._id === highlightEntryId);
             if (index >= 0) {
                 setSelectedRow(index);
             }
         }
-    }, [highlightEntryId, ledgerEntries]);
+    }, [highlightEntryId, sortedEntries]);
 
     // Keyboard navigation (Story 3-2, AC 3)
     useEffect(() => {
@@ -89,7 +143,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                 setIsAddingEntry(true);
             } else if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                const next = Math.min(selectedRow + 1, ledgerEntries.length - 1);
+                const next = Math.min(selectedRow + 1, sortedEntries.length - 1);
                 setSelectedRow(next);
                 rowVirtualizerRef.current.scrollToIndex(next, { align: 'auto' });
             } else if (e.key === 'ArrowUp') {
@@ -99,7 +153,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                 rowVirtualizerRef.current.scrollToIndex(next, { align: 'auto' });
             } else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedRow >= 0) {
                 e.preventDefault();
-                const entryToDelete = ledgerEntries[selectedRow];
+                const entryToDelete = sortedEntries[selectedRow];
                 if (entryToDelete) {
                     setPendingDeleteEntry(entryToDelete);
                 }
@@ -117,7 +171,61 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [ledgerEntries, selectedRow, deleteEntry]);
+    }, [sortedEntries, selectedRow, deleteEntry]);
+
+    useEffect(() => {
+        const onMouseMove = (e: MouseEvent) => {
+            if (!resizeState.current) return;
+            const delta = e.clientX - resizeState.current.startX;
+            const newWidth = Math.max(60, resizeState.current.startWidth + delta);
+            setColumnWidths(prev => ({ ...prev, [resizeState.current!.field]: newWidth }));
+        };
+
+        const onMouseUp = () => {
+            resizeState.current = null;
+        };
+
+        window.addEventListener('mousemove', onMouseMove);
+        window.addEventListener('mouseup', onMouseUp);
+        return () => {
+            window.removeEventListener('mousemove', onMouseMove);
+            window.removeEventListener('mouseup', onMouseUp);
+        };
+    }, []);
+
+    function getColWidth(fieldName: string): number {
+        return columnWidths[fieldName] ?? 150;
+    }
+
+    function handleHeaderClick(fieldName: string, shiftKey: boolean) {
+        setSortConfig(prev => {
+            const existingIdx = prev.findIndex(s => s.field === fieldName);
+
+            if (!shiftKey) {
+                if (existingIdx === -1) return [{ field: fieldName, direction: 'asc' }];
+                if (prev[existingIdx].direction === 'asc') return [{ field: fieldName, direction: 'desc' }];
+                return [];
+            } else {
+                if (existingIdx === -1) return [...prev, { field: fieldName, direction: 'asc' }];
+                if (prev[existingIdx].direction === 'asc') {
+                    return prev.map((s, i) =>
+                        i === existingIdx ? { ...s, direction: 'desc' as SortDirection } : s
+                    );
+                }
+                return prev.filter((_, i) => i !== existingIdx);
+            }
+        });
+        setSelectedRow(-1);
+    }
+
+    function handleResizeMouseDown(e: React.MouseEvent, fieldName: string) {
+        e.preventDefault();
+        resizeState.current = {
+            field: fieldName,
+            startX: e.clientX,
+            startWidth: getColWidth(fieldName),
+        };
+    }
 
     if (!schema) {
         return <div className="p-4 text-zinc-500 dark:text-zinc-500">Schema not found</div>;
@@ -180,26 +288,64 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                         role="rowgroup"
                         className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 shrink-0"
                     >
-                        <div role="row" className="flex">
-                            {schema.fields.map((field) => (
-                                <div
-                                    key={field.name}
-                                    role="columnheader"
-                                    className="flex-1 min-w-0 px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider whitespace-nowrap overflow-hidden"
-                                >
-                                    {field.name}
-                                    <span className="ml-1 font-normal normal-case text-zinc-400 dark:text-zinc-500">
-                                        ({field.type})
-                                    </span>
-                                </div>
-                            ))}
+                        <div ref={headerScrollRef} style={{ overflowX: 'hidden', display: 'flex' }}>
+                            <div role="row" style={{ display: 'flex' }}>
+                                {schema.fields.map((field) => {
+                                    const sortInfo = sortConfig.find(s => s.field === field.name);
+                                    const sortPriority = sortInfo ? sortConfig.indexOf(sortInfo) + 1 : 0;
+                                    return (
+                                        <div
+                                            key={field.name}
+                                            role="columnheader"
+                                            aria-sort={sortInfo
+                                                ? (sortInfo.direction === 'asc' ? 'ascending' : 'descending')
+                                                : 'none'
+                                            }
+                                            onClick={(e) => handleHeaderClick(field.name, e.shiftKey)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter' || e.key === ' ') {
+                                                    e.preventDefault();
+                                                    handleHeaderClick(field.name, e.shiftKey);
+                                                }
+                                            }}
+                                            tabIndex={0}
+                                            style={{ width: getColWidth(field.name), flexShrink: 0, position: 'relative', userSelect: 'none' }}
+                                            className="px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider whitespace-nowrap overflow-hidden cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 select-none"
+                                        >
+                                            {field.name}
+                                            <span className="ml-1 font-normal normal-case text-zinc-400 dark:text-zinc-500">
+                                                ({field.type})
+                                            </span>
+                                            {sortInfo && (
+                                                <span className="ml-1 text-emerald-500" aria-hidden="true">
+                                                    {sortInfo.direction === 'asc' ? '▲' : '▼'}
+                                                    {sortConfig.length > 1 && (
+                                                        <sup className="text-[10px]">{sortPriority}</sup>
+                                                    )}
+                                                </span>
+                                            )}
+                                            <div
+                                                onMouseDown={(e) => handleResizeMouseDown(e, field.name)}
+                                                style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: 6, cursor: 'col-resize' }}
+                                                aria-hidden="true"
+                                                onClick={(e) => e.stopPropagation()}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
 
                     {/* Scrollable virtualizer body — scroll element for useVirtualizer; no role needed here */}
                     <div
                         ref={scrollContainerRef}
-                        style={{ overflowY: 'auto', flex: 1 }}
+                        style={{ overflowY: 'auto', overflowX: 'auto', flex: 1 }}
+                        onScroll={() => {
+                            if (headerScrollRef.current && scrollContainerRef.current) {
+                                headerScrollRef.current.scrollLeft = scrollContainerRef.current.scrollLeft;
+                            }
+                        }}
                     >
                         {/* Inline add-entry row — rendered OUTSIDE the virtualizer loop */}
                         {isAddingEntry && (
@@ -253,7 +399,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                             }}
                         >
                             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                                const entry = ledgerEntries[virtualRow.index];
+                                const entry = sortedEntries[virtualRow.index];
                                 const isEditing = editingEntryId === entry._id;
                                 const isHighlighted = highlightEntryId && entry._id === highlightEntryId;
                                 const isSelected = selectedRow === virtualRow.index;
@@ -308,7 +454,8 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                                 <div
                                                     key={`${entry._id}-${field.name}`}
                                                     role="gridcell"
-                                                    className="flex-1 min-w-0 px-4 py-2 text-sm text-zinc-900 dark:text-zinc-100 overflow-hidden text-ellipsis whitespace-nowrap"
+                                                    style={{ width: getColWidth(field.name), flexShrink: 0 }}
+                                                    className="px-4 py-2 text-sm text-zinc-900 dark:text-zinc-100 overflow-hidden text-ellipsis whitespace-nowrap"
                                                 >
                                                     {renderFieldValue(entry.data[field.name], field.type, entry, field, deletedEntryIds)}
                                                 </div>
