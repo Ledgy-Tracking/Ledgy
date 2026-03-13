@@ -8,10 +8,14 @@ import { useErrorStore } from '../stores/useErrorStore';
  */
 export const HKDF_SALT = 'ledgy-salt-v1';
 
+// Cache encoder and decoder at module level to avoid redundant object creation
+const textEncoder = new TextEncoder();
+const textDecoder = new TextDecoder();
+
 /**
  * Pre-encoded HKDF salt for legacy support.
  */
-export const HKDF_SALT_BYTES = new TextEncoder().encode(HKDF_SALT);
+export const HKDF_SALT_BYTES = textEncoder.encode(HKDF_SALT);
 
 /** Serializable form of a passphrase-encrypted TOTP secret (stored in localStorage). */
 export interface EncryptedSecret {
@@ -87,10 +91,9 @@ export async function deriveKeyFromTotp(totpSecretBytes: Uint8Array, salt: Uint8
  */
 export async function deriveKeyFromPassphrase(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
     try {
-        const encoder = new TextEncoder();
         const keyMaterial = await crypto.subtle.importKey(
             'raw',
-            encoder.encode(passphrase),
+            textEncoder.encode(passphrase),
             { name: 'PBKDF2' },
             false,
             ['deriveKey']
@@ -116,8 +119,7 @@ export async function deriveKeyFromPassphrase(passphrase: string, salt: Uint8Arr
 
 export async function encryptPayload(key: CryptoKey, plaintext: string): Promise<{ iv: number[], ciphertext: ArrayBuffer }> {
     try {
-        const encoder = new TextEncoder();
-        const data = encoder.encode(plaintext);
+        const data = textEncoder.encode(plaintext);
         const iv = crypto.getRandomValues(new Uint8Array(12));
 
         const ciphertext = await crypto.subtle.encrypt(
@@ -151,8 +153,7 @@ export async function decryptPayload(key: CryptoKey, iv: Uint8Array, ciphertext:
             ciphertext
         );
 
-        const decoder = new TextDecoder();
-        return decoder.decode(decrypted);
+        return textDecoder.decode(decrypted);
     } catch (error) {
         // GCM auth tag verification failure means tampering or wrong key
         const errorMessage = error instanceof Error ? 'Decryption failed: invalid key or tampered data' : 'Decryption failed';
