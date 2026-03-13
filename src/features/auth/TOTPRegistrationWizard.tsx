@@ -243,6 +243,7 @@ export const TOTPRegistrationWizard = () => {
                             <input
                                 type="text"
                                 value={totpCode}
+                                autoComplete="one-time-code"
                                 onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 placeholder="000000"
                                 maxLength={6}
