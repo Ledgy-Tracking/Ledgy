@@ -132,6 +132,10 @@ body {
   .animate-slide-down-row {
     animation: slide-down-row 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
+  .selected-row {
+    @apply bg-blue-50 dark:bg-blue-900/20;
+  }
 }
 
 /* 

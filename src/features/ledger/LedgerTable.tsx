@@ -22,9 +22,13 @@ interface LedgerTableProps {
 }
 
 export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEntryId }) => {
-    const { schemas, entries, fetchEntries, allEntries, deleteEntry } = useLedgerStore();
+    const ledgerStore = useLedgerStore();
+    const { schemas, entries, fetchEntries, allEntries, deleteEntry } = ledgerStore;
     const { activeProfileId } = useProfileStore();
     const { setSelectedEntryId, setRightInspector } = useUIStore();
+    const selectedRowIds = ledgerStore.selectedRowIds ?? new Set<string>();
+    const toggleRowSelection = ledgerStore.toggleRowSelection ?? (() => undefined);
+    const selectAll = ledgerStore.selectAll ?? (() => undefined);
     const [isAddingEntry, setIsAddingEntry] = useState(false);
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
     const [selectedRow, setSelectedRow] = useState<number>(-1);
@@ -41,6 +45,8 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
     const resizeState = useRef<{ field: string; startX: number; startWidth: number } | null>(null);
     const headerScrollRef = useRef<HTMLDivElement>(null);
+    const lastClickedIndexRef = useRef<number | null>(null);
+    const headerCheckboxRef = useRef<HTMLInputElement>(null);
 
     const schema = useMemo(
         () => schemas.find(s => s._id === schemaId),
@@ -124,6 +130,27 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
         estimateSize: () => 36,
         overscan: 10,
     });
+
+    const virtualItems = rowVirtualizer.getVirtualItems();
+    const visibleRowIds = useMemo(
+        () =>
+            virtualItems
+                .map((item) => sortedEntries[item.index]?._id)
+                .filter((rowId): rowId is string => Boolean(rowId)),
+        [virtualItems, sortedEntries]
+    );
+    const visibleSelectedCount = useMemo(
+        () => visibleRowIds.filter((rowId) => selectedRowIds.has(rowId)).length,
+        [visibleRowIds, selectedRowIds]
+    );
+    const allVisibleSelected = visibleRowIds.length > 0 && visibleSelectedCount === visibleRowIds.length;
+    const isHeaderIndeterminate = visibleSelectedCount > 0 && visibleSelectedCount < visibleRowIds.length;
+
+    useEffect(() => {
+        if (headerCheckboxRef.current) {
+            headerCheckboxRef.current.indeterminate = isHeaderIndeterminate;
+        }
+    }, [isHeaderIndeterminate]);
 
     // Keep a stable ref to the latest virtualizer instance for use inside the keyboard handler closure
     const rowVirtualizerRef = useRef(rowVirtualizer);
@@ -244,6 +271,34 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
         };
     }
 
+    function handleToggleVisibleSelection() {
+        if (visibleRowIds.length === 0) return;
+        const nextSelection = new Set(selectedRowIds);
+        if (allVisibleSelected) {
+            visibleRowIds.forEach((rowId) => nextSelection.delete(rowId));
+        } else {
+            visibleRowIds.forEach((rowId) => nextSelection.add(rowId));
+        }
+        selectAll(Array.from(nextSelection));
+    }
+
+    function handleRowSelection(rowIndex: number, isShiftClick: boolean) {
+        const row = sortedEntries[rowIndex];
+        if (!row) return;
+
+        if (isShiftClick && lastClickedIndexRef.current !== null) {
+            const [start, end] = [Math.min(lastClickedIndexRef.current, rowIndex), Math.max(lastClickedIndexRef.current, rowIndex)];
+            const rangeIds = sortedEntries.slice(start, end + 1).map((entry) => entry._id);
+            const nextSelection = new Set(selectedRowIds);
+            rangeIds.forEach((rowId) => nextSelection.add(rowId));
+            selectAll(Array.from(nextSelection));
+        } else {
+            toggleRowSelection(row._id);
+        }
+
+        lastClickedIndexRef.current = rowIndex;
+    }
+
     if (!schema) {
         return <div className="p-4 text-zinc-500 dark:text-zinc-500">Schema not found</div>;
     }
@@ -307,6 +362,21 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                     >
                         <div ref={headerScrollRef} style={{ overflowX: 'hidden', display: 'flex' }}>
                             <div role="row" style={{ display: 'flex' }}>
+                                <div
+                                    role="columnheader"
+                                    aria-sort="none"
+                                    style={{ width: 48, flexShrink: 0 }}
+                                    className="px-2 py-3 flex items-center justify-center"
+                                >
+                                    <input
+                                        ref={headerCheckboxRef}
+                                        type="checkbox"
+                                        aria-label="Select All"
+                                        checked={allVisibleSelected}
+                                        aria-checked={isHeaderIndeterminate ? 'mixed' : allVisibleSelected}
+                                        onChange={handleToggleVisibleSelection}
+                                    />
+                                </div>
                                 {schema.fields.map((field) => {
                                     const sortInfo = sortConfig.find(s => s.field === field.name);
                                     const sortPriority = sortInfo ? sortConfig.indexOf(sortInfo) + 1 : 0;
@@ -417,11 +487,13 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                 position: 'relative',
                             }}
                         >
-                            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                            {virtualItems.map((virtualRow) => {
                                 const entry = sortedEntries[virtualRow.index];
                                 const isEditing = editingEntryId === entry._id;
                                 const isHighlighted = highlightEntryId && entry._id === highlightEntryId;
                                 const isSelected = selectedRow === virtualRow.index;
+                                const isBulkSelected = selectedRowIds.has(entry._id);
+                                const showBulkSelectionHighlight = isBulkSelected && selectedRowIds.size >= 2;
 
                                 return (
                                     <div
@@ -437,48 +509,79 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                             transform: `translateY(${virtualRow.start}px)`,
                                         }}
                                         className={`flex border-b border-zinc-100 dark:border-zinc-800 cursor-pointer transition-all duration-300 ${
-                                            isHighlighted
-                                                ? 'bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30'
-                                                : recentlyCommittedId === entry._id
-                                                ? 'bg-emerald-500/20 dark:bg-emerald-500/20 ring-1 ring-emerald-500/50 animate-slide-down-row'
-                                                : isSelected
-                                                ? 'bg-zinc-100 dark:bg-zinc-800'
-                                                : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
-                                        }`}
-                                        onClick={() => {
+                                             isHighlighted
+                                                 ? 'bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30'
+                                             : recentlyCommittedId === entry._id
+                                                 ? 'bg-emerald-500/20 dark:bg-emerald-500/20 ring-1 ring-emerald-500/50 animate-slide-down-row'
+                                                 : showBulkSelectionHighlight
+                                                     ? 'selected-row'
+                                                 : isSelected
+                                                 ? 'bg-zinc-100 dark:bg-zinc-800'
+                                                 : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50'
+                                         }`}
+                                        onClick={(e) => {
                                             setSelectedRow(virtualRow.index);
                                             setSelectedEntryId(entry._id);
                                             setRightInspector(true);
+                                            if (e.shiftKey && !isAddingEntry) {
+                                                handleRowSelection(virtualRow.index, true);
+                                            } else {
+                                                lastClickedIndexRef.current = virtualRow.index;
+                                            }
                                         }}
                                         onDoubleClick={() => setEditingEntryId(entry._id)}
                                         tabIndex={0}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') {
                                                 setEditingEntryId(entry._id);
+                                            } else if (e.key === ' ' && !isAddingEntry) {
+                                                e.preventDefault();
+                                                handleRowSelection(virtualRow.index, e.shiftKey);
                                             }
                                         }}
                                     >
                                         {isEditing ? (
-                                            <InlineEntryRow
-                                                schema={schema}
-                                                entry={entry}
-                                                onCancel={() => setEditingEntryId(null)}
-                                                onComplete={() => {
-                                                    setEditingEntryId(null);
-                                                    // Flash only fires for new entries (add mode), not edits
-                                                }}
-                                            />
+                                            <>
+                                                <div style={{ width: 48, flexShrink: 0 }} className="px-2 py-2" />
+                                                <InlineEntryRow
+                                                    schema={schema}
+                                                    entry={entry}
+                                                    onCancel={() => setEditingEntryId(null)}
+                                                    onComplete={() => {
+                                                        setEditingEntryId(null);
+                                                        // Flash only fires for new entries (add mode), not edits
+                                                    }}
+                                                />
+                                            </>
                                         ) : (
-                                            schema.fields.map((field) => (
+                                            <>
                                                 <div
-                                                    key={`${entry._id}-${field.name}`}
                                                     role="gridcell"
-                                                    style={{ width: getColWidth(field.name), flexShrink: 0 }}
-                                                    className="px-4 py-2 text-sm text-zinc-900 dark:text-zinc-100 overflow-hidden text-ellipsis whitespace-nowrap"
+                                                    style={{ width: 48, flexShrink: 0 }}
+                                                    className="px-2 py-2 flex items-center justify-center"
                                                 >
-                                                    {renderFieldValue(entry.data[field.name], field.type, entry, field, deletedEntryIds)}
+                                                    <input
+                                                        type="checkbox"
+                                                        aria-label={`Select row ${virtualRow.index + 1}`}
+                                                        checked={isBulkSelected}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleRowSelection(virtualRow.index, e.shiftKey);
+                                                        }}
+                                                        onChange={() => undefined}
+                                                    />
                                                 </div>
-                                            ))
+                                                {schema.fields.map((field) => (
+                                                    <div
+                                                        key={`${entry._id}-${field.name}`}
+                                                        role="gridcell"
+                                                        style={{ width: getColWidth(field.name), flexShrink: 0 }}
+                                                        className="px-4 py-2 text-sm text-zinc-900 dark:text-zinc-100 overflow-hidden text-ellipsis whitespace-nowrap"
+                                                    >
+                                                        {renderFieldValue(entry.data[field.name], field.type, entry, field, deletedEntryIds)}
+                                                    </div>
+                                                ))}
+                                            </>
                                         )}
                                     </div>
                                 );

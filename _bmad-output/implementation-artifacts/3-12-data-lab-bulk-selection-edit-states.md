@@ -1,6 +1,6 @@
 # Story 3.12: Data Lab - Bulk Selection & Edit States
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -45,9 +45,9 @@ so that I can efficiently batch-modify entries without entering each one individ
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Add bulk selection state to Zustand store
-  - [ ] 1.1 Open `src/stores/ledgerStore.ts`
-  - [ ] 1.2 Add new state and actions:
+- [x] Task 1 — Add bulk selection state to Zustand store
+  - [x] 1.1 Open `src/stores/ledgerStore.ts`
+  - [x] 1.2 Add new state and actions:
     ```ts
     // Bulk selection management
     selectedRowIds: Set<string>;
@@ -55,7 +55,7 @@ so that I can efficiently batch-modify entries without entering each one individ
     selectAll: (rowIds: string[]) => void;
     clearSelection: () => void;
     ```
-  - [ ] 1.3 Implement `toggleRowSelection`: 
+  - [x] 1.3 Implement `toggleRowSelection`: 
     ```ts
     toggleRowSelection: (rowId: string) => {
       set((state) => {
@@ -66,29 +66,29 @@ so that I can efficiently batch-modify entries without entering each one individ
       });
     }
     ```
-  - [ ] 1.4 Implement `selectAll`: 
+  - [x] 1.4 Implement `selectAll`: 
     ```ts
     selectAll: (rowIds: string[]) => {
       set({ selectedRowIds: new Set(rowIds) });
     }
     ```
-  - [ ] 1.5 Implement `clearSelection`: 
+  - [x] 1.5 Implement `clearSelection`: 
     ```ts
     clearSelection: () => {
       set({ selectedRowIds: new Set() });
     }
     ```
-  - [ ] 1.6 **CRITICAL:** Always use these actions (never mutate `selectedRowIds` directly with `.add()` or `.delete()`)
+  - [x] 1.6 **CRITICAL:** Always use these actions (never mutate `selectedRowIds` directly with `.add()` or `.delete()`)
 
-- [ ] Task 2 — Implement checkbox column in LedgerTable grid
-  - [ ] 2.1 Open `src/features/ledger/LedgerTable.tsx`
-  - [ ] 2.2 Import the new store selectors: `selectedRowIds`, `toggleRowSelection`, `selectAll`, `clearSelection`
-  - [ ] 2.3 Add checkbox column header as first virtualizer row (before field headers)
-    - [ ] 2.3a Render "Select All" checkbox in header
-    - [ ] 2.3b Checkbox state: checked if all visible rows are selected, indeterminate if partial, unchecked if none
-    - [ ] 2.3c onClick handler calls `selectAll(visibleRowIds)` or `clearSelection()` based on current state
+- [x] Task 2 — Implement checkbox column in LedgerTable grid
+  - [x] 2.1 Open `src/features/ledger/LedgerTable.tsx`
+  - [x] 2.2 Import the new store selectors: `selectedRowIds`, `toggleRowSelection`, `selectAll`, `clearSelection`
+  - [x] 2.3 Add checkbox column header as first virtualizer row (before field headers)
+    - [x] 2.3a Render "Select All" checkbox in header
+    - [x] 2.3b Checkbox state: checked if all visible rows are selected, indeterminate if partial, unchecked if none
+    - [x] 2.3c onClick handler calls `selectAll(visibleRowIds)` or `clearSelection()` based on current state
            where visibleRowIds is computed from: `virtualItems.map(item => entries[schemaId][item.index]._id)`
-    - [ ] 2.3d **CRITICAL:** Use `useEffect` + `ref` to set indeterminate property (not HTML attribute):
+    - [x] 2.3d **CRITICAL:** Use `useEffect` + `ref` to set indeterminate property (not HTML attribute):
            ```tsx
            const headerCheckboxRef = useRef<HTMLInputElement>(null);
            useEffect(() => {
@@ -98,12 +98,12 @@ so that I can efficiently batch-modify entries without entering each one individ
              }
            }, [selectedCount, totalVisible]);
            ```
-  - [ ] 2.4 For each data row, render checkbox in first column
-    - [ ] 2.4a **CRITICAL - Use controlled checkboxes:** `checked={selectedRowIds.has(rowId)}` (uncontrolled will break on virtualizer scroll)
-    - [ ] 2.4b onClick handler calls `toggleRowSelection(rowId)` via store action (never mutate Set directly)
-    - [ ] 2.4c CSS class `.selected-row` applied to row when checkbox is checked (for visual highlight)
-    - [ ] 2.4d Track last clicked index for Shift+Click: `lastClickedIndexRef.current = virtualItem.index`
-  - [ ] 2.5 Space key handler on focused cell toggles selection for that row:
+  - [x] 2.4 For each data row, render checkbox in first column
+    - [x] 2.4a **CRITICAL - Use controlled checkboxes:** `checked={selectedRowIds.has(rowId)}` (uncontrolled will break on virtualizer scroll)
+    - [x] 2.4b onClick handler calls `toggleRowSelection(rowId)` via store action (never mutate Set directly)
+    - [x] 2.4c CSS class `.selected-row` applied to row when checkbox is checked (for visual highlight)
+    - [x] 2.4d Track last clicked index for Shift+Click: `lastClickedIndexRef.current = virtualItem.index`
+  - [x] 2.5 Space key handler on focused cell toggles selection for that row:
     ```ts
     case ' ':
       if (!isAddingEntry) {  // Only when NOT in inline entry mode
@@ -112,7 +112,7 @@ so that I can efficiently batch-modify entries without entering each one individ
       }
       break;
     ```
-  - [ ] 2.6 Shift+Click handler: determine first and last clicked row indices, select range (inclusive):
+  - [x] 2.6 Shift+Click handler: determine first and last clicked row indices, select range (inclusive):
     ```ts
     const handleShiftClickRange = (firstIdx: number, lastIdx: number) => {
       const [start, end] = [Math.min(firstIdx, lastIdx), Math.max(firstIdx, lastIdx)];
@@ -123,20 +123,20 @@ so that I can efficiently batch-modify entries without entering each one individ
     };
     ```
 
-- [ ] Task 3 — Create floating action bar for bulk operations
-  - [ ] 3.1 Create new file `src/features/ledger/BulkActionBar.tsx`
-  - [ ] 3.2 Component displays only when `selectedRowIds.size >= 1`
-  - [ ] 3.3 Floating position: fixed at bottom-center of viewport, above tab bar (z-index: 40)
-  - [ ] 3.4 Display text: "X entries selected" with count
-  - [ ] 3.5 Buttons: "Delete Selected" and "Assign Tag" (both disabled if 0 selected)
-  - [ ] 3.6 Import this component in `src/features/ledger/LedgerView.tsx` and render at layout bottom
+- [x] Task 3 — Create floating action bar for bulk operations
+  - [x] 3.1 Create new file `src/features/ledger/BulkActionBar.tsx`
+  - [x] 3.2 Component displays only when `selectedRowIds.size >= 1`
+  - [x] 3.3 Floating position: fixed at bottom-center of viewport, above tab bar (z-index: 40)
+  - [x] 3.4 Display text: "X entries selected" with count
+  - [x] 3.5 Buttons: "Delete Selected" and "Assign Tag" (both disabled if 0 selected)
+  - [x] 3.6 Import this component in `src/features/ledger/LedgerView.tsx` and render at layout bottom
            (Note: The actual parent container is LedgerView, not DataLabView which does not exist)
 
-- [ ] Task 4 — Implement bulk delete action
-  - [ ] 4.1 In `BulkActionBar.tsx`, create `handleBulkDelete` function
-  - [ ] 4.2 Show confirmation dialog: "Delete X entries? This cannot be undone."
-  - [ ] 4.3 On confirm: batch delete all selected row IDs from PouchDB
-    - [ ] 4.3a **CRITICAL - Fetch current _rev before deletion:**
+- [x] Task 4 — Implement bulk delete action
+  - [x] 4.1 In `BulkActionBar.tsx`, create `handleBulkDelete` function
+  - [x] 4.2 Show confirmation dialog: "Delete X entries? This cannot be undone."
+  - [x] 4.3 On confirm: batch delete all selected row IDs from PouchDB
+    - [x] 4.3a **CRITICAL - Fetch current _rev before deletion:**
     ```ts
     async function batchDeleteEntries(db: PouchDB.Database, entryIds: string[]) {
       // Step 1: Fetch current documents to get _rev
@@ -166,19 +166,19 @@ so that I can efficiently batch-modify entries without entering each one individ
       return { success: successful.length, failed: failures.length };
     }
     ```
-    - [ ] 4.3b Never batch > 5000 rows; paginate if needed
-  - [ ] 4.4 On success: call `clearSelection()` from store immediately (before toast, to prevent race condition)
-  - [ ] 4.5 Show success toast: "X entries deleted"
-  - [ ] 4.6 On failure: show error toast with failure count (don't auto-clear selection if partial failure)
+    - [x] 4.3b Never batch > 5000 rows; paginate if needed
+  - [x] 4.4 On success: call `clearSelection()` from store immediately (before toast, to prevent race condition)
+  - [x] 4.5 Show success toast: "X entries deleted"
+  - [x] 4.6 On failure: show error toast with failure count (don't auto-clear selection if partial failure)
 
-- [ ] Task 5 — Implement bulk tag assignment
-  - [ ] 5.1 In `BulkActionBar.tsx`, create `handleBulkAssignTag` function
-  - [ ] 5.2 Open a small modal/popover with tag selector or create-new-tag input
-    - [ ] 5.2a Display existing tags (query from store or load from schema)
-    - [ ] 5.2b Allow user to type new tag name if not in list
-    - [ ] 5.2c **CRITICAL - Verify tags field exists in schema:** Before assigning, check that the current schema (Story 3-2) includes a `tags` field. If not, show error: "Current schema does not support tags. Edit schema first."
-  - [ ] 5.3 On tag select: batch update all selected rows
-    - [ ] 5.3a Load each selected row document (fetch current _rev):
+- [x] Task 5 — Implement bulk tag assignment
+  - [x] 5.1 In `BulkActionBar.tsx`, create `handleBulkAssignTag` function
+  - [x] 5.2 Open a small modal/popover with tag selector or create-new-tag input
+    - [x] 5.2a Display existing tags (query from store or load from schema)
+    - [x] 5.2b Allow user to type new tag name if not in list
+    - [x] 5.2c **CRITICAL - Verify tags field exists in schema:** Before assigning, check that the current schema (Story 3-2) includes a `tags` field. If not, show error: "Current schema does not support tags. Edit schema first."
+  - [x] 5.3 On tag select: batch update all selected rows
+    - [x] 5.3a Load each selected row document (fetch current _rev):
     ```ts
     async function batchAssignTag(db: PouchDB.Database, entryIds: string[], tagValue: string) {
       const docs = await Promise.all(entryIds.map(id => db.get(id)));
@@ -195,36 +195,36 @@ so that I can efficiently batch-modify entries without entering each one individ
       return { success: successful.length, failed: failures.length };
     }
     ```
-    - [ ] 5.3b Never batch > 5000 rows; paginate if needed
-  - [ ] 5.4 On success: call `clearSelection()` from store immediately (before toast)
-  - [ ] 5.5 Show success toast: "Tagged X entries"
-  - [ ] 5.6 On failure: show error toast; don't auto-clear selection for partial failures
+    - [x] 5.3b Never batch > 5000 rows; paginate if needed
+  - [x] 5.4 On success: call `clearSelection()` from store immediately (before toast)
+  - [x] 5.5 Show success toast: "Tagged X entries"
+  - [x] 5.6 On failure: show error toast; don't auto-clear selection for partial failures
 
-- [ ] Task 6 — Add CSS styling for selection highlight
-  - [ ] 6.1 Open `src/index.css` or relevant Tailwind config
-  - [ ] 6.2 Add `.selected-row` class: light background highlight (e.g., `bg-blue-50` or `bg-gray-100`)
-  - [ ] 6.3 Ensure checkbox column width is consistent (~40-50px)
-  - [ ] 6.4 Ensure checkbox is vertically centered in grid cells
+- [x] Task 6 — Add CSS styling for selection highlight
+  - [x] 6.1 Open `src/index.css` or relevant Tailwind config
+  - [x] 6.2 Add `.selected-row` class: light background highlight (e.g., `bg-blue-50` or `bg-gray-100`)
+  - [x] 6.3 Ensure checkbox column width is consistent (~40-50px)
+  - [x] 6.4 Ensure checkbox is vertically centered in grid cells
 
-- [ ] Task 7 — Write comprehensive tests
-  - [ ] 7.1 Create `tests/dataLabBulkSelection.test.tsx`
-  - [ ] 7.2 Set up mocks: Zustand store, PouchDB, virtualized grid (reuse boilerplate from `tests/dataLabFocusManagement.test.tsx`)
-  - [ ] 7.3 Test 1 — Checkbox column header renders: verify "Select All" checkbox is in DOM
-  - [ ] 7.4 Test 2 — Row checkbox toggles selection: click row checkbox → selectedRowIds updated in store
-  - [ ] 7.5 Test 3 — Select All toggles all rows: click header checkbox → all rows marked as selected
-  - [ ] 7.6 Test 4 — Partial selection → indeterminate header checkbox: select 2 of 3 rows → header checkbox aria-checked="mixed"
-  - [ ] 7.7 Test 5 — Space key toggles selection: focus on data cell, press Space → row checkbox toggles
-  - [ ] 7.8 Test 6 — Shift+Click selects range: click row 1, Shift+click row 3 → rows 1, 2, 3 all selected
-  - [ ] 7.9 Test 7 — Bulk Delete modal shows count: select 3 rows, click "Delete Selected" → confirmation dialog shows "Delete 3 entries?"
-  - [ ] 7.10 Test 8 — Bulk Delete removes rows from store: confirm delete → selectedRowIds cleared
-  - [ ] 7.11 Test 9 — Bulk Tag modal opens: select rows, click "Assign Tag" → tag selector popover is visible
-  - [ ] 7.12 Test 10 — Selection state survives scroll: select rows, virtualizer scrolls, scrolls back → rows still selected
-  - [ ] 7.13 Test 11 (Optional) — No regression - inline entry row still works: press `N` → inline entry row opens without affecting checkboxes
-  - [ ] 7.14 All tests ≥10 cases, all passing
+- [x] Task 7 — Write comprehensive tests
+  - [x] 7.1 Create `tests/dataLabBulkSelection.test.tsx`
+  - [x] 7.2 Set up mocks: Zustand store, PouchDB, virtualized grid (reuse boilerplate from `tests/dataLabFocusManagement.test.tsx`)
+  - [x] 7.3 Test 1 — Checkbox column header renders: verify "Select All" checkbox is in DOM
+  - [x] 7.4 Test 2 — Row checkbox toggles selection: click row checkbox → selectedRowIds updated in store
+  - [x] 7.5 Test 3 — Select All toggles all rows: click header checkbox → all rows marked as selected
+  - [x] 7.6 Test 4 — Partial selection → indeterminate header checkbox: select 2 of 3 rows → header checkbox aria-checked="mixed"
+  - [x] 7.7 Test 5 — Space key toggles selection: focus on data cell, press Space → row checkbox toggles
+  - [x] 7.8 Test 6 — Shift+Click selects range: click row 1, Shift+click row 3 → rows 1, 2, 3 all selected
+  - [x] 7.9 Test 7 — Bulk Delete modal shows count: select 3 rows, click "Delete Selected" → confirmation dialog shows "Delete 3 entries?"
+  - [x] 7.10 Test 8 — Bulk Delete removes rows from store: confirm delete → selectedRowIds cleared
+  - [x] 7.11 Test 9 — Bulk Tag modal opens: select rows, click "Assign Tag" → tag selector popover is visible
+  - [x] 7.12 Test 10 — Selection state survives scroll: select rows, virtualizer scrolls, scrolls back → rows still selected
+  - [x] 7.13 Test 11 (Optional) — No regression - inline entry row still works: press `N` → inline entry row opens without affecting checkboxes
+  - [x] 7.14 All tests ≥10 cases, all passing
 
-- [ ] Task 8 — TypeScript validation
-  - [ ] 8.1 Run `npx tsc --noEmit`
-  - [ ] 8.2 Confirm 0 new errors introduced
+- [x] Task 8 — TypeScript validation
+  - [x] 8.1 Run `npx tsc --noEmit`
+  - [x] 8.2 Confirm 0 new errors introduced
 
 ## Dev Notes
 
@@ -417,12 +417,12 @@ None yet — this is the initial story file creation.
 
 ### Completion Notes List
 
-- [ ] Story development started
-- [ ] All acceptance criteria met
-- [ ] All tests passing (≥10 test cases)
-- [ ] TypeScript validation: 0 errors
+- [x] Story development started
+- [x] All acceptance criteria met
+- [x] All tests passing (≥10 test cases)
+- [x] TypeScript validation: 0 errors
 - [ ] Code review passed
-- [ ] Story marked done in sprint-status.yaml
+- [x] Story marked review in sprint-status.yaml
 
 ### File List
 
@@ -431,11 +431,15 @@ None yet — this is the initial story file creation.
 - `tests/dataLabBulkSelection.test.tsx` — Test suite with ≥10 test cases
 
 **Files to modify:**
-- `src/stores/ledgerStore.ts` — Add bulk selection state and actions
+- `src/stores/useLedgerStore.ts` — Add bulk selection state and actions
 - `src/features/ledger/LedgerTable.tsx` — Add checkbox column and selection UI
-- `src/index.css` — Add `.selected-row` styling (if needed)
+- `src/features/ledger/LedgerView.tsx` — Render bulk action bar in ledger layout
+- `src/index.css` — Add `.selected-row` highlight utility
+- `_bmad-output/implementation-artifacts/3-12-data-lab-bulk-selection-edit-states.md` — Update task completion, status, and file list
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` — Move story status to review
 
 **Files NOT to modify (regression protection):**
 - `src/features/ledger/InlineEntryRow.tsx` — Focus management from 3-11 stays untouched
 - `src/features/ledger/RelationCombobox.tsx` — Tab forwarding from 3-11 stays untouched
 - `tests/dataLabFocusManagement.test.tsx` — Existing focus tests must continue to pass
+

@@ -77,7 +77,7 @@ development_status:
   3-9-data-lab-keyboard-first-inline-entry-row: done
   3-10-data-lab-relation-combobox-querying: done
   3-11-data-lab-focus-management: done
-  3-12-data-lab-bulk-selection-edit-states: ready-for-dev
+  3-12-data-lab-bulk-selection-edit-states: review
   3-13-bidirectional-link-writing: backlog
   3-14-ghost-reference-fallback-rendering: backlog
   3-15-local-undo-redo-stack: backlog
@@ -143,3 +143,4 @@ development_status:
   8-4-vitest-test-coverage-minimums: backlog
   8-5-accessibility-compliance-engine: backlog
   epic-8-retrospective: optional
+

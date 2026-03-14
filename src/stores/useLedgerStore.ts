@@ -22,6 +22,7 @@ interface LedgerState {
     entries: Record<string, LedgerEntry[]>; // keyed by ledgerId (excluding deleted)
     allEntries: Record<string, LedgerEntry[]>; // keyed by ledgerId (including deleted)
     backLinks: Record<string, LedgerEntry[]>; // keyed by targetEntryId
+    selectedRowIds: Set<string>;
     isLoading: boolean;
     error: string | null;
     onEntryEvent?: (eventType: 'on-create' | 'on-edit', entry: LedgerEntry) => void;
@@ -36,6 +37,9 @@ interface LedgerState {
     updateEntry: (entryId: string, data: Record<string, unknown>) => Promise<void>;
     deleteEntry: (entryId: string) => Promise<void>;
     restoreEntry: (entryId: string) => Promise<void>;
+    toggleRowSelection: (rowId: string) => void;
+    selectAll: (rowIds: string[]) => void;
+    clearSelection: () => void;
     setOnEntryEvent: (callback: (eventType: 'on-create' | 'on-edit', entry: LedgerEntry) => void) => void;
     clearProfileData: () => void;
 }
@@ -45,6 +49,7 @@ const initialState = {
     entries: {},
     allEntries: {},
     backLinks: {},
+    selectedRowIds: new Set<string>(),
     isLoading: false,
     error: null,
 };
@@ -265,6 +270,26 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             useErrorStore.getState().dispatchError(errorMsg);
             throw err;
         }
+    },
+
+    toggleRowSelection: (rowId: string) => {
+        set((state) => {
+            const nextSelected = new Set(state.selectedRowIds);
+            if (nextSelected.has(rowId)) {
+                nextSelected.delete(rowId);
+            } else {
+                nextSelected.add(rowId);
+            }
+            return { selectedRowIds: nextSelected };
+        });
+    },
+
+    selectAll: (rowIds: string[]) => {
+        set({ selectedRowIds: new Set(rowIds) });
+    },
+
+    clearSelection: () => {
+        set({ selectedRowIds: new Set<string>() });
     },
 
     setOnEntryEvent: (callback: (eventType: 'on-create' | 'on-edit', entry: LedgerEntry) => void) => {

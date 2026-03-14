@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { LedgerTable } from './LedgerTable';
+import { BulkActionBar } from './BulkActionBar';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 
@@ -55,6 +56,7 @@ export const LedgerView: React.FC = () => {
             <div className="flex-1 overflow-auto">
                 <LedgerTable schemaId={schema._id} highlightEntryId={highlightEntryId || undefined} />
             </div>
+            <BulkActionBar schemaId={schema._id} />
         </div>
     );
 };
