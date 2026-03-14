@@ -131,6 +131,33 @@ export class Database {
     }
 
     /**
+     * Applies multiple document patches in a single PouchDB bulk operation.
+     * Each patch merges into the existing document and refreshes updatedAt.
+     */
+    async bulkPatchDocuments(
+        patches: Array<{ id: string; data: Record<string, unknown> }>
+    ): Promise<Array<PouchDB.Core.Response | PouchDB.Core.Error>> {
+        for (const patch of patches) {
+            validateDocumentFields(patch.data as Partial<LedgyDocument>);
+        }
+
+        const timestamp = new Date().toISOString();
+        const docs = await Promise.all(
+            patches.map(async ({ id, data }) => {
+                const existing = await this.db.get<LedgyDocument>(id);
+                const { _id, _rev, createdAt, type, ...restData } = data as any;
+                return {
+                    ...existing,
+                    ...restData,
+                    updatedAt: timestamp,
+                };
+            })
+        );
+
+        return await this.db.bulkDocs(docs as PouchDB.Core.PutDocument<{}>[]);
+    }
+
+    /**
      * Query documents, excluding soft-deleted by default
      */
     async queryDocuments<T>(options?: {

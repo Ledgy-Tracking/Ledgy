@@ -5,7 +5,7 @@ import { BulkActionBar } from '../src/features/ledger/BulkActionBar';
 import { useLedgerStore } from '../src/stores/useLedgerStore';
 import { useProfileStore } from '../src/stores/useProfileStore';
 import { useUIStore } from '../src/stores/useUIStore';
-import { delete_entry, getProfileDb } from '../src/lib/db';
+import { getProfileDb } from '../src/lib/db';
 
 let virtualRange: { start: number; endExclusive: number } = { start: 0, endExclusive: 2 };
 const setVirtualRange = (start: number, endExclusive: number) => {
@@ -54,7 +54,6 @@ vi.mock('../src/stores/useUIStore', () => ({
 
 vi.mock('../src/lib/db', () => ({
     getProfileDb: vi.fn(),
-    delete_entry: vi.fn(),
 }));
 
 const mockSchema = {
@@ -203,26 +202,32 @@ describe('dataLabBulkSelection — BulkActionBar', () => {
 
     it('Test 10 — Confirm bulk delete clears selection', async () => {
         const clearSelection = vi.fn();
+        const selectAll = vi.fn();
         const fetchEntries = vi.fn().mockResolvedValue(undefined);
         setupLedgerStore({
             selectedRowIds: new Set<string>(['entry:1', 'entry:2', 'entry:3']),
             clearSelection,
+            selectAll,
             fetchEntries,
         });
 
         const mockDb = {
-            updateDocument: vi.fn().mockResolvedValue({ ok: true }),
+            bulkPatchDocuments: vi.fn().mockResolvedValue([
+                { id: 'entry:1', ok: true },
+                { id: 'entry:2', ok: true },
+                { id: 'entry:3', ok: true },
+            ]),
         };
         (getProfileDb as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockDb);
-        (delete_entry as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(undefined);
 
         render(<BulkActionBar schemaId="schema:bulk" />);
         fireEvent.click(screen.getByRole('button', { name: /delete selected/i }));
         fireEvent.click(screen.getByRole('button', { name: /confirm delete/i }));
 
         await waitFor(() => {
-            expect(delete_entry).toHaveBeenCalledTimes(3);
+            expect(mockDb.bulkPatchDocuments).toHaveBeenCalledTimes(1);
             expect(clearSelection).toHaveBeenCalled();
+            expect(selectAll).not.toHaveBeenCalled();
             expect(fetchEntries).toHaveBeenCalledWith('profile-1', 'schema:bulk');
         });
     });
@@ -231,5 +236,36 @@ describe('dataLabBulkSelection — BulkActionBar', () => {
         render(<BulkActionBar schemaId="schema:bulk" />);
         fireEvent.click(screen.getByRole('button', { name: /assign tag/i }));
         expect(screen.getByRole('combobox', { name: /tag value/i })).toBeInTheDocument();
+    });
+
+    it('Test 12 — Partial delete keeps only failed IDs selected', async () => {
+        const clearSelection = vi.fn();
+        const selectAll = vi.fn();
+        const fetchEntries = vi.fn().mockResolvedValue(undefined);
+        setupLedgerStore({
+            selectedRowIds: new Set<string>(['entry:1', 'entry:2', 'entry:3']),
+            clearSelection,
+            selectAll,
+            fetchEntries,
+        });
+
+        const mockDb = {
+            bulkPatchDocuments: vi.fn().mockResolvedValue([
+                { id: 'entry:1', ok: true },
+                { id: 'entry:2', error: 'conflict' },
+                { id: 'entry:3', ok: true },
+            ]),
+        };
+        (getProfileDb as unknown as ReturnType<typeof vi.fn>).mockReturnValue(mockDb);
+
+        render(<BulkActionBar schemaId="schema:bulk" />);
+        fireEvent.click(screen.getByRole('button', { name: /delete selected/i }));
+        fireEvent.click(screen.getByRole('button', { name: /confirm delete/i }));
+
+        await waitFor(() => {
+            expect(clearSelection).not.toHaveBeenCalled();
+            expect(selectAll).toHaveBeenCalledWith(['entry:2']);
+            expect(fetchEntries).toHaveBeenCalledWith('profile-1', 'schema:bulk');
+        });
     });
 });

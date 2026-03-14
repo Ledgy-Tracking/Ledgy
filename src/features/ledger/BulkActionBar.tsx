@@ -13,7 +13,7 @@ import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useNotificationStore } from '../../stores/useNotificationStore';
 import { useErrorStore } from '../../stores/useErrorStore';
-import { Database, delete_entry, getProfileDb } from '../../lib/db';
+import { Database, getProfileDb } from '../../lib/db';
 import { LedgerEntry } from '../../types/ledger';
 
 interface BulkActionBarProps {
@@ -23,6 +23,7 @@ interface BulkActionBarProps {
 interface BulkOperationResult {
     success: number;
     failed: number;
+    failedIds: string[];
 }
 
 const MAX_BATCH_SIZE = 5000;
@@ -41,14 +42,32 @@ async function batchDeleteEntries(
 ): Promise<BulkOperationResult> {
     let success = 0;
     let failed = 0;
+    const failedIds: string[] = [];
 
     for (const idBatch of chunk(entryIds, MAX_BATCH_SIZE)) {
-        const results = await Promise.allSettled(idBatch.map((id) => delete_entry(db, id)));
-        success += results.filter((result) => result.status === 'fulfilled').length;
-        failed += results.filter((result) => result.status === 'rejected').length;
+        const results = await db.bulkPatchDocuments(
+            idBatch.map((id) => ({
+                id,
+                data: {
+                    isDeleted: true,
+                    deletedAt: new Date().toISOString(),
+                },
+            }))
+        );
+
+        for (const result of results) {
+            if ('error' in result) {
+                failed += 1;
+                if (result.id) {
+                    failedIds.push(result.id);
+                }
+            } else {
+                success += 1;
+            }
+        }
     }
 
-    return { success, failed };
+    return { success, failed, failedIds };
 }
 
 async function batchAssignTag(
@@ -58,12 +77,24 @@ async function batchAssignTag(
 ): Promise<BulkOperationResult> {
     let success = 0;
     let failed = 0;
+    const failedIds: string[] = [];
 
     for (const idBatch of chunk(entryIds, MAX_BATCH_SIZE)) {
-        const results = await Promise.allSettled(idBatch.map(async (id) => {
+        const docs = await Promise.all(idBatch.map(async (id) => {
             const doc = await db.getDocument<LedgerEntry>(id);
             if (!doc) {
-                throw new Error(`Entry not found: ${id}`);
+                return null;
+            }
+            return doc;
+        }));
+
+        const patches: Array<{ id: string; data: Record<string, unknown> }> = [];
+        docs.forEach((doc, idx) => {
+            const id = idBatch[idx];
+            if (!doc) {
+                failed += 1;
+                failedIds.push(id);
+                return;
             }
 
             const currentData = (doc.data as Record<string, unknown> | undefined) ?? {};
@@ -72,19 +103,33 @@ async function batchAssignTag(
                 : [];
             const nextTags = Array.from(new Set([...currentTags, tagValue])).filter(Boolean);
 
-            await db.updateDocument(id, {
+            patches.push({
+                id,
                 data: {
-                    ...currentData,
-                    tags: nextTags,
+                    data: {
+                        ...currentData,
+                        tags: nextTags,
+                    },
                 },
             });
-        }));
+        });
 
-        success += results.filter((result) => result.status === 'fulfilled').length;
-        failed += results.filter((result) => result.status === 'rejected').length;
+        if (patches.length > 0) {
+            const results = await db.bulkPatchDocuments(patches);
+            for (const result of results) {
+                if ('error' in result) {
+                    failed += 1;
+                    if (result.id) {
+                        failedIds.push(result.id);
+                    }
+                } else {
+                    success += 1;
+                }
+            }
+        }
     }
 
-    return { success, failed };
+    return { success, failed, failedIds };
 }
 
 export const BulkActionBar: React.FC<BulkActionBarProps> = ({ schemaId }) => {
@@ -95,6 +140,7 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({ schemaId }) => {
 
     const selectedRowIds = ledgerStore.selectedRowIds ?? new Set<string>();
     const clearSelection = ledgerStore.clearSelection ?? (() => undefined);
+    const selectAll = ledgerStore.selectAll ?? (() => undefined);
     const fetchEntries = ledgerStore.fetchEntries;
     const schemas = ledgerStore.schemas;
     const entries = ledgerStore.entries;
@@ -122,7 +168,10 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({ schemaId }) => {
         return null;
     }
 
-    const hasTagsField = currentSchema?.fields.some((field) => field.name.toLowerCase() === 'tags') ?? false;
+    const hasTagsField =
+        currentSchema?.fields.some(
+            (field) => field.name.toLowerCase() === 'tags' && field.type === 'multi_select'
+        ) ?? false;
 
     const handleBulkDelete = async () => {
         if (!activeProfileId) {
@@ -132,13 +181,20 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({ schemaId }) => {
 
         const db = getProfileDb(activeProfileId);
         const result = await batchDeleteEntries(db, selectedIds);
-        await fetchEntries(activeProfileId, schemaId);
 
         if (result.failed === 0) {
             clearSelection();
+        } else {
+            const failedIdSet = new Set(result.failedIds);
+            selectAll(selectedIds.filter((id) => failedIdSet.has(id)));
+        }
+
+        await fetchEntries(activeProfileId, schemaId);
+
+        if (result.failed === 0) {
             addNotification(`${result.success} entries deleted`, 'success');
         } else {
-            dispatchError(`Failed to delete ${result.failed} entries`);
+            dispatchError(`Deleted ${result.success} entries, failed to delete ${result.failed} entries`);
         }
 
         setDeleteDialogOpen(false);
@@ -166,13 +222,20 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({ schemaId }) => {
 
         const db = getProfileDb(activeProfileId);
         const result = await batchAssignTag(db, selectedIds, trimmedTag);
-        await fetchEntries(activeProfileId, schemaId);
 
         if (result.failed === 0) {
             clearSelection();
+        } else {
+            const failedIdSet = new Set(result.failedIds);
+            selectAll(selectedIds.filter((id) => failedIdSet.has(id)));
+        }
+
+        await fetchEntries(activeProfileId, schemaId);
+
+        if (result.failed === 0) {
             addNotification(`Tagged ${result.success} entries`, 'success');
         } else {
-            dispatchError(`Failed to tag ${result.failed} entries`);
+            dispatchError(`Tagged ${result.success} entries, failed to tag ${result.failed} entries`);
         }
 
         setTagDialogOpen(false);
