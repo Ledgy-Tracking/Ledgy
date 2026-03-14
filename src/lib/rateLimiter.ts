@@ -20,6 +20,9 @@ const STORAGE_KEY = 'ledgy-auth-rate-limit';
 // HMAC key for signing (in production, this should be server-provided)
 const HMAC_KEY = 'ledgy-rate-limit-hmac-key-v1';
 
+// Cache TextEncoder at module level to avoid redundant instantiations (Performance optimization)
+const textEncoder = new TextEncoder();
+
 /**
  * Rate limit state for a single account
  */
@@ -35,9 +38,8 @@ export interface RateLimitState {
  * Generate HMAC signature for state
  */
 async function generateSignature(state: Omit<RateLimitState, 'signature'>): Promise<string> {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(JSON.stringify(state));
-    const keyData = encoder.encode(HMAC_KEY);
+    const data = textEncoder.encode(JSON.stringify(state));
+    const keyData = textEncoder.encode(HMAC_KEY);
     
     const key = await crypto.subtle.importKey(
         'raw',
