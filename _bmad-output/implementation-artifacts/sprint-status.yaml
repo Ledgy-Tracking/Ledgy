@@ -76,7 +76,7 @@ development_status:
   3-8-data-lab-header-custom-sorting: done
   3-9-data-lab-keyboard-first-inline-entry-row: done
   3-10-data-lab-relation-combobox-querying: done
-  3-11-data-lab-focus-management: backlog
+  3-11-data-lab-focus-management: ready-for-dev
   3-12-data-lab-bulk-selection-edit-states: backlog
   3-13-bidirectional-link-writing: backlog
   3-14-ghost-reference-fallback-rendering: backlog
