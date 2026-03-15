@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { LedgerSchema, SchemaField, LedgerEntry } from '../../types/ledger';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
@@ -17,12 +17,26 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
     onCancel,
     onComplete,
 }) => {
-    const { createEntry, updateEntry } = useLedgerStore();
+    const { createEntry, updateEntry, allEntries } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
     const [formData, setFormData] = useState<Record<string, unknown>>(entry?.data || {});
     const [errors, setErrors] = useState<Record<string, string>>({});
     const inputRefs = useRef<(HTMLInputElement | HTMLSelectElement | HTMLButtonElement | null)[]>([]);
     const [targetEntries, setTargetEntries] = useState<Record<string, LedgerEntry[]>>({});
+
+    // Memoized set of deleted entry IDs for efficient ghost detection (Story 3-14)
+    const deletedEntryIds = useMemo(() => {
+        const deleted = new Set<string>();
+        const relationFields = schema.fields.filter(f => f.type === 'relation' && f.relationTarget);
+        relationFields.forEach(field => {
+            (allEntries[field.relationTarget!] || []).forEach(entry => {
+                if (entry.isDeleted) {
+                    deleted.add(entry._id);
+                }
+            });
+        });
+        return deleted;
+    }, [allEntries, schema.fields]);
 
     // Load target ledger entries for relation fields
     useEffect(() => {
@@ -149,6 +163,7 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
                         onKeyDown={(e) => handleKeyDown(e, index)}
                         error={errors[field.name]}
                         targetEntries={targetEntries}
+                        deletedEntryIds={deletedEntryIds}
                     />
                 </div>
             ))}
@@ -189,10 +204,11 @@ interface FieldInputProps {
     onKeyDown: (e: React.KeyboardEvent) => void;
     error?: string;
     targetEntries: Record<string, LedgerEntry[]>;
+    deletedEntryIds: Set<string>;
 }
 
 const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLButtonElement, FieldInputProps>(
-    ({ field, value, onChange, onKeyDown, error, targetEntries }, ref) => {
+    ({ field, value, onChange, onKeyDown, error, targetEntries, deletedEntryIds }, ref) => {
         const baseClasses = `w-full bg-transparent border ${error ? 'border-red-500' : 'border-zinc-700'} rounded px-2 py-1 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all`;
 
         const renderInput = () => {
@@ -236,6 +252,7 @@ const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLB
                                 const firstValue = Object.values(data)[0];
                                 return firstValue ? String(firstValue) : entry._id.slice(-8);
                             }}
+                            deletedEntryIds={deletedEntryIds}
                         />
                     );
                 default: // text

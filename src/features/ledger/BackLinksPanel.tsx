@@ -38,11 +38,11 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
             <div className="flex items-center gap-2 mb-3">
                 <ArrowLeft size={16} className="text-emerald-400" />
                 <h3 className="text-sm font-semibold text-zinc-300">
-                    Referenced By ({entries.length})
+                    Referenced By ({entries.filter(e => !e.isDeleted).length})
                 </h3>
             </div>
             <div className="space-y-2">
-                {entries.map((entry) => (
+                {entries.filter(e => !e.isDeleted).map((entry) => (
                     <BackLinkItem
                         key={entry._id}
                         entry={entry}

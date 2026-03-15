@@ -42,6 +42,7 @@ interface RelationComboboxProps {
     allowMultiple?: boolean;
     getDisplayValue?: (entry: LedgerEntry) => string;
     onKeyDown?: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
+    deletedEntryIds?: Set<string>;
 }
 
 /**
@@ -60,6 +61,7 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
         return firstValue ? String(firstValue) : entry._id;
     },
     onKeyDown: externalKeyDown,
+    deletedEntryIds = new Set(),
 }, ref) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -213,6 +215,7 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
                                 {visibleEntries.map((entry, index) => {
                                     const displayValue = getDisplayValue(entry);
                                     const isSelected = selectedValues.includes(entry._id);
+                                    const isGhost = deletedEntryIds.has(entry._id);
 
                                     return (
                                         <li
@@ -223,14 +226,18 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
                                             onClick={() => handleSelect(entry._id)}
                                             className={`flex items-center justify-between px-3 py-2 cursor-pointer transition-colors ${
                                                 index === highlightedIndex
-                                                    ? 'bg-emerald-900/50'
+                                                    ? isGhost ? 'bg-zinc-800' : 'bg-emerald-900/50'
                                                     : 'hover:bg-zinc-800'
                                             } ${isSelected ? 'bg-emerald-900/30' : ''}`}
                                         >
-                                            <span className="text-sm text-zinc-200 truncate flex-1">
+                                            <span className={`text-sm truncate flex-1 ${
+                                                 isGhost ? 'text-zinc-500 line-through' : 'text-zinc-200'
+                                             }`}>
                                                 {displayValue}
                                             </span>
-                                            {isSelected && <Check size={14} className="text-emerald-500 ml-2" />}
+                                            {isSelected && <Check size={14} className={`ml-2 ${
+                                                 isGhost ? 'text-zinc-600' : 'text-emerald-500'
+                                             }`} />}
                                         </li>
                                     );
                                 })}
@@ -249,3 +256,5 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
 });
 
 RelationCombobox.displayName = 'RelationCombobox';
+
+
