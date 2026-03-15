@@ -182,6 +182,21 @@ describe('bidirectional backlink writing (Story 3.13)', () => {
         expect(fallbackResults.map((entry) => entry._id)).toContain(sourceEntryId);
     });
 
+    it('ignores non-relation fields when scanning for backlinks', async () => {
+        const targetA = await create_entry(db, targetSchemaId, 'ledger:target', { name: 'Target A' }, profileId);
+
+        const sourceEntryId = await create_entry(
+            db,
+            sourceSchemaId,
+            'ledger:source',
+            { name: 'Source Entry', ignoredField: targetA },
+            profileId
+        );
+
+        const fallbackResults = await find_entries_with_relation_to(db, targetA);
+        expect(fallbackResults.map((entry) => entry._id)).not.toContain(sourceEntryId);
+    });
+
     it('does not crash when relation target is missing and surfaces warning', async () => {
         const dispatchSpy = vi.spyOn(useErrorStore.getState(), 'dispatchError');
 

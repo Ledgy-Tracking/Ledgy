@@ -1,6 +1,6 @@
 # Story 3.13: Bidirectional Link Writing
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -166,8 +166,20 @@ so that linked context remains consistent, discoverable, and resilient across ed
 ## Story Completion Status
 
 - Story implemented with bidirectional backlink write/reconcile logic in entry lifecycle paths.
-- Story status set to: `review`.
+- Story status set to: `done`.
 - Completion note: **Backlink metadata is now maintained idempotently on relation targets across create/update/delete/restore, with schema-aware extraction and batched writes.**
+
+## Senior Developer Review (AI)
+
+Outcome: **Approve**
+
+Findings fixed during review:
+
+- Enforced schema-aware backlink fallback scanning so only schema `relation` fields are considered in `find_entries_with_relation_to`.
+- Added indexed backlink read path (target `backLinks` metadata) before fallback scan to preserve BackLinksPanel compatibility while reducing unnecessary scans.
+- Added rollback protections in `create_entry`, `update_entry`, `delete_entry`, and `restore_entry` so backlink reconciliation failures do not leave inconsistent source-entry state.
+- Corrected `BackLinksPanel` schema resolution to use `entry.schemaId` instead of `entry.ledgerId`.
+- Added/updated regression coverage for schema-aware fallback behavior and schema ID handling in panel tests.
 
 ## Dev Agent Record
 
@@ -194,10 +206,13 @@ GPT-5.3-Codex (model ID: gpt-5.3-codex)
 - [x] Added regression suite `tests/bidirectionalLinkWriting.test.ts` for create/update/delete/restore/idempotency/missing-target and fallback query compatibility
 - [x] Validation run: targeted story tests passed; `npx tsc --noEmit` passed; `npm run build` passed
 - [x] Full `npm run test` run showed pre-existing unrelated failures in long-running suite (e.g., `src/lib/crypto.test.ts`, `tests/dataLabHeaderSorting.test.tsx`, `tests/dataLabBulkSelection.test.tsx`, `tests/SchemaBuilder.test.tsx`)
+- [x] Review fixes applied: schema-aware fallback filtering, indexed backlink read path, write-path rollback guards, BackLinksPanel schema lookup fix
+- [x] Re-validation run after review fixes: `npx vitest run tests/bidirectionalLinkWriting.test.ts tests/SoftDelete.test.ts tests/BackLinksPanel.test.tsx` passed; `npx tsc --noEmit` passed
 
 ### Change Log
 
 - 2026-03-14: Implemented bidirectional backlink writing with deterministic reconciliation and added focused regression coverage for Story 3.13.
+- 2026-03-14: Senior Developer Review (AI) fixes applied and validated; story moved to done.
 
 ### File List
 
@@ -205,8 +220,10 @@ GPT-5.3-Codex (model ID: gpt-5.3-codex)
 - `src/lib/validation.ts` (modified)
 - `src/lib/db.ts` (modified)
 - `src/stores/useLedgerStore.ts` (modified)
+- `src/features/ledger/BackLinksPanel.tsx` (modified)
 - `tests/bidirectionalLinkWriting.test.ts` (added)
+- `tests/BackLinksPanel.test.tsx` (modified)
 - `_bmad-output/implementation-artifacts/3-13-bidirectional-link-writing.md` (updated)
-- `_bmad-output/implementation-artifacts/sprint-status.yaml` (updated to `review`)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` (updated to `done`)
 
 

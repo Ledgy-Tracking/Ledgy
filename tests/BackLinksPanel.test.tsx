@@ -30,7 +30,7 @@ const mockBackLinkEntry = {
         Name: 'Source Entry',
         RefField: 'entry:target'
     },
-    schemaId: 'ledger:source',
+    schemaId: 'schema:source',
     profileId: 'profile-1',
     schema_version: 1,
     createdAt: '',
@@ -38,7 +38,7 @@ const mockBackLinkEntry = {
 };
 
 const mockSchema = {
-    _id: 'ledger:source',
+    _id: 'schema:source',
     ledgerId: 'ledger:source',
     name: 'Source Ledger',
     fields: [{ name: 'Name', type: 'text' }, { name: 'RefField', type: 'relation' }]

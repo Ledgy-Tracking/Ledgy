@@ -67,7 +67,7 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => 
     const { activeProfileId } = useProfileStore();
 
     // Find the schema for this entry's ledger
-    const entrySchema = schemas.find(s => s._id === entry.ledgerId);
+    const entrySchema = schemas.find(s => s._id === entry.schemaId);
     const ledgerName = entrySchema?.name || entry.ledgerId;
 
     // Find which fields in this entry reference the target

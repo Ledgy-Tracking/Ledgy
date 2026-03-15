@@ -859,16 +859,29 @@ export async function create_entry(
             throw new Error('Failed to create entry document');
         }
 
-        await reconcileBackLinksForSource(
-            db,
-            {
-                sourceEntryId: response.id,
-                sourceSchemaId: schemaId,
-                sourceLedgerId: ledgerId,
-            },
-            new Map(),
-            sourceTargets
-        );
+        try {
+            await reconcileBackLinksForSource(
+                db,
+                {
+                    sourceEntryId: response.id,
+                    sourceSchemaId: schemaId,
+                    sourceLedgerId: ledgerId,
+                },
+                new Map(),
+                sourceTargets
+            );
+        } catch (reconcileError) {
+            try {
+                await db.hardDeleteDocument(response.id);
+            } catch (rollbackError) {
+                useErrorStore.getState().dispatchError(
+                    `Entry rollback failed after backlink reconciliation error: ${response.id}`,
+                    'error'
+                );
+                throw rollbackError;
+            }
+            throw reconcileError;
+        }
 
         return response.id;
     } catch (error) {
@@ -904,29 +917,46 @@ export async function update_entry(
             ? new Map<string, Set<string>>()
             : extractRelationTargets(validatedData, schema);
 
-        if (encryptionKey) {
-            const result = await encryptPayload(encryptionKey, JSON.stringify(validatedData));
-            await db.updateDocument(entryId, {
-                data_enc: {
-                    iv: result.iv,
-                    ciphertext: Array.from(new Uint8Array(result.ciphertext))
-                },
-                data: {}
-            });
-        } else {
-            await db.updateDocument(entryId, { data: validatedData });
-        }
+        try {
+            if (encryptionKey) {
+                const result = await encryptPayload(encryptionKey, JSON.stringify(validatedData));
+                await db.updateDocument(entryId, {
+                    data_enc: {
+                        iv: result.iv,
+                        ciphertext: Array.from(new Uint8Array(result.ciphertext))
+                    },
+                    data: {}
+                });
+            } else {
+                await db.updateDocument(entryId, { data: validatedData });
+            }
 
-        await reconcileBackLinksForSource(
-            db,
-            {
-                sourceEntryId: existingEntry._id,
-                sourceSchemaId: existingEntry.schemaId,
-                sourceLedgerId: existingEntry.ledgerId,
-            },
-            previousTargets,
-            nextTargets
-        );
+            await reconcileBackLinksForSource(
+                db,
+                {
+                    sourceEntryId: existingEntry._id,
+                    sourceSchemaId: existingEntry.schemaId,
+                    sourceLedgerId: existingEntry.ledgerId,
+                },
+                previousTargets,
+                nextTargets
+            );
+        } catch (reconcileError) {
+            try {
+                await db.updateDocument(entryId, {
+                    data: existingEntry.data,
+                    data_enc: existingEntry.data_enc,
+                    isDeleted: existingEntry.isDeleted,
+                    deletedAt: existingEntry.deletedAt,
+                });
+            } catch {
+                useErrorStore.getState().dispatchError(
+                    `Entry rollback failed after backlink reconciliation error: ${entryId}`,
+                    'error'
+                );
+            }
+            throw reconcileError;
+        }
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to update entry';
         useErrorStore.getState().dispatchError(message, 'error');
@@ -1033,21 +1063,53 @@ export async function find_entries_with_relation_to(
     targetEntryId: string,
     encryptionKey?: CryptoKey
 ): Promise<LedgerEntry[]> {
+    const targetEntry = await db.getDocument<LedgerEntry>(targetEntryId);
+    if (targetEntry?.backLinks?.length) {
+        const sourceIds = [...new Set(targetEntry.backLinks.map((backLink) => backLink.sourceEntryId))];
+        const sourceEntriesRaw = await Promise.all(
+            sourceIds.map((sourceId) => db.getDocument<LedgerEntry>(sourceId))
+        );
+        const sourceEntries: LedgerEntry[] = [];
+        for (const entry of sourceEntriesRaw) {
+            if (entry && !entry.isDeleted) {
+                sourceEntries.push(entry);
+            }
+        }
+
+        if (sourceEntries.length > 0) {
+            return encryptionKey
+                ? await decryptLedgerEntries(sourceEntries, encryptionKey)
+                : sourceEntries;
+        }
+    }
+
     const entryDocs = await db.getAllDocuments<LedgerEntry>('entry');
+    const activeEntries = entryDocs.filter((doc) => !doc.isDeleted);
     const decryptedDocs = encryptionKey
-        ? await decryptLedgerEntries(entryDocs, encryptionKey)
-        : entryDocs;
+        ? await decryptLedgerEntries(activeEntries, encryptionKey)
+        : activeEntries;
 
-    return decryptedDocs.filter(doc => {
-        if (doc.isDeleted) return false;
+    const relationFieldsBySchemaId = new Map<string, Set<string>>();
+    const schemaIds = [...new Set(decryptedDocs.map((doc) => doc.schemaId))];
+    await Promise.all(
+        schemaIds.map(async (schemaId) => {
+            try {
+                const schema = await get_schema(db, schemaId);
+                relationFieldsBySchemaId.set(schemaId, new Set(getRelationFieldNames(schema)));
+            } catch {
+                relationFieldsBySchemaId.set(schemaId, new Set());
+            }
+        })
+    );
 
-        // Check each field in the entry's data
-        for (const fieldName of Object.keys(doc.data)) {
+    return decryptedDocs.filter((doc) => {
+        const relationFields = relationFieldsBySchemaId.get(doc.schemaId) ?? new Set<string>();
+        for (const fieldName of relationFields) {
             const value = doc.data[fieldName];
-            // Handle single relation (string) or multiple relations (string[])
-            if (Array.isArray(value)) {
-                if (value.includes(targetEntryId)) return true;
-            } else if (value === targetEntryId) {
+            if (Array.isArray(value) && value.includes(targetEntryId)) {
+                return true;
+            }
+            if (value === targetEntryId) {
                 return true;
             }
         }
@@ -1114,21 +1176,36 @@ export async function delete_entry(
             schema
         );
 
-        await db.updateDocument(entryId, {
-            isDeleted: true,
-            deletedAt: new Date().toISOString(),
-        });
+        try {
+            await db.updateDocument(entryId, {
+                isDeleted: true,
+                deletedAt: new Date().toISOString(),
+            });
 
-        await reconcileBackLinksForSource(
-            db,
-            {
-                sourceEntryId: entry._id,
-                sourceSchemaId: entry.schemaId,
-                sourceLedgerId: entry.ledgerId,
-            },
-            sourceTargets,
-            new Map()
-        );
+            await reconcileBackLinksForSource(
+                db,
+                {
+                    sourceEntryId: entry._id,
+                    sourceSchemaId: entry.schemaId,
+                    sourceLedgerId: entry.ledgerId,
+                },
+                sourceTargets,
+                new Map()
+            );
+        } catch (reconcileError) {
+            try {
+                await db.updateDocument(entryId, {
+                    isDeleted: entry.isDeleted,
+                    deletedAt: entry.deletedAt,
+                });
+            } catch {
+                useErrorStore.getState().dispatchError(
+                    `Entry rollback failed after backlink reconciliation error: ${entryId}`,
+                    'error'
+                );
+            }
+            throw reconcileError;
+        }
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to delete entry';
         useErrorStore.getState().dispatchError(message, 'error');
@@ -1154,21 +1231,36 @@ export async function restore_entry(
             schema
         );
 
-        await db.updateDocument(entryId, {
-            isDeleted: false,
-            deletedAt: undefined,
-        });
+        try {
+            await db.updateDocument(entryId, {
+                isDeleted: false,
+                deletedAt: undefined,
+            });
 
-        await reconcileBackLinksForSource(
-            db,
-            {
-                sourceEntryId: entry._id,
-                sourceSchemaId: entry.schemaId,
-                sourceLedgerId: entry.ledgerId,
-            },
-            new Map(),
-            sourceTargets
-        );
+            await reconcileBackLinksForSource(
+                db,
+                {
+                    sourceEntryId: entry._id,
+                    sourceSchemaId: entry.schemaId,
+                    sourceLedgerId: entry.ledgerId,
+                },
+                new Map(),
+                sourceTargets
+            );
+        } catch (reconcileError) {
+            try {
+                await db.updateDocument(entryId, {
+                    isDeleted: entry.isDeleted,
+                    deletedAt: entry.deletedAt,
+                });
+            } catch {
+                useErrorStore.getState().dispatchError(
+                    `Entry rollback failed after backlink reconciliation error: ${entryId}`,
+                    'error'
+                );
+            }
+            throw reconcileError;
+        }
     } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to restore entry';
         useErrorStore.getState().dispatchError(message, 'error');
