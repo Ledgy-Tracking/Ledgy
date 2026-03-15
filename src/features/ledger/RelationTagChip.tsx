@@ -64,6 +64,7 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
                         }`}
                     title={targetLedgerId ? `Navigate to ${targetLedgerId}` : undefined}
                     disabled={isGhost}
+                    aria-disabled={isGhost}
                 >
                     <span className="truncate max-w-[150px]">{val}</span>
                     {!isGhost && <ExternalLink size={10} />}
