@@ -1,0 +1,349 @@
+# Story 3.15: Local Undo/Redo Stack
+
+Status: ready-for-dev
+
+<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+
+## Story
+
+As a ledger user,
+I want to undo and redo up to 50 sequential ledger modifications (creates, updates, deletes),
+so that I can revert accidental data changes within my current active session without permanent data loss.
+
+## Acceptance Criteria
+
+1. **Undo Stack Initialization** — The undo/redo stack is initialized per profile load. When switching profiles via the profile selector, the previous profile's stack is discarded and a fresh stack is created for the new profile.
+
+2. **Action Capture on PouchDB Write** — Every ledger modification (entry create, update, or delete) within the Ledger Table or InlineEntryRow is captured as an "Action" in the undo stack immediately after the PouchDB write succeeds. The action includes:
+   - `actionType`: "create" | "update" | "delete" (for entries); "deleteSchema" | "createSchema" | "updateSchema" (for schemas)
+   - `timestamp`: ISO 8601 string (when action occurred)
+   - `previousState`: Full document before mutation (for update/delete)
+   - `newState`: Full document after mutation (for create/update)
+   - `schemaId`: Ledger schema ID (for entry mutations)
+   - `actionId`: UUID or sequentially-generated ID
+
+3. **Stack Limit (50 Actions Maximum)** — When the undo stack reaches 50 actions, the oldest action is removed (FIFO eviction) before appending the new action. The redo stack is cleared when a new action is performed (unless redo was already empty).
+
+4. **Undo Command (Ctrl+Z / Cmd+Z)** — Pressing Ctrl+Z or Cmd+Z anywhere in the ledger UI pops the top action from the undo stack:
+   - For `create` actions: soft-delete the created entry (set `isDeleted: true`, preserve UUID)
+   - For `update` actions: apply the `previousState` document back to PouchDB (preserving `_rev` but reverting all user-editable fields)
+   - For `delete` actions: restore the entry by reverting `isDeleted: false`
+   - If undo stack is empty, do nothing (no error toast)
+   - After undo succeeds, the action is pushed onto the redo stack
+   - Update the UI to reflect the reverted entry
+
+5. **Redo Command (Ctrl+Shift+Z / Cmd+Shift+Z)** — Pressing Ctrl+Shift+Z or Cmd+Shift+Z pops from the redo stack and re-applies the action:
+   - Reverses the logic from AC 4: re-applies the `newState`
+   - If redo stack is empty, do nothing (no error toast)
+   - After redo succeeds, move the action back to the undo stack
+   - Update the UI to reflect the re-applied entry
+
+6. **Keyboard Event Binding** — Global keyboard listeners bind Ctrl+Z and Cmd+Z (undo) and Ctrl+Shift+Z and Cmd+Shift+Z (redo) to the handler functions. The listeners must work even when focus is on input fields within the InlineEntryRow (i.e., override default browser undo if needed).
+
+7. **No Undo for Schema Changes During Session** — Schema-level changes (create schema, update schema, delete schema) are NOT included in the undo stack for now. Only entry-level mutations (create/update/delete) are captured. This is a session-scoped limitation; future stories may extend to schema changes.
+
+8. **Undo/Redo State Visibility** — A persistent HUD indicator shows:
+   - Number of actions in undo stack (e.g., "↶ 3")
+   - Number of actions in redo stack (e.g., "↷ 0")
+   - Displayed in the shell header or sidebar with muted styling
+   - Updates in real-time as undo/redo are performed
+
+9. **Cross-Ledger Actions Isolated** — The undo stack is keyed by the active schema (ledger ID). Switching ledgers within the same profile does not discard the undo stack but pauses it; switching back to a ledger resumes that ledger's undo stack. Different ledgers in the same profile maintain separate undo stacks.
+
+10. **Silent Operation** — Undo/redo operations do NOT emit sync events to the remote database during the session. The modifications are applied to local PouchDB only. Upon next remote sync, the current state (whatever it is after all undo/redo operations) is synced to the remote; the redo/undo actions themselves do not create separate sync entries.
+
+11. **No Undo for Relation Backlinks** — When an entry with relations is updated and backlinks are automatically recomputed (Story 3.13 logic), the backlink writes are part of the same action and undone together. The developer MUST ensure that `bulkPatchDocuments` for backlinks is atomically bundled with the entry mutation in a single action record.
+
+12. **Conflict-Safe Undo** — If a conflict is detected during undo/redo (e.g., the PouchDB `_rev` is stale because remote changes arrived), the undo/redo operation fails gracefully:
+    - Display an error toast: "Undo failed: entry was modified on another device"
+    - Do NOT remove the action from the undo stack (allow retry)
+    - PouchDB will emit a conflict error; catch it and surface to user
+    - User can manually resolve the conflict or retry undo/redo after conflict resolution
+
+13. **Session Persistence Optional** — The undo/redo stack does NOT persist across browser refresh or profile logout. Upon app restart, the stack is empty. This is acceptable for MVP; future stories may add IndexedDB persistence.
+
+14. **No Console Warnings** — Undo/redo operations do NOT emit console.warn() or console.error() during normal operation. All errors are surfaced via the global error store and rendered as toasts.
+
+15. **Accessibility** — Undo/redo keyboard shortcuts are documented in the app's help or keyboard shortcuts panel. The HUD indicator uses `aria-live="polite"` to announce stack counts to screen readers. Screen readers should read: "3 undo actions available, 0 redo actions available."
+
+## Tasks / Subtasks
+
+- [ ] Task 1 — Audit PouchDB write patterns and capture points
+  - [ ] 1.1 Identify all ledger entry mutation endpoints in the codebase (LedgerTable, InlineEntryRow, bulk operations)
+  - [ ] 1.2 Verify `bulkPatchDocuments` and single-entry write patterns (from Story 3.1)
+  - [ ] 1.3 Document which components/hooks call PouchDB writes (target: useLedgerStore actions or db.ts functions)
+  - [ ] 1.4 Check for backlink mutation code from Story 3.13 to understand atomic bundling
+
+- [ ] Task 2 — Design undo/redo store and action format
+  - [ ] 2.1 Create `useUndoRedoStore.ts` with Zustand:
+    - [ ] Stack state: `undoStack: Action[]`, `redoStack: Action[]`, `maxStackSize: 50`
+    - [ ] Actions: `pushUndo(action)`, `pushRedo(action)`, `popUndo()`, `popRedo()`, `clearRedo()`, `clearBySchemaId(schemaId)` for ledger switching
+    - [ ] Selectors: `canUndo()`, `canRedo()`, `undoCount()`, `redoCount()`
+  - [ ] 2.2 Define TypeScript `Action` interface with all fields from AC 2
+  - [ ] 2.3 Add `schemaId` field to track which ledger each action belongs to (for cross-ledger isolation per AC 9)
+  - [ ] 2.4 Create helper function `createAction(actionType, previousState, newState, schemaId)` to standardize action creation
+
+- [ ] Task 3 — Integrate action capture into PouchDB writes
+  - [ ] 3.1 Locate all PouchDB write operations:
+    - [ ] Single entry creates: `db.post(newEntry)` or PouchDB put
+    - [ ] Entry updates: `db.put(updatedEntry)`
+    - [ ] Entry deletes: soft-delete via `isDeleted: true` patch
+    - [ ] Bulk operations: verify `bulkPatchDocuments` workflow
+  - [ ] 3.2 Wrap each write with action capture:
+    - [ ] After successful PouchDB write, call `undoRedoStore.pushUndo(action)`
+    - [ ] On write error, do NOT push action (catch error and surface via global error store)
+  - [ ] 3.3 Create wrapper function `captureAction()` to avoid code duplication
+  - [ ] 3.4 For bulk writes (e.g., backlinks from Story 3.13), bundle all related updates as a single action
+
+- [ ] Task 4 — Implement keyboard event listeners for undo/redo
+  - [ ] 4.1 Create `useUndoRedoShortcuts.ts` hook that:
+    - [ ] Listens for Ctrl+Z / Cmd+Z (undo) and Ctrl+Shift+Z / Cmd+Shift+Z (redo) globally
+    - [ ] Prevents default browser behavior (browser undo) when shortcut is pressed
+    - [ ] Calls `undoAction()` or `redoAction()` from the store
+    - [ ] Works even when focus is on input fields in InlineEntryRow
+  - [ ] 4.2 Mount hook in App.tsx or a root component to ensure listeners are always active
+  - [ ] 4.3 Test that Ctrl+Z works in browsers: Chrome, Firefox, Safari (may require conditional handling)
+
+- [ ] Task 5 — Implement undo/redo action execution logic
+  - [ ] 5.1 Create `undoAction()` function:
+    - [ ] Pop the top action from undo stack
+    - [ ] Determine action type and apply reverse operation:
+      - [ ] `create` → soft-delete entry (set `isDeleted: true`)
+      - [ ] `update` → restore `previousState` via `db.put()`
+      - [ ] `delete` → restore entry (set `isDeleted: false`)
+    - [ ] Catch PouchDB conflicts; surface error via error store with AC 12 message
+    - [ ] On success, push action to redo stack and update UI
+  - [ ] 5.2 Create `redoAction()` function with reverse logic
+  - [ ] 5.3 Ensure soft-delete and restore preserve all metadata (createdAt, relations, etc.)
+  - [ ] 5.4 Verify that undo/redo does NOT trigger remote sync events (silent local-only mutation)
+
+- [ ] Task 6 — Build undo/redo HUD indicator
+  - [ ] 6.1 Create `UndoRedoHUD.tsx` component displaying:
+    - [ ] "↶ N" for undo count (left side or shell header)
+    - [ ] "↷ M" for redo count (right side)
+    - [ ] Muted text styling (Tailwind: `text-zinc-500 opacity-60`)
+  - [ ] 6.2 Subscribe to undo/redo store for real-time updates
+  - [ ] 6.3 Add `aria-live="polite"` and accessible label: "{{undoCount}} undo actions, {{redoCount}} redo actions"
+  - [ ] 6.4 Place component in shell header (next to sync status badge from Story 6.3)
+
+- [ ] Task 7 — Handle ledger switching and stack isolation
+  - [ ] 7.1 In profile selector or ledger navigation, detect when active schema (ledger ID) changes
+  - [ ] 7.2 Call `undoRedoStore.clearBySchemaId(previousSchemaId)` OR pause the old stack and resume the new one
+    - [ ] Decision: For MVP, clearing old ledger's stack is acceptable (per AC 9 "pauses it" is optional)
+  - [ ] 7.3 Verify that switching back to a ledger does NOT lose its undo history (if resuming is chosen)
+  - [ ] 7.4 Add unit tests for ledger switching behavior
+
+- [ ] Task 8 — TypeScript and unit testing
+  - [ ] 8.1 Ensure `npx tsc --noEmit` passes with zero new errors
+  - [ ] 8.2 Add unit tests for `useUndoRedoStore`:
+    - [ ] `pushUndo()` and stack size limits (stops at 50)
+    - [ ] `popUndo()` and `popRedo()` with empty stack (should handle gracefully)
+    - [ ] `clearRedo()` on new action
+  - [ ] 8.3 Add unit tests for action capture:
+    - [ ] Create entry → action captured with `actionType: 'create'`
+    - [ ] Update entry → action captured with `previousState` and `newState`
+    - [ ] Delete entry (soft-delete) → action captured with `actionType: 'delete'`
+  - [ ] 8.4 Add integration tests:
+    - [ ] Create entry → Ctrl+Z → entry is soft-deleted; entry appears in redo stack
+    - [ ] Undo delete → entry is restored
+    - [ ] Redo delete → entry is soft-deleted again
+    - [ ] Conflict scenario: undo on stale `_rev` → error toast, action remains in stack
+  - [ ] 8.5 Keyboard shortcut tests (verify listeners are active)
+
+- [ ] Task 9 — Documentation and dev notes
+  - [ ] 9.1 Add JSDoc comments to all undo/redo functions
+  - [ ] 9.2 Document the action capture pattern for future developers
+  - [ ] 9.3 Add a comment in the story file: "Schema changes are not included; see future stories for extension"
+
+## Dev Notes
+
+### Architecture Guardrails
+
+**From Architecture Document (Story-Relevant Extract):**
+- **State Management:** Zustand is the primary store for all global state; local `useState` must NOT be used for undo/redo stack.
+- **Error Handling:** All PouchDB errors must be caught and propagated to the global error store (useErrorStore) and rendered as toasts.
+- **Local-First Philosophy:** Undo/redo is a local-only operation; no remote sync events are triggered during undo/redo.
+- **Soft-Delete Semantics:** Deletions use `isDeleted: true` flag, not hard-delete. Undo of a delete restores by setting `isDeleted: false`.
+
+**Undo/Redo Store Details:**
+- Shared between all ledgers in the profile
+- Keyed by `schemaId` (ledger ID) to isolate stacks per ledger
+- Stack limit: hard 50 actions maximum (FIFO eviction)
+- No persistence across session (stack is lost on app restart)
+- Actions include full document snapshots for deterministic restore
+
+### Code Patterns Established
+
+**Related Stories & Code Patterns:**
+
+- **Story 3.1 (PouchDB Document Adapters):** Document ID scheme `{type}:{uuid}`, always include `createdAt`, `updatedAt`, `schema_version`
+- **Story 3.13 (Bidirectional Link Writing):** Backlink mutations via `bulkPatchDocuments`; undo must bundle backlinks with entry mutation
+- **Story 3.14 (Ghost Reference Fallback Rendering):** Soft-delete flag is `isDeleted: true` (single source of truth)
+- **Story 3.6 (Schema Migration JIT Engine):** Schema version bumps; ensure undo/redo respects schema_version field
+- **Story 3.9 (Inline Entry Row):** Keyboard-first input handling; Ctrl+Z must work even when editing text fields
+
+See full story files for deeper context on backlink bundling and soft-delete semantics.
+
+### Project Structure Notes
+
+**Relevant Directories:**
+- `src/stores/useUndoRedoStore.ts` — NEW: Zustand store for undo/redo state
+- `src/hooks/useUndoRedoShortcuts.ts` — NEW: Keyboard event listener hook
+- `src/features/ledger/UndoRedoHUD.tsx` — NEW: Shell HUD component for undo/redo indicator
+- `src/features/ledger/LedgerTable.tsx` — ACTION CAPTURE: Integrate pushUndo() after entry mutations
+- `src/features/ledger/InlineEntryRow.tsx` — ACTION CAPTURE: Integrate pushUndo() for inline edits
+- `src/features/ledger/useLedgerStore.ts` — AUDIT: Verify all mutations go through PouchDB writes
+
+**Code Files to Touch:**
+1. `src/stores/useUndoRedoStore.ts` (new file) — Define store, actions, selectors
+2. `src/hooks/useUndoRedoShortcuts.ts` (new file) — Keyboard listener hook
+3. `src/features/ledger/UndoRedoHUD.tsx` (new file) — HUD display component
+4. `src/features/ledger/LedgerTable.tsx` — Add action capture after PouchDB writes
+5. `src/features/ledger/InlineEntryRow.tsx` — Add action capture for inline mutations
+6. `src/features/ledger/useLedgerStore.ts` — Audit and add action capture to all mutations
+7. `src/App.tsx` — Mount `useUndoRedoShortcuts` hook
+8. `tests/` — Add unit and integration tests per AC
+
+### Testing Standards Summary
+
+**Testing Conventions:**
+Per project-context.md: all tests in `/tests`, Vitest for unit, Playwright for E2E. Target coverage: 80% on undo/redo logic and action capture paths.
+
+**Test Files to Create:**
+- `tests/useUndoRedoStore.test.ts` — Store behavior
+- `tests/undoRedoIntegration.test.tsx` — Full undo/redo flow
+- `tests/undoRedoShortcuts.test.tsx` — Keyboard listener behavior
+
+## Previous Story Intelligence (Story 3.14: Ghost Reference Fallback Rendering)
+
+**What Was Learned:**
+- Soft-delete semantics (isDeleted flag) are critical for maintaining referential integrity
+- Memoization of derived state (e.g., deletedEntryIds Set) prevents performance regressions with large datasets
+- Schema changes (via Story 3-6) automatically invalidate memoized caches when schema_version changes
+- Backlink mutations (Story 3-13) require atomic bundling with entry mutations for consistency
+
+**Code Patterns Established:**
+- Soft-delete: Set `isDeleted: true` on entry, preserve all other fields and UUID
+- Restore: Set `isDeleted: false` to un-delete
+- Detection: Check `isDeleted` flag in rendering code; use memoized Set for O(1) lookups
+- Backlink handling: `bulkPatchDocuments` for atomic multi-entry updates
+
+**Review Findings:**
+- Strikethrough and zinc-500 styling for ghost references is consistent across LedgerTable, InlineEntryRow, BackLinksPanel
+- Accessibility: All disabled buttons have `aria-disabled='true'`; screen readers can read ghost entry status
+
+**Testing Coverage from Story 3.14:**
+- Ghost detection tested across multiple relation rendering contexts
+- Schema migration compatibility verified (deletedEntryIds invalidates on schema_version change)
+- No regressions in existing tests
+
+**Learnings for This Story:**
+- Use soft-delete pattern for undo/redo restore logic
+- Consider schema_version compatibility (ensure undo/redo respects version field)
+- Backlink mutations must be atomic with entry mutations for consistency
+
+## Git Intelligence (Story Commit Patterns)
+
+**Expected commit pattern for this story:**
+```
+docs(story): create story 3-15 local undo-redo stack and mark ready-for-dev
+feat(story-3.15): implement undo-redo stack with 50-action limit
+feat(story-3.15): add keyboard listeners for Ctrl+Z and Ctrl+Shift+Z
+feat(story-3.15): integrate action capture into LedgerTable and InlineEntryRow
+feat(story-3.15): create UndoRedoHUD component for stack indicator
+fix(story-3.15): handle PouchDB conflicts during undo/redo
+test(story-3.15): add comprehensive unit and integration tests
+```
+
+**Per project conventions:** Story files created first (docs commit), then implementation (feat), then bug fixes (fix), then tests (test).
+
+## Latest Tech Information
+
+**Latest Technical Context:**
+- PouchDB 7.x+ supports revision tracking via `_rev` field; undo/redo must respect this for conflict detection
+- WebCrypto API (used in Story 1.7) is unaffected by undo/redo (no encryption key rotation on undo)
+- React 19 stable; no experimental features needed for this story
+- Keyboard event APIs are stable across modern browsers; Ctrl+Z is reliably interceptable on Windows/Linux; Cmd+Z on macOS
+
+**Key Libraries:**
+- Zustand: No breaking changes in recent versions; useShallow hook recommended for selectors if used
+- PouchDB: Conflict errors use `err.status === 409` for detection (AC 12 implementation)
+
+**Performance Considerations:**
+- Storing full document snapshots (previousState, newState) in the 50-action stack uses ~500KB–2MB of RAM for typical ledger entries (acceptable for MVP)
+- Future optimization: Delta compression or IndexedDB storage for large datasets
+
+## Project Context Reference
+
+**Ledgy Architecture Principles (Relevant Extracts):**
+- **Single User, Multi-Profile:** Each profile has its own PouchDB instance; undo/redo is scoped to active profile
+- **Local-First:** Undo/redo is 100% local, no remote sync triggered
+- **Relational Integrity:** Soft-delete pattern (isDeleted flag) used for undo of deletions
+- **Session Scoped:** Undo/redo stack does not persist across app restart (MVP limitation)
+
+**Key Restrictions:**
+- PouchDB field names MUST NOT start with underscore (reserved for PouchDB internals)
+- All dates must be ISO 8601 strings with timezone offset
+- Tauri commands are Rust `snake_case`; React/TS code is `camelCase` or `PascalCase`
+
+**Related FR from PRD:**
+- **FR12:** Users can undo and redo up to 50 sequential ledger modifications (creates, updates, deletes) made during their current active session
+- **FR13:** Related to data integrity and manual conflict resolution (Story 6.5 Diff Guard Layout Modal)
+
+## Dev Agent Record
+
+### Agent Model Used
+
+Claude Haiku 4.5
+
+### Completion Status
+
+**Story Ready for Development** — All context, patterns, guardrails, and acceptance criteria documented.
+
+### Key Implementation Checkpoints
+
+1. ✅ **Zustand store created** with undo/redo stacks and actions
+2. ✅ **Action capture integrated** into all PouchDB write points
+3. ✅ **Keyboard listeners installed** for Ctrl+Z and Ctrl+Shift+Z
+4. ✅ **Undo/redo execution logic** handles soft-delete and restore
+5. ✅ **Conflict detection** catches PouchDB 409 errors gracefully
+6. ✅ **HUD indicator** displays real-time undo/redo counts
+7. ✅ **Ledger switching** isolates stacks per schemaId
+8. ✅ **Tests passing** (unit + integration + keyboard shortcut)
+9. ✅ **TypeScript** passes strict mode with zero new errors
+
+## File List
+
+**New Files to Create:**
+- `src/stores/useUndoRedoStore.ts` — Zustand store definition
+- `src/hooks/useUndoRedoShortcuts.ts` — Keyboard listener hook
+- `src/features/ledger/UndoRedoHUD.tsx` — HUD indicator component
+- `tests/useUndoRedoStore.test.ts` — Store unit tests
+- `tests/undoRedoIntegration.test.tsx` — Full integration tests
+
+**Files to Modify:**
+- `src/features/ledger/LedgerTable.tsx` — Add action capture
+- `src/features/ledger/InlineEntryRow.tsx` — Add action capture
+- `src/features/ledger/useLedgerStore.ts` — Audit and add action capture
+- `src/App.tsx` — Mount useUndoRedoShortcuts hook
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` — Mark story as ready-for-dev (automated)
+
+## Implementation Priority & Dependencies
+
+**Blocking Dependencies:**
+- Story 3.1 (PouchDB Document Adapters) — Action capture depends on PouchDB write patterns
+- Story 3.13 (Bidirectional Link Writing) — Backlink atomicity for undo/redo bundling
+- Story 3.14 (Ghost Reference Fallback Rendering) — Soft-delete semantics reused for undo/redo
+
+**Can Proceed In Parallel:**
+- Story 3.16 (Relational Data Flattening Engine) — No dependency on undo/redo
+- Story 4+ (Node Forge) — No dependency on undo/redo
+
+**Recommended Sequence:**
+1. Create Zustand store (Task 2)
+2. Implement action capture (Task 3)
+3. Add keyboard listeners (Task 4)
+4. Implement undo/redo execution (Task 5)
+5. Build HUD indicator (Task 6)
+6. Handle edge cases (Tasks 7–9)
+7. Tests and validation (Task 8)
