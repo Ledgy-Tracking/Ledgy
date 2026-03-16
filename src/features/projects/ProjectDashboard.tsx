@@ -98,6 +98,7 @@ export const ProjectDashboard: React.FC = () => {
                                         onClick={(e) => handleDeleteProject(e, project._id)}
                                         className="p-1.5 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-400/10 rounded transition-colors opacity-0 group-hover:opacity-100"
                                         title="Delete Project"
+                                        aria-label="Delete Project"
                                     >
                                         <Trash2 size={16} />
                                     </button>
