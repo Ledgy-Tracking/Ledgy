@@ -6,3 +6,7 @@
 ## $(date +%Y-%m-%d) - Pre-import CryptoKey outside expensive loops
 **Learning:** `crypto.subtle.importKey` introduces a measurable overhead (~1ms) that adds up when placed inside a loop checking multiple permutations (such as the window tolerance loop in `verifyTOTP` checking multiple time offsets and algorithms).
 **Action:** When performing repeated HMAC signing or other WebCrypto operations within a loop based on the same key material, either pass the pre-imported `CryptoKey` to the function or lazily load and cache it outside the loop.
+
+## 2026-03-17 - Cache stateless objects to avoid GC pressure
+**Learning:** Instantiating `new TextEncoder()` and `new TextDecoder()` frequently inside hot paths (like key derivation and crypto operations) introduces unnecessary object allocation and garbage collection overhead.
+**Action:** Extract stateless utility objects like `TextEncoder` and `TextDecoder` into module-level singletons when they are used repeatedly within the same file.
