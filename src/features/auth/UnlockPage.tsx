@@ -170,6 +170,7 @@ export const UnlockPage: React.FC = () => {
                         <div className="relative">
                             <input
                                 type={showPassphrase ? 'text' : 'password'}
+                                autoComplete="current-password"
                                 autoFocus
                                 value={passphrase}
                                 onChange={(e) => { setPassphrase(e.target.value); if (currentError) clearError(); }}
@@ -222,6 +223,7 @@ export const UnlockPage: React.FC = () => {
                             onChange={onChange}
                             disabled={isSubmitting}
                             containerClassName="group flex items-center has-[:disabled]:opacity-50"
+                            autoComplete="one-time-code"
                             render={({ slots }) => (
                                 <div className="flex gap-2">
                                     {slots.map((slot, idx) => (
@@ -290,6 +292,7 @@ export const UnlockPage: React.FC = () => {
                                         <div className="relative">
                                             <input
                                                 type={showPassphrase ? 'text' : 'password'}
+                                                autoComplete="new-password"
                                                 value={passphrase}
                                                 onChange={(e) => setPassphrase(e.target.value)}
                                                 placeholder="Enter a secure passphrase"

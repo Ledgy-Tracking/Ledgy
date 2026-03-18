@@ -126,6 +126,7 @@ export const SetupPage: React.FC = () => {
                                 id="code"
                                 type="text"
                                 maxLength={6}
+                                autoComplete="one-time-code"
                                 value={code}
                                 onChange={handleCodeChange}
                                 disabled={isSubmitting}
@@ -181,6 +182,7 @@ export const SetupPage: React.FC = () => {
                                         <div className="relative">
                                             <input
                                                 type={showPassphrase ? 'text' : 'password'}
+                                                autoComplete="new-password"
                                                 value={passphrase}
                                                 onChange={(e) => setPassphrase(e.target.value)}
                                                 placeholder="Enter a secure passphrase"

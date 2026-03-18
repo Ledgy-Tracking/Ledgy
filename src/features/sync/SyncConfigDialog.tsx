@@ -85,6 +85,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                         <input
                             type="url"
                             required
+                            autoComplete="off"
                             placeholder="https://your-couchdb-instance.com/db-name"
                             value={remoteUrl}
                             onChange={(e) => setRemoteUrl(e.target.value)}
@@ -99,6 +100,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                             </label>
                             <input
                                 type="text"
+                                autoComplete="off"
                                 placeholder="Admin"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
@@ -111,6 +113,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                             </label>
                             <input
                                 type="password"
+                                autoComplete="off"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
