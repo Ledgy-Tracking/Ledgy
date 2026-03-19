@@ -248,6 +248,7 @@ export const TOTPRegistrationWizard = () => {
                                 maxLength={6}
                                 className="w-48 px-4 py-3 text-center text-2xl font-mono tracking-widest border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                                 aria-label="6-digit TOTP code from authenticator app"
+                                autoComplete="one-time-code"
                             />
                         </div>
 
