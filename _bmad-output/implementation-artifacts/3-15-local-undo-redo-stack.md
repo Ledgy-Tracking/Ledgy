@@ -1,6 +1,6 @@
 # Story 3.15: Local Undo/Redo Stack
 
-Status: review
+Status: in-progress
 
 <!-- Validation: Multi-agent party mode review completed 2026-03-15. Approved for development. 5 clarifications documented; no blockers. Quality gate documented. -->
 
@@ -154,6 +154,17 @@ so that I can revert accidental data changes within my current active session wi
   - [ ] 9.1 Add JSDoc comments to all undo/redo functions
   - [ ] 9.2 Document the action capture pattern for future developers
   - [ ] 9.3 Add a comment in the story file: "Schema changes are not included; see future stories for extension"
+
+### Review Follow-ups (AI)
+
+- [ ] [AI-Review][High] Story claims all 15 QA scenarios are passing and implementation checkpoints are complete, but Task 2/3/4/5/6/8/9 subtasks remain unchecked and incomplete in this file; align completion claims with actual task state before closing story. [_bmad-output/implementation-artifacts/3-15-local-undo-redo-stack.md:77-157, 364-383]
+- [ ] [AI-Review][High] Story `File List` claims `tests/undoRedoIntegration.test.tsx` exists, but that file is missing in repository; either add the integration test suite or remove the claim and adjust AC/test coverage status. [_bmad-output/implementation-artifacts/3-15-local-undo-redo-stack.md:392; tests/undoRedoIntegration.test.tsx not found]
+- [ ] [AI-Review][High] Undo/redo conflict message for redo path is incorrect (`"Undo failed..."` for redo conflicts), violating AC 12 clarity and making user feedback ambiguous. [src/stores/useUndoRedoStore.ts:216]
+- [ ] [AI-Review][Medium] `useUndoRedoShortcuts` always intercepts Ctrl/Cmd+Z even inside text inputs/textareas, conflicting with validated context-aware behavior for input fields; add focus-target guard. [src/hooks/useUndoRedoShortcuts.ts:20]
+- [ ] [AI-Review][Medium] `useUndoRedoShortcuts` refreshes via `useLedgerStore.getState().fetchEntries(...)`, but `src/stores/useLedgerStore.ts` has no `fetchEntries`; this is masked in tests by mocks and risks runtime failure if this store path is imported. [src/hooks/useUndoRedoShortcuts.ts:34; src/stores/useLedgerStore.ts]
+- [ ] [AI-Review][Medium] Test coverage does not substantiate AC 4/5/12 integration behavior (create→undo/redo flows, conflict retry semantics): only store cap/isolation and shortcut invocation tests are present. [tests/useUndoRedoStore.test.ts, tests/undoRedoShortcuts.test.tsx]
+- [ ] [AI-Review][Medium] Git transparency mismatch: current `git status --porcelain` is clean while story presents active implementation claims and file-level changes; capture commit SHA or explicit “already committed” evidence in Dev Agent Record. [repo git state vs story Dev Agent Record/File List]
+- [ ] [AI-Review][Low] Project context inconsistency: architecture uses `type` field convention, but project-context still states `_type`; reconcile docs to avoid future implementation drift. [_bmad-output/planning-artifacts/architecture.md:228; _bmad-output/project-context.md:49]
 
 ## Dev Notes
 
@@ -422,4 +433,54 @@ test(story-3.15): add comprehensive unit and integration tests
 
 ## Change Log
 - 2026-03-22: Implemented local undo/redo store, keyboard shortcuts, HUD visibility, and action capture wiring for entry mutations.
+- 2026-03-22: Senior Developer Review (AI) completed; issues logged under "Review Follow-ups (AI)"; story moved to in-progress pending fixes.
+
+## Senior Developer Review (AI)
+
+Reviewer: James (AI)  
+Date: 2026-03-22
+
+### Outcome
+Changes Requested
+
+### Git vs Story Discrepancies
+- `git status --porcelain` reported no local changes.
+- Story still reports broad implementation activity and pending quality gate checks.
+- Story lists one test file that does not exist (`tests/undoRedoIntegration.test.tsx`).
+
+### Findings Summary
+- High: 3
+- Medium: 4
+- Low: 1
+
+### Key Findings
+1. **[High] Task/claim mismatch in story state**
+   - Completion and checkpoint claims conflict with unchecked task details.
+   - Evidence: `_bmad-output/implementation-artifacts/3-15-local-undo-redo-stack.md:77-157,364-383`
+
+2. **[High] Missing integration test file**
+   - File listed in story is absent in repo.
+   - Evidence: `_bmad-output/implementation-artifacts/3-15-local-undo-redo-stack.md:392`
+
+3. **[High] Incorrect redo conflict error text**
+   - Redo conflict branch dispatches undo message.
+   - Evidence: `src/stores/useUndoRedoStore.ts:216`
+
+4. **[Medium] Shortcut interception behavior too broad**
+   - Current logic prevents default in all contexts, including text inputs.
+   - Evidence: `src/hooks/useUndoRedoShortcuts.ts:20`
+
+5. **[Medium] Store API mismatch in shortcut hook**
+   - Hook calls `fetchEntries` on store import path that does not expose it.
+   - Evidence: `src/hooks/useUndoRedoShortcuts.ts:34`, `src/stores/useLedgerStore.ts`
+
+6. **[Medium] AC coverage evidence gap**
+   - Tests present do not validate full undo/redo integration/conflict behaviors.
+   - Evidence: `tests/useUndoRedoStore.test.ts`, `tests/undoRedoShortcuts.test.tsx`
+
+7. **[Medium] Missing commit-state traceability in story**
+   - Story should indicate whether implementation was already committed when review ran.
+
+8. **[Low] Standards doc inconsistency (`type` vs `_type`)**
+   - Could mislead future contributors; docs should be aligned.
 

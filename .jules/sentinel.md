@@ -7,3 +7,8 @@
 **Vulnerability:** The template import and export modules used `new Function('return import(...)')` to load `@tauri-apps/api` modules dynamically. This is functionally equivalent to `eval()`, bypassing modern security protections and potentially violating Content Security Policy (CSP) `unsafe-eval` restrictions.
 **Learning:** Using `new Function()` or `eval()` to circumvent bundler static analysis (like Vite) is a dangerous anti-pattern. Standard dynamic `import()` statements should be used instead.
 **Prevention:** Strictly avoid `new Function()` and `eval()` for module loading. Use ESM dynamic `import()` which is natively supported and secure.
+
+## 2026-03-10 - Secure AutoComplete Attributes
+**Vulnerability:** Sensitive inputs (TOTP codes, passphrases, remote database credentials) lacked appropriate `autoComplete` attributes. This could allow password managers or browsers to improperly suggest or save credentials, leading to accidental credential leakage or usability issues preventing proper password manager functionality.
+**Learning:** React components handling sensitive authentication and configuration data must explicitly declare `autoComplete` strategies. For passphrases, use `"new-password"` or `"current-password"` to guide password managers. For TOTP inputs, use `"one-time-code"` to allow OS-level auto-filling from SMS/Mail. For custom credentials (like remote DB URLs/passwords), use `"off"` to prevent incorrect browser auto-filling.
+**Prevention:** Always add explicit `autoComplete` attributes to any `<input type="password">` or sensitive text/number input handling security credentials.
