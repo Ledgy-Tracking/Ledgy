@@ -20,6 +20,12 @@ const STORAGE_KEY = 'ledgy-auth-rate-limit';
 // HMAC key for signing (in production, this should be server-provided)
 const HMAC_KEY = 'ledgy-rate-limit-hmac-key-v1';
 
+// Shared TextEncoder for performance
+const encoder = new TextEncoder();
+
+// Cached CryptoKey for HMAC signing to avoid expensive importKey calls on every signature
+let cachedHmacKey: CryptoKey | null = null;
+
 /**
  * Rate limit state for a single account
  */
@@ -35,19 +41,20 @@ export interface RateLimitState {
  * Generate HMAC signature for state
  */
 async function generateSignature(state: Omit<RateLimitState, 'signature'>): Promise<string> {
-    const encoder = new TextEncoder();
     const data = encoder.encode(JSON.stringify(state));
-    const keyData = encoder.encode(HMAC_KEY);
     
-    const key = await crypto.subtle.importKey(
-        'raw',
-        keyData,
-        { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['sign']
-    );
+    if (!cachedHmacKey) {
+        const keyData = encoder.encode(HMAC_KEY);
+        cachedHmacKey = await crypto.subtle.importKey(
+            'raw',
+            keyData,
+            { name: 'HMAC', hash: 'SHA-256' },
+            false,
+            ['sign']
+        );
+    }
     
-    const signature = await crypto.subtle.sign('HMAC', key, data);
+    const signature = await crypto.subtle.sign('HMAC', cachedHmacKey, data);
     return btoa(String.fromCharCode(...new Uint8Array(signature)));
 }
 
