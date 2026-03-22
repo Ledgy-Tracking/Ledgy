@@ -126,15 +126,15 @@ export const SetupPage: React.FC = () => {
                                 id="code"
                                 type="text"
                                 maxLength={6}
-                                autoComplete="one-time-code"
+
                                 value={code}
                                 onChange={handleCodeChange}
                                 disabled={isSubmitting}
                                 placeholder="000000"
-                                autoComplete="one-time-code"
+
                                 className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-4 text-center text-3xl tracking-widest text-zinc-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono disabled:opacity-50"
                                 autoFocus
-                                autoComplete="one-time-code"
+
                             />
                         </div>
 
@@ -184,15 +184,15 @@ export const SetupPage: React.FC = () => {
                                         <div className="relative">
                                             <input
                                                 type={showPassphrase ? 'text' : 'password'}
-                                                autoComplete="new-password"
+
                                                 value={passphrase}
                                                 onChange={(e) => setPassphrase(e.target.value)}
                                                 placeholder="Enter a secure passphrase"
                                                 required={rememberMe}
                                                 disabled={isSubmitting}
-                                                autoComplete="new-password"
+
                                                 className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
-                                                autoComplete="new-password"
+
                                             />
                                             <button
                                                 type="button"
