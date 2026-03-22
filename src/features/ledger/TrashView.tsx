@@ -24,9 +24,9 @@ export const TrashView: React.FC = () => {
                 await fetchSchemas(activeProfileId);
 
                 // Fetch entries for each schema to get soft-deleted ones
-                for (const schema of schemas) {
-                    await fetchEntries(activeProfileId, schema._id);
-                }
+                await Promise.all(
+                    schemas.map((schema) => fetchEntries(activeProfileId, schema._id))
+                );
             } catch (error) {
                 console.error('Failed to load deleted entries:', error);
             } finally {
