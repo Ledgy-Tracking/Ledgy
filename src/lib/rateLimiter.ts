@@ -39,6 +39,14 @@ function getOrGenerateHMACKey(): string {
 // on every signature generation.
 const encoder = new TextEncoder();
 let hmacCryptoKey: CryptoKey | null = null;
+export interface RateLimitState {
+    account: string;
+    attempts: number;
+    lastAttempt: number;
+    lockedUntil: number | null;
+    signature: string;
+}
+
 /**
  * Generate HMAC signature for state
  */
