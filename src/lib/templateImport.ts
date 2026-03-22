@@ -85,11 +85,14 @@ export async function import_template(
  */
 export async function readTemplateTauri(): Promise<TemplateExport | null> {
     try {
-        const importTauriDialog = new Function('return import("@tauri-apps/api/dialog")') as () => Promise<any>;
-        const importTauriFs = new Function('return import("@tauri-apps/api/fs")') as () => Promise<any>;
+        // Use variables for paths to completely bypass Vite's static analysis of import() literals
+        const dialogPath = "@tauri-apps/api/dialog";
+        const fsPath = "@tauri-apps/api/fs";
 
-        const dialogModule = await importTauriDialog();
-        const fsModule = await importTauriFs();
+        // @ts-ignore: Dynamic import for Tauri APIs (ignored by Vite/TypeScript during web builds)
+        const dialogModule = await import(/* @vite-ignore */ dialogPath);
+        // @ts-ignore: Dynamic import for Tauri APIs (ignored by Vite/TypeScript during web builds)
+        const fsModule = await import(/* @vite-ignore */ fsPath);
 
         const filePath = await dialogModule.open({
             filters: [{ name: 'Ledgy Template', extensions: ['json'] }],
