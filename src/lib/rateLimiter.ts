@@ -18,6 +18,14 @@ const GRACE_PERIOD_MS = 5000; // 5 seconds for clock skew
 const STORAGE_KEY = 'ledgy-auth-rate-limit';
 const HMAC_KEY_STORAGE_KEY = 'ledgy-rate-limit-hmac-key';
 
+export interface RateLimitState {
+    account: string;
+    attempts: number;
+    lastAttempt: number;
+    lockedUntil: number | null;
+    signature: string;
+}
+
 /**
  * Get or generate the HMAC key for signing rate limit state.
  * The key is stored in localStorage to persist across sessions,
