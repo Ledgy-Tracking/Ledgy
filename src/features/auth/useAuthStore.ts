@@ -11,6 +11,7 @@ import {
     decryptPayload,
     HKDF_SALT_BYTES,
     EncryptedSecret,
+    deriveUserIdFromSecret,
 } from '../../lib/crypto';
 import { decodeSecret, encodeSecret, verifyTOTP } from '../../lib/totp';
 import {
@@ -61,6 +62,8 @@ interface AuthState {
     // ----- Volatile (never persisted) -----
     isUnlocked: boolean;
     encryptionKey: CryptoKey | null;
+    /** Stable user identifier derived from TOTP secret for profile isolation */
+    userId: string | null;
     /** True when app starts with a passphrase-protected secret — UnlockPage shows passphrase prompt. */
     needsPassphrase: boolean;
     // Zustand store topology (Story 1-3)
@@ -99,6 +102,7 @@ export const useAuthStore = create<AuthState>()(
             encryptedTotpSecret: null,
             isUnlocked: false,
             encryptionKey: null,
+            userId: null,
             rememberMe: false,
             rememberMeExpiry: null,
             rememberMeExpiryMs: null,
@@ -128,6 +132,7 @@ export const useAuthStore = create<AuthState>()(
                     set({
                         isUnlocked: false,
                         encryptionKey: null,
+                        userId: null,
                         rememberMeExpiry: null,
                     });
                     // Note: We don't change `needsPassphrase` or clear secrets. The user either needs to enter
@@ -200,9 +205,11 @@ export const useAuthStore = create<AuthState>()(
                                 ciphertext: Array.from(new Uint8Array(ciphertext)),
                                 pbkdf2Salt: Array.from(pbkdf2Salt),
                             };
+                            const userId = await deriveUserIdFromSecret(totpSecret);
                             set({
                                 isUnlocked: true,
                                 encryptionKey: key,
+                                userId,
                                 rememberMe: remember,
                                 encryptedTotpSecret: encrypted,
                                 totpSecret: null, // Remove plaintext; encrypted version takes over
@@ -213,9 +220,11 @@ export const useAuthStore = create<AuthState>()(
                                 error: null,
                             });
                         } else {
+                            const userId = await deriveUserIdFromSecret(totpSecret);
                             set({
                                 isUnlocked: true,
                                 encryptionKey: key,
+                                userId,
                                 rememberMe: remember && !!passphrase,
                                 encryptedTotpSecret: null,
                                 rememberMeExpiry: expiryTimestamp,
@@ -272,9 +281,11 @@ export const useAuthStore = create<AuthState>()(
                     // Compute a fresh expiry using the stored duration so the session
                     // doesn't become eternal after the previous one expired.
                     const newExpiry = rememberMeExpiryMs !== null ? Date.now() + rememberMeExpiryMs : null;
+                    const userId = await deriveUserIdFromSecret(totpSecret);
                     set({
                         isUnlocked: true,
                         encryptionKey: key,
+                        userId,
                         // Restore secret in volatile memory so TOTP verification still works
                         // within this session; partialize excludes it from storage when
                         // encryptedTotpSecret is present (see partialize below).
@@ -320,11 +331,13 @@ export const useAuthStore = create<AuthState>()(
                                 ciphertext: Array.from(new Uint8Array(ciphertext)),
                                 pbkdf2Salt: Array.from(pbkdf2Salt),
                             };
+                            const userId = await deriveUserIdFromSecret(secret);
                             set({
                                 totpSecret: null,
                                 encryptedTotpSecret: encrypted,
                                 isUnlocked: true,
                                 encryptionKey: key,
+                                userId,
                                 rememberMe: remember,
                                 salt: saltBase32,
                                 rememberMeExpiry: expiryTimestamp,
@@ -332,11 +345,13 @@ export const useAuthStore = create<AuthState>()(
                                 needsPassphrase: false,
                             });
                         } else {
+                            const userId = await deriveUserIdFromSecret(secret);
                             set({
                                 totpSecret: secret,
                                 encryptedTotpSecret: null,
                                 isUnlocked: true,
                                 encryptionKey: key,
+                                userId,
                                 rememberMe: remember && !!passphrase,
                                 salt: saltBase32,
                                 rememberMeExpiry: expiryTimestamp,
@@ -357,7 +372,7 @@ export const useAuthStore = create<AuthState>()(
             lock: async () => {
                 // Preserve rememberMe preference so the user's choice persists across locks.
                 // Only clear the active session credentials.
-                set({ isUnlocked: false, encryptionKey: null });
+                set({ isUnlocked: false, encryptionKey: null, userId: null });
 
                 // Memory Sweep: Clear the global profile registry and dependent stores
                 useProfileStoreFeature.getState().clearActiveProfile();
@@ -377,6 +392,7 @@ export const useAuthStore = create<AuthState>()(
                     encryptedTotpSecret: null,
                     isUnlocked: false,
                     encryptionKey: null,
+                    userId: null,
                     rememberMe: false,
                     rememberMeExpiry: null,
                     rememberMeExpiryMs: null,
