@@ -69,7 +69,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     const onLayoutChange = (layout: any) => {
         // Optimize lookup by indexing widgets to reduce complexity from O(N^2) to O(N)
         const widgetMap = new Map(widgets.map(w => [w.id, w]));
-
         layout.forEach((l: any) => {
             const widget = widgetMap.get(l.i);
             if (widget && (
