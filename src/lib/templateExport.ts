@@ -102,10 +102,14 @@ export async function saveTemplateTauri(
     filename: string
 ): Promise<string | null> {
     try {
+        // Use variables for paths to completely bypass Vite's static analysis of import() literals
+        const dialogPath = "@tauri-apps/api/dialog";
+        const fsPath = "@tauri-apps/api/fs";
+
         // @ts-ignore: Dynamic import for Tauri APIs (ignored by Vite/TypeScript during web builds)
-        const dialogModule = await import(/* @vite-ignore */ "@tauri-apps/api/dialog");
+        const dialogModule = await import(/* @vite-ignore */ dialogPath);
         // @ts-ignore: Dynamic import for Tauri APIs (ignored by Vite/TypeScript during web builds)
-        const fsModule = await import(/* @vite-ignore */ "@tauri-apps/api/fs");
+        const fsModule = await import(/* @vite-ignore */ fsPath);
 
         const filePath = await dialogModule.save({
             filters: [{
