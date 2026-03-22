@@ -355,7 +355,6 @@ describe('Rate Limiter', () => {
         it('rejects state signed with a different key', async () => {
             // 1. Create valid state
             await recordFailedAttempt('test-account');
-            const stored = localStorage.getItem('ledgy-auth-rate-limit');
 
             // 2. Change the HMAC key in storage
             localStorage.setItem('ledgy-rate-limit-hmac-key', 'different-key-that-is-valid-base64-32bytes-long-long');
