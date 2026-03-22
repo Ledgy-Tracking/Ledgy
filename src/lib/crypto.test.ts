@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
-    HKDF_SALT,
     generateAESKey,
     deriveKeyFromTotp,
     deriveKeyFromPassphrase,
@@ -11,13 +10,6 @@ import {
 import { generateSecret } from './totp';
 
 describe('WebCrypto AES-256 Engine', () => {
-    describe('HKDF_SALT constant', () => {
-        it('is defined and non-empty', () => {
-            expect(HKDF_SALT).toBeDefined();
-            expect(HKDF_SALT.length).toBeGreaterThan(0);
-        });
-    });
-
     describe('generateAESKey', () => {
         it('handles errors during generation', async () => {
             const spy = vi.spyOn(crypto.subtle, 'generateKey').mockRejectedValue(new Error('Generation failed'));
@@ -54,7 +46,7 @@ describe('WebCrypto AES-256 Engine', () => {
     describe('deriveKeyFromTotp (HKDF)', () => {
         it('handles errors during derivation', async () => {
             const rawSecret = generateSecret();
-            const salt = new TextEncoder().encode(HKDF_SALT);
+            const salt = new TextEncoder().encode('test-salt-123');
 
             const spy = vi.spyOn(crypto.subtle, 'importKey').mockRejectedValue(new Error('Import failed'));
 
@@ -67,9 +59,9 @@ describe('WebCrypto AES-256 Engine', () => {
 
         it('derives 256-bit AES-GCM key from TOTP secret', async () => {
             const rawSecret = generateSecret();
-            const salt = new TextEncoder().encode(HKDF_SALT);
+            const salt = new TextEncoder().encode('test-salt-123');
             
-            const key = await deriveKeyFromTotp(rawSecret, salt);
+            const { key } = await deriveKeyFromTotp(rawSecret, salt);
             
             expect(key.algorithm.name).toBe('AES-GCM');
             expect((key.algorithm as AesKeyGenParams).length).toBe(256);
@@ -83,12 +75,12 @@ describe('WebCrypto AES-256 Engine', () => {
             const salt = new TextEncoder().encode('test-salt');
             
             // Derive keys and use them to encrypt same plaintext
-            const key1 = await deriveKeyFromTotp(rawSecret, salt);
-            const key2 = await deriveKeyFromTotp(rawSecret, salt);
+            const { key: key1 } = await deriveKeyFromTotp(rawSecret, salt);
+            const { key: key2 } = await deriveKeyFromTotp(rawSecret, salt);
             
-            // Both keys should encrypt to same ciphertext with same IV
-            const plaintext = 'test message';
-            const iv = new Uint8Array(12); // Fixed IV for comparison
+            // Test by encrypting same plaintext with same IV
+            const plaintext = 'test';
+            const iv = new Uint8Array(12);
             
             const enc1 = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key1, new TextEncoder().encode(plaintext));
             const enc2 = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key2, new TextEncoder().encode(plaintext));
@@ -100,8 +92,8 @@ describe('WebCrypto AES-256 Engine', () => {
         it('derives different keys with different salts', async () => {
             const rawSecret = generateSecret();
             
-            const key1 = await deriveKeyFromTotp(rawSecret, new TextEncoder().encode('salt1'));
-            const key2 = await deriveKeyFromTotp(rawSecret, new TextEncoder().encode('salt2'));
+            const { key: key1 } = await deriveKeyFromTotp(rawSecret, new TextEncoder().encode('salt1'));
+            const { key: key2 } = await deriveKeyFromTotp(rawSecret, new TextEncoder().encode('salt2'));
             
             // Encrypt same plaintext with same IV
             const plaintext = 'test';
@@ -120,9 +112,23 @@ describe('WebCrypto AES-256 Engine', () => {
             const ikm = new Uint8Array([0x0b, 0x0b, 0x0b, 0x0b, 0x0b, 0x0b]);
             const salt = new Uint8Array([0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]);
             
-            const key = await deriveKeyFromTotp(ikm, salt);
+            const { key } = await deriveKeyFromTotp(ikm, salt);
             expect(key.algorithm.name).toBe('AES-GCM');
             expect((key.algorithm as AesKeyGenParams).length).toBe(256);
+        });
+
+        it('generates a 16-byte random salt if not provided', async () => {
+            const rawSecret = generateSecret();
+
+            const { key, salt } = await deriveKeyFromTotp(rawSecret);
+
+            expect(key.algorithm.name).toBe('AES-GCM');
+            expect(salt).toBeDefined();
+            expect(salt.length).toBe(16);
+
+            // Ensure salts are random
+            const { salt: salt2 } = await deriveKeyFromTotp(rawSecret);
+            expect(salt).not.toEqual(salt2);
         });
     });
 
