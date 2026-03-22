@@ -1325,11 +1325,6 @@ export async function load_canvas(
 import { WidgetConfig, DashboardLayout } from '../types/dashboard';
 
 /**
- * Dashboard Layout document structure.
- */
-// export interface DashboardLayout { ... } removed as it's now in types/dashboard.ts
-
-/**
  * Saves dashboard layout configuration.
  * Story 4-5, AC 5: Layout Persistence.
  * @param db - Profile database instance
