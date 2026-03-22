@@ -8,14 +8,14 @@ import { useErrorStore } from '../stores/useErrorStore';
  */
 export const HKDF_SALT = 'ledgy-salt-v1';
 
-// Shared encoder and decoder for performance
-const ENCODER = new TextEncoder();
-const DECODER = new TextDecoder();
+// Shared encoder and decoder instances for performance
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
 /**
  * Pre-encoded HKDF salt for legacy support.
  */
-export const HKDF_SALT_BYTES = ENCODER.encode(HKDF_SALT);
+export const HKDF_SALT_BYTES = encoder.encode(HKDF_SALT);
 
 /** Serializable form of a passphrase-encrypted TOTP secret (stored in localStorage). */
 export interface EncryptedSecret {
@@ -93,7 +93,7 @@ export async function deriveKeyFromPassphrase(passphrase: string, salt: Uint8Arr
     try {
         const keyMaterial = await crypto.subtle.importKey(
             'raw',
-            ENCODER.encode(passphrase),
+            encoder.encode(passphrase),
             { name: 'PBKDF2' },
             false,
             ['deriveKey']
@@ -119,7 +119,7 @@ export async function deriveKeyFromPassphrase(passphrase: string, salt: Uint8Arr
 
 export async function encryptPayload(key: CryptoKey, plaintext: string): Promise<{ iv: number[], ciphertext: ArrayBuffer }> {
     try {
-        const data = ENCODER.encode(plaintext);
+        const data = encoder.encode(plaintext);
         const iv = crypto.getRandomValues(new Uint8Array(12));
 
         const ciphertext = await crypto.subtle.encrypt(
@@ -153,7 +153,7 @@ export async function decryptPayload(key: CryptoKey, iv: Uint8Array, ciphertext:
             ciphertext
         );
 
-        return DECODER.decode(decrypted);
+        return decoder.decode(decrypted);
     } catch (error) {
         // GCM auth tag verification failure means tampering or wrong key
         const errorMessage = error instanceof Error ? 'Decryption failed: invalid key or tampered data' : 'Decryption failed';

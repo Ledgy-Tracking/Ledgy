@@ -35,15 +35,20 @@ export interface RateLimitState {
     signature: string; // HMAC signature for tamper detection
 }
 
+// Cached TextEncoder for reuse
+const encoder = new TextEncoder();
+// Cached CryptoKey to avoid redundant WebCrypto API calls
+let hmacCryptoKey: CryptoKey | null = null;
+
 /**
  * Generate HMAC signature for state
  */
 async function generateSignature(state: Omit<RateLimitState, 'signature'>): Promise<string> {
-    const data = ENCODER.encode(JSON.stringify(state));
+    const data = encoder.encode(JSON.stringify(state));
     
-    if (!cachedHmacKey) {
-        const keyData = ENCODER.encode(HMAC_KEY);
-        cachedHmacKey = await crypto.subtle.importKey(
+    if (!hmacCryptoKey) {
+        const keyData = encoder.encode(HMAC_KEY);
+        hmacCryptoKey = await crypto.subtle.importKey(
             'raw',
             keyData,
             { name: 'HMAC', hash: 'SHA-256' },
@@ -52,7 +57,7 @@ async function generateSignature(state: Omit<RateLimitState, 'signature'>): Prom
         );
     }
     
-    const signature = await crypto.subtle.sign('HMAC', cachedHmacKey, data);
+    const signature = await crypto.subtle.sign('HMAC', hmacCryptoKey, data);
     return btoa(String.fromCharCode(...new Uint8Array(signature)));
 }
 
