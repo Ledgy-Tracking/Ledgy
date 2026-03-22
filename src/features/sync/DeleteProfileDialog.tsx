@@ -78,6 +78,7 @@ export const DeleteProfileDialog: React.FC<DeleteProfileDialogProps> = ({
                         </label>
                         <input
                             type="text"
+                                autoComplete="off"
                             value={confirmText}
                             onChange={(e) => setConfirmText(e.target.value)}
                             className="w-full bg-zinc-800 border border-zinc-700 rounded px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-red-500"
