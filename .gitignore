@@ -41,3 +41,18 @@ coverage/
 # Python
 __pycache__/
 *.pyc
+
+# Temporary/debug files
+*.txt
+!README.txt
+build-out.txt
+full.txt
+part*.txt
+tsc-errors.txt
+
+# Lock files (choose one package manager)
+package-lock.json
+bun.lock
+
+# Keep pnpm as primary
+# pnpm-lock.yaml
