@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProjectStore } from '../../stores/useProjectStore';
 import { Plus, Folder, Trash2, ArrowRight } from 'lucide-react';
+import { Input } from '../../components/ui/input';
+import { Textarea } from '../../components/ui/textarea';
+import { Label } from '../../components/ui/label';
 
 export const ProjectDashboard: React.FC = () => {
     const { profileId } = useParams<{ profileId: string }>();
@@ -132,25 +135,26 @@ export const ProjectDashboard: React.FC = () => {
                             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Define a new container for your tracking ecosystems.</p>
                         </div>
                         <form onSubmit={handleCreateProject} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1.5">Project Name</label>
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="project-name" className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Project Name</Label>
+                                <Input
+                                    id="project-name"
                                     autoFocus
                                     type="text"
                                     value={newProjectName}
                                     onChange={(e) => setNewProjectName(e.target.value)}
-                                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md px-3 py-2 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                                     placeholder="e.g. Personal Health, My Business"
                                     required
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-zinc-500 dark:text-zinc-400 mb-1.5">Description (Optional)</label>
-                                <textarea
+                            <div className="space-y-2">
+                                <Label htmlFor="project-desc" className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Description (Optional)</Label>
+                                <Textarea
+                                    id="project-desc"
                                     value={newProjectDesc}
                                     onChange={(e) => setNewProjectDesc(e.target.value)}
-                                    className="w-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md px-3 py-2 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all h-24 resize-none"
                                     placeholder="What are you tracking in this project?"
+                                    className="h-24 resize-none"
                                 />
                             </div>
                             <div className="flex gap-3 pt-2">

@@ -1,6 +1,7 @@
-import { useUIStore } from '../../stores/useUIStore';
+import { useUIStore, Theme, Density } from '../../stores/useUIStore';
 import { Sun, Moon, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export const SettingsPage = () => {
     const { theme, density, setTheme, setDensity, resetToDefaults } = useUIStore();
@@ -37,28 +38,18 @@ export const SettingsPage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button
-                                onClick={() => setTheme('light')}
-                                size="sm"
-                                variant={theme === 'light' ? 'default' : 'outline'}
-                                className={theme === 'light'
-                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                                }
-                            >
-                                Light
-                            </Button>
-                            <Button
-                                onClick={() => setTheme('dark')}
-                                size="sm"
-                                variant={theme === 'dark' ? 'default' : 'outline'}
-                                className={theme === 'dark'
-                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                                }
-                            >
-                                Dark
-                            </Button>
+                            <Tabs value={theme} onValueChange={(value: string) => setTheme(value as Theme)}>
+                                <TabsList className="bg-zinc-100 dark:bg-zinc-800">
+                                    <TabsTrigger value="light" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-emerald-500/30">
+                                        <Sun className="w-4 h-4 mr-2" />
+                                        Light
+                                    </TabsTrigger>
+                                    <TabsTrigger value="dark" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-emerald-500/30">
+                                        <Moon className="w-4 h-4 mr-2" />
+                                        Dark
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
                         </div>
                     </div>
 
@@ -80,28 +71,18 @@ export const SettingsPage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button
-                                onClick={() => setDensity('comfortable')}
-                                size="sm"
-                                variant={density === 'comfortable' ? 'default' : 'outline'}
-                                className={density === 'comfortable'
-                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                                }
-                            >
-                                Comfortable
-                            </Button>
-                            <Button
-                                onClick={() => setDensity('compact')}
-                                size="sm"
-                                variant={density === 'compact' ? 'default' : 'outline'}
-                                className={density === 'compact'
-                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                                }
-                            >
-                                Compact
-                            </Button>
+                            <Tabs value={density} onValueChange={(value: string) => setDensity(value as Density)}>
+                                <TabsList className="bg-zinc-100 dark:bg-zinc-800">
+                                    <TabsTrigger value="comfortable" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-emerald-500/30">
+                                        <Maximize2 className="w-4 h-4 mr-2" />
+                                        Comfortable
+                                    </TabsTrigger>
+                                    <TabsTrigger value="compact" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-emerald-500/30">
+                                        <Minimize2 className="w-4 h-4 mr-2" />
+                                        Compact
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
                         </div>
                     </div>
                 </div>

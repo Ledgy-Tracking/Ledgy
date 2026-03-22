@@ -1,6 +1,7 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { useMemo, useState } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface QRCodeDisplayProps {
     totpUri: string;
@@ -48,9 +49,11 @@ export const QRCodeDisplay = ({ totpUri, secret, accountName }: QRCodeDisplayPro
                     <code className="flex-1 px-3 py-2 bg-white dark:bg-zinc-950 rounded-lg font-mono text-sm text-center text-zinc-900 dark:text-white break-all border border-zinc-300 dark:border-white/10">
                         {secret}
                     </code>
-                    <button
+                    <Button
                         onClick={handleCopy}
-                        className="p-2 rounded-lg bg-gray-100 dark:bg-zinc-800/50 hover:bg-zinc-700/50 transition-all duration-300 ease-in-out"
+                        variant="ghost"
+                        size="icon-sm"
+                        className="bg-gray-100 dark:bg-zinc-800/50 hover:bg-zinc-700/50"
                         aria-label={copied ? 'Copied' : 'Copy secret to clipboard'}
                     >
                         {copied ? (
@@ -58,7 +61,7 @@ export const QRCodeDisplay = ({ totpUri, secret, accountName }: QRCodeDisplayPro
                         ) : (
                             <Copy className="w-5 h-5 text-zinc-400" />
                         )}
-                    </button>
+                    </Button>
                 </div>
             </div>
 

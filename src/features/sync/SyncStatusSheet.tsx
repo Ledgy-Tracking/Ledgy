@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, RefreshCw, CheckCircle2, AlertCircle, CloudOff, Wifi, Info, ShieldCheck, History, ExternalLink, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useSyncStore } from '../../stores/useSyncStore';
 import { useAuthStore } from '../auth/useAuthStore';
 
@@ -83,62 +84,62 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
     const details = getStatusDetails();
 
     return (
-        <div className="fixed inset-0 z-50 flex justify-end bg-white/40 dark:bg-black/40 dark:bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
-            {/* Backdrop close area */}
-            <div className="flex-1" onClick={onClose} />
-
-            <div className="w-full max-w-md bg-white dark:bg-[#0d0d0f] border-l border-zinc-200 dark:border-zinc-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
-                <div className="p-6 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/20">
-                    <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${details.bg} ${details.color}`}>
-                            {details.icon}
+        <Sheet open={isUnlocked && isOpen} onOpenChange={(open) => !open && onClose()}>
+            <SheetContent side="right" className="w-full max-w-md flex flex-col" showCloseButton={false}>
+                <SheetHeader className="p-6 border-b border-border bg-muted/20">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${details.bg} ${details.color}`}>
+                                {details.icon}
+                            </div>
+                            <div>
+                                <SheetTitle className="text-xl italic">Sync Telemetry</SheetTitle>
+                                <SheetDescription className="text-[10px] uppercase tracking-widest font-bold">
+                                    CouchDB Protocol
+                                </SheetDescription>
+                            </div>
                         </div>
-                        <div>
-                            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 italic">Sync Telemetry</h2>
-                            <p className="text-[10px] uppercase tracking-widest font-bold text-zinc-500">CouchDB Protocol</p>
+                        <div className="flex items-center gap-1">
+                            <Button
+                                onClick={onOpenSettings}
+                                variant="ghost"
+                                size="icon-sm"
+                                className="text-muted-foreground hover:text-foreground"
+                                title="Sync Settings"
+                                aria-label="Open Sync Settings"
+                            >
+                                <ShieldCheck size={20} />
+                            </Button>
+                            <Button
+                                onClick={onClose}
+                                variant="ghost"
+                                size="icon-sm"
+                                className="text-muted-foreground hover:text-foreground"
+                                aria-label="Close Sync Status"
+                            >
+                                <X size={20} />
+                            </Button>
                         </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                        <Button
-                            onClick={onOpenSettings}
-                            variant="ghost"
-                            size="icon-sm"
-                            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-                            title="Sync Settings"
-                            aria-label="Open Sync Settings"
-                        >
-                            <ShieldCheck size={20} />
-                        </Button>
-                        <Button
-                            onClick={onClose}
-                            variant="ghost"
-                            size="icon-sm"
-                            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-                            aria-label="Close Sync Status"
-                        >
-                            <X size={20} />
-                        </Button>
-                    </div>
-                </div>
+                </SheetHeader>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-8">
                     {/* Primary Status Card */}
-                    <div className={`p-5 rounded-2xl border ${details.bg.replace('/10', '/5')} border-zinc-200 dark:border-zinc-800 space-y-3`}>
+                    <div className={`p-5 rounded-2xl border ${details.bg.replace('/10', '/5')} border-border space-y-3`}>
                         <div className="flex items-center justify-between">
                             <span className={`text-sm font-bold uppercase tracking-tight ${details.color}`}>{details.label}</span>
                             {syncStatus.lastSync && (
-                                <span className="text-[10px] text-zinc-500 font-medium">
+                                <span className="text-[10px] text-muted-foreground font-medium">
                                     {new Date(syncStatus.lastSync).toLocaleString()}
                                 </span>
                             )}
                         </div>
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        <p className="text-sm text-muted-foreground leading-relaxed">
                             {details.description}
                         </p>
                         <Button
                             onClick={() => triggerSync(profileId)}
-                            variant="default"
-                            className="w-full bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 hover:opacity-90 group"
+                            className="w-full bg-foreground text-background hover:opacity-90 group"
                             disabled={isLoading || syncStatus.status === 'syncing'}
                         >
                             <RefreshCw size={14} className={(isLoading || syncStatus.status === 'syncing') ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} />
@@ -148,19 +149,19 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
 
                     {/* Metadata Grid */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-1">
-                            <span className="text-[10px] uppercase font-bold text-zinc-500 flex items-center gap-1.5">
+                        <div className="p-4 bg-muted/40 border border-border rounded-xl space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1.5">
                                 <History size={10} /> Last Push
                             </span>
-                            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate block">
+                            <span className="text-sm font-medium text-foreground truncate block">
                                 {syncStatus.lastSync ? 'Successful' : 'Never'}
                             </span>
                         </div>
-                        <div className="p-4 bg-zinc-50 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-xl space-y-1">
-                            <span className="text-[10px] uppercase font-bold text-zinc-500 flex items-center gap-1.5">
+                        <div className="p-4 bg-muted/40 border border-border rounded-xl space-y-1">
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1.5">
                                 <ShieldCheck size={10} /> Encryption
                             </span>
-                            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 block">
+                            <span className="text-sm font-medium text-foreground block">
                                 AES-256-GCM
                             </span>
                         </div>
@@ -168,19 +169,19 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
 
                     {/* Configuration Summary */}
                     <div className="space-y-4">
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500">Endpoint Configuration</h3>
+                        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Endpoint Configuration</h3>
                         <div className="space-y-3">
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-zinc-500">Remote Instance</span>
-                                <span className="text-zinc-900 dark:text-zinc-200 font-mono text-xs">{syncConfig?.remoteUrl || 'Not set'}</span>
+                                <span className="text-muted-foreground">Remote Instance</span>
+                                <span className="text-foreground font-mono text-xs">{syncConfig?.remoteUrl || 'Not set'}</span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-zinc-500">Sync Mode</span>
-                                <span className="text-zinc-900 dark:text-zinc-200 capitalize">{syncConfig?.syncDirection || 'Two-way'}</span>
+                                <span className="text-muted-foreground">Sync Mode</span>
+                                <span className="text-foreground capitalize">{syncConfig?.syncDirection || 'Two-way'}</span>
                             </div>
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-zinc-500">Continuous Syncing</span>
-                                <span className={`font-semibold ${syncConfig?.continuous ? 'text-emerald-500' : 'text-zinc-500'}`}>
+                                <span className="text-muted-foreground">Continuous Syncing</span>
+                                <span className={`font-semibold ${syncConfig?.continuous ? 'text-emerald-500' : 'text-muted-foreground'}`}>
                                     {syncConfig?.continuous ? 'Enabled' : 'Disabled'}
                                 </span>
                             </div>
@@ -204,13 +205,13 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                             <div className="space-y-2">
                                 {conflicts.slice(0, 3).map((conflict, idx) => (
                                     <div key={idx} className="flex items-center justify-between py-2 border-b border-amber-500/10 last:border-0">
-                                        <span className="text-xs text-zinc-900 dark:text-zinc-100 font-medium truncate max-w-[200px]">
+                                        <span className="text-xs text-foreground font-medium truncate max-w-[200px]">
                                             {conflict.ledgerName} / {conflict.entryName}
                                         </span>
                                         <Button
                                             variant="ghost"
                                             size="icon-xs"
-                                            className="text-zinc-400 hover:text-red-500"
+                                            className="text-muted-foreground hover:text-red-500"
                                             aria-label={`Delete conflict for ${conflict.ledgerName} ${conflict.entryName}`}
                                         >
                                             <Trash2 size={12} />
@@ -222,13 +223,13 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                     )}
                 </div>
 
-                <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 mt-auto">
-                    <p className="text-[11px] text-zinc-500 leading-relaxed">
+                <div className="p-6 border-t border-border bg-muted/20 mt-auto">
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
                         Ledgy ensures your data remains private. All sync operations are performed
                         locally on your device. Credentials never leave this instance unencrypted.
                     </p>
                 </div>
-            </div>
-        </div>
+            </SheetContent>
+        </Sheet>
     );
 };

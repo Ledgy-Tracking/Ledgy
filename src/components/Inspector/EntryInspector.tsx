@@ -5,6 +5,8 @@ import { FileText, Calendar, Hash, Tag, Type, Trash2, Save, Info } from 'lucide-
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { Badge } from '../ui/badge';
+import { Badge } from '../ui/badge';
 
 export const EntryInspector: React.FC = () => {
     const { selectedEntryId, setSelectedEntryId } = useUIStore();
@@ -65,9 +67,9 @@ export const EntryInspector: React.FC = () => {
                     <FileText size={16} className="text-emerald-500" />
                     <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-500">Entry Inspector</h2>
                 </div>
-                <div className="text-[10px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-bold uppercase">
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30 text-[10px] font-bold uppercase">
                     {entrySchema.name}
-                </div>
+                </Badge>
             </div>
 
             <div className="flex-1 overflow-auto p-4 space-y-6">

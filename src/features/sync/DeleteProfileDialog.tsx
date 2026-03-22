@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { AlertTriangle, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 
 interface DeleteProfileDialogProps {
     profileName: string;
     hasRemoteSync: boolean;
+    isOpen: boolean;
     onConfirm: () => void;
     onCancel: () => void;
 }
@@ -17,6 +20,7 @@ interface DeleteProfileDialogProps {
 export const DeleteProfileDialog: React.FC<DeleteProfileDialogProps> = ({
     profileName,
     hasRemoteSync,
+    isOpen,
     onConfirm,
     onCancel,
 }) => {
@@ -32,22 +36,19 @@ export const DeleteProfileDialog: React.FC<DeleteProfileDialogProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-gray-50 dark:bg-zinc-900 rounded-lg shadow-2xl max-w-md w-full mx-4 overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center gap-3 px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-                    <AlertTriangle size={20} className="text-red-500 shrink-0" />
-                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-900 dark:text-zinc-100">
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
+            <DialogContent className="max-w-md overflow-hidden" showCloseButton={false}>
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-3">
+                        <AlertTriangle size={20} className="text-red-500 shrink-0" />
                         Delete Profile Permanently
-                    </h2>
-                </div>
+                    </DialogTitle>
+                    <DialogDescription className="text-left">
+                        This action will permanently delete the profile <strong>"{profileName}"</strong> and ALL associated data.
+                    </DialogDescription>
+                </DialogHeader>
 
-                {/* Content */}
-                <div className="p-6 space-y-4">
-                    <p className="text-sm text-zinc-600 dark:text-zinc-300">
-                        This action will permanently delete the profile <strong className="text-zinc-900 dark:text-zinc-900 dark:text-zinc-100">"{profileName}"</strong> and ALL associated data.
-                    </p>
-
+                <div className="space-y-4">
                     {/* Warning Box */}
                     <div className="bg-red-900/20 border border-red-900 rounded p-4 space-y-2">
                         <div className="flex items-start gap-2">
@@ -73,41 +74,38 @@ export const DeleteProfileDialog: React.FC<DeleteProfileDialogProps> = ({
 
                     {/* Confirmation Input */}
                     <div>
-                        <label className="text-xs text-zinc-600 dark:text-zinc-400 block mb-1.5">
-                            Type <strong className="text-zinc-900 dark:text-zinc-800 dark:text-zinc-200">"{profileName}"</strong> to confirm deletion:
+                        <label className="text-xs text-muted-foreground block mb-1.5">
+                            Type <strong className="text-foreground">"{profileName}"</strong> to confirm deletion:
                         </label>
                         <input
                             type="text"
-
                             value={confirmText}
                             onChange={(e) => setConfirmText(e.target.value)}
-                            className="w-full bg-zinc-100 dark:bg-gray-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-300 dark:border-zinc-700 rounded px-3 py-2 text-sm text-zinc-900 dark:text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-red-500"
+                            className="w-full bg-background border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-red-500"
                             placeholder={`Type "${profileName}"`}
                             disabled={isDeleting}
-
                         />
                     </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50">
-                    <button
+                <DialogFooter>
+                    <Button
                         onClick={onCancel}
                         disabled={isDeleting}
-                        className="px-4 py-2 text-sm bg-gray-100 dark:bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-900 dark:text-zinc-300 rounded transition-colors"
+                        variant="secondary"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={handleConfirm}
                         disabled={!canConfirm || isDeleting}
-                        className="flex items-center gap-2 px-4 py-2 text-sm bg-red-600 hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-900 dark:text-white rounded transition-colors"
+                        variant="destructive"
                     >
                         <Trash2 size={14} />
                         {isDeleting ? 'Deleting...' : 'Delete Permanently'}
-                    </button>
-                </div>
-            </div>
-        </div>
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };

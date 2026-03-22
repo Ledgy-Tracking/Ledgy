@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { useAuthStore, EXPIRY_OPTIONS, RememberMeExpiry, DEFAULT_EXPIRY } from './useAuthStore';
 import { generateSecret, encodeSecret, generateOtpauthUri } from '../../lib/totp';
 
@@ -139,16 +141,20 @@ export const SetupPage: React.FC = () => {
 
                         {/* Security Options */}
                         <div className="space-y-3 pt-2">
-                            <label className="flex items-center gap-2 self-start text-sm text-zinc-400 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="remember-me"
                                     checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    onCheckedChange={(checked) => setRememberMe(checked === true)}
                                     disabled={isSubmitting}
                                 />
-                                Remember me on this device
-                            </label>
+                                <Label 
+                                    htmlFor="remember-me"
+                                    className="text-sm text-zinc-400 cursor-pointer"
+                                >
+                                    Remember me on this device
+                                </Label>
+                            </div>
 
                             {rememberMe && (
                                 <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
@@ -176,19 +182,20 @@ export const SetupPage: React.FC = () => {
                                     </div>
 
                                     {/* Required passphrase */}
-                                    <div className="space-y-1">
-                                        <label className="text-xs text-zinc-500 font-medium">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="passphrase" className="text-xs text-zinc-500 font-medium">
                                             Passphrase <span className="text-emerald-500">(required to encrypt the stored secret)</span>
-                                        </label>
+                                        </Label>
                                         <div className="relative">
                                             <Input
+                                                id="passphrase"
                                                 type={showPassphrase ? 'text' : 'password'}
                                                 value={passphrase}
                                                 onChange={(e) => setPassphrase(e.target.value)}
                                                 placeholder="Enter a secure passphrase"
                                                 required={rememberMe}
                                                 disabled={isSubmitting}
-                                                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg pr-9 text-xs text-zinc-900 dark:text-zinc-300 placeholder-zinc-600"
+                                                className="pr-10"
                                             />
                                             <Button
                                                 type="button"

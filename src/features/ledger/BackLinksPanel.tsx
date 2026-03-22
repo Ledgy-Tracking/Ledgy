@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerEntry } from '../../types/ledger';
@@ -104,12 +105,13 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => 
                 </div>
                 <div className="flex flex-col gap-1">
                     {referencingFields.map((field, idx) => (
-                        <span
+                        <Badge
                             key={idx}
-                            className="text-xs px-2 py-0.5 bg-zinc-700 text-zinc-300 rounded"
+                            variant="secondary"
+                            className="text-xs bg-zinc-700 text-zinc-300 w-fit"
                         >
                             {field.fieldName}
-                        </span>
+                        </Badge>
                     ))}
                 </div>
             </div>

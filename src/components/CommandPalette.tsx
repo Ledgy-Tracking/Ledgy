@@ -8,6 +8,7 @@ import {
     CommandItem,
     CommandList,
 } from './ui/command';
+import { Badge } from './ui/badge';
 import { useProfileStore } from '../stores/useProfileStore';
 import { useLedgerStore } from '../stores/useLedgerStore';
 import { useProjectStore } from '../stores/useProjectStore';
@@ -90,7 +91,9 @@ export const CommandPalette: React.FC = () => {
                                 <LayoutGrid className="mr-2 h-4 w-4 text-zinc-400" />
                                 <span>{project.name}</span>
                                 {projectId === project._id && (
-                                    <span className="ml-auto text-[10px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-bold uppercase">Active</span>
+                                    <Badge variant="secondary" className="ml-auto bg-emerald-500/10 text-emerald-500 border-emerald-500/30 text-[10px] font-bold uppercase">
+                                        Active
+                                    </Badge>
                                 )}
                             </CommandItem>
                         ))}
@@ -129,7 +132,10 @@ export const CommandPalette: React.FC = () => {
                                 });
                             }}
                         >
-                            <div className={`w-2 h-2 rounded-full mr-3 ${profile.id === profileId ? 'bg-emerald-500' : 'bg-zinc-700'}`} />
+                            <Badge
+                                variant="ghost"
+                                className={`w-2 h-2 rounded-full mr-3 ${profile.id === profileId ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                            />
                             <span>{profile.name}</span>
                         </CommandItem>
                     ))}

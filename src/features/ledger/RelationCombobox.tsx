@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { LedgerEntry } from '../../types/ledger';
 import { Check, ChevronDown } from 'lucide-react';
 
@@ -155,12 +156,13 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
     return (
         <div className="relative" ref={containerRef}>
             {/* Trigger */}
-            <button
+            <Button
                 ref={ref}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 onKeyDown={!isOpen ? externalKeyDown : undefined}
-                className="w-full flex items-center justify-between gap-2 px-2 py-1 bg-transparent border border-zinc-300 dark:border-zinc-700 rounded text-sm text-zinc-900 dark:text-zinc-100 hover:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                variant="outline"
+                className="w-full justify-between gap-2 bg-transparent text-zinc-900 dark:text-zinc-100 hover:border-zinc-600 focus:ring-emerald-500"
                 aria-expanded={isOpen}
                 aria-haspopup="listbox"
             >
@@ -168,7 +170,7 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
                     {selectedDisplay ?? placeholder}
                 </span>
                 <ChevronDown size={14} className={`text-zinc-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
+            </Button>
 
             {/* Dropdown */}
             {isOpen && (

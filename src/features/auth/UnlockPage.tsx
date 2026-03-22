@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { OTPInput, SlotProps } from 'input-otp';
 import { Lock, ShieldAlert, ArrowRight, AlertTriangle, Eye, EyeOff, KeyRound, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { useAuthStore, EXPIRY_OPTIONS, RememberMeExpiry, DEFAULT_EXPIRY } from './useAuthStore';
 import { useErrorStore } from '../../stores/useErrorStore';
 
@@ -170,7 +173,7 @@ export const UnlockPage: React.FC = () => {
                         className="flex flex-col w-full space-y-4"
                     >
                         <div className="relative">
-                            <input
+                            <Input
                                 type={showPassphrase ? 'text' : 'password'}
                                 autoComplete="current-password"
                                 autoFocus
@@ -178,7 +181,7 @@ export const UnlockPage: React.FC = () => {
                                 onChange={(e) => { setPassphrase(e.target.value); if (currentError) clearError(); }}
                                 placeholder="Enter passphrase…"
                                 disabled={isSubmitting}
-                                className="w-full bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 pr-10 text-sm text-zinc-50 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all disabled:opacity-50"
+                                className="pr-12"
                             />
                             <Button
                                 variant="ghost"
@@ -252,16 +255,20 @@ export const UnlockPage: React.FC = () => {
 
                         {/* ── Remember Me section ── */}
                         <div className="w-full space-y-3">
-                            <label className="flex items-center gap-2 self-start text-sm text-zinc-400 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    className="rounded border-zinc-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="remember-me-unlock"
                                     checked={rememberMe}
-                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                    onCheckedChange={(checked) => setRememberMe(checked === true)}
                                     disabled={isSubmitting}
                                 />
-                                Remember me on this device
-                            </label>
+                                <Label 
+                                    htmlFor="remember-me-unlock"
+                                    className="text-sm text-zinc-400 cursor-pointer"
+                                >
+                                    Remember me on this device
+                                </Label>
+                            </div>
 
                             {rememberMe && (
                                 <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
@@ -289,12 +296,13 @@ export const UnlockPage: React.FC = () => {
                                     </div>
 
                                     {/* Required passphrase */}
-                                    <div className="space-y-1">
-                                        <label className="text-xs text-zinc-500 font-medium">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="new-passphrase" className="text-xs text-zinc-500 font-medium">
                                             Passphrase <span className="text-emerald-500">(required to encrypt the stored secret)</span>
-                                        </label>
+                                        </Label>
                                         <div className="relative">
-                                            <input
+                                            <Input
+                                                id="new-passphrase"
                                                 type={showPassphrase ? 'text' : 'password'}
                                                 autoComplete="new-password"
                                                 value={passphrase}
@@ -302,7 +310,7 @@ export const UnlockPage: React.FC = () => {
                                                 placeholder="Enter a secure passphrase"
                                                 required={rememberMe}
                                                 disabled={isSubmitting}
-                                                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-900 dark:text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
+                                                className="pr-10"
                                             />
                                             <Button
                                                 type="button"

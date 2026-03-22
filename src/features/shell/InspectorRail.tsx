@@ -1,4 +1,5 @@
 import { useUIStore } from '../../stores/useUIStore';
+import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Settings, Info } from 'lucide-react';
 
 export const InspectorRail = () => {
@@ -22,13 +23,15 @@ export const InspectorRail = () => {
                     <Settings className="w-5 h-5 text-emerald-400" />
                     <span className="font-semibold text-zinc-900 dark:text-white">Inspector</span>
                 </div>
-                <button
+                <Button
                     onClick={toggleInspector}
-                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-700/50 transition-all duration-300 ease-in-out"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-zinc-400"
                     aria-label="Collapse inspector"
                 >
-                    <ChevronRight className="w-4 h-4 text-zinc-400" />
-                </button>
+                    <ChevronRight className="w-4 h-4" />
+                </Button>
             </div>
 
             {/* Inspector Content - Placeholder for contextual tools */}
@@ -54,13 +57,15 @@ export const InspectorRail = () => {
 
             {/* Toggle Button (when collapsed) */}
             <div className={`absolute -left-3 top-1/2 transform -translate-y-1/2 ${inspectorOpen && 'hidden'}`}>
-                <button
+                <Button
                     onClick={toggleInspector}
-                    className="p-1.5 rounded-full bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md hover:bg-gray-200 dark:hover:bg-zinc-700/50 transition-all duration-300 ease-in-out"
+                    variant="outline"
+                    size="icon-sm"
+                    className="rounded-full bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md text-zinc-400"
                     aria-label="Expand inspector"
                 >
-                    <ChevronLeft className="w-4 h-4 text-zinc-400" />
-                </button>
+                    <ChevronLeft className="w-4 h-4" />
+                </Button>
             </div>
         </aside>
     );

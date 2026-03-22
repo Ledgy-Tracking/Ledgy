@@ -1,5 +1,6 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Button } from '@/components/ui/button';
 import { useDashboardStore } from '../../../stores/useDashboardStore';
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { BarChart3, TrendingUp, Type } from 'lucide-react';
@@ -65,42 +66,48 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
                 <div>
                     <label className="text-xs text-zinc-400 block mb-1">Widget Type:</label>
                     <div className="flex gap-1">
-                        <button
+                        <Button
                             onClick={() => handleWidgetTypeChange('chart')}
-                            className={`flex-1 p-1.5 rounded border transition-colors ${nodeData.widgetType === 'chart'
+                            variant={nodeData.widgetType === 'chart' ? 'default' : 'outline'}
+                            size="icon-xs"
+                            className={nodeData.widgetType === 'chart'
                                 ? 'bg-blue-600 border-blue-500 text-zinc-900 dark:text-white'
-                                : 'bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                                }`}
+                                : 'text-zinc-400'
+                            }
                             title="Chart"
                             aria-label="Chart widget type"
                             aria-pressed={nodeData.widgetType === 'chart'}
                         >
                             <BarChart3 size={14} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => handleWidgetTypeChange('trend')}
-                            className={`flex-1 p-1.5 rounded border transition-colors ${nodeData.widgetType === 'trend'
+                            variant={nodeData.widgetType === 'trend' ? 'default' : 'outline'}
+                            size="icon-xs"
+                            className={nodeData.widgetType === 'trend'
                                 ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white'
-                                : 'bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                                }`}
+                                : 'text-zinc-400'
+                            }
                             title="Trend"
                             aria-label="Trend widget type"
                             aria-pressed={nodeData.widgetType === 'trend'}
                         >
                             <TrendingUp size={14} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => handleWidgetTypeChange('text')}
-                            className={`flex-1 p-1.5 rounded border transition-colors ${nodeData.widgetType === 'text'
+                            variant={nodeData.widgetType === 'text' ? 'default' : 'outline'}
+                            size="icon-xs"
+                            className={nodeData.widgetType === 'text'
                                 ? 'bg-purple-600 border-purple-500 text-zinc-900 dark:text-white'
-                                : 'bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                                }`}
+                                : 'text-zinc-400'
+                            }
                             title="Text"
                             aria-label="Text widget type"
                             aria-pressed={nodeData.widgetType === 'text'}
                         >
                             <Type size={14} />
-                        </button>
+                        </Button>
                     </div>
                 </div>
 

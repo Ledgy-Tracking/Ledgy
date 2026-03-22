@@ -371,6 +371,7 @@ export const AppShell: React.FC = () => {
                 {selectedConflict && (
                     <DiffGuardModal
                         conflict={selectedConflict}
+                        isOpen={!!selectedConflict}
                         onAcceptLocal={() => setSelectedConflict(null)}
                         onAcceptRemote={() => setSelectedConflict(null)}
                         onSkip={() => setSelectedConflict(null)}

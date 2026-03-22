@@ -10,6 +10,8 @@ import { Input } from '../../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../components/ui/dialog';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Label } from '../../components/ui/label';
 
 interface SchemaBuilderProps {
     projectId: string;
@@ -142,22 +144,26 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                         {/* Main controls row */}
                                         <div className="flex items-center gap-2 p-3">
                                             <div className="flex flex-col gap-1">
-                                                <button
+                                                <Button
                                                     type="button"
                                                     onClick={() => handleMoveField(index, 'up')}
                                                     disabled={index === 0}
-                                                    className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                                 >
                                                     <ChevronUp size={14} />
-                                                </button>
-                                                <button
+                                                </Button>
+                                                <Button
                                                     type="button"
                                                     onClick={() => handleMoveField(index, 'down')}
                                                     disabled={index === draftFields.length - 1}
-                                                    className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                                 >
                                                     <ChevronDown size={14} />
-                                                </button>
+                                                </Button>
                                             </div>
 
                                             <Input
@@ -218,15 +224,19 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 )
                                             )}
 
-                                            <label className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 ml-2">
-                                                <input
-                                                    type="checkbox"
+                                            <div className="flex items-center gap-1 ml-2">
+                                                <Checkbox
+                                                    id={`field-required-${index}`}
                                                     checked={field.required}
-                                                    onChange={(e) => updateField(index, { required: e.target.checked })}
-                                                    className="rounded border-zinc-300 text-emerald-500 focus:ring-emerald-500"
+                                                    onCheckedChange={(checked) => updateField(index, { required: checked === true })}
                                                 />
-                                                Required
-                                            </label>
+                                                <Label 
+                                                    htmlFor={`field-required-${index}`}
+                                                    className="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer"
+                                                >
+                                                    Required
+                                                </Label>
+                                            </div>
 
                                             <Button
                                                 type="button"

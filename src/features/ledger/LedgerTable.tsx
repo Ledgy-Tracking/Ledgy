@@ -8,6 +8,8 @@ import { InlineEntryRow } from './InlineEntryRow';
 import { RelationTagChip } from './RelationTagChip';
 import { BackLinksPanel } from './BackLinksPanel';
 import { Button } from '../../components/ui/button';
+import { Alert, AlertDescription } from '../../components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -319,31 +321,40 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                     </Button>
                 </div>
                 {pendingDeleteEntry && (
-                    <div className="flex items-center gap-3 px-3 py-2 bg-red-50 dark:bg-red-900/20 border-t border-red-200 dark:border-red-800 text-sm">
-                        <span className="flex-1 text-red-700 dark:text-red-300">
-                            Delete this entry? Press{' '}
-                            <kbd className="px-1 py-0.5 bg-red-100 dark:bg-red-900 rounded font-mono text-xs border border-red-300 dark:border-red-700">Enter</kbd>
-                            {' '}to confirm or{' '}
-                            <kbd className="px-1 py-0.5 bg-red-100 dark:bg-red-900 rounded font-mono text-xs border border-red-300 dark:border-red-700">Esc</kbd>
-                            {' '}to cancel.
-                        </span>
-                        <button
-                            onClick={() => {
-                                deleteEntry(pendingDeleteEntry._id);
-                                setSelectedRow(-1);
-                                setPendingDeleteEntry(null);
-                            }}
-                            className="px-2 py-1 bg-red-600 hover:bg-red-500 text-zinc-900 dark:text-white rounded text-xs font-medium"
-                        >
-                            Delete
-                        </button>
-                        <button
-                            onClick={() => setPendingDeleteEntry(null)}
-                            className="px-2 py-1 bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 text-zinc-900 dark:text-zinc-100 rounded text-xs font-medium"
-                        >
-                            Cancel
-                        </button>
-                    </div>
+                    <Alert variant="destructive" className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 rounded-none border-l-0 border-r-0 border-b-0">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription className="flex items-center justify-between">
+                            <span className="text-sm text-red-700 dark:text-red-300">
+                                Delete this entry? Press{' '}
+                                <kbd className="px-1 py-0.5 bg-red-100 dark:bg-red-900 rounded font-mono text-xs border border-red-300 dark:border-red-700">Enter</kbd>
+                                {' '}to confirm or{' '}
+                                <kbd className="px-1 py-0.5 bg-red-100 dark:bg-red-900 rounded font-mono text-xs border border-red-300 dark:border-red-700">Esc</kbd>
+                                {' '}to cancel.
+                            </span>
+                            <div className="flex gap-2">
+                                <Button
+                                    onClick={() => {
+                                        deleteEntry(pendingDeleteEntry._id);
+                                        setSelectedRow(-1);
+                                        setPendingDeleteEntry(null);
+                                    }}
+                                    variant="destructive"
+                                    size="sm"
+                                    className="text-zinc-900 dark:text-white"
+                                >
+                                    Delete
+                                </Button>
+                                <Button
+                                    onClick={() => setPendingDeleteEntry(null)}
+                                    variant="secondary"
+                                    size="sm"
+                                    className="text-zinc-900 dark:text-zinc-100"
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+                        </AlertDescription>
+                    </Alert>
                 )}
             </div>
 
