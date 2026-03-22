@@ -28,8 +28,8 @@ export const Sidebar = () => {
     return (
         <aside
             className={`
-                flex flex-col border-r border-gray-200 dark:border-gray-700
-                bg-white dark:bg-gray-800
+                flex flex-col border-r border-white/5
+                bg-zinc-900/50 backdrop-blur-xl
                 transition-all duration-300 ease-in-out
                 ${sidebarOpen ? 'w-64' : 'w-0'}
                 ${!sidebarOpen && 'overflow-hidden'}
@@ -37,17 +37,17 @@ export const Sidebar = () => {
             `}
         >
             {/* Sidebar Header */}
-            <div className={`flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 ${!sidebarOpen && 'hidden'}`}>
+            <div className={`flex items-center justify-between p-4 border-b border-white/5 ${!sidebarOpen && 'hidden'}`}>
                 <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-                    <span className="font-semibold text-gray-900 dark:text-white">Ledgy</span>
+                    <Users className="w-5 h-5 text-emerald-400" />
+                    <span className="font-semibold text-white">Ledgy</span>
                 </div>
                 <button
                     onClick={toggleSidebar}
-                    className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    className="p-1 rounded hover:bg-zinc-800/50 transition-colors"
                     aria-label="Collapse sidebar"
                 >
-                    <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    <ChevronLeft className="w-4 h-4 text-zinc-400" />
                 </button>
             </div>
 
@@ -55,11 +55,11 @@ export const Sidebar = () => {
             {!sidebarOpen && (
                 <button
                     onClick={toggleSidebar}
-                    className="md:hidden absolute left-2 top-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors z-30"
+                    className="md:hidden absolute left-2 top-2 p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors z-30"
                     aria-label="Open sidebar"
                     aria-expanded="false"
                 >
-                    <Menu className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    <Menu className="w-5 h-5 text-zinc-400" />
                 </button>
             )}
 
@@ -76,10 +76,10 @@ export const Sidebar = () => {
                                     onClick={() => handleNavigate(item.path)}
                                     className={`
                                         w-full flex items-center gap-3 px-3 py-2 rounded-lg
-                                        transition-colors
+                                        transition-all duration-300 ease-in-out
                                         ${isActive 
-                                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                            ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30' 
+                                            : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
                                         }
                                     `}
                                 >
@@ -93,13 +93,13 @@ export const Sidebar = () => {
             </nav>
 
             {/* Toggle Button (when collapsed on desktop) */}
-            <div className={`hidden md:block absolute -right-3 top-1/2 ${sidebarOpen && 'hidden'}`}>
+            <div className={`hidden md:block absolute -right-3 top-1/2 transform -translate-y-1/2 ${sidebarOpen && 'hidden'}`}>
                 <button
                     onClick={toggleSidebar}
-                    className="p-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    className="p-1.5 rounded-full bg-zinc-900 border border-white/10 shadow-md hover:bg-zinc-800/50 transition-all duration-300 ease-in-out"
                     aria-label="Expand sidebar"
                 >
-                    <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    <ChevronRight className="w-4 h-4 text-zinc-400" />
                 </button>
             </div>
         </aside>

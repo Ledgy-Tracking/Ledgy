@@ -6,31 +6,31 @@ export const SettingsPage = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-6">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+            <h1 className="text-3xl font-bold text-white mb-8">
                 Settings
             </h1>
 
             {/* Appearance Section */}
             <section className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
                     <Maximize2 className="w-5 h-5" />
                     Appearance
                 </h2>
 
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 divide-y divide-gray-200 dark:divide-gray-700">
+                <div className="bg-zinc-900/50 backdrop-blur-xl rounded-lg shadow-sm border border-white/5 divide-y divide-white/5">
                     {/* Theme Setting */}
                     <div className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <div className="p-2 bg-zinc-800/50 rounded-lg">
                                 {theme === 'dark' ? (
-                                    <Moon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                    <Moon className="w-5 h-5 text-zinc-400" />
                                 ) : (
-                                    <Sun className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                    <Sun className="w-5 h-5 text-zinc-400" />
                                 )}
                             </div>
                             <div>
-                                <h3 className="font-medium text-gray-900 dark:text-white">Theme</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                <h3 className="font-medium text-white">Theme</h3>
+                                <p className="text-sm text-zinc-400">
                                     Choose between light and dark mode
                                 </p>
                             </div>
@@ -38,20 +38,20 @@ export const SettingsPage = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setTheme('light')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
                                     theme === 'light'
-                                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
+                                        : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-white'
                                 }`}
                             >
                                 Light
                             </button>
                             <button
                                 onClick={() => setTheme('dark')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
                                     theme === 'dark'
-                                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
+                                        : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-white'
                                 }`}
                             >
                                 Dark
@@ -62,16 +62,16 @@ export const SettingsPage = () => {
                     {/* Density Setting */}
                     <div className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                            <div className="p-2 bg-zinc-800/50 rounded-lg">
                                 {density === 'compact' ? (
-                                    <Minimize2 className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                    <Minimize2 className="w-5 h-5 text-zinc-400" />
                                 ) : (
-                                    <Maximize2 className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                                    <Maximize2 className="w-5 h-5 text-zinc-400" />
                                 )}
                             </div>
                             <div>
-                                <h3 className="font-medium text-gray-900 dark:text-white">Density</h3>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                <h3 className="font-medium text-white">Density</h3>
+                                <p className="text-sm text-zinc-400">
                                     Control the spacing and size of UI elements
                                 </p>
                             </div>
@@ -79,20 +79,20 @@ export const SettingsPage = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setDensity('comfortable')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
                                     density === 'comfortable'
-                                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
+                                        : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-white'
                                 }`}
                             >
                                 Comfortable
                             </button>
                             <button
                                 onClick={() => setDensity('compact')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
                                     density === 'compact'
-                                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
+                                        : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-white'
                                 }`}
                             >
                                 Compact
@@ -104,17 +104,17 @@ export const SettingsPage = () => {
 
             {/* Reset Section */}
             <section>
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                     Reset Settings
                 </h2>
 
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                    <p className="text-sm text-yellow-800 dark:text-yellow-300 mb-4">
+                <div className="bg-amber-500/20 border border-amber-500/30 rounded-lg p-4">
+                    <p className="text-sm text-amber-300 mb-4">
                         Reset all settings to their default values. This action cannot be undone.
                     </p>
                     <button
                         onClick={resetToDefaults}
-                        className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-medium rounded-lg transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 font-medium rounded-lg transition-all duration-300 ease-in-out ring-1 ring-amber-600/30"
                     >
                         <RotateCcw className="w-4 h-4" />
                         Reset to Defaults
@@ -124,27 +124,27 @@ export const SettingsPage = () => {
 
             {/* Future Settings Placeholder */}
             <section className="mt-8 opacity-50">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <h2 className="text-xl font-semibold text-white mb-4">
                     Coming Soon
                 </h2>
 
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="bg-zinc-900/30 border border-white/5 rounded-lg p-4">
+                    <p className="text-sm text-zinc-500">
                         Additional settings will be available in future updates:
                     </p>
-                    <ul className="mt-2 space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                    <ul className="mt-2 space-y-1 text-sm text-zinc-500">
                         <li className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
+                            <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
                             Language & Locale
                         </li>
                         <li className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
+                            <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
                             Notification Preferences
                         </li>
                         <li className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
+                            <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
                             Keyboard Shortcuts
-                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                            <span className="text-xs text-zinc-600">
                                 (Undo: Ctrl/Cmd+Z, Redo: Ctrl/Cmd+Shift+Z)
                             </span>
                         </li>
