@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { LedgerSchema, SchemaField, LedgerEntry } from '../../types/ledger';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
+import { Button } from '@/components/ui/button';
 import { RelationCombobox } from './RelationCombobox';
 
 interface InlineEntryRowProps {
@@ -171,20 +172,22 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
             <div role="gridcell" className="p-2" style={{ width: 150, flexShrink: 0 }}>
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                        <button
+                        <Button
                             onClick={handleSubmit}
-                            className="px-3 py-1 text-xs bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
+                            size="xs"
+                            className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold"
                             aria-label="Save entry"
                         >
                             Save
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={onCancel}
-                            className="px-3 py-1 text-xs bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
+                            variant="secondary"
+                            size="xs"
                             aria-label="Cancel"
                         >
                             Cancel
-                        </button>
+                        </Button>
                     </div>
                     {errors._form && (
                         <div className="text-red-500 text-[10px] font-medium leading-tight mt-1">

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useErrorStore } from '../stores/useErrorStore';
 import { AlertCircle, X, Info, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const ErrorToast: React.FC = () => {
     const { error, clearError } = useErrorStore();
@@ -49,13 +50,14 @@ export const ErrorToast: React.FC = () => {
                 <div className="flex-grow text-sm font-medium">
                     {error?.message}
                 </div>
-                <button
+                <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={handleClose}
-                    className="shrink-0 p-1 hover:bg-white/10 rounded transition-colors"
                     aria-label="Close"
                 >
                     <X size={16} />
-                </button>
+                </Button>
             </div>
         </div>
     );

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Plus, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface EmptyDashboardProps {
     onActionClick: () => void;
@@ -15,14 +16,15 @@ export const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onActionClick })
             <p className="text-zinc-400 max-w-sm mb-8">
                 Create your first ledger to get started tracking your data securely and privately.
             </p>
-            <button
+            <Button
                 onClick={onActionClick}
-                className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold py-2.5 px-6 rounded-lg transition-colors shadow-lg shadow-emerald-500/20"
+                className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-semibold shadow-lg shadow-emerald-500/20"
+                size="lg"
                 aria-label="Create new ledger"
             >
                 <Plus size={20} />
                 <span>Create Ledger</span>
-            </button>
+            </Button>
         </div>
     );
 };
