@@ -102,8 +102,10 @@ export async function saveTemplateTauri(
     filename: string
 ): Promise<string | null> {
     try {
-        const dialogModule = await import("@tauri-apps/api/dialog");
-        const fsModule = await import("@tauri-apps/api/fs");
+        // @ts-ignore: Dynamic import for Tauri APIs (ignored by Vite/TypeScript during web builds)
+        const dialogModule = await import(/* @vite-ignore */ "@tauri-apps/api/dialog");
+        // @ts-ignore: Dynamic import for Tauri APIs (ignored by Vite/TypeScript during web builds)
+        const fsModule = await import(/* @vite-ignore */ "@tauri-apps/api/fs");
 
         const filePath = await dialogModule.save({
             filters: [{
