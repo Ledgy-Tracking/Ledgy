@@ -104,6 +104,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         onClick={() => setIsAddingWidget(!isAddingWidget)}
                         className="bg-emerald-600 hover:bg-emerald-500 text-white"
                         size="sm"
+                        aria-haspopup="true"
+                        aria-expanded={isAddingWidget}
                     >
                         <Plus size={16} className="mr-2" />
                         Add Widget
@@ -172,6 +174,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                             onClick={() => setSelectedWidget(widget)}
                                             className="p-1 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 rounded transition-colors"
                                             title="Widget settings"
+                                            aria-label="Widget settings"
                                         >
                                             <Settings size={14} />
                                         </button>
@@ -179,6 +182,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                             onClick={() => removeWidget(widget.id)}
                                             className="p-1 hover:bg-red-900/50 text-zinc-400 hover:text-red-400 rounded transition-colors"
                                             title="Remove widget"
+                                            aria-label="Remove widget"
                                         >
                                             <Trash2 size={14} />
                                         </button>
