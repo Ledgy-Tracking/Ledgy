@@ -1,4 +1,4 @@
-## 2026-03-10 - Error Boundary Information Disclosure
-**Vulnerability:** The `ErrorBoundary` component was appending the raw React `errorInfo.componentStack` to the error message string dispatched to the global `useErrorStore`. This string could be displayed to end users via toast notifications or error UI, potentially leaking internal component structure, file paths, and application architecture details.
-**Learning:** Raw stack traces and internal debugging information should never be passed into user-facing state or error stores. Such detailed internal information should strictly be logged to secure, developer-only channels (like `console.error` during development).
-**Prevention:** Always sanitize error messages before dispatching them to user-facing stores. Distinguish between 'safe' user-facing error messages and internal stack traces/details.
+## 2025-02-28 - Missing AutoComplete on Sensitive Inputs
+**Vulnerability:** Sensitive authentication inputs (TOTP code and passphrase fields) were missing explicit `autoComplete` attributes. This could lead to credential leakage via browser history, auto-filling in incorrect contexts, and prevents password managers from securely filling or generating credentials.
+**Learning:** Browsers and password managers rely on standard `autoComplete` hints (`new-password`, `current-password`, `one-time-code`) to securely handle sensitive data. Omitting them degrades security and UX.
+**Prevention:** Always define explicit `autoComplete` attributes for inputs handling secrets, tokens, or passwords to control browser caching and enable secure auto-fill.
