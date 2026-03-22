@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useErrorStore } from '../../stores/useErrorStore';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { Avatar } from '../../components/ui/Avatar';
 import { ColorPicker, DEFAULT_PRESET_COLORS } from '../../components/ui/ColorPicker';
 import { Input } from '../../components/ui/input';

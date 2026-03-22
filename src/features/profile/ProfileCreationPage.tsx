@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { ProfileCreationForm } from './ProfileCreationForm';
 import { useUIStore } from '../../stores/useUIStore';
 import { cn } from '../../lib/utils';
