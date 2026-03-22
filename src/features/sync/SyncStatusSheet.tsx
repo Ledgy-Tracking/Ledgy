@@ -82,7 +82,7 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
     const details = getStatusDetails();
 
     return (
-        <div className="fixed inset-0 z-50 flex justify-end bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex justify-end bg-white/40 dark:bg-black/40 dark:bg-zinc-950/40 backdrop-blur-sm animate-in fade-in duration-200">
             {/* Backdrop close area */}
             <div className="flex-1" onClick={onClose} />
 

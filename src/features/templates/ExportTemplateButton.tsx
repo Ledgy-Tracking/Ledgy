@@ -17,7 +17,7 @@ export const ExportTemplateButton: React.FC = () => {
         <button
             onClick={handleExport}
             disabled={isExporting}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-800/50 text-zinc-300 rounded transition-colors disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 disabled:bg-gray-100/50 dark:disabled:bg-zinc-800/50 text-gray-700 dark:text-zinc-300 rounded transition-colors disabled:cursor-not-allowed"
             title="Export project as template (.ledgy.json)"
             aria-label="Export template"
         >

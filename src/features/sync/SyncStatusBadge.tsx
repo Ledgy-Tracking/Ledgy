@@ -69,7 +69,7 @@ function getSyncStateConfig(state: SyncState) {
         case 'offline':
             return {
                 label: 'Offline',
-                bgClass: 'bg-zinc-800',
+                bgClass: 'bg-gray-100 dark:bg-zinc-800',
                 textClass: 'text-zinc-400',
                 icon: CloudOff,
             };

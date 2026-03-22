@@ -69,18 +69,18 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
 
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[220px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+            className={`bg-gray-50 dark:bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[220px] ${selected ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'
                 } ${nodeData.status === 'error' ? 'border-red-500/50' : ''}`}
         >
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 bg-zinc-800 rounded-t-md">
+            <div className="flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-zinc-800 rounded-t-md">
                 <div className="flex items-center gap-2">
                     {getStatusIcon()}
-                    <span className="text-sm font-semibold text-zinc-100">Trigger</span>
+                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Trigger</span>
                 </div>
                 <button
                     onClick={() => setIsConfigOpen(!isConfigOpen)}
-                    className="p-1 hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-200"
+                    className="p-1 hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
                     title="Configure"
                     aria-label="Configure node"
                     aria-expanded={isConfigOpen}
@@ -91,14 +91,14 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
 
             {/* Configuration Panel */}
             {isConfigOpen && (
-                <div className="p-3 space-y-3 border-b border-zinc-700 bg-zinc-800/50">
+                <div className="p-3 space-y-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50">
                     {/* Ledger Selector */}
                     <div>
                         <label className="text-xs text-zinc-400 block mb-1">Listen to Ledger:</label>
                         <select
                             value={nodeData.ledgerId || ''}
                             onChange={(e) => handleLedgerChange(e.target.value)}
-                            className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            className="w-full bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         >
                             <option value="">-- Choose a ledger --</option>
                             {schemas.map(schema => (
@@ -116,8 +116,8 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
                             <button
                                 onClick={() => handleEventTypeChange('on-create')}
                                 className={`flex-1 px-2 py-1.5 text-xs rounded border transition-colors ${nodeData.eventType === 'on-create'
-                                    ? 'bg-emerald-600 border-emerald-500 text-white'
-                                    : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                    ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white'
+                                    : 'bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-400 hover:border-zinc-600'
                                     }`}
                             >
                                 On Create
@@ -125,8 +125,8 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
                             <button
                                 onClick={() => handleEventTypeChange('on-edit')}
                                 className={`flex-1 px-2 py-1.5 text-xs rounded border transition-colors ${nodeData.eventType === 'on-edit'
-                                    ? 'bg-emerald-600 border-emerald-500 text-white'
-                                    : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
+                                    ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white'
+                                    : 'bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-400 hover:border-zinc-600'
                                     }`}
                             >
                                 On Edit
@@ -137,7 +137,7 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
             )}
 
             {/* Status Display */}
-            <div className="px-3 py-2 bg-zinc-800/30">
+            <div className="px-3 py-2 bg-gray-100 dark:bg-zinc-800/30">
                 <div className="text-xs text-zinc-500 mb-1">Status</div>
                 <div className={`text-sm ${nodeData.status === 'error' ? 'text-red-400' :
                     nodeData.status === 'fired' ? 'text-amber-400' :

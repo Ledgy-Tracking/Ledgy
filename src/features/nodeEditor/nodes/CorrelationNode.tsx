@@ -38,13 +38,13 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected
 
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[220px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+            className={`bg-gray-50 dark:bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[220px] ${selected ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'
                 } ${nodeData.error ? 'border-red-500/50' : ''}`}
         >
             {/* Header */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-t-md">
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-zinc-800 rounded-t-md">
                 <Calculator size={14} className="text-purple-400" />
-                <span className="text-sm font-semibold text-zinc-100">Correlation</span>
+                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Correlation</span>
             </div>
 
             {/* Input Ports */}
@@ -73,7 +73,7 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected
 
             {/* Result Display */}
             <div className="px-3 pb-3">
-                <div className="bg-zinc-800/50 rounded p-2 border border-zinc-700">
+                <div className="bg-gray-100 dark:bg-zinc-800/50 rounded p-2 border border-zinc-300 dark:border-zinc-700">
                     <div className="text-xs text-zinc-500 mb-1">Pearson r</div>
                     {nodeData.error ? (
                         <div className="flex items-center gap-1.5 text-red-400 text-xs">

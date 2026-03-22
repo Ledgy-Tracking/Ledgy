@@ -152,7 +152,7 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
                 <div
                     key={field.name}
                     role="gridcell"
-                    className="p-2 pb-5 relative border-r border-zinc-200 dark:border-zinc-800 last:border-r-0"
+                    className="p-2 pb-5 relative border-r border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 last:border-r-0"
                     style={{ width: 150, flexShrink: 0 }}
                 >
                     <FieldInput
@@ -209,7 +209,7 @@ interface FieldInputProps {
 
 const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLButtonElement, FieldInputProps>(
     ({ field, value, onChange, onKeyDown, error, targetEntries, deletedEntryIds }, ref) => {
-        const baseClasses = `w-full bg-transparent border ${error ? 'border-red-500' : 'border-zinc-700'} rounded px-2 py-1 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all`;
+        const baseClasses = `w-full bg-transparent border ${error ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-700'} rounded px-2 py-1 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all`;
 
         const renderInput = () => {
             switch (field.type) {

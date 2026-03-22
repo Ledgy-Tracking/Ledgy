@@ -5,7 +5,7 @@
  * access or enumerate profiles belonging to other users.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { useProfileStore } from '../stores/useProfileStore';
 import { getProfileDb, _clearProfileDatabases } from './db';

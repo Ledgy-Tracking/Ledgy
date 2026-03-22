@@ -94,7 +94,7 @@ export const SetupPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col items-center justify-center p-4 font-sans">
+        <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 flex flex-col items-center justify-center p-4 font-sans">
             <div className="max-w-md w-full bg-zinc-900 p-8 rounded-2xl border border-zinc-800 shadow-2xl space-y-8">
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold text-emerald-500">Secure Your Ledgy</h1>
@@ -113,7 +113,7 @@ export const SetupPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                    <div className="p-4 bg-zinc-950/50 rounded-lg border border-zinc-800 text-sm font-mono break-all text-zinc-500 text-center">
+                    <div className="p-4 bg-white dark:bg-zinc-950/50 rounded-lg border border-zinc-300 dark:border-zinc-800 text-sm font-mono break-all text-zinc-600 dark:text-zinc-500 text-center">
                         Secret: <span className="text-zinc-300">{tempSecret}</span>
                     </div>
 
@@ -132,7 +132,7 @@ export const SetupPage: React.FC = () => {
                                 disabled={isSubmitting}
                                 placeholder="000000"
 
-                                className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-4 text-center text-3xl tracking-widest text-zinc-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono disabled:opacity-50"
+                                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-4 text-center text-3xl tracking-widest text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono disabled:opacity-50"
                                 autoFocus
 
                             />
@@ -191,7 +191,7 @@ export const SetupPage: React.FC = () => {
                                                 required={rememberMe}
                                                 disabled={isSubmitting}
 
-                                                className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
+                                                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-900 dark:text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
 
                                             />
                                             <button

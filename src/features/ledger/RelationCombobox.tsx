@@ -160,7 +160,7 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 onKeyDown={!isOpen ? externalKeyDown : undefined}
-                className="w-full flex items-center justify-between gap-2 px-2 py-1 bg-transparent border border-zinc-700 rounded text-sm text-zinc-100 hover:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full flex items-center justify-between gap-2 px-2 py-1 bg-transparent border border-zinc-300 dark:border-zinc-700 rounded text-sm text-zinc-900 dark:text-zinc-100 hover:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 aria-expanded={isOpen}
                 aria-haspopup="listbox"
             >
@@ -172,7 +172,7 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-zinc-900 border border-zinc-700 rounded shadow-lg max-h-60 overflow-hidden">
+                <div className="absolute z-50 w-full mt-1 bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded shadow-lg max-h-60 overflow-hidden">
                     {/* Search Input */}
                     <input
                         ref={inputRef}
@@ -198,7 +198,7 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
                             handleKeyDown(e);
                         }}
                         placeholder="Search entries..."
-                        className="w-full px-3 py-2 bg-zinc-800 border-b border-zinc-700 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full px-3 py-2 bg-gray-100 dark:bg-zinc-800 border-b border-zinc-300 dark:border-zinc-700 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         aria-autocomplete="list"
                     />
 
@@ -226,12 +226,12 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
                                             onClick={() => handleSelect(entry._id)}
                                             className={`flex items-center justify-between px-3 py-2 cursor-pointer transition-colors ${
                                                 index === highlightedIndex
-                                                    ? isGhost ? 'bg-zinc-800' : 'bg-emerald-900/50'
-                                                    : 'hover:bg-zinc-800'
+                                                    ? isGhost ? 'bg-gray-100 dark:bg-zinc-800' : 'bg-emerald-900/50'
+                                                    : 'hover:bg-gray-200 dark:hover:bg-zinc-800'
                                             } ${isSelected ? 'bg-emerald-900/30' : ''}`}
                                         >
                                             <span className={`text-sm truncate flex-1 ${
-                                                 isGhost ? 'text-zinc-500 line-through' : 'text-zinc-200'
+                                                 isGhost ? 'text-zinc-500 line-through' : 'text-zinc-800 dark:text-zinc-200'
                                              }`}>
                                                 {displayValue}
                                             </span>
@@ -242,7 +242,7 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
                                     );
                                 })}
                                 {isOverflowing && (
-                                    <li className="px-3 py-1.5 text-xs text-zinc-500 border-t border-zinc-800 select-none">
+                                    <li className="px-3 py-1.5 text-xs text-zinc-500 border-t border-zinc-200 dark:border-zinc-800 select-none">
                                         Showing {MAX_RESULTS} of {totalCount} — type to filter
                                     </li>
                                 )}

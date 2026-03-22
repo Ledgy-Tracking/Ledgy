@@ -22,7 +22,7 @@ export const ProfileCreationPage: React.FC = () => {
 
     // Adjust padding based on density
     const containerClasses = cn(
-        "min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center p-4 selection:bg-emerald-500/30",
+        "min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white flex flex-col items-center justify-center p-4 selection:bg-emerald-500/30",
         {
             'py-8': density === 'compact',
             'py-12': density === 'comfortable',
@@ -39,7 +39,7 @@ export const ProfileCreationPage: React.FC = () => {
             </div>
 
             {/* Content Container */}
-            <div className="relative z-10 w-full max-w-2xl bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-3xl p-8 sm:p-12 shadow-2xl flex flex-col animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-both">
+            <div className="relative z-10 w-full max-w-2xl bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl border border-white/5 rounded-3xl p-8 sm:p-12 shadow-2xl flex flex-col animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-both">
 
                 {/* Header */}
                 <div className="flex flex-col items-center justify-center text-center space-y-4 mb-10">
@@ -47,7 +47,7 @@ export const ProfileCreationPage: React.FC = () => {
                         <Sparkles className="h-8 w-8" />
                     </div>
                     <div className="space-y-2">
-                        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
+                        <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-zinc-900 dark:text-white">
                             Create a Profile
                         </h1>
                         <p className="text-zinc-400 text-lg max-w-md mx-auto leading-relaxed">

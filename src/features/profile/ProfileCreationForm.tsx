@@ -92,7 +92,7 @@ export const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onCanc
                     className="shadow-xl ring-4 ring-zinc-950 transition-all duration-300"
                 />
                 <div className="text-center space-y-1">
-                    <h3 className="text-xl font-medium text-white truncate max-w-xs px-4">
+                    <h3 className="text-xl font-medium text-zinc-900 dark:text-white truncate max-w-xs px-4">
                         {name.trim() || 'New Profile'}
                     </h3>
                     <p className="text-sm text-zinc-400">Preview</p>
@@ -159,7 +159,7 @@ export const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onCanc
                         variant="outline"
                         onClick={onCancel}
                         disabled={isSubmitting}
-                        className="flex-1 bg-transparent border-zinc-700 hover:bg-zinc-800 text-zinc-300 hover:text-white"
+                        className="flex-1 bg-transparent border-zinc-700 hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
                     >
                         Cancel
                     </Button>
@@ -167,7 +167,7 @@ export const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onCanc
                 <Button
                     type="submit"
                     disabled={!isFormValid || isSubmitting}
-                    className="flex-[2] bg-emerald-600 hover:bg-emerald-500 text-white font-medium shadow-emerald-500/20 shadow-lg"
+                    className="flex-[2] bg-emerald-600 hover:bg-emerald-500 text-zinc-900 dark:text-white font-medium shadow-emerald-500/20 shadow-lg"
                 >
                     {isSubmitting ? (
                         <>

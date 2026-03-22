@@ -50,7 +50,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
                         onClick={() => onChange(colorClass)}
                     >
                         {isSelected && (
-                            <Check className="h-4 w-4 sm:h-5 sm:w-5 text-white drop-shadow-md animate-in zoom-in duration-200" />
+                            <Check className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-900 dark:text-white drop-shadow-md animate-in zoom-in duration-200" />
                         )}
                     </button>
                 );

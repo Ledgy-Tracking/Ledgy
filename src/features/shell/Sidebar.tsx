@@ -29,7 +29,7 @@ export const Sidebar = () => {
         <aside
             className={`
                 flex flex-col border-r border-white/5
-                bg-zinc-900/50 backdrop-blur-xl
+                bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl
                 transition-all duration-300 ease-in-out
                 ${sidebarOpen ? 'w-64' : 'w-0'}
                 ${!sidebarOpen && 'overflow-hidden'}
@@ -40,11 +40,11 @@ export const Sidebar = () => {
             <div className={`flex items-center justify-between p-4 border-b border-white/5 ${!sidebarOpen && 'hidden'}`}>
                 <div className="flex items-center gap-2">
                     <Users className="w-5 h-5 text-emerald-400" />
-                    <span className="font-semibold text-white">Ledgy</span>
+                    <span className="font-semibold text-zinc-900 dark:text-white">Ledgy</span>
                 </div>
                 <button
                     onClick={toggleSidebar}
-                    className="p-1 rounded hover:bg-zinc-800/50 transition-colors"
+                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-800/50 transition-colors"
                     aria-label="Collapse sidebar"
                 >
                     <ChevronLeft className="w-4 h-4 text-zinc-400" />
@@ -55,7 +55,7 @@ export const Sidebar = () => {
             {!sidebarOpen && (
                 <button
                     onClick={toggleSidebar}
-                    className="md:hidden absolute left-2 top-2 p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors z-30"
+                    className="md:hidden absolute left-2 top-2 p-2 rounded-lg bg-gray-100 dark:bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors z-30"
                     aria-label="Open sidebar"
                     aria-expanded="false"
                 >
@@ -79,7 +79,7 @@ export const Sidebar = () => {
                                         transition-all duration-300 ease-in-out
                                         ${isActive 
                                             ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30' 
-                                            : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                                            : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
                                         }
                                     `}
                                 >
@@ -96,7 +96,7 @@ export const Sidebar = () => {
             <div className={`hidden md:block absolute -right-3 top-1/2 transform -translate-y-1/2 ${sidebarOpen && 'hidden'}`}>
                 <button
                     onClick={toggleSidebar}
-                    className="p-1.5 rounded-full bg-zinc-900 border border-white/10 shadow-md hover:bg-zinc-800/50 transition-all duration-300 ease-in-out"
+                    className="p-1.5 rounded-full bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md hover:bg-gray-200 dark:hover:bg-zinc-800/50 transition-all duration-300 ease-in-out"
                     aria-label="Expand sidebar"
                 >
                     <ChevronRight className="w-4 h-4 text-zinc-400" />

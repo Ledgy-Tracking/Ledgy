@@ -34,7 +34,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     }
 
     return (
-        <div className="mt-4 border-t border-zinc-800 pt-4">
+        <div className="mt-4 border-t border-zinc-200 dark:border-zinc-800 pt-4">
             <div className="flex items-center gap-2 mb-3">
                 <ArrowLeft size={16} className="text-emerald-400" />
                 <h3 className="text-sm font-semibold text-zinc-300">
@@ -88,7 +88,7 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => 
     const navProfileId = profileId || activeProfileId;
 
     return (
-        <div className="p-3 bg-zinc-800/30 rounded border border-zinc-700 hover:border-zinc-600 transition-colors">
+        <div className="p-3 bg-gray-100 dark:bg-zinc-800/30 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-600 transition-colors">
             <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                     <Link

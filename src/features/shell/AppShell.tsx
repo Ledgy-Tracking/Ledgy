@@ -33,7 +33,7 @@ export const AppShell = () => {
     return (
         <ErrorBoundary>
             <AuthGuard>
-                <div className={`flex h-screen w-full overflow-hidden bg-zinc-950 ${theme}`}>
+                <div className={`flex h-screen w-full overflow-hidden bg-white dark:bg-zinc-950 ${theme}`}>
                     {/* Background Effects - matching auth pages */}
                     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
                         <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] opacity-50 mix-blend-screen" />

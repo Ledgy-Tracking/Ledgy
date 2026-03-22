@@ -41,7 +41,7 @@ export const ImportTemplateButton: React.FC<ImportTemplateButtonProps> = ({ prof
         <button
             onClick={handleImport}
             disabled={isImporting}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-800/50 text-zinc-300 rounded transition-colors disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 disabled:bg-gray-100/50 dark:disabled:bg-zinc-800/50 text-gray-700 dark:text-zinc-300 rounded transition-colors disabled:cursor-not-allowed"
             title="Import template from .ledgy.json file"
             aria-label="Import template"
         >

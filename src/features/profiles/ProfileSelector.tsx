@@ -102,12 +102,12 @@ export const ProfileSelector: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center p-8 relative transition-colors duration-300">
+        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-900 dark:text-zinc-100 flex flex-col items-center justify-center p-8 relative transition-colors duration-300">
             {/* Theme Toggle Button */}
             <button
                 onClick={toggleTheme}
                 aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="absolute top-8 right-8 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/50 transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                className="absolute top-8 right-8 p-3 bg-white dark:bg-gray-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/50 transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
             >
                 {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
             </button>
@@ -126,14 +126,14 @@ export const ProfileSelector: React.FC = () => {
                         <button
                             onClick={() => handleSelectProfile(profile.id)}
                             aria-label={`Select profile ${profile.name}`}
-                            className="text-left w-full bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 hover:dark:border-emerald-500/50 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/5 dark:hover:shadow-2xl dark:hover:shadow-emerald-500/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                            className="text-left w-full bg-white dark:bg-gray-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 hover:dark:border-emerald-500/50 rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/5 dark:hover:shadow-2xl dark:hover:shadow-emerald-500/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                         >
                             <div className="flex items-start mb-4">
-                                <div className="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300">
+                                <div className="p-3 rounded-xl bg-zinc-100 dark:bg-gray-100 dark:bg-zinc-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300">
                                     <User size={24} />
                                 </div>
                             </div>
-                            <h3 className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-100">{profile.name}</h3>
+                            <h3 className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-900 dark:text-zinc-100">{profile.name}</h3>
                             <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-4">
                                 {profile.description || 'No description provided'}
                             </p>
@@ -154,12 +154,12 @@ export const ProfileSelector: React.FC = () => {
 
                 <button
                     onClick={handleOpenCreate}
-                    className="flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-900/30 border border-dashed border-zinc-300 dark:border-zinc-800 hover:border-emerald-500 hover:dark:border-emerald-500/50 rounded-2xl p-6 transition-all duration-300 group"
+                    className="flex flex-col items-center justify-center bg-zinc-50 dark:bg-gray-50 dark:bg-zinc-900/30 border border-dashed border-zinc-300 dark:border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 hover:dark:border-emerald-500/50 rounded-2xl p-6 transition-all duration-300 group"
                 >
-                    <div className="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300 mb-4">
+                    <div className="p-3 rounded-xl bg-zinc-100 dark:bg-gray-100 dark:bg-zinc-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300 mb-4">
                         <Plus size={24} />
                     </div>
-                    <span className="font-semibold text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-200">New Profile</span>
+                    <span className="font-semibold text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-800 dark:text-zinc-200">New Profile</span>
                 </button>
             </div>
 
@@ -171,13 +171,13 @@ export const ProfileSelector: React.FC = () => {
 
             {/* Create Profile Dialog */}
             {isCreateDialogOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/70 backdrop-blur-sm p-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50 dark:bg-zinc-900/50 dark:bg-white dark:bg-black/70 backdrop-blur-sm p-4">
                     <form
                         onSubmit={handleConfirmCreate}
-                        className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+                        className="bg-white dark:bg-gray-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200"
                     >
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Create Profile</h2>
+                            <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-900 dark:text-zinc-100">Create Profile</h2>
                             <button
                                 type="button"
                                 onClick={() => setIsCreateDialogOpen(false)}
@@ -196,7 +196,7 @@ export const ProfileSelector: React.FC = () => {
                                     value={createName}
                                     onChange={(e) => setCreateName(e.target.value)}
                                     placeholder="e.g. Personal Ledger"
-                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
                                 />
                             </div>
                             <div>
@@ -206,7 +206,7 @@ export const ProfileSelector: React.FC = () => {
                                     onChange={(e) => setCreateDesc(e.target.value)}
                                     placeholder="Brief description of this workspace"
                                     rows={3}
-                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none"
+                                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors resize-none"
                                 />
                             </div>
                         </div>
@@ -215,7 +215,7 @@ export const ProfileSelector: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setIsCreateDialogOpen(false)}
-                                className="px-4 py-2 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
+                                className="px-4 py-2 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-gray-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-800 dark:text-zinc-200 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -239,7 +239,7 @@ export const ProfileSelector: React.FC = () => {
                 <div
                     data-testid="delete-dialog-backdrop"
                     onClick={!isDeleting ? handleCancelDelete : undefined}
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/70 backdrop-blur-sm p-4"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-gray-50 dark:bg-zinc-900/50 dark:bg-white dark:bg-black/70 backdrop-blur-sm p-4"
                 >
                     <form
                         role="dialog"
@@ -248,14 +248,14 @@ export const ProfileSelector: React.FC = () => {
                         onClick={(e) => e.stopPropagation()}
                         onKeyDown={(e) => { if (e.key === 'Escape' && !isDeleting) handleCancelDelete(); }}
                         onSubmit={(e) => { e.preventDefault(); if (isDeleteConfirmed && !isDeleting) handleConfirmDelete(false); }}
-                        className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+                        className="bg-white dark:bg-gray-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-in fade-in zoom-in-95 duration-200"
                     >
                         <div className="flex items-start gap-4 mb-6">
                             <div className="p-3 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-500 shrink-0">
                                 <AlertTriangle size={24} />
                             </div>
                             <div>
-                                <h2 id="delete-dialog-heading" className="text-xl font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Delete Profile "{profileToDelete.name}"?</h2>
+                                <h2 id="delete-dialog-heading" className="text-xl font-semibold text-zinc-900 dark:text-zinc-900 dark:text-zinc-100 mb-2">Delete Profile "{profileToDelete.name}"?</h2>
                                 <p className="text-zinc-600 dark:text-zinc-400 text-sm mb-4">
                                     <span className="font-semibold text-red-600 dark:text-red-400">This action is permanent and irreversible.</span>
                                 </p>
@@ -298,7 +298,7 @@ export const ProfileSelector: React.FC = () => {
                                 htmlFor="delete-confirm-input"
                                 className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1"
                             >
-                                Type <span className="font-bold text-zinc-900 dark:text-zinc-100">{profileToDelete.name}</span> to confirm
+                                Type <span className="font-bold text-zinc-900 dark:text-zinc-900 dark:text-zinc-100">{profileToDelete.name}</span> to confirm
                             </label>
                             <input
                                 id="delete-confirm-input"
@@ -308,9 +308,9 @@ export const ProfileSelector: React.FC = () => {
                                 onChange={(e) => setDeleteConfirmName(e.target.value)}
                                 aria-label={`Type the profile name ${profileToDelete.name} to confirm deletion`}
                                 aria-describedby="delete-danger-description"
-                                className={`w-full bg-zinc-50 dark:bg-zinc-950 border rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 transition-colors ${deleteConfirmName.length > 0 && !isDeleteConfirmed
+                                className={`w-full bg-zinc-50 dark:bg-zinc-950 border rounded-lg px-4 py-2 text-zinc-900 dark:text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 transition-colors ${deleteConfirmName.length > 0 && !isDeleteConfirmed
                                     ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-                                    : 'border-zinc-200 dark:border-zinc-800 focus:border-red-500 focus:ring-red-500'
+                                    : 'border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 focus:border-red-500 focus:ring-red-500'
                                     }`}
                             />
                             <span id="delete-danger-description" className="sr-only">
@@ -323,7 +323,7 @@ export const ProfileSelector: React.FC = () => {
                                 type="button"
                                 onClick={handleCancelDelete}
                                 disabled={isDeleting}
-                                className="px-4 py-2 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-4 py-2 rounded-lg font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-gray-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-800 dark:text-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Cancel
                             </button>
@@ -331,7 +331,7 @@ export const ProfileSelector: React.FC = () => {
                             <button
                                 type="submit"
                                 disabled={!isDeleteConfirmed || isDeleting}
-                                className="px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="px-4 py-2 rounded-lg font-medium bg-red-600 dark:bg-red-500 text-zinc-900 dark:text-white hover:bg-red-700 dark:hover:bg-red-600 transition-colors focus:ring-2 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
                                 {isDeleting && !isDeletingForceLocal && (
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -344,7 +344,7 @@ export const ProfileSelector: React.FC = () => {
                                     type="button"
                                     onClick={() => handleConfirmDelete(true)}
                                     disabled={!isDeleteConfirmed || isDeleting}
-                                    className="px-4 py-2 rounded-lg font-medium bg-amber-600 text-white hover:bg-amber-700 transition-colors focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    className="px-4 py-2 rounded-lg font-medium bg-amber-600 text-zinc-900 dark:text-white hover:bg-amber-700 transition-colors focus:ring-2 focus:ring-amber-500/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 >
                                     {isDeleting && isDeletingForceLocal && (
                                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

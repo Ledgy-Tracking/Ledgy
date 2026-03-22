@@ -18,6 +18,7 @@ interface DiffGuardModalProps {
  * Diff Guard Modal - Side-by-side comparison of conflicting versions
  * Story 5-3: Conflict Detection & Diff Guard Layout
  * Story 5-4: Conflict Resolution (Accept/Reject)
+ * Theme: Uses dark:text-white conditional styling
  */
 export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
     conflict,
@@ -102,12 +103,12 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-zinc-900 rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-zinc-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-zinc-200 dark:border-zinc-800">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/50">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
                     <div>
-                        <h2 className="text-xl font-bold text-zinc-100 flex items-center gap-2">
+                        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
                             <RotateCcw size={20} className="text-amber-500" />
                             Resolve Conflict
                         </h2>
@@ -115,7 +116,7 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                        className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
                         aria-label="Close Conflict Resolution"
                     >
                         <X size={20} />
@@ -130,11 +131,11 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                                    <h3 className="text-sm font-semibold text-zinc-100 uppercase tracking-wider">Local</h3>
+                                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">Local</h3>
                                 </div>
                                 <span className="text-[10px] text-zinc-500 font-mono">{localVersion.deviceId.slice(0, 8)}</span>
                             </div>
-                            <div className="bg-zinc-950/50 rounded-xl border border-zinc-800 p-4 space-y-3">
+                            <div className="bg-white dark:bg-zinc-950/50 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 space-y-3">
                                 {allFields.map(field => {
                                     const isDifferent = conflictingFields.includes(field);
                                     const localValue = localVersion.data?.[field];
@@ -166,11 +167,11 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                                    <h3 className="text-sm font-semibold text-zinc-100 uppercase tracking-wider">Remote</h3>
+                                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">Remote</h3>
                                 </div>
                                 <span className="text-[10px] text-zinc-500 font-mono">{remoteVersion.deviceId.slice(0, 8)}</span>
                             </div>
-                            <div className="bg-zinc-950/50 rounded-xl border border-zinc-800 p-4 space-y-3">
+                            <div className="bg-white dark:bg-zinc-950/50 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 space-y-3">
                                 {allFields.map(field => {
                                     const isDifferent = conflictingFields.includes(field);
                                     const remoteValue = remoteVersion.data?.[field];
@@ -201,16 +202,16 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
                                 <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                                <h3 className="text-sm font-semibold text-zinc-100 uppercase tracking-wider">Merge Result</h3>
+                                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">Merge Result</h3>
                             </div>
-                            <div className="bg-zinc-950/30 rounded-xl border border-dashed border-zinc-700 p-4 space-y-3">
+                            <div className="bg-white dark:bg-zinc-950/30 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 p-4 space-y-3">
                                 {allFields.map(field => {
                                     const isDifferent = conflictingFields.includes(field);
                                     const mergedValue = mergedData[field];
                                     const isFromLocal = mergedValue === localVersion.data?.[field];
 
                                     return (
-                                        <div key={field} className="p-2 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                                        <div key={field} className="p-2 rounded-lg bg-gray-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
                                             <div className="flex justify-between items-center mb-1">
                                                 <div className="text-[10px] text-zinc-500 font-bold uppercase">{field}</div>
                                                 {isDifferent && (
@@ -232,17 +233,17 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-between px-6 py-6 border-t border-zinc-800 bg-zinc-900/80">
+                <div className="flex items-center justify-between px-6 py-6 border-t border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/80">
                     <div className="flex items-center gap-4">
                         <div className="flex flex-col">
-                            <span className="text-lg font-bold text-zinc-100">{conflictingFields.length}</span>
+                            <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{conflictingFields.length}</span>
                             <span className="text-[10px] text-zinc-500 font-bold uppercase">Conflicts</span>
                         </div>
                         <div className="h-8 w-px bg-zinc-800" />
                         <button
                             onClick={handleSkip}
                             disabled={isResolving}
-                            className="flex items-center gap-2 px-4 py-2 text-sm bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 text-zinc-300 rounded-xl transition-all"
+                            className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 disabled:opacity-50 text-gray-700 dark:text-zinc-300 rounded-xl transition-all"
                         >
                             <SkipForward size={16} />
                             Decline All
@@ -253,14 +254,14 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                         <button
                             onClick={handleAcceptLocal}
                             disabled={isResolving}
-                            className="px-5 py-2.5 text-sm bg-zinc-800 border border-zinc-700 hover:border-blue-500/50 hover:bg-zinc-800 text-zinc-300 rounded-xl transition-all"
+                            className="px-5 py-2.5 text-sm bg-gray-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 hover:border-blue-500/50 hover:bg-gray-200 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded-xl transition-all"
                         >
                             Accept Local
                         </button>
                         <button
                             onClick={handleAcceptRemote}
                             disabled={isResolving}
-                            className="px-5 py-2.5 text-sm bg-zinc-800 border border-zinc-700 hover:border-emerald-500/50 hover:bg-zinc-800 text-zinc-300 rounded-xl transition-all"
+                            className="px-5 py-2.5 text-sm bg-gray-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 hover:border-emerald-500/50 hover:bg-gray-200 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded-xl transition-all"
                         >
                             Accept Remote
                         </button>

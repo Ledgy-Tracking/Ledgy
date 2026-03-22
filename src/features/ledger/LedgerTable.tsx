@@ -333,7 +333,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                 setSelectedRow(-1);
                                 setPendingDeleteEntry(null);
                             }}
-                            className="px-2 py-1 bg-red-600 hover:bg-red-500 text-white rounded text-xs font-medium"
+                            className="px-2 py-1 bg-red-600 hover:bg-red-500 text-zinc-900 dark:text-white rounded text-xs font-medium"
                         >
                             Delete
                         </button>

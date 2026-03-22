@@ -64,7 +64,7 @@ export const UnlockPage: React.FC = () => {
                     <div className="space-y-3">
                         <button
                             onClick={() => navigate('/profiles')}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg transition-all"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-zinc-900 dark:text-white font-semibold rounded-lg transition-all"
                         >
                             <span>Go to Profiles</span>
                             <ArrowRight className="w-4 h-4" />
@@ -75,7 +75,7 @@ export const UnlockPage: React.FC = () => {
                                 await reset();
                                 navigate('/setup');
                             }}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-zinc-800 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50 border border-zinc-700 text-zinc-300 font-semibold rounded-lg transition-all"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-zinc-800 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50 border border-zinc-300 dark:border-zinc-700 text-zinc-300 font-semibold rounded-lg transition-all"
                         >
                             <LogOut className="w-4 h-4" />
                             <span>Reset Vault & Logout</span>
@@ -176,7 +176,7 @@ export const UnlockPage: React.FC = () => {
                                 onChange={(e) => { setPassphrase(e.target.value); if (currentError) clearError(); }}
                                 placeholder="Enter passphrase…"
                                 disabled={isSubmitting}
-                                className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 pr-10 text-sm text-zinc-50 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all disabled:opacity-50"
+                                className="w-full bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 pr-10 text-sm text-zinc-50 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all disabled:opacity-50"
                             />
                             <button
                                 type="button"
@@ -192,7 +192,7 @@ export const UnlockPage: React.FC = () => {
                         <button
                             type="submit"
                             disabled={!passphrase || isSubmitting}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-emerald-500/10"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-zinc-500 text-zinc-900 dark:text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-emerald-500/10"
                         >
                             {isSubmitting ? (
                                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -251,7 +251,7 @@ export const UnlockPage: React.FC = () => {
                             <label className="flex items-center gap-2 self-start text-sm text-zinc-400 cursor-pointer">
                                 <input
                                     type="checkbox"
-                                    className="rounded border-zinc-700 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
+                                    className="rounded border-zinc-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
                                     checked={rememberMe}
                                     onChange={(e) => setRememberMe(e.target.checked)}
                                     disabled={isSubmitting}
@@ -276,7 +276,7 @@ export const UnlockPage: React.FC = () => {
                                             value={expiryOption}
                                             onChange={(e) => setExpiryOption(e.target.value as RememberMeExpiry)}
                                             disabled={isSubmitting}
-                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
+                                            className="w-full bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
                                         >
                                             {EXPIRY_OPTIONS.map(opt => (
                                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -298,7 +298,7 @@ export const UnlockPage: React.FC = () => {
                                                 placeholder="Enter a secure passphrase"
                                                 required={rememberMe}
                                                 disabled={isSubmitting}
-                                                className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
+                                                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-900 dark:text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
                                             />
                                             <button
                                                 type="button"
@@ -318,7 +318,7 @@ export const UnlockPage: React.FC = () => {
                         <button
                             type="submit"
                             disabled={code.length !== 6 || isSubmitting || (rememberMe && passphrase.length === 0)}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-emerald-500/10"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-zinc-500 text-zinc-900 dark:text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-emerald-500/10"
                         >
                             {isSubmitting ? (
                                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -359,7 +359,7 @@ const Slot = (props: SlotProps) => {
                 text-2xl font-bold
                 border-2 rounded-xl
                 transition-all duration-200
-                ${props.isActive ? 'border-emerald-500 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'border-zinc-800 bg-zinc-900'}
+                ${props.isActive ? 'border-emerald-500 bg-emerald-500/5 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900'}
                 ${props.char ? 'text-zinc-50' : 'text-zinc-700'}
             `}
         >

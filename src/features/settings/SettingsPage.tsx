@@ -6,22 +6,22 @@ export const SettingsPage = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-6">
-            <h1 className="text-3xl font-bold text-white mb-8">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mb-8">
                 Settings
             </h1>
 
             {/* Appearance Section */}
             <section className="mb-8">
-                <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
                     <Maximize2 className="w-5 h-5" />
                     Appearance
                 </h2>
 
-                <div className="bg-zinc-900/50 backdrop-blur-xl rounded-lg shadow-sm border border-white/5 divide-y divide-white/5">
+                <div className="bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-lg shadow-sm border border-white/5 divide-y divide-white/5">
                     {/* Theme Setting */}
                     <div className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-zinc-800/50 rounded-lg">
+                            <div className="p-2 bg-gray-100 dark:bg-zinc-800/50 rounded-lg">
                                 {theme === 'dark' ? (
                                     <Moon className="w-5 h-5 text-zinc-400" />
                                 ) : (
@@ -29,7 +29,7 @@ export const SettingsPage = () => {
                                 )}
                             </div>
                             <div>
-                                <h3 className="font-medium text-white">Theme</h3>
+                                <h3 className="font-medium text-zinc-900 dark:text-white">Theme</h3>
                                 <p className="text-sm text-zinc-400">
                                     Choose between light and dark mode
                                 </p>
@@ -41,7 +41,7 @@ export const SettingsPage = () => {
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
                                     theme === 'light'
                                         ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                        : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-white'
+                                        : 'bg-gray-100 dark:bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-900 dark:hover:text-white'
                                 }`}
                             >
                                 Light
@@ -51,7 +51,7 @@ export const SettingsPage = () => {
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
                                     theme === 'dark'
                                         ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                        : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-white'
+                                        : 'bg-gray-100 dark:bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-900 dark:hover:text-white'
                                 }`}
                             >
                                 Dark
@@ -62,7 +62,7 @@ export const SettingsPage = () => {
                     {/* Density Setting */}
                     <div className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 bg-zinc-800/50 rounded-lg">
+                            <div className="p-2 bg-gray-100 dark:bg-zinc-800/50 rounded-lg">
                                 {density === 'compact' ? (
                                     <Minimize2 className="w-5 h-5 text-zinc-400" />
                                 ) : (
@@ -70,7 +70,7 @@ export const SettingsPage = () => {
                                 )}
                             </div>
                             <div>
-                                <h3 className="font-medium text-white">Density</h3>
+                                <h3 className="font-medium text-zinc-900 dark:text-white">Density</h3>
                                 <p className="text-sm text-zinc-400">
                                     Control the spacing and size of UI elements
                                 </p>
@@ -82,7 +82,7 @@ export const SettingsPage = () => {
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
                                     density === 'comfortable'
                                         ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                        : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-white'
+                                        : 'bg-gray-100 dark:bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-900 dark:hover:text-white'
                                 }`}
                             >
                                 Comfortable
@@ -92,7 +92,7 @@ export const SettingsPage = () => {
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
                                     density === 'compact'
                                         ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                        : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-white'
+                                        : 'bg-gray-100 dark:bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-900 dark:hover:text-white'
                                 }`}
                             >
                                 Compact
@@ -128,7 +128,7 @@ export const SettingsPage = () => {
                     Coming Soon
                 </h2>
 
-                <div className="bg-zinc-900/30 border border-white/5 rounded-lg p-4">
+                <div className="bg-gray-50 dark:bg-zinc-900/30 border border-white/5 rounded-lg p-4">
                     <p className="text-sm text-zinc-500">
                         Additional settings will be available in future updates:
                     </p>

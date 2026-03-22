@@ -5,7 +5,7 @@
  * the actual user flow with proper encryption.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { useProfileStore } from '../stores/useProfileStore';
 import { _clearProfileDatabases } from './db';

@@ -83,9 +83,9 @@ export const TrashView: React.FC = () => {
     }
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-zinc-950 text-zinc-50 overflow-hidden">
+        <div className="flex-1 flex flex-col h-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800 bg-zinc-900">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900">
                 <Trash2 size={20} className="text-zinc-400" />
                 <h1 className="text-lg font-semibold">Trash</h1>
                 <span className="text-sm text-zinc-500 ml-2">
@@ -103,9 +103,9 @@ export const TrashView: React.FC = () => {
                     </div>
                 ) : (
                     <div className="p-4">
-                        <div className="bg-zinc-900/50 rounded-lg border border-zinc-800 overflow-hidden">
+                        <div className="bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                             {/* Table Header */}
-                            <div className="flex border-b border-zinc-800 bg-zinc-800/50 text-xs font-medium text-zinc-400">
+                            <div className="flex border-b border-zinc-200 dark:border-zinc-800 bg-gray-100 dark:bg-zinc-800/50 text-xs font-medium text-zinc-400">
                                 <div className="flex-1 px-3 py-2 text-left">Entry</div>
                                 <div className="w-40 px-3 py-2 text-left">Ledger</div>
                                 <div className="w-48 px-3 py-2 text-left">Deleted At</div>
@@ -124,7 +124,7 @@ export const TrashView: React.FC = () => {
                                 return (
                                     <div
                                         key={entry._id}
-                                        className="flex border-b border-zinc-800 hover:bg-zinc-800/30 transition-colors last:border-b-0"
+                                        className="flex border-b border-zinc-200 dark:border-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-800/30 transition-colors last:border-b-0"
                                     >
                                         <div className="flex-1 px-3 py-3 text-sm text-zinc-300">
                                             <span className="line-through text-zinc-500">

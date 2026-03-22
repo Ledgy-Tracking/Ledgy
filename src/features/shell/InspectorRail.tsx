@@ -9,7 +9,7 @@ export const InspectorRail = () => {
         <aside
             className={`
                 flex flex-col border-l border-white/5
-                bg-zinc-900/50 backdrop-blur-xl
+                bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl
                 transition-all duration-300 ease-in-out
                 ${inspectorOpen ? 'w-72' : 'w-0'}
                 ${!inspectorOpen && 'overflow-hidden'}
@@ -20,11 +20,11 @@ export const InspectorRail = () => {
             <div className={`flex items-center justify-between p-4 border-b border-white/5 ${!inspectorOpen && 'hidden'}`}>
                 <div className="flex items-center gap-2">
                     <Settings className="w-5 h-5 text-emerald-400" />
-                    <span className="font-semibold text-white">Inspector</span>
+                    <span className="font-semibold text-zinc-900 dark:text-white">Inspector</span>
                 </div>
                 <button
                     onClick={toggleInspector}
-                    className="p-1 rounded hover:bg-zinc-800/50 transition-all duration-300 ease-in-out"
+                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-700/50 transition-all duration-300 ease-in-out"
                     aria-label="Collapse inspector"
                 >
                     <ChevronRight className="w-4 h-4 text-zinc-400" />
@@ -56,7 +56,7 @@ export const InspectorRail = () => {
             <div className={`absolute -left-3 top-1/2 transform -translate-y-1/2 ${inspectorOpen && 'hidden'}`}>
                 <button
                     onClick={toggleInspector}
-                    className="p-1.5 rounded-full bg-zinc-900 border border-white/10 shadow-md hover:bg-zinc-800/50 transition-all duration-300 ease-in-out"
+                    className="p-1.5 rounded-full bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md hover:bg-gray-200 dark:hover:bg-zinc-700/50 transition-all duration-300 ease-in-out"
                     aria-label="Expand inspector"
                 >
                     <ChevronLeft className="w-4 h-4 text-zinc-400" />

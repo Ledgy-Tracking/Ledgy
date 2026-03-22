@@ -6,7 +6,7 @@ export const MainCanvas = () => {
             className={`
                 flex-1 overflow-auto
                 transition-all duration-300 ease-in-out
-                bg-zinc-950
+                bg-white dark:bg-zinc-950
             `}
         >
             <div className="min-h-full p-6">

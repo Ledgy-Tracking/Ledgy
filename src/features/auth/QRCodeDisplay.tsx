@@ -33,7 +33,7 @@ export const QRCodeDisplay = ({ totpUri, secret, accountName }: QRCodeDisplayPro
     };
 
     return (
-        <div className="flex flex-col items-center gap-4 p-6 bg-zinc-900/50 backdrop-blur-xl rounded-xl shadow-lg border border-white/5">
+        <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-xl shadow-lg border border-white/5">
             {/* QR Code */}
             <div className="p-4 bg-white rounded-lg border-2 border-white/10">
                 {qrCode}
@@ -45,12 +45,12 @@ export const QRCodeDisplay = ({ totpUri, secret, accountName }: QRCodeDisplayPro
                     Can't scan the QR code? Enter this key manually:
                 </p>
                 <div className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 bg-zinc-950 rounded-lg font-mono text-sm text-center text-white break-all border border-white/10">
+                    <code className="flex-1 px-3 py-2 bg-white dark:bg-zinc-950 rounded-lg font-mono text-sm text-center text-zinc-900 dark:text-white break-all border border-zinc-300 dark:border-white/10">
                         {secret}
                     </code>
                     <button
                         onClick={handleCopy}
-                        className="p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 transition-all duration-300 ease-in-out"
+                        className="p-2 rounded-lg bg-gray-100 dark:bg-zinc-800/50 hover:bg-zinc-700/50 transition-all duration-300 ease-in-out"
                         aria-label={copied ? 'Copied' : 'Copy secret to clipboard'}
                     >
                         {copied ? (

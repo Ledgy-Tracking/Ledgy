@@ -52,7 +52,7 @@ export const LedgerView: React.FC = () => {
 
     return (
         <div className="h-full flex flex-col">
-            <div className="p-4 border-b border-zinc-800">
+            <div className="p-4 border-b border-zinc-200 dark:border-zinc-800">
                 <div className="flex items-center justify-between gap-3">
                     <h1 className="text-xl font-bold text-zinc-50">{schema.name}</h1>
                     <UndoRedoHUD />

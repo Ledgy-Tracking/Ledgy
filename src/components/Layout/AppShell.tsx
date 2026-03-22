@@ -30,7 +30,7 @@ import { executeTrigger } from '../../services/triggerEngine';
 import { Inspector } from '../Inspector/Inspector';
 import { useErrorStore } from '../../stores/useErrorStore';
 import { useNodeStore } from '../../stores/useNodeStore';
-import { designTokens } from '../../lib/design-tokens';
+
 
 export const AppShell: React.FC = () => {
     const {
@@ -142,7 +142,7 @@ export const AppShell: React.FC = () => {
     };
 
     return (
-        <div className="h-screen w-full flex flex-col bg-zinc-950 overflow-hidden select-none">
+        <div className="h-screen w-full flex flex-col bg-white dark:bg-zinc-950 overflow-hidden select-none">
             {/* Background Effects - matching auth pages */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
                 <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] opacity-50 mix-blend-screen" />
@@ -158,11 +158,11 @@ export const AppShell: React.FC = () => {
             )}
             <div className="relative z-10 flex flex-1 overflow-hidden">{/* Left Sidebar */}
                 <aside
-                    className={`flex flex-col bg-zinc-900/50 backdrop-blur-xl border-r border-white/5 transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${leftSidebarOpen ? 'w-64' : 'w-12'
+                    className={`flex flex-col bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl border-r border-white/5 transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${leftSidebarOpen ? 'w-64' : 'w-12'
                         }`}
                 >
                     <div className={`flex items-center border-b border-white/5 ${leftSidebarOpen ? 'p-4 justify-between' : 'p-2 justify-center'}`}>
-                        <div className={`flex items-center gap-2 font-bold italic text-xl tracking-tighter text-white ${!leftSidebarOpen ? 'hidden' : ''}`}>
+                        <div className={`flex items-center gap-2 font-bold italic text-xl tracking-tighter text-zinc-900 dark:text-white ${!leftSidebarOpen ? 'hidden' : ''}`}>
                             <Network size={22} className="text-emerald-400" />
                             LEDGY
                         </div>
@@ -176,7 +176,7 @@ export const AppShell: React.FC = () => {
                             title="Projects"
                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group ${location.pathname.includes('/projects')
                                 ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                                : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
                                 } ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                         >
                             <FolderKanban size={18} className="shrink-0" />
@@ -194,7 +194,7 @@ export const AppShell: React.FC = () => {
                                         title={schema.name}
                                         className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-300 ease-in-out text-left ${location.pathname.includes(schema._id)
                                             ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                            : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                                            : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
                                             }`}
                                     >
                                         <Database size={14} className="shrink-0" />
@@ -211,7 +211,7 @@ export const AppShell: React.FC = () => {
                                 title="Node Forge"
                                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group ${location.pathname.includes('/node-forge')
                                     ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                    : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                                    : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
                                     } ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                             >
                                 <Network size={18} className="shrink-0" />
@@ -225,7 +225,7 @@ export const AppShell: React.FC = () => {
                             title="Trash"
                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group ${location.pathname.includes('/trash')
                                 ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white'
+                                : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-white'
                                 } ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                         >
                             <Trash2 size={18} className="shrink-0" />
@@ -260,7 +260,7 @@ export const AppShell: React.FC = () => {
                         <button
                             onClick={() => navigate(`/app/${profileId}/settings`)}
                             title="Settings"
-                            className={`w-full flex items-center gap-3 px-3 py-2 text-zinc-400 hover:bg-zinc-800/50 hover:text-white rounded-lg transition-all duration-300 ease-in-out group ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
+                            className={`w-full flex items-center gap-3 px-3 py-2 text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-white rounded-lg transition-all duration-300 ease-in-out group ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                         >
                             <Settings size={18} className="shrink-0" />
                             {leftSidebarOpen && <span className="text-sm font-medium">Settings</span>}
@@ -279,17 +279,17 @@ export const AppShell: React.FC = () => {
                 {/* Main Content Area */}
                 <main className="flex-1 h-full flex flex-col min-w-0 bg-zinc-950 relative">
                     {/* Header / Toolbar */}
-                    <header className="h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md z-10 shrink-0">
+                    <header className="h-14 border-b border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white/50 dark:bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-md z-10 shrink-0">
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={toggleLeftSidebar}
-                                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
+                                className="p-2 hover:bg-zinc-100 dark:hover:bg-gray-50 dark:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
                                 aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
                             >
                                 {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
                             </button>
-                            <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
-                            <h1 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                            <div className="h-4 w-px bg-zinc-200 dark:bg-gray-100 dark:bg-zinc-800" />
+                            <h1 className="text-sm font-semibold text-zinc-900 dark:text-zinc-900 dark:text-zinc-100 truncate">
                                 {activeProfile ? `Ledger: ${profileName}` : 'Select Profile'}
                             </h1>
                         </div>
@@ -297,16 +297,16 @@ export const AppShell: React.FC = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={toggleTheme}
-                                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
+                                className="p-2 hover:bg-zinc-100 dark:hover:bg-gray-50 dark:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
                                 title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                                 aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                             >
                                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                             </button>
-                            <div className="h-4 w-px bg-zinc-200 dark:border-zinc-800" />
+                            <div className="h-4 w-px bg-zinc-200 dark:border-zinc-200 dark:border-zinc-800" />
                             <button
                                 onClick={toggleRightInspector}
-                                className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
+                                className="p-2 hover:bg-zinc-100 dark:hover:bg-gray-50 dark:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
                                 aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
                             >
                                 <PanelRightClose size={18} className={rightInspectorOpen ? '' : 'rotate-180'} />
@@ -322,7 +322,7 @@ export const AppShell: React.FC = () => {
 
                 {/* Right Inspector Panel */}
                 <div
-                    className={`h-full border-l border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${rightInspectorOpen ? 'w-80' : 'w-0 border-l-0'
+                    className={`h-full border-l border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${rightInspectorOpen ? 'w-80' : 'w-0 border-l-0'
                         }`}
                 >
                     <Inspector />
@@ -352,9 +352,9 @@ export const AppShell: React.FC = () => {
 
                 {/* Conflict List Sheet */}
                 {isConflictListOpen && (
-                    <div className="fixed inset-0 z-[60] flex justify-end bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="fixed inset-0 z-[60] flex justify-end bg-white dark:bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
                         <div className="flex-1" onClick={() => setIsConflictListOpen(false)} />
-                        <div className="w-full max-w-md bg-zinc-900 border-l border-zinc-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+                        <div className="w-full max-w-md bg-gray-50 dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
                             <ConflictListSheet
                                 conflicts={conflicts}
                                 onSelectConflict={(c) => {

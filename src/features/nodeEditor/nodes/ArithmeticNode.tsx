@@ -33,21 +33,21 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
 
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+            className={`bg-gray-50 dark:bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${selected ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'
                 } ${nodeData.error ? 'border-red-500/50' : ''}`}
         >
             {/* Header */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-t-md">
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-zinc-800 rounded-t-md">
                 <Calculator size={14} className="text-amber-400" />
-                <span className="text-sm font-semibold text-zinc-100">Arithmetic</span>
+                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Arithmetic</span>
             </div>
 
             {/* Operation Selector */}
-            <div className="px-3 py-2 border-b border-zinc-700">
+            <div className="px-3 py-2 border-b border-zinc-300 dark:border-zinc-700">
                 <select
                     value={nodeData.operation || 'sum'}
                     onChange={(e) => handleOperationChange(e.target.value as ArithmeticOperation)}
-                    className="w-full bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-gray-100 dark:bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                     {ARITHMETIC_OPERATIONS.map(op => (
                         <option key={op} value={op}>
@@ -73,7 +73,7 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
 
             {/* Result Display */}
             <div className="px-3 pb-3">
-                <div className="bg-zinc-800/50 rounded p-2 border border-zinc-700">
+                <div className="bg-gray-100 dark:bg-zinc-800/50 rounded p-2 border border-zinc-300 dark:border-zinc-700">
                     <div className="text-xs text-zinc-500 mb-1">
                         {(nodeData.operation || 'sum').charAt(0).toUpperCase() + (nodeData.operation || 'sum').slice(1)}
                     </div>
