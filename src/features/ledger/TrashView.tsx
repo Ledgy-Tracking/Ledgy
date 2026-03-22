@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerEntry, LedgerSchema } from '../../types/ledger';
+import { Button } from '@/components/ui/button';
 import { Trash2, RotateCcw, Archive } from 'lucide-react';
 
 /**
@@ -138,14 +139,15 @@ export const TrashView: React.FC = () => {
                                             {deletedAt}
                                         </div>
                                         <div className="w-24 px-3 py-2 flex items-center justify-center">
-                                            <button
+                                            <Button
                                                 onClick={() => handleRestore(entry._id)}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
+                                                size="xs"
+                                                className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold"
                                                 title="Restore entry"
                                             >
                                                 <RotateCcw size={12} />
                                                 Restore
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 );

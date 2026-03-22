@@ -1,5 +1,6 @@
 import { useUIStore } from '../../stores/useUIStore';
 import { Menu, ChevronLeft, ChevronRight, FolderOpen, Database, GitGraph, LayoutDashboard, Settings, Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export const Sidebar = () => {
@@ -42,25 +43,29 @@ export const Sidebar = () => {
                     <Users className="w-5 h-5 text-emerald-400" />
                     <span className="font-semibold text-zinc-900 dark:text-white">Ledgy</span>
                 </div>
-                <button
+                <Button
                     onClick={toggleSidebar}
-                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-800/50 transition-colors"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50"
                     aria-label="Collapse sidebar"
                 >
-                    <ChevronLeft className="w-4 h-4 text-zinc-400" />
-                </button>
+                    <ChevronLeft className="w-4 h-4" />
+                </Button>
             </div>
 
             {/* Mobile Hamburger Trigger */}
             {!sidebarOpen && (
-                <button
+                <Button
                     onClick={toggleSidebar}
-                    className="md:hidden absolute left-2 top-2 p-2 rounded-lg bg-gray-100 dark:bg-zinc-800/50 hover:bg-zinc-700/50 transition-colors z-30"
+                    variant="ghost"
+                    size="icon"
+                    className="md:hidden absolute left-2 top-2 bg-gray-100 dark:bg-zinc-800/50 hover:bg-zinc-700/50 z-30"
                     aria-label="Open sidebar"
                     aria-expanded="false"
                 >
                     <Menu className="w-5 h-5 text-zinc-400" />
-                </button>
+                </Button>
             )}
 
             {/* Navigation Menu */}
@@ -72,20 +77,17 @@ export const Sidebar = () => {
                         
                         return (
                             <li key={item.label}>
-                                <button
+                                <Button
                                     onClick={() => handleNavigate(item.path)}
-                                    className={`
-                                        w-full flex items-center gap-3 px-3 py-2 rounded-lg
-                                        transition-all duration-300 ease-in-out
-                                        ${isActive 
-                                            ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30' 
-                                            : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
-                                        }
-                                    `}
+                                    variant="ghost"
+                                    className={`w-full justify-start ${isActive 
+                                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30' 
+                                        : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
+                                    }`}
                                 >
                                     <Icon className="w-5 h-5" />
                                     <span className="font-medium">{item.label}</span>
-                                </button>
+                                </Button>
                             </li>
                         );
                     })}
@@ -94,13 +96,15 @@ export const Sidebar = () => {
 
             {/* Toggle Button (when collapsed on desktop) */}
             <div className={`hidden md:block absolute -right-3 top-1/2 transform -translate-y-1/2 ${sidebarOpen && 'hidden'}`}>
-                <button
+                <Button
                     onClick={toggleSidebar}
-                    className="p-1.5 rounded-full bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md hover:bg-gray-200 dark:hover:bg-zinc-800/50 transition-all duration-300 ease-in-out"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md hover:bg-gray-200 dark:hover:bg-zinc-800/50"
                     aria-label="Expand sidebar"
                 >
                     <ChevronRight className="w-4 h-4 text-zinc-400" />
-                </button>
+                </Button>
             </div>
         </aside>
     );
