@@ -91,7 +91,7 @@ export function downloadTemplateBrowser(template: TemplateExport, filename: stri
 
 /**
  * Saves template file using Tauri dialog.
- * Note: Uses Function constructor to avoid Vite resolving the import at build time.
+ * Note: Uses dynamic import with @vite-ignore to avoid Vite resolving the import at build time.
  * 
  * @param template - Template export object
  * @param filename - Suggested filename
