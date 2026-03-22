@@ -102,13 +102,8 @@ export async function saveTemplateTauri(
     filename: string
 ): Promise<string | null> {
     try {
-        // Use Function constructor to avoid static analysis resolving the import
-        // This is safe because we're importing from known Tauri packages
-        const importTauriDialog = new Function('return import("@tauri-apps/api/dialog")') as () => Promise<any>;
-        const importTauriFs = new Function('return import("@tauri-apps/api/fs")') as () => Promise<any>;
-
-        const dialogModule = await importTauriDialog();
-        const fsModule = await importTauriFs();
+        const dialogModule = await import("@tauri-apps/api/dialog");
+        const fsModule = await import("@tauri-apps/api/fs");
 
         const filePath = await dialogModule.save({
             filters: [{

@@ -85,11 +85,8 @@ export async function import_template(
  */
 export async function readTemplateTauri(): Promise<TemplateExport | null> {
     try {
-        const importTauriDialog = new Function('return import("@tauri-apps/api/dialog")') as () => Promise<any>;
-        const importTauriFs = new Function('return import("@tauri-apps/api/fs")') as () => Promise<any>;
-
-        const dialogModule = await importTauriDialog();
-        const fsModule = await importTauriFs();
+        const dialogModule = await import("@tauri-apps/api/dialog");
+        const fsModule = await import("@tauri-apps/api/fs");
 
         const filePath = await dialogModule.open({
             filters: [{ name: 'Ledgy Template', extensions: ['json'] }],
