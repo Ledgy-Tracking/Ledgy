@@ -25,10 +25,11 @@ class NodeEngine {
             // 1. Identify valid execution order
             const executionOrder = this.getExecutionOrder(nodes as any[], edges as any[]);
             const nodeResults = new Map<string, any>();
+            const nodeMap = new Map(nodes.map(n => [n.id, n]));
 
             // 2. Execute process in order
             for (const nodeId of executionOrder) {
-                const node = nodes.find(n => n.id === nodeId);
+                const node = nodeMap.get(nodeId);
                 if (!node) continue;
 
                 if (node.type === 'ledgerSource') {
