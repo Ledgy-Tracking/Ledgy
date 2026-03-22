@@ -58,9 +58,8 @@ export const CommandPalette: React.FC = () => {
                         )}
                         {ledgerId && (
                             <CommandItem onSelect={() => runCommand(() => {
-                                // We'd need to trigger the "Add Entry" UI in LedgerTable
-                                // For now, focus the shortcut N
-                                console.log('New Entry triggered');
+                                // Trigger the "Add Entry" UI in LedgerTable via the N shortcut
+                                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'n' }));
                             })}>
                                 <Plus className="mr-2 h-4 w-4 text-zinc-400" />
                                 <span>New Entry in this Ledger (N)</span>
