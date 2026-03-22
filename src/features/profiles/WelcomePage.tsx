@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DatabaseZap, Sun, Moon, ArrowRight, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useUIStore } from '../../stores/useUIStore';
 
 export const WelcomePage: React.FC = () => {
@@ -21,13 +22,15 @@ export const WelcomePage: React.FC = () => {
             </div>
 
             {/* Theme Toggle */}
-            <button
+            <Button
                 onClick={toggleTheme}
+                variant="outline"
+                size="icon"
                 aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="absolute top-8 right-8 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/50 transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+                className="absolute top-8 right-8 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/50 transition-all duration-300 shadow-sm focus:ring-2 focus:ring-emerald-500/50"
             >
                 {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
+            </Button>
 
             {/* Main content */}
             <div className="relative z-10 max-w-2xl w-full flex flex-col items-center text-center space-y-10">
@@ -82,11 +85,12 @@ export const WelcomePage: React.FC = () => {
                 </div>
 
                 {/* CTA Button */}
-                <button
+                <Button
                     id="create-first-profile-btn"
                     onClick={() => navigate('/profiles/new')}
                     aria-label="Create your first profile"
-                    className="group flex items-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-zinc-950 font-bold text-lg rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/35 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-zinc-50 dark:focus:ring-offset-zinc-950"
+                    size="lg"
+                    className="group px-8 py-4 bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-zinc-950 font-bold text-lg rounded-2xl shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/35 transition-all duration-300 focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-zinc-50 dark:focus:ring-offset-zinc-950"
                 >
                     Create Your First Profile
                     <ArrowRight
@@ -94,7 +98,7 @@ export const WelcomePage: React.FC = () => {
                         className="transition-transform duration-300 group-hover:translate-x-1"
                         aria-hidden="true"
                     />
-                </button>
+                </Button>
 
                 {/* Sub-hint */}
                 <p className="text-sm text-zinc-400 dark:text-zinc-500">

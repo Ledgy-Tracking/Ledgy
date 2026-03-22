@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { OTPInput, SlotProps } from 'input-otp';
 import { Lock, ShieldAlert, ArrowRight, AlertTriangle, Eye, EyeOff, KeyRound, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useAuthStore, EXPIRY_OPTIONS, RememberMeExpiry, DEFAULT_EXPIRY } from './useAuthStore';
 import { useErrorStore } from '../../stores/useErrorStore';
 
@@ -62,24 +63,25 @@ export const UnlockPage: React.FC = () => {
                     </div>
 
                     <div className="space-y-3">
-                        <button
+                        <Button
                             onClick={() => navigate('/profiles')}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-zinc-900 dark:text-white font-semibold rounded-lg transition-all"
+                            className="w-full bg-emerald-600 hover:bg-emerald-500 text-zinc-900 dark:text-white font-semibold"
                         >
                             <span>Go to Profiles</span>
                             <ArrowRight className="w-4 h-4" />
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                             onClick={async () => {
                                 await reset();
                                 navigate('/setup');
                             }}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-zinc-800 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50 border border-zinc-300 dark:border-zinc-700 text-zinc-300 font-semibold rounded-lg transition-all"
+                            variant="outline"
+                            className="w-full hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/50 text-zinc-300 font-semibold"
                         >
                             <LogOut className="w-4 h-4" />
                             <span>Reset Vault & Logout</span>
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -178,7 +180,9 @@ export const UnlockPage: React.FC = () => {
                                 disabled={isSubmitting}
                                 className="w-full bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 pr-10 text-sm text-zinc-50 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all disabled:opacity-50"
                             />
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
                                 type="button"
                                 onClick={() => setShowPassphrase(v => !v)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
@@ -186,13 +190,13 @@ export const UnlockPage: React.FC = () => {
                                 aria-label={showPassphrase ? "Hide passphrase" : "Show passphrase"}
                             >
                                 {showPassphrase ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
+                            </Button>
                         </div>
 
-                        <button
+                        <Button
                             type="submit"
                             disabled={!passphrase || isSubmitting}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-zinc-500 text-zinc-900 dark:text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-emerald-500/10"
+                            className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-100 dark:disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-900 dark:text-white font-semibold shadow-lg shadow-emerald-500/10"
                         >
                             {isSubmitting ? (
                                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -202,7 +206,7 @@ export const UnlockPage: React.FC = () => {
                                     <ArrowRight className="w-4 h-4" />
                                 </>
                             )}
-                        </button>
+                        </Button>
                     </form>
                 ) : (
                     /* ── Standard TOTP unlock UI ── */
@@ -300,25 +304,28 @@ export const UnlockPage: React.FC = () => {
                                                 disabled={isSubmitting}
                                                 className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-900 dark:text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
                                             />
-                                            <button
+                                            <Button
                                                 type="button"
                                                 onClick={() => setShowPassphrase(v => !v)}
-                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                                                variant="ghost"
+                                                size="icon-xs"
+                                                className="absolute right-1 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                                                 tabIndex={-1}
                                                 aria-label={showPassphrase ? "Hide passphrase" : "Show passphrase"}
                                             >
                                                 {showPassphrase ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        <button
+                        <Button
                             type="submit"
                             disabled={code.length !== 6 || isSubmitting || (rememberMe && passphrase.length === 0)}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-zinc-500 text-zinc-900 dark:text-white font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-emerald-500/10"
+                            variant="default"
+                            className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-zinc-500 text-zinc-900 dark:text-white shadow-lg shadow-emerald-500/10"
                         >
                             {isSubmitting ? (
                                 <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -328,22 +335,23 @@ export const UnlockPage: React.FC = () => {
                                     <ArrowRight className="w-4 h-4" />
                                 </>
                             )}
-                        </button>
+                        </Button>
                     </form >
                 )}
 
                 <div className="pt-8 text-center space-y-4 flex flex-col items-center">
                     <p className="text-xs text-zinc-600 uppercase tracking-widest font-bold">Secure Local-Only Architecture</p>
-                    <button
+                    <Button
                         type="button"
                         onClick={async () => {
                             await reset();
                             navigate('/setup');
                         }}
-                        className="text-sm text-zinc-500 hover:text-emerald-400 transition-colors bg-transparent border-none cursor-pointer"
+                        variant="link"
+                        className="text-sm text-zinc-500 hover:text-emerald-400"
                     >
                         Not you? Reset vault & start over
-                    </button>
+                    </Button>
                 </div>
             </div >
         </div >

@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export interface ConflictEntry {
     entryId: string;
@@ -48,22 +49,25 @@ export const ConflictListSheet: React.FC<ConflictListSheetProps> = ({
                 <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                     Sync Conflicts ({conflicts.length})
                 </h2>
-                <button
+                <Button
                     onClick={onClose}
-                    className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
                     aria-label="Close Sync Conflicts"
                 >
                     <X size={16} />
-                </button>
+                </Button>
             </div>
 
             {/* Conflict List */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
                 {conflicts.map((conflict, index) => (
-                    <button
+                    <Button
                         key={index}
                         onClick={() => onSelectConflict(conflict)}
-                        className="w-full p-3 bg-gray-100 dark:bg-zinc-800/50 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-600 transition-colors text-left"
+                        variant="secondary"
+                        className="w-full h-auto p-3 bg-gray-100 dark:bg-zinc-800/50 hover:bg-gray-200 dark:hover:bg-zinc-800 border-zinc-300 dark:border-zinc-700 hover:border-zinc-600 text-left justify-between"
                     >
                         <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
@@ -90,7 +94,7 @@ export const ConflictListSheet: React.FC<ConflictListSheetProps> = ({
                                 Remote: {new Date(conflict.remoteVersion.timestamp).toLocaleString()}
                             </span>
                         </div>
-                    </button>
+                    </Button>
                 ))}
             </div>
 

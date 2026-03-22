@@ -117,27 +117,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     {isAddingWidget && (
                         <div className="absolute right-0 mt-1 w-48 bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-xl z-50">
                             <div className="p-2">
-                                <button
+                                <Button
                                     onClick={() => handleAddWidget('chart')}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded transition-colors"
+                                    variant="ghost"
+                                    className="w-full justify-start text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
                                 >
                                     <BarChart3 size={16} className="text-blue-400" />
                                     Chart Widget
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={() => handleAddWidget('trend')}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded transition-colors"
+                                    variant="ghost"
+                                    className="w-full justify-start text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
                                 >
                                     <TrendingUp size={16} className="text-emerald-400" />
                                     Trend Widget
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={() => handleAddWidget('text')}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800 rounded transition-colors"
+                                    variant="ghost"
+                                    className="w-full justify-start text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
                                 >
                                     <Type size={16} className="text-purple-400" />
                                     Text Widget
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     )}
@@ -172,22 +175,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 <div className="absolute top-0 left-0 right-0 h-8 opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-center px-2 bg-gradient-to-b from-black/50 to-transparent z-10">
                                     <div className="widget-drag-handle flex-1 h-full cursor-grab active:cursor-grabbing" />
                                     <div className="flex items-center gap-1">
-                                        <button
+                                        <Button
                                             onClick={() => setSelectedWidget(widget)}
-                                            className="p-1 hover:bg-gray-200 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-800 dark:text-zinc-200 rounded transition-colors"
+                                            variant="ghost"
+                                            size="icon-xs"
+                                            className="text-zinc-400 hover:text-zinc-800 dark:text-zinc-200 hover:bg-gray-200 dark:hover:bg-zinc-800"
                                             title="Widget settings"
                                             aria-label="Widget settings"
                                         >
                                             <Settings size={14} />
-                                        </button>
-                                        <button
+                                        </Button>
+                                        <Button
                                             onClick={() => removeWidget(widget.id)}
-                                            className="p-1 hover:bg-red-900/50 text-zinc-400 hover:text-red-400 rounded transition-colors"
+                                            variant="ghost"
+                                            size="icon-xs"
+                                            className="text-zinc-400 hover:text-red-400 hover:bg-red-900/50"
                                             title="Remove widget"
                                             aria-label="Remove widget"
                                         >
                                             <Trash2 size={14} />
-                                        </button>
+                                        </Button>
                                     </div>
                                 </div>
 

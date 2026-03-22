@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Save, RefreshCw, Shield, Globe, User, Key, ArrowRightLeft, Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useSyncStore } from '../../stores/useSyncStore';
 
 interface SyncConfigDialogProps {
@@ -60,14 +61,16 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                         </div>
                         <h2 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Sync Configuration</h2>
                     </div>
-                    <button
+                    <Button
+                        variant="ghost"
+                        size="icon-sm"
                         type="button"
                         onClick={onClose}
-                        className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
+                        className="text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
                         aria-label="Close Sync Configuration"
                     >
                         <X size={20} />
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl p-4 mb-6 flex gap-3">
@@ -83,16 +86,13 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                         <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1.5 flex items-center gap-2">
                             <Globe size={14} /> CouchDB Remote URL
                         </label>
-                        <input
+                        <Input
                             type="url"
                             required
-
                             placeholder="https://your-couchdb-instance.com/db-name"
                             value={remoteUrl}
                             onChange={(e) => setRemoteUrl(e.target.value)}
-
-                            className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-
+                            className="w-full bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:border-emerald-500 focus:ring-emerald-500"
                         />
                     </div>
 
@@ -101,30 +101,24 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                             <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1.5 flex items-center gap-2">
                                 <User size={14} /> Username
                             </label>
-                            <input
+                            <Input
                                 type="text"
-
                                 placeholder="Admin"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-
-                                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-
+                                className="w-full bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:border-emerald-500 focus:ring-emerald-500"
                             />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1.5 flex items-center gap-2">
                                 <Key size={14} /> Password
                             </label>
-                            <input
+                            <Input
                                 type="password"
-
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-
-                                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-4 py-2.5 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
-
+                                className="w-full bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:border-emerald-500 focus:ring-emerald-500"
                             />
                         </div>
                     </div>
@@ -133,26 +127,30 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                         <div>
                             <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1.5">Sync Direction</label>
                             <div className="flex bg-zinc-100 dark:bg-zinc-800 p-1 rounded-lg">
-                                <button
+                                <Button
                                     type="button"
                                     onClick={() => setSyncDirection('two-way')}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded-md transition-all ${syncDirection === 'two-way'
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`flex-1 text-xs ${syncDirection === 'two-way'
                                         ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
                                         : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
                                         }`}
                                 >
                                     <ArrowRightLeft size={14} /> Two-way
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="button"
                                     onClick={() => setSyncDirection('upload')}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded-md transition-all ${syncDirection === 'upload'
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`flex-1 text-xs ${syncDirection === 'upload'
                                         ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-sm'
                                         : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300'
                                         }`}
                                 >
                                     <Upload size={14} /> Upload only
-                                </button>
+                                </Button>
                             </div>
                         </div>
                         <div className="flex flex-col justify-end">
@@ -173,17 +171,19 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                 </div>
 
                 <div className="flex justify-end space-x-3">
-                    <button
+                    <Button
                         type="button"
                         onClick={onClose}
-                        className="px-6 py-2.5 rounded-xl font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
+                        variant="ghost"
+                        className="text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         type="submit"
                         disabled={!remoteUrl || isLoading}
-                        className="px-6 py-2.5 rounded-xl font-bold bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2"
+                        variant="default"
+                        className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 shadow-lg shadow-emerald-500/20"
                     >
                         {isLoading ? (
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -191,7 +191,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                             <Save size={18} />
                         )}
                         Save Configuration
-                    </button>
+                    </Button>
                 </div>
             </form>
         </div>

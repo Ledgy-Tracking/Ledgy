@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useAuthStore, EXPIRY_OPTIONS, RememberMeExpiry, DEFAULT_EXPIRY } from './useAuthStore';
 import { generateSecret, encodeSecret, generateOtpauthUri } from '../../lib/totp';
 
@@ -122,19 +124,16 @@ export const SetupPage: React.FC = () => {
                             <label htmlFor="code" className="block text-sm font-medium text-zinc-400 text-center">
                                 Enter 6-digit confirmation code
                             </label>
-                            <input
+                            <Input
                                 id="code"
                                 type="text"
                                 maxLength={6}
-
                                 value={code}
                                 onChange={handleCodeChange}
                                 disabled={isSubmitting}
                                 placeholder="000000"
-
-                                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-4 text-center text-3xl tracking-widest text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all font-mono disabled:opacity-50"
+                                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-4 text-center text-3xl tracking-widest text-zinc-900 dark:text-zinc-50 font-mono"
                                 autoFocus
-
                             />
                         </div>
 
@@ -182,27 +181,26 @@ export const SetupPage: React.FC = () => {
                                             Passphrase <span className="text-emerald-500">(required to encrypt the stored secret)</span>
                                         </label>
                                         <div className="relative">
-                                            <input
+                                            <Input
                                                 type={showPassphrase ? 'text' : 'password'}
-
                                                 value={passphrase}
                                                 onChange={(e) => setPassphrase(e.target.value)}
                                                 placeholder="Enter a secure passphrase"
                                                 required={rememberMe}
                                                 disabled={isSubmitting}
-
-                                                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-900 dark:text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
-
+                                                className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg pr-9 text-xs text-zinc-900 dark:text-zinc-300 placeholder-zinc-600"
                                             />
-                                            <button
+                                            <Button
                                                 type="button"
                                                 onClick={() => setShowPassphrase(v => !v)}
+                                                variant="ghost"
+                                                size="icon-xs"
                                                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                                                 tabIndex={-1}
                                                 aria-label={showPassphrase ? "Hide passphrase" : "Show passphrase"}
                                             >
                                                 {showPassphrase ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 </div>
@@ -213,17 +211,19 @@ export const SetupPage: React.FC = () => {
                             <p className="text-red-400 text-sm text-center font-medium">{error}</p>
                         )}
 
-                        <button
+                        <Button
                             type="submit"
                             disabled={code.length !== 6 || isSubmitting || (rememberMe && passphrase.length === 0)}
-                            className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 font-bold py-4 rounded-xl transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2"
+                            variant="default"
+                            size="lg"
+                            className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-zinc-800 disabled:text-zinc-600 text-zinc-950 active:scale-[0.98] shadow-lg"
                         >
                             {isSubmitting ? (
                                 <div className="w-6 h-6 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
                             ) : (
                                 'Finish Setup'
                             )}
-                        </button>
+                        </Button>
                     </form>
                 </div>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, RefreshCw, CheckCircle2, AlertCircle, CloudOff, Wifi, Info, ShieldCheck, History, ExternalLink, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useSyncStore } from '../../stores/useSyncStore';
 import { useAuthStore } from '../auth/useAuthStore';
 
@@ -98,21 +99,25 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                         </div>
                     </div>
                     <div className="flex items-center gap-1">
-                        <button
+                        <Button
                             onClick={onOpenSettings}
-                            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
                             title="Sync Settings"
                             aria-label="Open Sync Settings"
                         >
                             <ShieldCheck size={20} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={onClose}
-                            className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
                             aria-label="Close Sync Status"
                         >
                             <X size={20} />
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
@@ -130,14 +135,15 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
                             {details.description}
                         </p>
-                        <button
+                        <Button
                             onClick={() => triggerSync(profileId)}
-                            className="w-full py-2.5 bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 group"
+                            variant="default"
+                            className="w-full bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 hover:opacity-90 group"
                             disabled={isLoading || syncStatus.status === 'syncing'}
                         >
                             <RefreshCw size={14} className={(isLoading || syncStatus.status === 'syncing') ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} />
                             Synchronize Now
-                        </button>
+                        </Button>
                     </div>
 
                     {/* Metadata Grid */}
@@ -186,12 +192,14 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                         <div className="space-y-4 bg-amber-500/5 p-4 rounded-xl border border-amber-500/10">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">Conflicts Detected</h3>
-                                <button
+                                <Button
                                     onClick={onResolveAll}
-                                    className="text-[10px] font-bold text-amber-600 dark:text-amber-500 hover:underline flex items-center gap-1"
+                                    variant="link"
+                                    size="xs"
+                                    className="text-[10px] font-bold text-amber-600 dark:text-amber-500 hover:underline"
                                 >
                                     Resolve All <ExternalLink size={10} />
-                                </button>
+                                </Button>
                             </div>
                             <div className="space-y-2">
                                 {conflicts.slice(0, 3).map((conflict, idx) => (
@@ -199,12 +207,14 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                                         <span className="text-xs text-zinc-900 dark:text-zinc-100 font-medium truncate max-w-[200px]">
                                             {conflict.ledgerName} / {conflict.entryName}
                                         </span>
-                                        <button
-                                            className="p-1 text-zinc-400 hover:text-red-500 transition-colors"
+                                        <Button
+                                            variant="ghost"
+                                            size="icon-xs"
+                                            className="text-zinc-400 hover:text-red-500"
                                             aria-label={`Delete conflict for ${conflict.ledgerName} ${conflict.entryName}`}
                                         >
                                             <Trash2 size={12} />
-                                        </button>
+                                        </Button>
                                     </div>
                                 ))}
                             </div>

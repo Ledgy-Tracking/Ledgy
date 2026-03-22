@@ -1,5 +1,6 @@
 import { useUIStore } from '../../stores/useUIStore';
 import { Sun, Moon, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const SettingsPage = () => {
     const { theme, density, setTheme, setDensity, resetToDefaults } = useUIStore();
@@ -36,26 +37,28 @@ export const SettingsPage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button
+                            <Button
                                 onClick={() => setTheme('light')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
-                                    theme === 'light'
-                                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                        : 'bg-gray-100 dark:bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-900 dark:hover:text-white'
-                                }`}
+                                size="sm"
+                                variant={theme === 'light' ? 'default' : 'outline'}
+                                className={theme === 'light'
+                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                                }
                             >
                                 Light
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={() => setTheme('dark')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
-                                    theme === 'dark'
-                                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                        : 'bg-gray-100 dark:bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-900 dark:hover:text-white'
-                                }`}
+                                size="sm"
+                                variant={theme === 'dark' ? 'default' : 'outline'}
+                                className={theme === 'dark'
+                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                                }
                             >
                                 Dark
-                            </button>
+                            </Button>
                         </div>
                     </div>
 
@@ -77,26 +80,28 @@ export const SettingsPage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button
+                            <Button
                                 onClick={() => setDensity('comfortable')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
-                                    density === 'comfortable'
-                                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                        : 'bg-gray-100 dark:bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-900 dark:hover:text-white'
-                                }`}
+                                size="sm"
+                                variant={density === 'comfortable' ? 'default' : 'outline'}
+                                className={density === 'comfortable'
+                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                                }
                             >
                                 Comfortable
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={() => setDensity('compact')}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ease-in-out ${
-                                    density === 'compact'
-                                        ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
-                                        : 'bg-gray-100 dark:bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700/50 hover:text-zinc-900 dark:hover:text-white'
-                                }`}
+                                size="sm"
+                                variant={density === 'compact' ? 'default' : 'outline'}
+                                className={density === 'compact'
+                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                                }
                             >
                                 Compact
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -112,13 +117,14 @@ export const SettingsPage = () => {
                     <p className="text-sm text-amber-300 mb-4">
                         Reset all settings to their default values. This action cannot be undone.
                     </p>
-                    <button
+                    <Button
                         onClick={resetToDefaults}
-                        className="flex items-center gap-2 px-4 py-2 bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 font-medium rounded-lg transition-all duration-300 ease-in-out ring-1 ring-amber-600/30"
+                        variant="outline"
+                        className="bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 font-medium border-amber-600/30"
                     >
                         <RotateCcw className="w-4 h-4" />
                         Reset to Defaults
-                    </button>
+                    </Button>
                 </div>
             </section>
 

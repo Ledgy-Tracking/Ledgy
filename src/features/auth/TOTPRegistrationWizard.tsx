@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuthStore } from './useAuthStore';
 import { useErrorStore } from '../../stores/useErrorStore';
 import { QRCodeDisplay } from './QRCodeDisplay';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { generateSecret, encodeSecret, generateTOTPURI, generateBackupCodes, getSecondsUntilNextCode } from '../../lib/totp';
 import { Shield, CheckCircle, AlertCircle, RefreshCw, HelpCircle } from 'lucide-react';
 
@@ -163,13 +165,14 @@ export const TOTPRegistrationWizard = () => {
                 <p className="text-gray-600 dark:text-gray-400">
                     Protect your account with an authenticator app
                 </p>
-                <button
+                <Button
                     onClick={() => setShowHelp(!showHelp)}
-                    className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center justify-center gap-1 mx-auto"
+                    variant="link"
+                    className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
                 >
                     <HelpCircle className="w-4 h-4" />
                     What is two-factor authentication?
-                </button>
+                </Button>
             </div>
 
             {/* Help Modal */}
@@ -205,12 +208,13 @@ export const TOTPRegistrationWizard = () => {
                             accountName="user@ledgy.app"
                         />
                         <div className="flex justify-center">
-                            <button
+                            <Button
                                 onClick={() => setStep('verify')}
-                                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                                variant="default"
+                                className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
                                 Continue to Verification
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -240,17 +244,14 @@ export const TOTPRegistrationWizard = () => {
 
                         {/* Code Input */}
                         <div className="flex justify-center">
-                            <input
+                            <Input
                                 type="text"
-
                                 value={totpCode}
                                 onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 placeholder="000000"
                                 maxLength={6}
-
-                                className="w-48 px-4 py-3 text-center text-2xl font-mono tracking-widest border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:border-blue-500 dark:focus:border-blue-400 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                                className="w-48 text-center text-2xl font-mono tracking-widest border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
                                 aria-label="6-digit TOTP code from authenticator app"
-
                             />
                         </div>
 
@@ -263,13 +264,14 @@ export const TOTPRegistrationWizard = () => {
 
                         {/* Actions */}
                         <div className="flex justify-center gap-4">
-                            <button
+                            <Button
                                 onClick={handleRegenerate}
-                                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-2 transition-colors"
+                                variant="ghost"
+                                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                             >
                                 <RefreshCw className="w-4 h-4" />
                                 Rescan QR Code
-                            </button>
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -310,12 +312,13 @@ export const TOTPRegistrationWizard = () => {
                                 ))}
                             </div>
 
-                            <button
+                            <Button
                                 onClick={handleCopyBackupCodes}
-                                className="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg transition-colors"
+                                variant="default"
+                                className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
                             >
                                 Copy Backup Codes
-                            </button>
+                            </Button>
                         </div>
 
                         <p className="text-center text-sm text-gray-600 dark:text-gray-400">
