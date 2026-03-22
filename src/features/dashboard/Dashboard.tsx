@@ -55,7 +55,7 @@ export const Dashboard: React.FC = () => {
                             onClick={() => setViewMode('grid')}
                             className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-zinc-700 text-emerald-400 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
                             title="Metric Grid"
-                            aria-label="Metric Grid"
+                            aria-label="Metric Grid View"
                             aria-pressed={viewMode === 'grid'}
                         >
                             <LayoutGrid size={14} />
@@ -122,3 +122,4 @@ export const Dashboard: React.FC = () => {
         </div>
     );
 };
+

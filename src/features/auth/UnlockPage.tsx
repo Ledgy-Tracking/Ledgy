@@ -176,9 +176,7 @@ export const UnlockPage: React.FC = () => {
                                 onChange={(e) => { setPassphrase(e.target.value); if (currentError) clearError(); }}
                                 placeholder="Enter passphrase…"
                                 disabled={isSubmitting}
-                                autoComplete="current-password"
                                 className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 pr-10 text-sm text-zinc-50 placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all disabled:opacity-50"
-                                autoComplete="current-password"
                             />
                             <button
                                 type="button"
@@ -226,7 +224,6 @@ export const UnlockPage: React.FC = () => {
                             disabled={isSubmitting}
                             autoComplete="one-time-code"
                             containerClassName="group flex items-center has-[:disabled]:opacity-50"
-                            autoComplete="one-time-code"
                             render={({ slots }) => (
                                 <div className="flex gap-2">
                                     {slots.map((slot, idx) => (
@@ -301,9 +298,7 @@ export const UnlockPage: React.FC = () => {
                                                 placeholder="Enter a secure passphrase"
                                                 required={rememberMe}
                                                 disabled={isSubmitting}
-                                                autoComplete="new-password"
                                                 className="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 pr-9 text-xs text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
-                                                autoComplete="new-password"
                                             />
                                             <button
                                                 type="button"
