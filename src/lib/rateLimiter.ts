@@ -39,7 +39,6 @@ function getOrGenerateHMACKey(): string {
 // on every signature generation.
 const encoder = new TextEncoder();
 let hmacCryptoKey: CryptoKey | null = null;
-
 /**
  * Generate HMAC signature for state
  */
