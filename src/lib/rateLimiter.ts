@@ -37,12 +37,6 @@ export interface RateLimitState {
     signature: string; // HMAC signature for tamper detection
 }
 
-// Cache TextEncoder and CryptoKey at module level to avoid redundant
-// instantiation and computationally expensive WebCrypto API overhead
-// on every signature generation.
-const encoder = new TextEncoder();
-let cachedHmacKey: CryptoKey | null = null;
-
 /**
  * Generate HMAC signature for state
  */
