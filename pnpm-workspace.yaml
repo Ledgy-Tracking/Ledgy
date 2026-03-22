@@ -1,0 +1,6 @@
+ignoredBuiltDependencies:
+  - leveldown
+  - msw
+
+onlyBuiltDependencies:
+  - esbuild

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Node, Edge } from '@xyflow/react';
+import { useErrorStore } from '../../stores/useErrorStore';
 
 export interface NodeData {
     label: string;
@@ -62,9 +63,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to add node';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -82,9 +81,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to update node position';
             set({ error: errorMessage });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -99,9 +96,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to add edge';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -119,9 +114,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to delete node';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -136,9 +129,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to delete edge';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -157,9 +148,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load graph';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -173,9 +162,7 @@ export const useNodeStore = create<NodeState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to save graph';
             set({ error: errorMessage });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 

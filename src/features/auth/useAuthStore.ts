@@ -1,5 +1,9 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { useErrorStore } from '../../stores/useErrorStore';
+import { useProfileStore } from '../../stores/useProfileStore';
+import { useProfileStore as useProfileStoreFeature } from '../profiles/useProfileStore';
+import { destroyAllDatabases } from '../../lib/db';
 import {
     deriveKeyFromTotp,
     deriveKeyFromPassphrase,
@@ -157,9 +161,7 @@ export const useAuthStore = create<AuthState>()(
                         console.warn('unlock() called but totpSecret is null — a passphrase session may be active');
                     }
                     set({ isLoading: false, error: 'No TOTP secret found. Please complete setup first.' });
-                    import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                        useErrorStore.getState().dispatchError('No TOTP secret found', 'error');
-                    });
+                    useErrorStore.getState().dispatchError('No TOTP secret found', 'error');
                     return false;
                 }
 
@@ -169,9 +171,7 @@ export const useAuthStore = create<AuthState>()(
                     const minutes = Math.ceil(rateLimit.waitTime / 60);
                     const errorMessage = `Too many failed attempts. Please wait ${minutes} minute${minutes > 1 ? 's' : ''} before trying again.`;
                     set({ isLoading: false, error: errorMessage });
-                    import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                        useErrorStore.getState().dispatchError(errorMessage, 'error');
-                    });
+                    useErrorStore.getState().dispatchError(errorMessage, 'error');
                     return false;
                 }
 
@@ -239,9 +239,7 @@ export const useAuthStore = create<AuthState>()(
                     }
 
                     set({ isLoading: false, error: errorMessage });
-                    import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                        useErrorStore.getState().dispatchError(errorMessage, 'error');
-                    });
+                    useErrorStore.getState().dispatchError(errorMessage, 'error');
                     return false;
                 } catch (error) {
                     if (import.meta.env.DEV) {
@@ -249,9 +247,7 @@ export const useAuthStore = create<AuthState>()(
                     }
                     const errorMessage = error instanceof Error ? error.message : 'Invalid TOTP code';
                     set({ isLoading: false, error: errorMessage });
-                    import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                        useErrorStore.getState().dispatchError(errorMessage, 'error');
-                    });
+                    useErrorStore.getState().dispatchError(errorMessage, 'error');
                     return false;
                 }
 
@@ -364,18 +360,15 @@ export const useAuthStore = create<AuthState>()(
                 set({ isUnlocked: false, encryptionKey: null });
 
                 // Memory Sweep: Clear the global profile registry and dependent stores
-                const { useProfileStore } = await import('../profiles/useProfileStore');
-                useProfileStore.getState().clearActiveProfile();
-                useProfileStore.setState({ profiles: [] });
+                useProfileStoreFeature.getState().clearActiveProfile();
+                useProfileStoreFeature.setState({ profiles: [] });
             },
 
             reset: async () => {
                 // Destroy all IndexedDB profile databases so a new account starts clean
-                const { destroyAllDatabases } = await import('../../lib/db');
                 await destroyAllDatabases();
 
                 // Clear the real profile store (used by ProfileSelector)
-                const { useProfileStore } = await import('../../stores/useProfileStore');
                 useProfileStore.setState({ profiles: [], activeProfileId: null });
                 localStorage.removeItem('ledgy-profile-storage');
 
