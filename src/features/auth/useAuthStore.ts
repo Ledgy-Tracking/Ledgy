@@ -164,7 +164,7 @@ export const useAuthStore = create<AuthState>()(
                 }
 
                 // Check rate limit before attempting unlock
-                const rateLimit = canAttempt('default-account');
+                const rateLimit = await canAttempt('default-account');
                 if (!rateLimit.allowed && rateLimit.waitTime) {
                     const minutes = Math.ceil(rateLimit.waitTime / 60);
                     const errorMessage = `Too many failed attempts. Please wait ${minutes} minute${minutes > 1 ? 's' : ''} before trying again.`;
@@ -230,7 +230,7 @@ export const useAuthStore = create<AuthState>()(
 
                     // Failed attempt - record for rate limiting
                     await recordFailedAttempt('default-account');
-                    const remaining = getRemainingLockoutTime('default-account');
+                    const remaining = await getRemainingLockoutTime('default-account');
 
                     let errorMessage = 'Invalid TOTP code. Please try again.';
                     if (remaining > 0) {
