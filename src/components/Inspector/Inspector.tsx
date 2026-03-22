@@ -20,6 +20,7 @@ export const Inspector: React.FC = () => {
                 <button
                     onClick={() => setRightInspector(false)}
                     className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 transition-colors"
+                    aria-label="Close inspector"
                 >
                     <X size={16} />
                 </button>

@@ -46,6 +46,8 @@ export const Dashboard: React.FC = () => {
                             onClick={() => setViewMode('table')}
                             className={`p-1.5 rounded-md transition-colors ${viewMode === 'table' ? 'bg-zinc-700 text-emerald-400 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
                             title="Table View"
+                            aria-label="Table View"
+                            aria-pressed={viewMode === 'table'}
                         >
                             <Table size={14} />
                         </button>
@@ -53,6 +55,8 @@ export const Dashboard: React.FC = () => {
                             onClick={() => setViewMode('grid')}
                             className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-zinc-700 text-emerald-400 shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
                             title="Metric Grid"
+                            aria-label="Metric Grid"
+                            aria-pressed={viewMode === 'grid'}
                         >
                             <LayoutGrid size={14} />
                         </button>
