@@ -175,14 +175,16 @@ export async function resolveConflictWithCustomData(
 
         // 2. Remove all conflicting revisions
         if (currentDoc._conflicts) {
-            for (const rev of currentDoc._conflicts) {
-                try {
-                    await db.removeRevision(entryId, rev);
-                } catch (e) {
-                    // Ignore if revision already gone
-                    console.warn(`Could not remove revision ${rev} for ${entryId}:`, e);
-                }
-            }
+            await Promise.all(
+                currentDoc._conflicts.map(async (rev: string) => {
+                    try {
+                        await db.removeRevision(entryId, rev);
+                    } catch (e) {
+                        // Ignore if revision already gone
+                        console.warn(`Could not remove revision ${rev} for ${entryId}:`, e);
+                    }
+                })
+            );
         }
 
         // 3. Update with custom merged data, preserving envelope
