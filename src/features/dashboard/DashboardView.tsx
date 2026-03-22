@@ -67,8 +67,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     };
 
     const onLayoutChange = (layout: any) => {
+        const widgetMap = new Map(widgets.map(w => [w.id, w]));
         layout.forEach((l: any) => {
-            const widget = widgets.find(w => w.id === l.i);
+            const widget = widgetMap.get(l.i);
             if (widget && (
                 widget.position.x !== l.x ||
                 widget.position.y !== l.y ||
