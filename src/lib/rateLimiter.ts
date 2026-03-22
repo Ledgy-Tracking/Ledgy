@@ -20,10 +20,10 @@ const STORAGE_KEY = 'ledgy-auth-rate-limit';
 // HMAC key for signing (in production, this should be server-provided)
 const HMAC_KEY = 'ledgy-rate-limit-hmac-key-v1';
 
-// Shared TextEncoder for performance
+// Cache TextEncoder and CryptoKey at module level to avoid redundant
+// instantiation and computationally expensive WebCrypto API overhead
+// on every signature generation.
 const encoder = new TextEncoder();
-
-// Cached CryptoKey for HMAC signing to avoid expensive importKey calls on every signature
 let cachedHmacKey: CryptoKey | null = null;
 
 /**
@@ -36,12 +36,6 @@ export interface RateLimitState {
     lockedUntil: number | null; // Unix timestamp or null
     signature: string; // HMAC signature for tamper detection
 }
-
-// Cache TextEncoder and CryptoKey at module level to avoid redundant
-// instantiation and computationally expensive WebCrypto API overhead
-// on every signature generation.
-const encoder = new TextEncoder();
-let cachedHmacKey: CryptoKey | null = null;
 
 /**
  * Generate HMAC signature for state

@@ -55,10 +55,7 @@ function trimToMax(actions: UndoRedoAction[]): UndoRedoAction[] {
 }
 
 function actionId(): string {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-        return crypto.randomUUID();
-    }
-    return `action:${Date.now()}:${Math.random().toString(16).slice(2)}`;
+    return crypto.randomUUID();
 }
 
 export function createAction(
