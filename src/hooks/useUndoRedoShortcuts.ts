@@ -39,4 +39,3 @@ export function useUndoRedoShortcuts(): void {
         return () => window.removeEventListener('keydown', handle);
     }, []);
 }
-

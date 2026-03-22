@@ -437,7 +437,7 @@ test(story-3.15): add comprehensive unit and integration tests
 
 ## Senior Developer Review (AI)
 
-Reviewer: James (AI)  
+Reviewer: James (AI)
 Date: 2026-03-22
 
 ### Outcome
@@ -483,4 +483,3 @@ Changes Requested
 
 8. **[Low] Standards doc inconsistency (`type` vs `_type`)**
    - Could mislead future contributors; docs should be aligned.
-

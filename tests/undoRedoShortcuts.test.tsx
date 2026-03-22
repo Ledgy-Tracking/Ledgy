@@ -55,4 +55,3 @@ describe('useUndoRedoShortcuts', () => {
         expect(redoAction).toHaveBeenCalledWith('profile:1');
     });
 });
-

@@ -17,4 +17,3 @@ export const UndoRedoHUD: React.FC = () => {
         </div>
     );
 };
-
