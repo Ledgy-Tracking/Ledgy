@@ -15,9 +15,8 @@ export const ProfileCreationPage: React.FC = () => {
         navigate('/'); // Navigate back to profile selector
     };
 
-    const handleSuccess = (profileId: string) => {
+    const handleSuccess = (_profileId: string) => {
         // The form handles navigation to /dashboard, but we can do extra logic here if needed
-        console.log('Profile created successfully:', profileId);
     };
 
     // Adjust padding based on density
