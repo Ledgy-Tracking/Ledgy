@@ -1,0 +1,100 @@
+import React, { useEffect, useState } from 'react';
+import { useLedgerStore } from '../../stores/useLedgerStore';
+import { useProfileStore } from '../../stores/useProfileStore';
+import { useSchemaBuilderStore } from '../../stores/useSchemaBuilderStore';
+import { useErrorStore } from '../../stores/useErrorStore';
+import { FieldType } from '../../types/ledger';
+import { Plus, Trash2, ChevronUp, ChevronDown, Save, Info } from 'lucide-react';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip';
+
+interface SchemaBuilderProps {
+    projectId: string;
+    onClose: () => void;
+}
+
+export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose }) => {
+    const { activeProfileId } = useProfileStore();
+    const { schemas } = useLedgerStore();
+    const {
+        draftName,
+        draftFields,
+        error,
+        isLoading,
+        editingSchemaId,
+        initCreate,
+        setDraftName,
+        addField,
+        removeField,
+        updateField,
+        reorderField,
+        commit,
+        discard,
+    } = useSchemaBuilderStore();
+
+    const [patternError, setPatternError] = useState<Record<number, string | null>>({});
+
+    useEffect(() => {
+        initCreate(projectId);
+    }, [projectId, initCreate]);
+
+    // Filter schemas to show as potential relation targets, excluding the current schema (self-target prevention)
+    const availableLedgers = schemas
+        .filter(s => s.projectId === projectId)
+        .filter(s => s._id !== editingSchemaId);
+
+    const handleMoveField = (index: number, direction: 'up' | 'down') => {
+        const toIndex = direction === 'up' ? index - 1 : index + 1;
+        reorderField(index, toIndex);
+        setPatternError(prev => {
+            const next = { ...prev };
+            [next[index], next[toIndex]] = [prev[toIndex] ?? null, prev[index] ?? null];
+            return next;
+        });
+    };
+
+    const handleRemoveField = (index: number) => {
+        removeField(index);
+        setPatternError(prev => {
+            const next: Record<number, string | null> = {};
+            Object.entries(prev).forEach(([k, v]) => {
+                const i = Number(k);
+                if (i < index) next[i] = v;
+                else if (i > index) next[i - 1] = v;
+            });
+            return next;
+        });
+    };
+
+    const handleSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!activeProfileId) {
+            const msg = 'No active profile. Please select a profile before saving.';
+            useSchemaBuilderStore.setState({ error: msg });
+            useErrorStore.getState().dispatchError(msg);
+            return;
+        }
+        try {
+            await commit(activeProfileId);
+            // Only close if validation passed (no error set by commit)
+            if (!useSchemaBuilderStore.getState().error) {
+                onClose();
+            }
+        } catch (err) {
+            // PouchDB/network errors are already set in store and re-thrown
+        }
+    };
+
+    return (
+        <Dialog open={true} onOpenChange={onClose}>
+            <TooltipProvider>
+            <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>Create Ledger Schema</DialogTitle>
+                    <DialogDescription>Define the structure of your new ledger.</DialogDescription>
+                </DialogHeader>
+
+                <form onSubmit={handleSave} className="space-y-6 mt-4">

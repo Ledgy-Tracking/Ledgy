@@ -1,0 +1,100 @@
+                    {error && (
+                        <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
+                            <p className="text-red-700 dark:text-red-500 text-sm">{error}</p>
+                        </div>
+                    )}
+
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
+                                Schema Name
+                            </label>
+                            <Input
+                                required
+                                value={draftName}
+                                onChange={(e) => setDraftName(e.target.value)}
+                                placeholder="e.g. Coffee Tracker, Sleep Log"
+                            />
+                        </div>
+
+                        <div>
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                                    Schema Fields
+                                </label>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={addField}
+                                    className="text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400"
+                                >
+                                    <Plus size={14} className="mr-1" /> Add Field
+                                </Button>
+                            </div>
+
+                            <div className="space-y-2">
+                                {draftFields.map((field, index) => (
+                                    <div
+                                        key={index}
+                                        className="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden"
+                                    >
+                                        {/* Main controls row */}
+                                        <div className="flex items-center gap-2 p-3">
+                                            <div className="flex flex-col gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleMoveField(index, 'up')}
+                                                    disabled={index === 0}
+                                                    className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    <ChevronUp size={14} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleMoveField(index, 'down')}
+                                                    disabled={index === draftFields.length - 1}
+                                                    className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    <ChevronDown size={14} />
+                                                </button>
+                                            </div>
+
+                                            <Input
+                                                placeholder="Field name"
+                                                value={field.name}
+                                                onChange={(e) => updateField(index, { name: e.target.value })}
+                                                className="flex-1 bg-white dark:bg-zinc-900"
+                                            />
+
+                                            <Select
+                                                value={field.type}
+                                                onValueChange={(value) => {
+                                                    updateField(index, { type: value as FieldType });
+                                                    setPatternError(prev => ({ ...prev, [index]: null }));
+                                                }}
+                                            >
+                                                <SelectTrigger className="w-[140px] bg-white dark:bg-zinc-900">
+                                                    <SelectValue placeholder="Type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="text">Text</SelectItem>
+                                                    <SelectItem value="long_text">Long Text</SelectItem>
+                                                    <SelectItem value="number">Number</SelectItem>
+                                                    <SelectItem value="date">Date</SelectItem>
+                                                    <SelectItem value="boolean">Boolean</SelectItem>
+                                                    <SelectItem value="select">Select</SelectItem>
+                                                    <SelectItem value="multi_select">Multi-Select</SelectItem>
+                                                    <SelectItem value="relation">Relation</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+
+                                            {field.type === 'relation' && (
+                                                availableLedgers.length === 0 ? (
+                                                    <Select disabled>
+                                                        <SelectTrigger
+                                                            title="No other ledgers available — a relation cannot target its own schema"
+                                                            className="w-[160px] bg-white dark:bg-zinc-900 border-emerald-500/50 opacity-50 cursor-not-allowed"
+                                                        >
+                                                            <SelectValue placeholder="No targets available" />
+                                                        </SelectTrigger>
