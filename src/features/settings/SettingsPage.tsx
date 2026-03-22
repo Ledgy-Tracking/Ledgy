@@ -144,6 +144,9 @@ export const SettingsPage = () => {
                         <li className="flex items-center gap-2">
                             <span className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
                             Keyboard Shortcuts
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                (Undo: Ctrl/Cmd+Z, Redo: Ctrl/Cmd+Shift+Z)
+                            </span>
                         </li>
                     </ul>
                 </div>

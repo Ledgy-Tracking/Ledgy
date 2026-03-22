@@ -16,6 +16,7 @@ import {
     find_entries_with_relation_to,
     decryptLedgerEntry,
 } from '../lib/db';
+import { createAction, useUndoRedoStore } from './useUndoRedoStore';
 
 interface LedgerState {
     schemas: LedgerSchema[];
@@ -134,6 +135,7 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
                 allEntries: { ...get().allEntries, [ledgerId]: allEntries },
                 isLoading: false
             });
+            useUndoRedoStore.getState().setActiveSchemaId(ledgerId);
         } catch (err: any) {
             const errorMsg = err.message || 'Failed to fetch entries';
             set({ error: errorMsg, isLoading: false });
@@ -172,6 +174,15 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
 
             const db = getProfileDb(profileId);
             const entryId = await create_entry(db, schemaId, ledgerId, data, profileId, authState.encryptionKey || undefined);
+            const created = await db.getDocument<LedgerEntry>(entryId);
+            useUndoRedoStore.getState().pushUndo(
+                createAction('create', schemaId, [
+                    {
+                        previousState: null,
+                        newState: created,
+                    },
+                ])
+            );
             await get().fetchEntries(profileId, ledgerId);
 
             // Fire on-create trigger event
@@ -204,7 +215,17 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
 
             const db = getProfileDb(state.activeProfileId);
             const authState = useAuthStore.getState();
+            const previous = await db.getDocument<LedgerEntry>(entryId);
             await update_entry(db, entryId, data, authState.encryptionKey || undefined);
+            const updated = await db.getDocument<LedgerEntry>(entryId);
+            useUndoRedoStore.getState().pushUndo(
+                createAction('update', previous.schemaId, [
+                    {
+                        previousState: previous,
+                        newState: updated,
+                    },
+                ])
+            );
 
             // Fire on-edit trigger event
             const ledgerState = get();
@@ -237,8 +258,17 @@ export const useLedgerStore = create<LedgerState>((set, get) => ({
             }
 
             const db = getProfileDb(state.activeProfileId);
-            const entry = await db.getDocument<any>(entryId);
+            const entry = await db.getDocument<LedgerEntry>(entryId);
             await delete_entry(db, entryId, useAuthStore.getState().encryptionKey || undefined);
+            const deleted = await db.getDocument<LedgerEntry>(entryId);
+            useUndoRedoStore.getState().pushUndo(
+                createAction('delete', entry.schemaId, [
+                    {
+                        previousState: entry,
+                        newState: deleted,
+                    },
+                ])
+            );
 
             // Refresh entries for the ledger
             await get().fetchEntries(state.activeProfileId, entry.ledgerId);

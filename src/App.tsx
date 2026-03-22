@@ -16,6 +16,7 @@ import { useLedgerStore } from "./stores/useLedgerStore";
 import { useNodeStore } from "./stores/useNodeStore";
 import { useDashboardStore } from "./stores/useDashboardStore";
 import { useSyncStore } from "./stores/useSyncStore";
+import { useUndoRedoStore } from "./stores/useUndoRedoStore";
 import { useEffect } from "react";
 import { LedgerView } from "./features/ledger/LedgerView";
 import { TrashView } from "./features/ledger/TrashView";
@@ -38,6 +39,7 @@ function App() {
     useNodeStore.getState().clearProfileData();
     useDashboardStore.getState().clearProfileData();
     useSyncStore.getState().clearProfileData();
+    useUndoRedoStore.getState().clearAll();
   }, [activeProfileId]);
 
   useEffect(() => {

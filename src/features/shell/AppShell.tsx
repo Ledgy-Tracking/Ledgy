@@ -5,9 +5,11 @@ import { MainCanvas } from './MainCanvas';
 import { InspectorRail } from './InspectorRail';
 import { useUIStore } from '../../stores/useUIStore';
 import { useEffect } from 'react';
+import { useUndoRedoShortcuts } from '../../hooks/useUndoRedoShortcuts';
 
 export const AppShell = () => {
     const theme = useUIStore((state) => state.theme);
+    useUndoRedoShortcuts();
 
     // Keyboard shortcuts for panel toggling
     useEffect(() => {
