@@ -102,12 +102,14 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                             onClick={onOpenSettings}
                             className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
                             title="Sync Settings"
+                            aria-label="Open Sync Settings"
                         >
                             <ShieldCheck size={20} />
                         </button>
                         <button
                             onClick={onClose}
                             className="p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                            aria-label="Close Sync Status"
                         >
                             <X size={20} />
                         </button>

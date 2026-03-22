@@ -51,6 +51,7 @@ export const ConflictListSheet: React.FC<ConflictListSheetProps> = ({
                 <button
                     onClick={onClose}
                     className="p-1 hover:bg-zinc-800 rounded text-zinc-400 hover:text-zinc-200"
+                    aria-label="Close Sync Conflicts"
                 >
                     <X size={16} />
                 </button>
