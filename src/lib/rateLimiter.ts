@@ -16,9 +16,23 @@ const BASE_DELAY_MS = 1000; // 1 second
 const MAX_DELAY_MS = 30000; // 30 seconds cap
 const GRACE_PERIOD_MS = 5000; // 5 seconds for clock skew
 const STORAGE_KEY = 'ledgy-auth-rate-limit';
+const HMAC_KEY_STORAGE_KEY = 'ledgy-rate-limit-hmac-key';
 
-// HMAC key for signing (in production, this should be server-provided)
-const HMAC_KEY = 'ledgy-rate-limit-hmac-key-v1';
+/**
+ * Get or generate the HMAC key for signing rate limit state.
+ * The key is stored in localStorage to persist across sessions,
+ * but is unique per client installation.
+ */
+function getOrGenerateHMACKey(): string {
+    let key = localStorage.getItem(HMAC_KEY_STORAGE_KEY);
+    if (!key) {
+        // Generate a random 256-bit key (32 bytes)
+        const bytes = crypto.getRandomValues(new Uint8Array(32));
+        key = btoa(String.fromCharCode(...bytes));
+        localStorage.setItem(HMAC_KEY_STORAGE_KEY, key);
+    }
+    return key;
+}
 
 /**
  * Rate limit state for a single account
@@ -37,7 +51,9 @@ export interface RateLimitState {
 async function generateSignature(state: Omit<RateLimitState, 'signature'>): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(JSON.stringify(state));
-    const keyData = encoder.encode(HMAC_KEY);
+
+    const hmacKey = getOrGenerateHMACKey();
+    const keyData = new Uint8Array(atob(hmacKey).split('').map(c => c.charCodeAt(0)));
     
     const key = await crypto.subtle.importKey(
         'raw',
@@ -49,6 +65,15 @@ async function generateSignature(state: Omit<RateLimitState, 'signature'>): Prom
     
     const signature = await crypto.subtle.sign('HMAC', key, data);
     return btoa(String.fromCharCode(...new Uint8Array(signature)));
+}
+
+/**
+ * Verify HMAC signature for state
+ */
+async function verifySignature(state: RateLimitState): Promise<boolean> {
+    const { signature, ...unsignedState } = state;
+    const expectedSignature = await generateSignature(unsignedState);
+    return signature === expectedSignature;
 }
 
 /**
@@ -66,7 +91,7 @@ export function calculateDelay(attempts: number): number {
 /**
  * Get current rate limit state for an account
  */
-export function getRateLimitState(account: string): RateLimitState | null {
+export async function getRateLimitState(account: string): Promise<RateLimitState | null> {
     try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (!stored) return null;
@@ -77,7 +102,7 @@ export function getRateLimitState(account: string): RateLimitState | null {
         if (state.account !== account) return null;
         
         // Verify signature (tamper detection)
-        const isValid = verifySignatureSync(state);
+        const isValid = await verifySignature(state);
         if (!isValid) {
             console.warn('Rate limit state tampered, resetting');
             return null;
@@ -98,20 +123,11 @@ export function getRateLimitState(account: string): RateLimitState | null {
 }
 
 /**
- * Synchronous signature verification (for hydration)
- * Note: This is a simplified check - full verification is async
- */
-function verifySignatureSync(state: RateLimitState): boolean {
-    // Basic integrity check - signature should exist and be non-empty
-    return state.signature !== undefined && state.signature.length > 0;
-}
-
-/**
  * Record a failed attempt
  */
 export async function recordFailedAttempt(account: string): Promise<RateLimitState> {
     const now = Date.now();
-    let state = getRateLimitState(account);
+    let state = await getRateLimitState(account);
     
     if (!state) {
         // First attempt
@@ -151,14 +167,14 @@ export async function recordFailedAttempt(account: string): Promise<RateLimitSta
  * Reset rate limit on successful authentication
  */
 export function resetRateLimit(_account: string): void {
-    localStorage.removeItem('ledgy-auth-rate-limit');
+    localStorage.removeItem(STORAGE_KEY);
 }
 
 /**
  * Check if account is currently locked out
  */
-export function isLockedOut(account: string): boolean {
-    const state = getRateLimitState(account);
+export async function isLockedOut(account: string): Promise<boolean> {
+    const state = await getRateLimitState(account);
     if (!state) return false;
     
     if (!state.lockedUntil) return false;
@@ -170,8 +186,8 @@ export function isLockedOut(account: string): boolean {
 /**
  * Get remaining lockout time in seconds
  */
-export function getRemainingLockoutTime(account: string): number {
-    const state = getRateLimitState(account);
+export async function getRemainingLockoutTime(account: string): Promise<number> {
+    const state = await getRateLimitState(account);
     if (!state || !state.lockedUntil) return 0;
     
     const now = Date.now();
@@ -182,8 +198,8 @@ export function getRemainingLockoutTime(account: string): number {
 /**
  * Get delay before next attempt in seconds
  */
-export function getNextAttemptDelay(account: string): number {
-    const state = getRateLimitState(account);
+export async function getNextAttemptDelay(account: string): Promise<number> {
+    const state = await getRateLimitState(account);
     if (!state) return 0;
     
     if (state.lockedUntil) {
@@ -200,15 +216,15 @@ export function getNextAttemptDelay(account: string): number {
 /**
  * Check if an attempt is allowed
  */
-export function canAttempt(account: string): { allowed: boolean; waitTime?: number } {
-    if (isLockedOut(account)) {
+export async function canAttempt(account: string): Promise<{ allowed: boolean; waitTime?: number }> {
+    if (await isLockedOut(account)) {
         return {
             allowed: false,
-            waitTime: getRemainingLockoutTime(account),
+            waitTime: await getRemainingLockoutTime(account),
         };
     }
     
-    const delay = getNextAttemptDelay(account);
+    const delay = await getNextAttemptDelay(account);
     if (delay > 0) {
         return {
             allowed: false,
@@ -225,7 +241,7 @@ export function canAttempt(account: string): { allowed: boolean; waitTime?: numb
  */
 export function cleanupExpiredEntries(): void {
     try {
-        const stored = localStorage.getItem('ledgy-auth-rate-limit');
+        const stored = localStorage.getItem(STORAGE_KEY);
         if (!stored) return;
 
         const state: RateLimitState = JSON.parse(stored);
@@ -233,7 +249,7 @@ export function cleanupExpiredEntries(): void {
 
         // Check if expired (lockout ended + grace period)
         if (state.lockedUntil && now > state.lockedUntil + GRACE_PERIOD_MS) {
-            localStorage.removeItem('ledgy-auth-rate-limit');
+            localStorage.removeItem(STORAGE_KEY);
         }
     } catch {
         // Ignore errors, clear on next attempt
@@ -243,15 +259,15 @@ export function cleanupExpiredEntries(): void {
 /**
  * Get attempt count for display
  */
-export function getAttemptCount(account: string): number {
-    const state = getRateLimitState(account);
+export async function getAttemptCount(account: string): Promise<number> {
+    const state = await getRateLimitState(account);
     return state?.attempts ?? 0;
 }
 
 /**
  * Get remaining attempts before lockout
  */
-export function getRemainingAttempts(account: string): number {
-    const attempts = getAttemptCount(account);
+export async function getRemainingAttempts(account: string): Promise<number> {
+    const attempts = await getAttemptCount(account);
     return Math.max(0, MAX_ATTEMPTS - attempts);
 }
