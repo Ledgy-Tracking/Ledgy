@@ -56,3 +56,26 @@ bun.lock
 
 # Keep pnpm as primary
 # pnpm-lock.yaml
+
+# AI Agent folders (keep .jules)
+.agent/
+.agents/
+.augment/
+.claude/
+.clinerules/
+.codebuddy/
+.crush/
+.cursor/
+.gemini/
+.iflow/
+.kilocode/
+.kilocodemodes/
+.kiro/
+.opencode/
+.qwen/
+.roo/
+.rovodev/
+.trae/
+.windsurf/
+.vscode/
+# !.jules/ (keeping this one)
