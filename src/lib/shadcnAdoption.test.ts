@@ -8,7 +8,14 @@ describe('Shadcn Component Adoption Analysis', () => {
     // First, identify what shadcn components exist
     const uiComponentFiles = await glob('src/components/ui/*.{ts,tsx}', { cwd: process.cwd() })
     
-    const availableComponents = []
+    interface ComponentInfo {
+      component: string;
+      file: string;
+      isLikelyShadcn: boolean;
+      shadcnScore: number;
+      indicators: Record<string, boolean>;
+    }
+    const availableComponents: ComponentInfo[] = []
     
     for (const file of uiComponentFiles) {
       const content = fs.readFileSync(file, 'utf-8')
@@ -47,14 +54,20 @@ describe('Shadcn Component Adoption Analysis', () => {
     
     console.log(`Analyzing ${allAppFiles.length} application files...`)
     
-    const usageReport = []
+    interface FileUsageInfo {
+      file: string;
+      shadcnImports: string[];
+      hasAnyShadcnUsage: boolean;
+      customUIPatterns: Array<{ pattern: string; count: number }>;
+    }
+    const usageReport: FileUsageInfo[] = []
     let totalShadcnImports = 0
     let filesUsingShadcn = 0
-    const filesNotUsingShadcn = []
+    const filesNotUsingShadcn: string[] = []
     
     for (const file of allAppFiles) {
       const content = fs.readFileSync(file, 'utf-8')
-      const fileUsage = {
+      const fileUsage: FileUsageInfo = {
         file: file,
         shadcnImports: [],
         hasAnyShadcnUsage: false,
