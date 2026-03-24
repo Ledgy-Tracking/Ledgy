@@ -27,6 +27,14 @@ class NodeEngine {
             const nodeResults = new Map<string, any>();
             const nodeMap = new Map(nodes.map(n => [n.id, n]));
 
+            // Index edges by target node ID for O(1) lookup during execution
+            const targetEdgesMap = new Map<string, any[]>();
+            edges.forEach(e => {
+                const targetEdges = targetEdgesMap.get(e.target) || [];
+                targetEdges.push(e);
+                targetEdgesMap.set(e.target, targetEdges);
+            });
+
             // 2. Execute process in order
             for (const nodeId of executionOrder) {
                 const node = nodeMap.get(nodeId);
@@ -51,7 +59,7 @@ class NodeEngine {
 
                     nodeResults.set(node.id, outputs);
                 } else if (node.type === 'arithmetic' || node.type === 'correlation') {
-                    const targetEdges = edges.filter(e => e.target === node.id);
+                    const targetEdges = targetEdgesMap.get(node.id) || [];
                     const nodeData = node.data as any;
 
                     if (node.type === 'arithmetic') {
@@ -86,7 +94,8 @@ class NodeEngine {
                         }
                     }
                 } else if (node.type === 'dashboardOutput') {
-                    const targetEdge = edges.find(e => e.target === node.id);
+                    const targetEdges = targetEdgesMap.get(node.id) || [];
+                    const targetEdge = targetEdges[0]; // Assuming dashboard output has at most 1 target edge
                     const nodeData = node.data as any;
                     const sourceData = targetEdge ? nodeResults.get(targetEdge.source) : null;
                     const value = sourceData?.output ?? 0;
