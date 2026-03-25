@@ -27,6 +27,16 @@ class NodeEngine {
             const nodeResults = new Map<string, any>();
             const nodeMap = new Map(nodes.map(n => [n.id, n]));
 
+            // ⚡ Bolt: Pre-index edges by target to avoid O(E) filter/find operations inside the O(N) execution loop
+            // Reduces overall time complexity from O(N * E) to O(N + E)
+            const targetEdgesMap = new Map<string, any[]>();
+            edges.forEach(e => {
+                if (!targetEdgesMap.has(e.target)) {
+                    targetEdgesMap.set(e.target, []);
+                }
+                targetEdgesMap.get(e.target)!.push(e);
+            });
+
             // 2. Execute process in order
             for (const nodeId of executionOrder) {
                 const node = nodeMap.get(nodeId);
@@ -51,7 +61,7 @@ class NodeEngine {
 
                     nodeResults.set(node.id, outputs);
                 } else if (node.type === 'arithmetic' || node.type === 'correlation') {
-                    const targetEdges = edges.filter(e => e.target === node.id);
+                    const targetEdges = targetEdgesMap.get(node.id) || [];
                     const nodeData = node.data as any;
 
                     if (node.type === 'arithmetic') {
@@ -86,7 +96,8 @@ class NodeEngine {
                         }
                     }
                 } else if (node.type === 'dashboardOutput') {
-                    const targetEdge = edges.find(e => e.target === node.id);
+                    const targetEdges = targetEdgesMap.get(node.id) || [];
+                    const targetEdge = targetEdges.length > 0 ? targetEdges[0] : undefined;
                     const nodeData = node.data as any;
                     const sourceData = targetEdge ? nodeResults.get(targetEdge.source) : null;
                     const value = sourceData?.output ?? 0;

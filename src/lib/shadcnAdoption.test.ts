@@ -47,14 +47,19 @@ describe('Shadcn Component Adoption Analysis', () => {
     
     console.log(`Analyzing ${allAppFiles.length} application files...`)
     
-    const usageReport = []
+    const usageReport: any[] = []
     let totalShadcnImports = 0
     let filesUsingShadcn = 0
-    const filesNotUsingShadcn = []
+    const filesNotUsingShadcn: string[] = []
     
     for (const file of allAppFiles) {
       const content = fs.readFileSync(file, 'utf-8')
-      const fileUsage = {
+      const fileUsage: {
+        file: string;
+        shadcnImports: string[];
+        hasAnyShadcnUsage: boolean;
+        customUIPatterns: { pattern: string; count: number }[];
+      } = {
         file: file,
         shadcnImports: [],
         hasAnyShadcnUsage: false,
@@ -146,7 +151,7 @@ describe('Shadcn Component Adoption Analysis', () => {
     // Show some examples
     filesWithCustomUI.slice(0, 5).forEach(file => {
       console.log(`🔧 ${file.file}:`)
-      file.customUIPatterns.forEach(pattern => {
+      file.customUIPatterns.forEach((pattern: any) => {
         console.log(`   - ${pattern.pattern} (${pattern.count} instances)`)
       })
     })
