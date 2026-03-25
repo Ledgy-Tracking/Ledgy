@@ -94,6 +94,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                             value={remoteUrl}
                             onChange={(e) => setRemoteUrl(e.target.value)}
                             className="w-full bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:border-emerald-500 focus:ring-emerald-500"
+                            autoComplete="off"
                         />
                     </div>
 
@@ -108,6 +109,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 className="w-full bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:border-emerald-500 focus:ring-emerald-500"
+                                autoComplete="off"
                             />
                         </div>
                         <div>
@@ -120,6 +122,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 focus:border-emerald-500 focus:ring-emerald-500"
+                                autoComplete="off"
                             />
                         </div>
                     </div>
