@@ -17,3 +17,8 @@
 **Vulnerability:** Sensitive inputs (TOTP codes, passphrases, remote database credentials) lacked appropriate `autoComplete` attributes. This could allow password managers or browsers to improperly suggest or save credentials, leading to accidental credential leakage or usability issues preventing proper password manager functionality.
 **Learning:** React components handling sensitive authentication and configuration data must explicitly declare `autoComplete` strategies. For passphrases, use `"new-password"` or `"current-password"` to guide password managers. For TOTP inputs, use `"one-time-code"` to allow OS-level auto-filling from SMS/Mail. For custom credentials (like remote DB URLs/passwords), use `"off"` to prevent incorrect browser auto-filling.
 **Prevention:** Always add explicit `autoComplete` attributes to any `<input type="password">` or sensitive text/number input handling security credentials.
+
+## 2024-05-20 - Missing autoComplete on Sensitive Inputs
+**Vulnerability:** Found multiple sensitive inputs (TOTP code, passphrases, remote database passwords) lacking explicit `autoComplete` attributes.
+**Learning:** React/UI component libraries don't enforce these security attributes by default. Without them, password managers might misclassify fields (e.g., trying to save a TOTP code as a password) or fail to suggest generated passwords where needed. For non-browser-managed credentials like external database sync configs, `autoComplete="off"` is necessary to prevent accidental leakage or autofill overriding.
+**Prevention:** Always explicitly define `autoComplete` for any input handling sensitive material (`new-password`, `current-password`, `one-time-code`, `off`).
