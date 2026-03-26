@@ -128,6 +128,7 @@ export const SetupPage: React.FC = () => {
                                 id="code"
                                 type="text"
                                 maxLength={6}
+                                autoComplete="one-time-code"
                                 value={code}
                                 onChange={handleCodeChange}
                                 disabled={isSubmitting}
@@ -188,6 +189,7 @@ export const SetupPage: React.FC = () => {
                                                 placeholder="Enter a secure passphrase"
                                                 required={rememberMe}
                                                 disabled={isSubmitting}
+                                                autoComplete="new-password"
                                                 className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg pr-9 text-xs text-zinc-900 dark:text-zinc-300 placeholder-zinc-600"
                                             />
                                             <Button

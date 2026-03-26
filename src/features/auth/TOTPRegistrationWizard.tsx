@@ -250,6 +250,7 @@ export const TOTPRegistrationWizard = () => {
                                 onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 placeholder="000000"
                                 maxLength={6}
+                                autoComplete="one-time-code"
                                 className="w-48 text-center text-2xl font-mono tracking-widest border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
                                 aria-label="6-digit TOTP code from authenticator app"
                             />
