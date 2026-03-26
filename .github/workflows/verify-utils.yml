@@ -8,7 +8,7 @@ on:
       - 'src/lib/utils.ts'
       - 'src/lib/utils.test.ts'
       - 'package.json'
-      - 'pnpm-lock.yaml'
+      - 'package-lock.json'
 
 jobs:
   test:
@@ -20,19 +20,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run Vitest tests for utils
-        run: pnpm vitest run src/lib/utils.test.ts
+        run: npx vitest run src/lib/utils.test.ts

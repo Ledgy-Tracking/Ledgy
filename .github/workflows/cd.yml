@@ -25,16 +25,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -43,7 +38,7 @@ jobs:
           target: x86_64-pc-windows-msvc
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0.5.16
@@ -80,16 +75,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -98,7 +88,7 @@ jobs:
           target: x86_64-apple-darwin
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0.5.16
@@ -132,16 +122,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -160,7 +145,7 @@ jobs:
             libssl-dev
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build Tauri app
         uses: tauri-apps/tauri-action@v0.5.16

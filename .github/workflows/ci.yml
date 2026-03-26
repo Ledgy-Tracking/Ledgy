@@ -28,25 +28,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run TypeScript type check
-        run: pnpm tsc --noEmit
+        run: npx tsc --noEmit
 
       - name: Run ESLint
-        run: pnpm run lint
+        run: npm run lint
         continue-on-error: true
 
   # Job 2: Unit Tests with Coverage
@@ -59,22 +54,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Run Vitest tests with coverage
-        run: pnpm run test -- --coverage
+        run: npm run test -- --coverage
         continue-on-error: true
 
       - name: Upload coverage report
@@ -94,22 +84,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
-      - name: Run pnpm audit
-        run: pnpm audit --audit-level=moderate
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
         continue-on-error: true
 
       - name: Setup Rust (for cargo audit)
@@ -143,22 +128,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9.x
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Build application
-        run: pnpm run build
+        run: npm run build
 
       - name: Check build sizes
         run: |
