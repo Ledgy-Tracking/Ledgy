@@ -17,3 +17,7 @@
 ## 2026-03-22 - Optimized widget lookup in React Grid Layout handlers
 **Learning:** In high-frequency layout handlers like `onLayoutChange` in `react-grid-layout`, using `Array.prototype.find` inside a loop over external data arrays causes $O(N^2)$ complexity. This can cause significant main thread blocking and jank when rearranging many widgets.
 **Action:** Always index local state items (e.g., `widgets`) into a `Map` by identifier before the loop. This reduces lookup complexity from $O(N)$ to $O(1)$, converting the overall operation from $O(N^2)$ to $O(N)$.
+
+## 2026-03-27 - Optimize edge resolution in NodeEngine execution loop
+**Learning:** In the NodeEngine execution loop, repeatedly searching for target edges in the `edges` array using `Array.prototype.filter` resulted in O(N * E) complexity, where N is the number of nodes in execution order and E is the total number of edges.
+**Action:** Index the `edges` array into a `Map` keyed by `target` before the loop to reduce lookup time to O(1) per step, achieving an overall complexity of O(N + E). This significantly reduces computation time when working with large node graphs.
