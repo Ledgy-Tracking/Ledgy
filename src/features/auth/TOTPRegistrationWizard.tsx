@@ -246,6 +246,7 @@ export const TOTPRegistrationWizard = () => {
                         <div className="flex justify-center">
                             <Input
                                 type="text"
+                                autoComplete="one-time-code"
                                 value={totpCode}
                                 onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                 placeholder="000000"
