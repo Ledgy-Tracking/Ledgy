@@ -56,9 +56,9 @@ describe('Shadcn Component Adoption Analysis', () => {
       const content = fs.readFileSync(file, 'utf-8')
       const fileUsage = {
         file: file,
-        shadcnImports: [],
+        shadcnImports: [] as string[],
         hasAnyShadcnUsage: false,
-        customUIPatterns: []
+        customUIPatterns: [] as { pattern: string; count: number }[]
       }
       
       // Check for shadcn component imports
