@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useErrorStore } from '../../stores/useErrorStore';
 
 export interface Profile {
     id: string;
@@ -42,9 +43,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
             const errorMessage = error instanceof Error ? error.message : 'Failed to load profiles';
             set({ error: errorMessage, isLoading: false });
             // Dispatch to global error store
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -75,9 +74,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to create profile';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -97,9 +94,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to delete profile';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 }));

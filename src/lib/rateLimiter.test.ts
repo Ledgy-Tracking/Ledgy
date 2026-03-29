@@ -85,15 +85,15 @@ describe('Rate Limiter', () => {
     });
 
     describe('getRateLimitState', () => {
-        it('returns null when no state exists', () => {
-            const state = getRateLimitState('test-account');
+        it('returns null when no state exists', async () => {
+            const state = await getRateLimitState('test-account');
             expect(state).toBeNull();
         });
 
         it('returns state after failed attempt', async () => {
             await recordFailedAttempt('test-account');
             
-            const state = getRateLimitState('test-account');
+            const state = await getRateLimitState('test-account');
             expect(state).not.toBeNull();
             expect(state?.attempts).toBe(1);
         });
@@ -101,7 +101,7 @@ describe('Rate Limiter', () => {
         it('returns null for wrong account', async () => {
             await recordFailedAttempt('account-1');
             
-            const state = getRateLimitState('account-2');
+            const state = await getRateLimitState('account-2');
             expect(state).toBeNull();
         });
 
@@ -114,7 +114,7 @@ describe('Rate Limiter', () => {
             parsed.signature = '';
             localStorage.setItem('ledgy-auth-rate-limit', JSON.stringify(parsed));
             
-            const state = getRateLimitState('test-account');
+            const state = await getRateLimitState('test-account');
             expect(state).toBeNull();
         });
     });
@@ -125,7 +125,7 @@ describe('Rate Limiter', () => {
             
             resetRateLimit('test-account');
             
-            const state = getRateLimitState('test-account');
+            const state = await getRateLimitState('test-account');
             expect(state).toBeNull();
         });
 
@@ -140,13 +140,13 @@ describe('Rate Limiter', () => {
     });
 
     describe('isLockedOut', () => {
-        it('returns false when no state exists', () => {
-            expect(isLockedOut('test-account')).toBe(false);
+        it('returns false when no state exists', async () => {
+            expect(await isLockedOut('test-account')).toBe(false);
         });
 
         it('returns false when not locked', async () => {
             await recordFailedAttempt('test-account');
-            expect(isLockedOut('test-account')).toBe(false);
+            expect(await isLockedOut('test-account')).toBe(false);
         });
 
         it('returns true when locked out', async () => {
@@ -154,7 +154,7 @@ describe('Rate Limiter', () => {
                 await recordFailedAttempt('test-account');
             }
             
-            expect(isLockedOut('test-account')).toBe(true);
+            expect(await isLockedOut('test-account')).toBe(true);
         });
 
         it('returns false after lockout expires', async () => {
@@ -165,7 +165,7 @@ describe('Rate Limiter', () => {
             // Fast-forward past lockout (15 minutes + grace period)
             vi.advanceTimersByTime(16 * 60 * 1000);
             
-            expect(isLockedOut('test-account')).toBe(false);
+            expect(await isLockedOut('test-account')).toBe(false);
         });
     });
 
@@ -173,7 +173,7 @@ describe('Rate Limiter', () => {
         it('returns 0 when not locked out', async () => {
             await recordFailedAttempt('test-account');
             
-            expect(getRemainingLockoutTime('test-account')).toBe(0);
+            expect(await getRemainingLockoutTime('test-account')).toBe(0);
         });
 
         it('returns remaining time when locked out', async () => {
@@ -181,7 +181,7 @@ describe('Rate Limiter', () => {
                 await recordFailedAttempt('test-account');
             }
             
-            const remaining = getRemainingLockoutTime('test-account');
+            const remaining = await getRemainingLockoutTime('test-account');
             expect(remaining).toBeGreaterThan(0);
             expect(remaining).toBeLessThanOrEqual(15 * 60 + 5); // 15 minutes + grace period in seconds
         });
@@ -191,19 +191,19 @@ describe('Rate Limiter', () => {
                 await recordFailedAttempt('test-account');
             }
             
-            const initial = getRemainingLockoutTime('test-account');
+            const initial = await getRemainingLockoutTime('test-account');
             
             // Fast-forward 5 minutes
             vi.advanceTimersByTime(5 * 60 * 1000);
             
-            const later = getRemainingLockoutTime('test-account');
+            const later = await getRemainingLockoutTime('test-account');
             expect(later).toBeLessThan(initial);
         });
     });
 
     describe('canAttempt', () => {
-        it('returns allowed when no state exists', () => {
-            const result = canAttempt('test-account');
+        it('returns allowed when no state exists', async () => {
+            const result = await canAttempt('test-account');
             expect(result.allowed).toBe(true);
             expect(result.waitTime).toBeUndefined();
         });
@@ -214,7 +214,7 @@ describe('Rate Limiter', () => {
             // Fast-forward past backoff delay
             vi.advanceTimersByTime(2000);
             
-            const result = canAttempt('test-account');
+            const result = await canAttempt('test-account');
             expect(result.allowed).toBe(true);
         });
 
@@ -223,7 +223,7 @@ describe('Rate Limiter', () => {
                 await recordFailedAttempt('test-account');
             }
             
-            const result = canAttempt('test-account');
+            const result = await canAttempt('test-account');
             expect(result.allowed).toBe(false);
             expect(result.waitTime).toBeGreaterThan(0);
         });
@@ -232,7 +232,7 @@ describe('Rate Limiter', () => {
             await recordFailedAttempt('test-account');
             
             // Immediately check (within backoff period)
-            const result = canAttempt('test-account');
+            const result = await canAttempt('test-account');
             expect(result.allowed).toBe(false);
             expect(result.waitTime).toBeGreaterThan(0);
         });
@@ -267,8 +267,8 @@ describe('Rate Limiter', () => {
     });
 
     describe('getAttemptCount', () => {
-        it('returns 0 when no state exists', () => {
-            expect(getAttemptCount('test-account')).toBe(0);
+        it('returns 0 when no state exists', async () => {
+            expect(await getAttemptCount('test-account')).toBe(0);
         });
 
         it('returns correct attempt count', async () => {
@@ -276,21 +276,21 @@ describe('Rate Limiter', () => {
             await recordFailedAttempt('test-account');
             await recordFailedAttempt('test-account');
             
-            expect(getAttemptCount('test-account')).toBe(3);
+            expect(await getAttemptCount('test-account')).toBe(3);
         });
     });
 
     describe('getRemainingAttempts', () => {
-        it('returns MAX_ATTEMPTS when no state exists', () => {
-            expect(getRemainingAttempts('test-account')).toBe(5);
+        it('returns MAX_ATTEMPTS when no state exists', async () => {
+            expect(await getRemainingAttempts('test-account')).toBe(5);
         });
 
         it('decreases with each failed attempt', async () => {
             await recordFailedAttempt('test-account');
-            expect(getRemainingAttempts('test-account')).toBe(4);
+            expect(await getRemainingAttempts('test-account')).toBe(4);
             
             await recordFailedAttempt('test-account');
-            expect(getRemainingAttempts('test-account')).toBe(3);
+            expect(await getRemainingAttempts('test-account')).toBe(3);
         });
 
         it('returns 0 when max attempts reached', async () => {
@@ -298,7 +298,7 @@ describe('Rate Limiter', () => {
                 await recordFailedAttempt('test-account');
             }
             
-            expect(getRemainingAttempts('test-account')).toBe(0);
+            expect(await getRemainingAttempts('test-account')).toBe(0);
         });
     });
 
@@ -307,7 +307,7 @@ describe('Rate Limiter', () => {
             await recordFailedAttempt('test-account');
             
             // Simulate page reload by clearing module cache
-            const state = getRateLimitState('test-account');
+            const state = await getRateLimitState('test-account');
             expect(state).not.toBeNull();
             expect(state?.attempts).toBe(1);
         });
@@ -320,8 +320,48 @@ describe('Rate Limiter', () => {
             localStorage.clear();
             await recordFailedAttempt('test-account');
             
-            const state = getRateLimitState('test-account');
+            const state = await getRateLimitState('test-account');
             expect(state?.attempts).toBe(1); // New sequence
+        });
+    });
+
+    describe('Security Fix: Dynamic HMAC Key', () => {
+        it('generates a unique HMAC key if none exists', async () => {
+            const HMAC_KEY_STORAGE_KEY = 'ledgy-rate-limit-hmac-key';
+
+            // Should be empty initially (beforeEach clears localStorage)
+            expect(localStorage.getItem(HMAC_KEY_STORAGE_KEY)).toBeNull();
+
+            // Action that triggers key generation
+            await recordFailedAttempt('test-account');
+
+            const key = localStorage.getItem(HMAC_KEY_STORAGE_KEY);
+            expect(key).not.toBeNull();
+            expect(key?.length).toBeGreaterThan(32); // Base64 encoded 32 bytes
+        });
+
+        it('persists the same HMAC key across attempts', async () => {
+            const HMAC_KEY_STORAGE_KEY = 'ledgy-rate-limit-hmac-key';
+
+            await recordFailedAttempt('test-account');
+            const key1 = localStorage.getItem(HMAC_KEY_STORAGE_KEY);
+
+            await recordFailedAttempt('test-account');
+            const key2 = localStorage.getItem(HMAC_KEY_STORAGE_KEY);
+
+            expect(key1).toBe(key2);
+        });
+
+        it('rejects state signed with a different key', async () => {
+            // 1. Create valid state
+            await recordFailedAttempt('test-account');
+
+            // 2. Change the HMAC key in storage
+            localStorage.setItem('ledgy-rate-limit-hmac-key', 'different-key-that-is-valid-base64-32bytes-long-long');
+
+            // 3. getRateLimitState should now return null because signature verification fails
+            const state = await getRateLimitState('test-account');
+            expect(state).toBeNull();
         });
     });
 });

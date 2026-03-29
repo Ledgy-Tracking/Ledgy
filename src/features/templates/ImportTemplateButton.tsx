@@ -1,5 +1,6 @@
 import React from 'react';
 import { Upload } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useTemplateStore } from '../../stores/useTemplateStore';
 import { useErrorStore } from '../../stores/useErrorStore';
 import { isTauri, readTemplateBrowser, readTemplateTauri, validate_template } from '../../lib/templateImport';
@@ -38,10 +39,11 @@ export const ImportTemplateButton: React.FC<ImportTemplateButtonProps> = ({ prof
     };
 
     return (
-        <button
+        <Button
+            variant="secondary"
+            size="sm"
             onClick={handleImport}
             disabled={isImporting}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm bg-zinc-800 hover:bg-zinc-700 disabled:bg-zinc-800/50 text-zinc-300 rounded transition-colors disabled:cursor-not-allowed"
             title="Import template from .ledgy.json file"
             aria-label="Import template"
         >
@@ -50,6 +52,6 @@ export const ImportTemplateButton: React.FC<ImportTemplateButtonProps> = ({ prof
             {isImporting && (
                 <span className="ml-1 text-xs text-zinc-500">...</span>
             )}
-        </button>
+        </Button>
     );
 };

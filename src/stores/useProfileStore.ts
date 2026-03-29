@@ -40,9 +40,13 @@ export const useProfileStore = create<ProfileState>()(
                     if (!authState.encryptionKey) {
                         throw new Error('Encryption key not available. Please lock and unlock again.');
                     }
+                    if (!authState.userId) {
+                        throw new Error('User ID not available. Please lock and unlock again.');
+                    }
 
-                    const masterDb = getProfileDb('master');
-                    const profileDocs = await list_profiles(masterDb);
+                    // Use user-scoped database instead of shared master database
+                    const userProfilesDb = getProfileDb(`profiles_${authState.userId}`);
+                    const profileDocs = await list_profiles(userProfilesDb);
 
                     // Decrypt profile metadata using DAL function
                     const profiles = await decryptProfileMetadata(profileDocs, authState.encryptionKey);
@@ -75,7 +79,6 @@ export const useProfileStore = create<ProfileState>()(
             createProfile: async (name: string, description?: string, color?: string, avatar?: string): Promise<string> => {
                 set({ isLoading: true, error: null });
                 try {
-                    const masterDb = getProfileDb('master');
                     const authState = useAuthStore.getState();
 
                     // Stabilization: Ensure we are unlocked before proceeding
@@ -87,9 +90,17 @@ export const useProfileStore = create<ProfileState>()(
                     if (!encryptionKey) {
                         throw new Error('Encryption key is unavailable. Please try locking and unlocking again.');
                     }
+                    
+                    const userId = authState.userId;
+                    if (!userId) {
+                        throw new Error('User ID is unavailable. Please try locking and unlocking again.');
+                    }
+
+                    // Use user-scoped database instead of shared master database
+                    const userProfilesDb = getProfileDb(`profiles_${userId}`);
 
                     // Validate: Prevent duplicate profile names (handles both encrypted and legacy profiles)
-                    const existingProfiles = await list_profiles(masterDb);
+                    const existingProfiles = await list_profiles(userProfilesDb);
                     const authStateCurrent = useAuthStore.getState();
                     const key = authStateCurrent.encryptionKey;
 
@@ -133,7 +144,7 @@ export const useProfileStore = create<ProfileState>()(
                     }
 
                     // Use the DAL function to create the profile with encrypted metadata
-                    const profileId = await create_profile_encrypted(masterDb, encryptedName, encryptedDescription, color, avatar);
+                    const profileId = await create_profile_encrypted(userProfilesDb, encryptedName, encryptedDescription, color, avatar);
 
                     // Initialize the profile database with encrypted metadata
                     const profileDb = getProfileDb(profileId);
@@ -165,8 +176,12 @@ export const useProfileStore = create<ProfileState>()(
                     if (!authState.isUnlocked || !authState.encryptionKey) {
                         throw new Error('Vault must be unlocked to delete a profile.');
                     }
+                    if (!authState.userId) {
+                        throw new Error('User ID not available. Please lock and unlock again.');
+                    }
 
-                    const masterDb = getProfileDb('master');
+                    // Use user-scoped database instead of shared master database
+                    const userProfilesDb = getProfileDb(`profiles_${authState.userId}`);
                     const profileDb = getProfileDb(id);
 
                     // 1. Fetch sync config if exists for this profile
@@ -185,8 +200,8 @@ export const useProfileStore = create<ProfileState>()(
                     const result = await deleteProfileWithRemote(id, remoteConfig, forceLocalOnly);
 
                     if (result.success) {
-                        // 3. Hard-delete the profile record from master DB
-                        await hard_delete_profile(masterDb, id);
+                        // 3. Hard-delete the profile record from user profiles DB
+                        await hard_delete_profile(userProfilesDb, id);
                         await get().fetchProfiles();
 
                         if (get().activeProfileId === id) {

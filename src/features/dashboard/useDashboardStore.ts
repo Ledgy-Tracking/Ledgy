@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useErrorStore } from '../../stores/useErrorStore';
 
 export interface Widget {
     id: string;
@@ -61,9 +62,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to add widget';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -77,9 +76,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to update layout';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -95,9 +92,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to remove widget';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -115,9 +110,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to update widget';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -132,9 +125,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -147,9 +138,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to save dashboard';
             set({ error: errorMessage });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 

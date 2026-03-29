@@ -102,13 +102,14 @@ export async function saveTemplateTauri(
     filename: string
 ): Promise<string | null> {
     try {
-        // Use Function constructor to avoid static analysis resolving the import
-        // This is safe because we're importing from known Tauri packages
-        const importTauriDialog = new Function('return import("@tauri-apps/api/dialog")') as () => Promise<any>;
-        const importTauriFs = new Function('return import("@tauri-apps/api/fs")') as () => Promise<any>;
+        // Use variables for paths to completely bypass Vite's static analysis of import() literals
+        const dialogPath = "@tauri-apps/api/dialog";
+        const fsPath = "@tauri-apps/api/fs";
 
-        const dialogModule = await importTauriDialog();
-        const fsModule = await importTauriFs();
+        // @ts-ignore: Dynamic import for Tauri APIs (ignored by Vite/TypeScript during web builds)
+        const dialogModule = await import(/* @vite-ignore */ dialogPath);
+        // @ts-ignore: Dynamic import for Tauri APIs (ignored by Vite/TypeScript during web builds)
+        const fsModule = await import(/* @vite-ignore */ fsPath);
 
         const filePath = await dialogModule.save({
             filters: [{

@@ -1,5 +1,8 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useDashboardStore } from '../../../stores/useDashboardStore';
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { BarChart3, TrendingUp, Type } from 'lucide-react';
@@ -48,71 +51,77 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
 
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+            className={`bg-gray-50 dark:bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${selected ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'
                 }`}
         >
             {/* Header */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-t-md">
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-zinc-800 rounded-t-md">
                 {getWidgetIcon()}
-                <span className="text-sm font-semibold text-zinc-100">
+                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                     {nodeData.title || 'Dashboard Widget'}
                 </span>
             </div>
 
             {/* Configuration */}
-            <div className="p-3 space-y-3 border-b border-zinc-700">
+            <div className="p-3 space-y-3 border-b border-zinc-300 dark:border-zinc-700">
                 {/* Widget Type */}
                 <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Widget Type:</label>
+                    <Label className="text-xs text-zinc-400 block mb-1">Widget Type:</Label>
                     <div className="flex gap-1">
-                        <button
+                        <Button
                             onClick={() => handleWidgetTypeChange('chart')}
-                            className={`flex-1 p-1.5 rounded border transition-colors ${nodeData.widgetType === 'chart'
-                                ? 'bg-blue-600 border-blue-500 text-white'
-                                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                                }`}
+                            variant={nodeData.widgetType === 'chart' ? 'default' : 'outline'}
+                            size="icon-xs"
+                            className={nodeData.widgetType === 'chart'
+                                ? 'bg-blue-600 border-blue-500 text-zinc-900 dark:text-white'
+                                : 'text-zinc-400'
+                            }
                             title="Chart"
                             aria-label="Chart widget type"
                             aria-pressed={nodeData.widgetType === 'chart'}
                         >
                             <BarChart3 size={14} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => handleWidgetTypeChange('trend')}
-                            className={`flex-1 p-1.5 rounded border transition-colors ${nodeData.widgetType === 'trend'
-                                ? 'bg-emerald-600 border-emerald-500 text-white'
-                                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                                }`}
+                            variant={nodeData.widgetType === 'trend' ? 'default' : 'outline'}
+                            size="icon-xs"
+                            className={nodeData.widgetType === 'trend'
+                                ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white'
+                                : 'text-zinc-400'
+                            }
                             title="Trend"
                             aria-label="Trend widget type"
                             aria-pressed={nodeData.widgetType === 'trend'}
                         >
                             <TrendingUp size={14} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={() => handleWidgetTypeChange('text')}
-                            className={`flex-1 p-1.5 rounded border transition-colors ${nodeData.widgetType === 'text'
-                                ? 'bg-purple-600 border-purple-500 text-white'
-                                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                                }`}
+                            variant={nodeData.widgetType === 'text' ? 'default' : 'outline'}
+                            size="icon-xs"
+                            className={nodeData.widgetType === 'text'
+                                ? 'bg-purple-600 border-purple-500 text-zinc-900 dark:text-white'
+                                : 'text-zinc-400'
+                            }
                             title="Text"
                             aria-label="Text widget type"
                             aria-pressed={nodeData.widgetType === 'text'}
                         >
                             <Type size={14} />
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
                 {/* Title */}
                 <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Widget Title:</label>
-                    <input
+                    <Label className="text-xs text-zinc-400 block mb-1">Widget Title:</Label>
+                    <Input
                         type="text"
                         value={nodeData.title || ''}
                         onChange={(e) => handleTitleChange(e.target.value)}
                         placeholder="Enter widget title..."
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                 </div>
             </div>

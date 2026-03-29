@@ -1,17 +1,9 @@
 // Browser-native WebCrypto implementation for AES-256-GCM, HKDF, and PBKDF2
 import { useErrorStore } from '../stores/useErrorStore';
 
-/**
- * Shared HKDF salt used for deriving the vault encryption key from a TOTP secret.
- * This is a protocol constant, not a secret (RFC 5869 Section 3.1).
- * @see https://tools.ietf.org/html/rfc5869
- */
-export const HKDF_SALT = 'ledgy-salt-v1';
-
-/**
- * Pre-encoded HKDF salt for legacy support.
- */
-export const HKDF_SALT_BYTES = new TextEncoder().encode(HKDF_SALT);
+// Shared encoder and decoder instances for performance
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
 
 /** Serializable form of a passphrase-encrypted TOTP secret (stored in localStorage). */
 export interface EncryptedSecret {
@@ -41,8 +33,10 @@ export async function generateAESKey(): Promise<CryptoKey> {
     }
 }
 
-export async function deriveKeyFromTotp(totpSecretBytes: Uint8Array, salt: Uint8Array): Promise<CryptoKey> {
+export async function deriveKeyFromTotp(totpSecretBytes: Uint8Array, salt?: Uint8Array): Promise<{ key: CryptoKey; salt: Uint8Array }> {
     try {
+        const actualSalt = salt || crypto.getRandomValues(new Uint8Array(16));
+
         // 1. Convert secret to key material
         const secretKeyMaterial = await crypto.subtle.importKey(
             "raw",
@@ -53,11 +47,11 @@ export async function deriveKeyFromTotp(totpSecretBytes: Uint8Array, salt: Uint8
         );
 
         // 2. Derive AES-256-GCM key
-        return await crypto.subtle.deriveKey(
+        const key = await crypto.subtle.deriveKey(
             {
                 name: "HKDF",
                 hash: "SHA-256",
-                salt: salt,
+                salt: actualSalt,
                 info: new Uint8Array(), // Empty info array
             },
             secretKeyMaterial,
@@ -65,6 +59,8 @@ export async function deriveKeyFromTotp(totpSecretBytes: Uint8Array, salt: Uint8
             false, // extractable
             ["encrypt", "decrypt"]
         );
+
+        return { key, salt: actualSalt };
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to derive key from TOTP secret';
         useErrorStore.getState().dispatchError(errorMessage, 'error');
@@ -87,7 +83,6 @@ export async function deriveKeyFromTotp(totpSecretBytes: Uint8Array, salt: Uint8
  */
 export async function deriveKeyFromPassphrase(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
     try {
-        const encoder = new TextEncoder();
         const keyMaterial = await crypto.subtle.importKey(
             'raw',
             encoder.encode(passphrase),
@@ -116,7 +111,6 @@ export async function deriveKeyFromPassphrase(passphrase: string, salt: Uint8Arr
 
 export async function encryptPayload(key: CryptoKey, plaintext: string): Promise<{ iv: number[], ciphertext: ArrayBuffer }> {
     try {
-        const encoder = new TextEncoder();
         const data = encoder.encode(plaintext);
         const iv = crypto.getRandomValues(new Uint8Array(12));
 
@@ -151,11 +145,30 @@ export async function decryptPayload(key: CryptoKey, iv: Uint8Array, ciphertext:
             ciphertext
         );
 
-        const decoder = new TextDecoder();
         return decoder.decode(decrypted);
     } catch (error) {
         // GCM auth tag verification failure means tampering or wrong key
         const errorMessage = error instanceof Error ? 'Decryption failed: invalid key or tampered data' : 'Decryption failed';
+        useErrorStore.getState().dispatchError(errorMessage, 'error');
+        throw error;
+    }
+}
+
+/**
+ * Derives a stable user identifier from TOTP secret for profile isolation.
+ * Uses SHA-256 to create a deterministic but privacy-preserving user ID.
+ * 
+ * @param totpSecret - Base32 TOTP secret string
+ * @returns Hex string user identifier
+ */
+export async function deriveUserIdFromSecret(totpSecret: string): Promise<string> {
+    try {
+        const secretBytes = encoder.encode(totpSecret);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', secretBytes);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to derive user ID';
         useErrorStore.getState().dispatchError(errorMessage, 'error');
         throw error;
     }

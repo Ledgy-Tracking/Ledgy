@@ -9,10 +9,15 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../components/ui/dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Label } from '../../components/ui/label';
+import { Card, CardContent } from '../../components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
+import { useForm } from 'react-hook-form';
 
-interface SchemaBuilderProps {
-    projectId: string;
-    onClose: () => void;
+interface SchemaBuilderFormValues {
+    name: string;
 }
 
 export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose }) => {
@@ -36,9 +41,20 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
 
     const [patternError, setPatternError] = useState<Record<number, string | null>>({});
 
+    const form = useForm<SchemaBuilderFormValues>({
+        defaultValues: {
+            name: '',
+        },
+    });
+
     useEffect(() => {
         initCreate(projectId);
     }, [projectId, initCreate]);
+
+    // Sync form value with draftName
+    useEffect(() => {
+        form.setValue('name', draftName);
+    }, [draftName, form]);
 
     // Filter schemas to show as potential relation targets, excluding the current schema (self-target prevention)
     const availableLedgers = schemas
@@ -68,8 +84,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         });
     };
 
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSave = async (data: SchemaBuilderFormValues) => {
         if (!activeProfileId) {
             const msg = 'No active profile. Please select a profile before saving.';
             useSchemaBuilderStore.setState({ error: msg });
@@ -89,50 +104,62 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
 
     return (
         <Dialog open={true} onOpenChange={onClose}>
+            <TooltipProvider>
             <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Create Ledger Schema</DialogTitle>
                     <DialogDescription>Define the structure of your new ledger.</DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSave} className="space-y-6 mt-4">
-                    {error && (
-                        <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
-                            <p className="text-red-700 dark:text-red-500 text-sm">{error}</p>
-                        </div>
-                    )}
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6 mt-4">
+                        {error && (
+                            <Card className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
+                                <CardContent>
+                                    <p className="text-red-700 dark:text-red-500 text-sm">{error}</p>
+                                </CardContent>
+                            </Card>
+                        )}
 
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
-                                Schema Name
-                            </label>
-                            <Input
-                                required
-                                value={draftName}
-                                onChange={(e) => setDraftName(e.target.value)}
-                                placeholder="e.g. Coffee Tracker, Sleep Log"
+                        <div className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                rules={{ required: 'Schema name is required' }}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="block text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                                            Schema Name
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                {...field}
+                                                placeholder="e.g. Coffee Tracker, Sleep Log"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                        </div>
 
-                        <div>
-                            <div className="flex items-center justify-between mb-2">
-                                <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                                    Schema Fields
-                                </label>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={addField}
-                                    className="text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400"
-                                >
-                                    <Plus size={14} className="mr-1" /> Add Field
-                                </Button>
-                            </div>
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <Label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                                        Schema Fields
+                                    </Label>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={addField}
+                                        className="text-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400"
+                                    >
+                                        <Plus size={14} className="mr-1" /> Add Field
+                                    </Button>
+                                </div>
 
-                            <div className="space-y-2">
-                                {draftFields.map((field, index) => (
+                                <div className="space-y-2">
+                                    {draftFields.map((field, index) => (
                                     <div
                                         key={index}
                                         className="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden"
@@ -140,22 +167,26 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                         {/* Main controls row */}
                                         <div className="flex items-center gap-2 p-3">
                                             <div className="flex flex-col gap-1">
-                                                <button
+                                                <Button
                                                     type="button"
                                                     onClick={() => handleMoveField(index, 'up')}
                                                     disabled={index === 0}
-                                                    className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                                 >
                                                     <ChevronUp size={14} />
-                                                </button>
-                                                <button
+                                                </Button>
+                                                <Button
                                                     type="button"
                                                     onClick={() => handleMoveField(index, 'down')}
                                                     disabled={index === draftFields.length - 1}
-                                                    className="p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                                                 >
                                                     <ChevronDown size={14} />
-                                                </button>
+                                                </Button>
                                             </div>
 
                                             <Input
@@ -216,15 +247,19 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 )
                                             )}
 
-                                            <label className="flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400 ml-2">
-                                                <input
-                                                    type="checkbox"
+                                            <div className="flex items-center gap-1 ml-2">
+                                                <Checkbox
+                                                    id={`field-required-${index}`}
                                                     checked={field.required}
-                                                    onChange={(e) => updateField(index, { required: e.target.checked })}
-                                                    className="rounded border-zinc-300 text-emerald-500 focus:ring-emerald-500"
+                                                    onCheckedChange={(checked) => updateField(index, { required: checked === true })}
                                                 />
-                                                Required
-                                            </label>
+                                                <Label 
+                                                    htmlFor={`field-required-${index}`}
+                                                    className="text-xs text-zinc-500 dark:text-zinc-400 cursor-pointer"
+                                                >
+                                                    Required
+                                                </Label>
+                                            </div>
 
                                             <Button
                                                 type="button"
@@ -265,10 +300,14 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 <div className="flex flex-col gap-1 flex-1 mt-2">
                                                     <span className="flex items-center gap-1">
                                                         Pattern (RegEx)
-                                                        {/* TODO: replace with Tooltip component when installed */}
-                                                        <span title="JavaScript RegExp source string, e.g. '^[A-Z]' matches strings starting with a capital letter. No leading/trailing delimiters.">
-                                                            <Info size={12} className="text-zinc-400 cursor-help" />
-                                                        </span>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Info size={12} className="text-zinc-400 cursor-help" />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="right" className="max-w-xs">
+                                                                JavaScript RegExp source string, e.g. '^[A-Z]' matches strings starting with a capital letter. No leading/trailing delimiters.
+                                                            </TooltipContent>
+                                                        </Tooltip>
                                                     </span>
                                                     <Input
                                                         type="text"
@@ -328,10 +367,14 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 <div className="flex flex-col gap-1 mt-2">
                                                     <span className="flex items-center gap-1">
                                                         Date Format
-                                                        {/* TODO: replace with Tooltip component when installed */}
-                                                        <span title="Specify the expected date format. Leave empty to accept any valid date string.">
-                                                            <Info size={12} className="text-zinc-400 cursor-help" />
-                                                        </span>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Info size={12} className="text-zinc-400 cursor-help" />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="right" className="max-w-xs">
+                                                                Specify the expected date format. Leave empty to accept any valid date string.
+                                                            </TooltipContent>
+                                                        </Tooltip>
                                                     </span>
                                                     <Select
                                                         value={field.dateFormat ?? '__none__'}
@@ -349,7 +392,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 </div>
                                                 <label className="flex flex-col gap-1 mt-2">
                                                     Min Date
-                                                    <input
+                                                    <Input
                                                         type="date"
                                                         className="h-7 text-xs bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded px-2"
                                                         value={field.dateMin ?? ''}
@@ -358,7 +401,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 </label>
                                                 <label className="flex flex-col gap-1 mt-2">
                                                     Max Date
-                                                    <input
+                                                    <Input
                                                         type="date"
                                                         className="h-7 text-xs bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded px-2"
                                                         value={field.dateMax ?? ''}
@@ -392,7 +435,9 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                         </Button>
                     </div>
                 </form>
+            </Form>
             </DialogContent>
+            </TooltipProvider>
         </Dialog>
     );
 };

@@ -25,10 +25,20 @@ class NodeEngine {
             // 1. Identify valid execution order
             const executionOrder = this.getExecutionOrder(nodes as any[], edges as any[]);
             const nodeResults = new Map<string, any>();
+            const nodeMap = new Map(nodes.map(n => [n.id, n]));
+
+            // Pre-index edges by target to avoid O(E) filter in loop
+            const targetEdgesMap = new Map<string, any[]>();
+            for (const edge of edges) {
+                if (!targetEdgesMap.has(edge.target)) {
+                    targetEdgesMap.set(edge.target, []);
+                }
+                targetEdgesMap.get(edge.target)!.push(edge);
+            }
 
             // 2. Execute process in order
             for (const nodeId of executionOrder) {
-                const node = nodes.find(n => n.id === nodeId);
+                const node = nodeMap.get(nodeId);
                 if (!node) continue;
 
                 if (node.type === 'ledgerSource') {
@@ -50,7 +60,7 @@ class NodeEngine {
 
                     nodeResults.set(node.id, outputs);
                 } else if (node.type === 'arithmetic' || node.type === 'correlation') {
-                    const targetEdges = edges.filter(e => e.target === node.id);
+                    const targetEdges = targetEdgesMap.get(node.id) || [];
                     const nodeData = node.data as any;
 
                     if (node.type === 'arithmetic') {
@@ -85,7 +95,7 @@ class NodeEngine {
                         }
                     }
                 } else if (node.type === 'dashboardOutput') {
-                    const targetEdge = edges.find(e => e.target === node.id);
+                    const targetEdge = (targetEdgesMap.get(node.id) || [])[0];
                     const nodeData = node.data as any;
                     const sourceData = targetEdge ? nodeResults.get(targetEdge.source) : null;
                     const value = sourceData?.output ?? 0;

@@ -53,9 +53,9 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
             <div
                 ref={ref}
                 className={cn(
-                    'relative flex shrink-0 items-center justify-center rounded-full text-white font-medium overflow-hidden shadow-sm selection:bg-transparent',
+                    'relative flex shrink-0 items-center justify-center rounded-full text-zinc-900 dark:text-white font-medium overflow-hidden shadow-sm selection:bg-transparent',
                     sizeClasses[size],
-                    !src || imgError ? color : 'bg-zinc-800',
+                    !src || imgError ? color : 'bg-gray-100 dark:bg-zinc-800',
                     className
                 )}
                 {...props}

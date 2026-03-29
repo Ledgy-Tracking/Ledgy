@@ -1,12 +1,16 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { useErrorStore } from '../../stores/useErrorStore';
+import { useProfileStore } from '../../stores/useProfileStore';
+import { useProfileStore as useProfileStoreFeature } from '../profiles/useProfileStore';
+import { destroyAllDatabases } from '../../lib/db';
 import {
     deriveKeyFromTotp,
     deriveKeyFromPassphrase,
     encryptPayload,
     decryptPayload,
-    HKDF_SALT_BYTES,
     EncryptedSecret,
+    deriveUserIdFromSecret,
 } from '../../lib/crypto';
 import { decodeSecret, encodeSecret, verifyTOTP } from '../../lib/totp';
 import {
@@ -16,6 +20,9 @@ import {
     getRemainingLockoutTime,
     cleanupExpiredEntries,
 } from '../../lib/rateLimiter';
+
+/** Pre-encoded HKDF salt for legacy support. Newer profiles use a unique generated salt. */
+const LEGACY_HKDF_SALT_BYTES = new TextEncoder().encode('ledgy-salt-v1');
 
 // ---------------------------------------------------------------------------
 // Session expiry options (shown as a dropdown in the unlock UI)
@@ -57,6 +64,8 @@ interface AuthState {
     // ----- Volatile (never persisted) -----
     isUnlocked: boolean;
     encryptionKey: CryptoKey | null;
+    /** Stable user identifier derived from TOTP secret for profile isolation */
+    userId: string | null;
     /** True when app starts with a passphrase-protected secret — UnlockPage shows passphrase prompt. */
     needsPassphrase: boolean;
     // Zustand store topology (Story 1-3)
@@ -95,6 +104,7 @@ export const useAuthStore = create<AuthState>()(
             encryptedTotpSecret: null,
             isUnlocked: false,
             encryptionKey: null,
+            userId: null,
             rememberMe: false,
             rememberMeExpiry: null,
             rememberMeExpiryMs: null,
@@ -124,6 +134,7 @@ export const useAuthStore = create<AuthState>()(
                     set({
                         isUnlocked: false,
                         encryptionKey: null,
+                        userId: null,
                         rememberMeExpiry: null,
                     });
                     // Note: We don't change `needsPassphrase` or clear secrets. The user either needs to enter
@@ -157,21 +168,17 @@ export const useAuthStore = create<AuthState>()(
                         console.warn('unlock() called but totpSecret is null — a passphrase session may be active');
                     }
                     set({ isLoading: false, error: 'No TOTP secret found. Please complete setup first.' });
-                    import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                        useErrorStore.getState().dispatchError('No TOTP secret found', 'error');
-                    });
+                    useErrorStore.getState().dispatchError('No TOTP secret found', 'error');
                     return false;
                 }
 
                 // Check rate limit before attempting unlock
-                const rateLimit = canAttempt('default-account');
+                const rateLimit = await canAttempt('default-account');
                 if (!rateLimit.allowed && rateLimit.waitTime) {
                     const minutes = Math.ceil(rateLimit.waitTime / 60);
                     const errorMessage = `Too many failed attempts. Please wait ${minutes} minute${minutes > 1 ? 's' : ''} before trying again.`;
                     set({ isLoading: false, error: errorMessage });
-                    import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                        useErrorStore.getState().dispatchError(errorMessage, 'error');
-                    });
+                    useErrorStore.getState().dispatchError(errorMessage, 'error');
                     return false;
                 }
 
@@ -182,8 +189,8 @@ export const useAuthStore = create<AuthState>()(
                     if (isValid) {
                         // Reset rate limit on success
                         resetRateLimit('default-account');
-                        const hkdfSalt = salt ? decodeSecret(salt) : HKDF_SALT_BYTES;
-                        const key = await deriveKeyFromTotp(rawSecret, hkdfSalt);
+                        const hkdfSalt = salt ? decodeSecret(salt) : LEGACY_HKDF_SALT_BYTES;
+                        const { key } = await deriveKeyFromTotp(rawSecret, hkdfSalt);
 
                         const expiryTimestamp =
                             remember && expiryMs != null ? Date.now() + expiryMs : null;
@@ -200,9 +207,11 @@ export const useAuthStore = create<AuthState>()(
                                 ciphertext: Array.from(new Uint8Array(ciphertext)),
                                 pbkdf2Salt: Array.from(pbkdf2Salt),
                             };
+                            const userId = await deriveUserIdFromSecret(totpSecret);
                             set({
                                 isUnlocked: true,
                                 encryptionKey: key,
+                                userId,
                                 rememberMe: remember,
                                 encryptedTotpSecret: encrypted,
                                 totpSecret: null, // Remove plaintext; encrypted version takes over
@@ -213,9 +222,11 @@ export const useAuthStore = create<AuthState>()(
                                 error: null,
                             });
                         } else {
+                            const userId = await deriveUserIdFromSecret(totpSecret);
                             set({
                                 isUnlocked: true,
                                 encryptionKey: key,
+                                userId,
                                 rememberMe: remember && !!passphrase,
                                 encryptedTotpSecret: null,
                                 rememberMeExpiry: expiryTimestamp,
@@ -230,7 +241,7 @@ export const useAuthStore = create<AuthState>()(
 
                     // Failed attempt - record for rate limiting
                     await recordFailedAttempt('default-account');
-                    const remaining = getRemainingLockoutTime('default-account');
+                    const remaining = await getRemainingLockoutTime('default-account');
 
                     let errorMessage = 'Invalid TOTP code. Please try again.';
                     if (remaining > 0) {
@@ -239,9 +250,7 @@ export const useAuthStore = create<AuthState>()(
                     }
 
                     set({ isLoading: false, error: errorMessage });
-                    import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                        useErrorStore.getState().dispatchError(errorMessage, 'error');
-                    });
+                    useErrorStore.getState().dispatchError(errorMessage, 'error');
                     return false;
                 } catch (error) {
                     if (import.meta.env.DEV) {
@@ -249,9 +258,7 @@ export const useAuthStore = create<AuthState>()(
                     }
                     const errorMessage = error instanceof Error ? error.message : 'Invalid TOTP code';
                     set({ isLoading: false, error: errorMessage });
-                    import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                        useErrorStore.getState().dispatchError(errorMessage, 'error');
-                    });
+                    useErrorStore.getState().dispatchError(errorMessage, 'error');
                     return false;
                 }
 
@@ -270,15 +277,17 @@ export const useAuthStore = create<AuthState>()(
                     const ciphertext = new Uint8Array(encryptedTotpSecret.ciphertext).buffer;
                     const totpSecret = await decryptPayload(passphraseKey, iv, ciphertext);
 
-                    const hkdfSalt = salt ? decodeSecret(salt) : HKDF_SALT_BYTES;
-                    const key = await deriveKeyFromTotp(decodeSecret(totpSecret), hkdfSalt);
+                    const hkdfSalt = salt ? decodeSecret(salt) : LEGACY_HKDF_SALT_BYTES;
+                    const { key } = await deriveKeyFromTotp(decodeSecret(totpSecret), hkdfSalt);
 
                     // Compute a fresh expiry using the stored duration so the session
                     // doesn't become eternal after the previous one expired.
                     const newExpiry = rememberMeExpiryMs !== null ? Date.now() + rememberMeExpiryMs : null;
+                    const userId = await deriveUserIdFromSecret(totpSecret);
                     set({
                         isUnlocked: true,
                         encryptionKey: key,
+                        userId,
                         // Restore secret in volatile memory so TOTP verification still works
                         // within this session; partialize excludes it from storage when
                         // encryptedTotpSecret is present (see partialize below).
@@ -307,9 +316,8 @@ export const useAuthStore = create<AuthState>()(
                     const isValid = await verifyTOTP(rawSecret, code);
 
                     if (isValid) {
-                        const saltBytes = crypto.getRandomValues(new Uint8Array(16));
-                        const saltBase32 = encodeSecret(saltBytes);
-                        const key = await deriveKeyFromTotp(rawSecret, saltBytes);
+                        const { key, salt: generatedSalt } = await deriveKeyFromTotp(rawSecret);
+                        const saltBase32 = encodeSecret(generatedSalt);
 
                         const expiryTimestamp =
                             remember && expiryMs != null ? Date.now() + expiryMs : null;
@@ -324,11 +332,13 @@ export const useAuthStore = create<AuthState>()(
                                 ciphertext: Array.from(new Uint8Array(ciphertext)),
                                 pbkdf2Salt: Array.from(pbkdf2Salt),
                             };
+                            const userId = await deriveUserIdFromSecret(secret);
                             set({
                                 totpSecret: null,
                                 encryptedTotpSecret: encrypted,
                                 isUnlocked: true,
                                 encryptionKey: key,
+                                userId,
                                 rememberMe: remember,
                                 salt: saltBase32,
                                 rememberMeExpiry: expiryTimestamp,
@@ -336,11 +346,13 @@ export const useAuthStore = create<AuthState>()(
                                 needsPassphrase: false,
                             });
                         } else {
+                            const userId = await deriveUserIdFromSecret(secret);
                             set({
                                 totpSecret: secret,
                                 encryptedTotpSecret: null,
                                 isUnlocked: true,
                                 encryptionKey: key,
+                                userId,
                                 rememberMe: remember && !!passphrase,
                                 salt: saltBase32,
                                 rememberMeExpiry: expiryTimestamp,
@@ -361,21 +373,18 @@ export const useAuthStore = create<AuthState>()(
             lock: async () => {
                 // Preserve rememberMe preference so the user's choice persists across locks.
                 // Only clear the active session credentials.
-                set({ isUnlocked: false, encryptionKey: null });
+                set({ isUnlocked: false, encryptionKey: null, userId: null });
 
                 // Memory Sweep: Clear the global profile registry and dependent stores
-                const { useProfileStore } = await import('../profiles/useProfileStore');
-                useProfileStore.getState().clearActiveProfile();
-                useProfileStore.setState({ profiles: [] });
+                useProfileStoreFeature.getState().clearActiveProfile();
+                useProfileStoreFeature.setState({ profiles: [] });
             },
 
             reset: async () => {
                 // Destroy all IndexedDB profile databases so a new account starts clean
-                const { destroyAllDatabases } = await import('../../lib/db');
                 await destroyAllDatabases();
 
                 // Clear the real profile store (used by ProfileSelector)
-                const { useProfileStore } = await import('../../stores/useProfileStore');
                 useProfileStore.setState({ profiles: [], activeProfileId: null });
                 localStorage.removeItem('ledgy-profile-storage');
 
@@ -384,6 +393,7 @@ export const useAuthStore = create<AuthState>()(
                     encryptedTotpSecret: null,
                     isUnlocked: false,
                     encryptionKey: null,
+                    userId: null,
                     rememberMe: false,
                     rememberMeExpiry: null,
                     rememberMeExpiryMs: null,
