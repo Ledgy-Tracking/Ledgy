@@ -226,10 +226,10 @@ interface WidgetContentProps {
 }
 
 const WidgetContent: React.FC<WidgetContentProps> = ({ widget }) => {
-    const { nodes } = useNodeStore();
-
-    // Find the source node for this widget (Story 4-5, AC 1 & 3)
-    const sourceNode = nodes.find(n => n.id === widget.nodeId);
+    // Select specific node to prevent unnecessary re-renders when unrelated nodes update
+    const sourceNode = useNodeStore(
+        state => state.nodes.find(n => n.id === widget.nodeId)
+    );
 
     // Extract data from the source node (prefer live computation result)
     const nodeData = (sourceNode?.data || {}) as any;
