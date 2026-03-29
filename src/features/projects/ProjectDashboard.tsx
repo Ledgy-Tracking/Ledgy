@@ -17,7 +17,6 @@ export const ProjectDashboard: React.FC = () => {
     const navigate = useNavigate();
     const { projects, fetchProjects, createProject, deleteProject, isLoading, setActiveProject } = useProjectStore();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [newProjectDesc, setNewProjectDesc] = useState('');
 
     const form = useForm<{ name: string; description: string }>({
         defaultValues: {
@@ -36,7 +35,6 @@ export const ProjectDashboard: React.FC = () => {
         if (profileId && data.name) {
             await createProject(profileId, data.name, data.description);
             form.reset();
-            setNewProjectDesc('');
             setIsCreateModalOpen(false);
         }
     };
