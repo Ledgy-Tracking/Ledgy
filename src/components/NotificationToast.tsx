@@ -1,6 +1,9 @@
 import React from 'react';
 import { useNotificationStore, Notification } from '../stores/useNotificationStore';
 import { Info, CheckCircle, AlertTriangle, X } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export const NotificationToast: React.FC = () => {
     const { notifications, removeNotification } = useNotificationStore();
@@ -20,30 +23,28 @@ const NotificationItem: React.FC<{ notification: Notification; onRemove: (id: st
     const Icon = notification.type === 'success' ? CheckCircle :
         notification.type === 'warning' ? AlertTriangle : Info;
 
-    const bgColor = notification.type === 'success' ? 'bg-emerald-900/90' :
-        notification.type === 'warning' ? 'bg-amber-900/90' : 'bg-blue-900/90';
-
-    const borderColor = notification.type === 'success' ? 'border-emerald-500' :
-        notification.type === 'warning' ? 'border-amber-500' : 'border-blue-500';
-
-    const textColor = notification.type === 'success' ? 'text-emerald-200' :
-        notification.type === 'warning' ? 'text-amber-200' : 'text-blue-200';
-
     return (
-        <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-xl backdrop-blur-md animate-in slide-in-from-left-4 duration-300 ${bgColor} ${borderColor} ${textColor} min-w-[300px] max-w-md`}>
-            <div className="shrink-0">
-                <Icon size={20} />
-            </div>
-            <div className="flex-grow text-sm font-medium">
-                {notification.message}
-            </div>
-            <button
-                onClick={() => onRemove(notification.id)}
-                className="shrink-0 p-1 hover:bg-white/10 rounded transition-colors"
-                aria-label="Close"
-            >
-                <X size={16} />
-            </button>
-        </div>
+        <Alert className={cn(
+            "shadow-xl backdrop-blur-md animate-in slide-in-from-left-4 duration-300 min-w-[300px] max-w-md",
+            notification.type === 'success' 
+                ? 'bg-emerald-900/90 border-emerald-500 text-emerald-200'
+                : notification.type === 'warning'
+                ? 'bg-amber-900/90 border-amber-500 text-amber-200'
+                : 'bg-blue-900/90 border-blue-500 text-blue-200'
+        )}>
+            <Icon className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between pr-2">
+                <span className="text-sm font-medium">{notification.message}</span>
+                <Button
+                    onClick={() => onRemove(notification.id)}
+                    variant="ghost"
+                    size="icon-sm"
+                    className="hover:bg-white/10 ml-2"
+                    aria-label="Close"
+                >
+                    <X size={16} />
+                </Button>
+            </AlertDescription>
+        </Alert>
     );
 };

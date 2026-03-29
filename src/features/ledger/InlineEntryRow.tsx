@@ -2,7 +2,9 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { LedgerSchema, SchemaField, LedgerEntry } from '../../types/ledger';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
+import { Button } from '@/components/ui/button';
 import { RelationCombobox } from './RelationCombobox';
+import { Input } from '@/components/ui/input';
 
 interface InlineEntryRowProps {
     schema: LedgerSchema;
@@ -152,7 +154,7 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
                 <div
                     key={field.name}
                     role="gridcell"
-                    className="p-2 pb-5 relative border-r border-zinc-200 dark:border-zinc-800 last:border-r-0"
+                    className="p-2 pb-5 relative border-r border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 last:border-r-0"
                     style={{ width: 150, flexShrink: 0 }}
                 >
                     <FieldInput
@@ -171,20 +173,22 @@ export const InlineEntryRow: React.FC<InlineEntryRowProps> = ({
             <div role="gridcell" className="p-2" style={{ width: 150, flexShrink: 0 }}>
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-2">
-                        <button
+                        <Button
                             onClick={handleSubmit}
-                            className="px-3 py-1 text-xs bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
+                            size="xs"
+                            className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold"
                             aria-label="Save entry"
                         >
                             Save
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={onCancel}
-                            className="px-3 py-1 text-xs bg-zinc-700 hover:bg-zinc-600 text-zinc-300 rounded transition-colors"
+                            variant="secondary"
+                            size="xs"
                             aria-label="Cancel"
                         >
                             Cancel
-                        </button>
+                        </Button>
                     </div>
                     {errors._form && (
                         <div className="text-red-500 text-[10px] font-medium leading-tight mt-1">
@@ -209,13 +213,13 @@ interface FieldInputProps {
 
 const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLButtonElement, FieldInputProps>(
     ({ field, value, onChange, onKeyDown, error, targetEntries, deletedEntryIds }, ref) => {
-        const baseClasses = `w-full bg-transparent border ${error ? 'border-red-500' : 'border-zinc-700'} rounded px-2 py-1 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all`;
+        const baseClasses = `w-full bg-transparent border ${error ? 'border-red-500' : 'border-zinc-300 dark:border-zinc-700'} rounded px-2 py-1 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all`;
 
         const renderInput = () => {
             switch (field.type) {
                 case 'number':
                     return (
-                        <input
+                        <Input
                             ref={ref as React.RefObject<HTMLInputElement>}
                             type="number"
                             className={baseClasses}
@@ -227,7 +231,7 @@ const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLB
                     );
                 case 'date':
                     return (
-                        <input
+                        <Input
                             ref={ref as React.RefObject<HTMLInputElement>}
                             type="date"
                             className={baseClasses}
@@ -257,7 +261,7 @@ const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLB
                     );
                 default: // text
                     return (
-                        <input
+                        <Input
                             ref={ref as React.RefObject<HTMLInputElement>}
                             type="text"
                             className={baseClasses}

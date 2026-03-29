@@ -4,6 +4,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ErrorBoundary, useErrorHandler } from './ErrorBoundary';
 import { useErrorStore } from '../../stores/useErrorStore';
 import { ErrorToast } from '../../components/ErrorToast';
+import { Button } from '@/components/ui/button';
 
 // Test component that throws an error
 const ThrowErrorComponent: React.FC<{ message?: string }> = ({ message = 'Test error' }) => {
@@ -172,7 +173,7 @@ describe('useErrorHandler', () => {
                 }
             };
             
-            return <button onClick={handleAsyncError}>Trigger Error</button>;
+            return <Button onClick={handleAsyncError}>Trigger Error</Button>;
         };
 
         render(<TestComponent />);
