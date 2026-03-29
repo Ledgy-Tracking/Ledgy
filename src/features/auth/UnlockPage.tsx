@@ -46,7 +46,6 @@ export const UnlockPage: React.FC = () => {
     const isSubmittingRef = useRef(false);
 
     // Passphrase (shown when rememberMe is checked)
-    const [passphrase, setPassphrase] = useState('');
     const [showPassphrase, setShowPassphrase] = useState(false);
 
     // Session expiry (shown when rememberMe is checked)
@@ -84,7 +83,7 @@ export const UnlockPage: React.FC = () => {
     if (isUnlocked) {
         return (
             <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 flex flex-col items-center justify-center p-6 font-sans">
-                <div className="w-full max-w-sm space-y-8 text-center">
+                <div className="w-full max-sm:px-4 max-w-sm space-y-8 text-center">
                     <Card className="p-4 bg-emerald-500/10 rounded-full border border-emerald-500/20 inline-block">
                         <CardContent>
                             <Lock className="w-8 h-8 text-emerald-500" />
@@ -132,7 +131,7 @@ export const UnlockPage: React.FC = () => {
             const selectedExpiry = EXPIRY_OPTIONS.find(o => o.value === expiryOption);
             const expiryMs = selectedExpiry?.ms ?? null;
             const formPassphrase = unlockForm.getValues('passphrase');
-            const success = await unlock(otp, rememberMe, formPassphrase.length > 0 ? formPassphrase : passphrase, expiryMs);
+            const success = await unlock(otp, rememberMe, formPassphrase.length > 0 ? formPassphrase : undefined, expiryMs);
             if (success) {
                 navigate('/profiles');
             } else {
@@ -420,23 +419,23 @@ export const UnlockPage: React.FC = () => {
                             </div>
 
                             <Button
-                            type="submit"
-                            disabled={code.length !== 6 || isSubmitting || (unlockForm.watch('rememberMe') && !unlockForm.watch('passphrase'))}
-                            variant="default"
-                            className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-zinc-500 text-zinc-900 dark:text-white shadow-lg shadow-emerald-500/10"
-                        >
-                            {isSubmitting ? (
-                                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                            ) : (
-                                <>
-                                    <span>Unlock Vault</span>
-                                    <ArrowRight className="w-4 h-4" />
-                                </>
-                            )}
-                        </Button>
-                    </form>
-                </Form>
-            )}
+                                type="submit"
+                                disabled={code.length !== 6 || isSubmitting || (unlockForm.watch('rememberMe') && !unlockForm.watch('passphrase'))}
+                                variant="default"
+                                className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-100 dark:bg-zinc-800 disabled:text-zinc-500 text-zinc-900 dark:text-white shadow-lg shadow-emerald-500/10"
+                            >
+                                {isSubmitting ? (
+                                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                ) : (
+                                    <>
+                                        <span>Unlock Vault</span>
+                                        <ArrowRight className="w-4 h-4" />
+                                    </>
+                                )}
+                            </Button>
+                        </form>
+                    </Form>
+                )}
 
                 <div className="pt-8 text-center space-y-4 flex flex-col items-center">
                     <p className="text-xs text-zinc-600 uppercase tracking-widest font-bold">Secure Local-Only Architecture</p>
