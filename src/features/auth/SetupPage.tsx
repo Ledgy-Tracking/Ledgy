@@ -138,6 +138,7 @@ export const SetupPage: React.FC = () => {
                                             <Input
                                                 {...field}
                                                 type="text"
+                                                autoComplete="one-time-code"
                                                 maxLength={6}
                                                 disabled={isSubmitting}
                                                 placeholder="000000"
@@ -212,6 +213,7 @@ export const SetupPage: React.FC = () => {
                                                                 <Input
                                                                     {...field}
                                                                     type={showPassphrase ? 'text' : 'password'}
+                                                                    autoComplete="new-password"
                                                                     placeholder="Enter a secure passphrase"
                                                                     disabled={isSubmitting}
                                                                     className="pr-10"

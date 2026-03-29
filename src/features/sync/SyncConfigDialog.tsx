@@ -118,6 +118,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                         <Input
                                             type="url"
                                             required
+                                            autoComplete="off"
                                             placeholder="https://your-couchdb-instance.com/db-name"
                                             {...field}
                                             className="bg-background border-border text-foreground focus:border-emerald-500 focus:ring-emerald-500"
@@ -140,6 +141,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                         <FormControl>
                                             <Input
                                                 type="text"
+                                                autoComplete="off"
                                                 placeholder="Admin"
                                                 {...field}
                                                 className="bg-background border-border text-foreground focus:border-emerald-500 focus:ring-emerald-500"
@@ -160,6 +162,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                         <FormControl>
                                             <Input
                                                 type="password"
+                                                autoComplete="off"
                                                 placeholder="••••••••"
                                                 {...field}
                                                 className="bg-background border-border text-foreground focus:border-emerald-500 focus:ring-emerald-500"
