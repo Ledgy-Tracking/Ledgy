@@ -5,6 +5,8 @@ import { FileText, Calendar, Hash, Tag, Type, Trash2, Save, Info } from 'lucide-
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
+import { Badge } from '../ui/badge';
+import { ScrollArea } from '../ui/scroll-area';
 
 export const EntryInspector: React.FC = () => {
     const { selectedEntryId, setSelectedEntryId } = useUIStore();
@@ -65,12 +67,12 @@ export const EntryInspector: React.FC = () => {
                     <FileText size={16} className="text-emerald-500" />
                     <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-500">Entry Inspector</h2>
                 </div>
-                <div className="text-[10px] bg-emerald-500/10 text-emerald-500 px-1.5 py-0.5 rounded font-bold uppercase">
+                <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/30 text-[10px] font-bold uppercase">
                     {entrySchema.name}
-                </div>
+                </Badge>
             </div>
 
-            <div className="flex-1 overflow-auto p-4 space-y-6">
+            <ScrollArea className="flex-1 p-4 space-y-6">
                 <div className="space-y-4">
                     {entrySchema.fields.map((field: any) => (
                         <div key={field.name} className="space-y-1.5">
@@ -111,7 +113,7 @@ export const EntryInspector: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </ScrollArea>
 
             <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 flex gap-2">
                 <Button

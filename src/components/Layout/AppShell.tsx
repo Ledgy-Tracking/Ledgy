@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Outlet, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Settings,
     LogOut,
@@ -171,7 +174,8 @@ export const AppShell: React.FC = () => {
 
                     <nav className="flex-1 overflow-y-auto p-2 space-y-1">
                         {/* Projects */}
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={() => navigate(`/app/${profileId}/projects`)}
                             title="Projects"
                             aria-label="Projects"
@@ -182,14 +186,15 @@ export const AppShell: React.FC = () => {
                         >
                             <FolderKanban size={18} className="shrink-0" />
                             {leftSidebarOpen && <span className="text-sm font-medium">Projects</span>}
-                        </button>
+                        </Button>
 
                         {/* Ledgers for the current project */}
                         {leftSidebarOpen && projectId && projectSchemas.length > 0 && (
                             <div className="pl-4 space-y-0.5">
                                 <p className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Ledgers</p>
                                 {projectSchemas.map(schema => (
-                                    <button
+                                    <Button
+                                        variant="ghost"
                                         key={schema._id}
                                         onClick={() => navigate(`/app/${profileId}/project/${projectId}/ledger/${schema._id}`)}
                                         title={schema.name}
@@ -201,14 +206,15 @@ export const AppShell: React.FC = () => {
                                     >
                                         <Database size={14} className="shrink-0" />
                                         <span className="text-xs font-medium truncate">{schema.name}</span>
-                                    </button>
+                                    </Button>
                                 ))}
                             </div>
                         )}
 
                         {/* Node Forge — requires a project in context */}
                         {projectId && (
-                            <button
+                            <Button
+                                variant="ghost"
                                 onClick={() => navigate(`/app/${profileId}/project/${projectId}/node-forge`)}
                                 title="Node Forge"
                                 aria-label="Node Forge"
@@ -219,11 +225,12 @@ export const AppShell: React.FC = () => {
                             >
                                 <Network size={18} className="shrink-0" />
                                 {leftSidebarOpen && <span className="text-sm font-medium">Node Forge</span>}
-                            </button>
+                            </Button>
                         )}
 
                         {/* Trash */}
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={() => navigate(`/app/${profileId}/trash`)}
                             title="Trash"
                             aria-label="Trash"
@@ -234,7 +241,7 @@ export const AppShell: React.FC = () => {
                         >
                             <Trash2 size={18} className="shrink-0" />
                             {leftSidebarOpen && <span className="text-sm font-medium">Trash</span>}
-                        </button>
+                        </Button>
                     </nav>
 
                     {/* Sidebar Footer */}
@@ -261,7 +268,8 @@ export const AppShell: React.FC = () => {
                                 />
                             </div>
                         )}
-                        <button
+                        <Button
+                            variant="ghost"
                             onClick={() => navigate(`/app/${profileId}/settings`)}
                             title="Settings"
                             aria-label="Settings"
@@ -269,8 +277,9 @@ export const AppShell: React.FC = () => {
                         >
                             <Settings size={18} className="shrink-0" />
                             {leftSidebarOpen && <span className="text-sm font-medium">Settings</span>}
-                        </button>
-                        <button
+                        </Button>
+                        <Button
+                            variant="ghost"
                             onClick={handleLockVault}
                             title="Lock Vault"
                             aria-label="Lock Vault"
@@ -278,7 +287,7 @@ export const AppShell: React.FC = () => {
                         >
                             <LogOut size={18} className="shrink-0" />
                             {leftSidebarOpen && <span className="text-sm font-medium">Lock Vault</span>}
-                        </button>
+                        </Button>
                     </div>
                 </aside>
 
@@ -287,13 +296,14 @@ export const AppShell: React.FC = () => {
                     {/* Header / Toolbar */}
                     <header className="h-14 border-b border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white/50 dark:bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-md z-10 shrink-0">
                         <div className="flex items-center gap-4">
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={toggleLeftSidebar}
-                                className="p-2 hover:bg-zinc-100 dark:hover:bg-gray-50 dark:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
                                 aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
                             >
                                 {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
-                            </button>
+                            </Button>
                             <div className="h-4 w-px bg-zinc-200 dark:bg-gray-100 dark:bg-zinc-800" />
                             <h1 className="text-sm font-semibold text-zinc-900 dark:text-zinc-900 dark:text-zinc-100 truncate">
                                 {activeProfile ? `Ledger: ${profileName}` : 'Select Profile'}
@@ -301,29 +311,31 @@ export const AppShell: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={toggleTheme}
-                                className="p-2 hover:bg-zinc-100 dark:hover:bg-gray-50 dark:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
                                 title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                                 aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                             >
                                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-                            </button>
+                            </Button>
                             <div className="h-4 w-px bg-zinc-200 dark:border-zinc-200 dark:border-zinc-800" />
-                            <button
+                            <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={toggleRightInspector}
-                                className="p-2 hover:bg-zinc-100 dark:hover:bg-gray-50 dark:bg-zinc-900 rounded-lg text-zinc-600 dark:text-zinc-400 transition-colors"
                                 aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
                             >
                                 <PanelRightClose size={18} className={rightInspectorOpen ? '' : 'rotate-180'} />
-                            </button>
+                            </Button>
                         </div>
                     </header>
 
                     {/* Viewport Content */}
-                    <div className="flex-1 overflow-auto bg-zinc-50 dark:bg-zinc-950 p-6">
+                    <ScrollArea className="flex-1 p-6 bg-zinc-50 dark:bg-zinc-950">
                         <Outlet />
-                    </div>
+                    </ScrollArea>
                 </main>
 
                 {/* Right Inspector Panel */}
@@ -360,7 +372,7 @@ export const AppShell: React.FC = () => {
                 {isConflictListOpen && (
                     <div className="fixed inset-0 z-[60] flex justify-end bg-white dark:bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
                         <div className="flex-1" onClick={() => setIsConflictListOpen(false)} />
-                        <div className="w-full max-w-md bg-gray-50 dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+                        <Card className="w-full max-w-md bg-gray-50 dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800 shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
                             <ConflictListSheet
                                 conflicts={conflicts}
                                 onSelectConflict={(c) => {
@@ -369,7 +381,7 @@ export const AppShell: React.FC = () => {
                                 }}
                                 onClose={() => setIsConflictListOpen(false)}
                             />
-                        </div>
+                        </Card>
                     </div>
                 )}
 
@@ -377,6 +389,7 @@ export const AppShell: React.FC = () => {
                 {selectedConflict && (
                     <DiffGuardModal
                         conflict={selectedConflict}
+                        isOpen={!!selectedConflict}
                         onAcceptLocal={() => setSelectedConflict(null)}
                         onAcceptRemote={() => setSelectedConflict(null)}
                         onSkip={() => setSelectedConflict(null)}
@@ -386,7 +399,6 @@ export const AppShell: React.FC = () => {
 
                 {/* ARIA Live Region for Sync Announcements */}
                 <div
-                    role="status"
                     aria-live="polite"
                     aria-atomic="true"
                     className="sr-only"

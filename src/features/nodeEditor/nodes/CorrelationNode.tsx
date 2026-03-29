@@ -1,6 +1,8 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Calculator, AlertCircle } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface CorrelationNodeData {
     label: string;
@@ -73,7 +75,7 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected
 
             {/* Result Display */}
             <div className="px-3 pb-3">
-                <div className="bg-gray-100 dark:bg-zinc-800/50 rounded p-2 border border-zinc-300 dark:border-zinc-700">
+                <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded p-2 border border-zinc-300 dark:border-zinc-700">
                     <div className="text-xs text-zinc-500 mb-1">Pearson r</div>
                     {nodeData.error ? (
                         <div className="flex items-center gap-1.5 text-red-400 text-xs">
@@ -81,7 +83,7 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected
                             <span>{nodeData.error}</span>
                         </div>
                     ) : nodeData.isComputing ? (
-                        <div className="text-amber-400 text-xs animate-pulse">Computing...</div>
+                        <Skeleton className="text-amber-400 text-xs">Computing...</Skeleton>
                     ) : (
                         <div className="flex items-baseline gap-2">
                             <span className={`text-lg font-bold ${getCorrelationColor(nodeData.result)}`}>
@@ -92,7 +94,7 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected
                             </span>
                         </div>
                     )}
-                </div>
+                </Card>
             </div>
 
             {/* Output Port */}

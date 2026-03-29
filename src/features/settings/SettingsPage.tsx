@@ -1,6 +1,8 @@
-import { useUIStore } from '../../stores/useUIStore';
+import { useUIStore, Theme, Density } from '../../stores/useUIStore';
 import { Sun, Moon, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 
 export const SettingsPage = () => {
     const { theme, density, setTheme, setDensity, resetToDefaults } = useUIStore();
@@ -18,9 +20,9 @@ export const SettingsPage = () => {
                     Appearance
                 </h2>
 
-                <div className="bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-lg shadow-sm border border-white/5 divide-y divide-white/5">
+                <Card className="bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl border-white/5 divide-y divide-white/5">
                     {/* Theme Setting */}
-                    <div className="p-4 flex items-center justify-between">
+                    <CardContent className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-gray-100 dark:bg-zinc-800/50 rounded-lg">
                                 {theme === 'dark' ? (
@@ -37,33 +39,23 @@ export const SettingsPage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button
-                                onClick={() => setTheme('light')}
-                                size="sm"
-                                variant={theme === 'light' ? 'default' : 'outline'}
-                                className={theme === 'light'
-                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                                }
-                            >
-                                Light
-                            </Button>
-                            <Button
-                                onClick={() => setTheme('dark')}
-                                size="sm"
-                                variant={theme === 'dark' ? 'default' : 'outline'}
-                                className={theme === 'dark'
-                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                                }
-                            >
-                                Dark
-                            </Button>
+                            <Tabs value={theme} onValueChange={(value: string) => setTheme(value as Theme)}>
+                                <TabsList className="bg-zinc-100 dark:bg-zinc-800">
+                                    <TabsTrigger value="light" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-emerald-500/30">
+                                        <Sun className="w-4 h-4 mr-2" />
+                                        Light
+                                    </TabsTrigger>
+                                    <TabsTrigger value="dark" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-emerald-500/30">
+                                        <Moon className="w-4 h-4 mr-2" />
+                                        Dark
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
                         </div>
-                    </div>
+                    </CardContent>
 
                     {/* Density Setting */}
-                    <div className="p-4 flex items-center justify-between">
+                    <CardContent className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-gray-100 dark:bg-zinc-800/50 rounded-lg">
                                 {density === 'compact' ? (
@@ -80,31 +72,21 @@ export const SettingsPage = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Button
-                                onClick={() => setDensity('comfortable')}
-                                size="sm"
-                                variant={density === 'comfortable' ? 'default' : 'outline'}
-                                className={density === 'comfortable'
-                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                                }
-                            >
-                                Comfortable
-                            </Button>
-                            <Button
-                                onClick={() => setDensity('compact')}
-                                size="sm"
-                                variant={density === 'compact' ? 'default' : 'outline'}
-                                className={density === 'compact'
-                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                                    : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
-                                }
-                            >
-                                Compact
-                            </Button>
+                            <Tabs value={density} onValueChange={(value: string) => setDensity(value as Density)}>
+                                <TabsList className="bg-zinc-100 dark:bg-zinc-800">
+                                    <TabsTrigger value="comfortable" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-emerald-500/30">
+                                        <Maximize2 className="w-4 h-4 mr-2" />
+                                        Comfortable
+                                    </TabsTrigger>
+                                    <TabsTrigger value="compact" className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-emerald-500/30">
+                                        <Minimize2 className="w-4 h-4 mr-2" />
+                                        Compact
+                                    </TabsTrigger>
+                                </TabsList>
+                            </Tabs>
                         </div>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
             </section>
 
             {/* Reset Section */}
@@ -113,19 +95,21 @@ export const SettingsPage = () => {
                     Reset Settings
                 </h2>
 
-                <div className="bg-amber-500/20 border border-amber-500/30 rounded-lg p-4">
-                    <p className="text-sm text-amber-300 mb-4">
-                        Reset all settings to their default values. This action cannot be undone.
-                    </p>
-                    <Button
-                        onClick={resetToDefaults}
-                        variant="outline"
-                        className="bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 font-medium border-amber-600/30"
-                    >
-                        <RotateCcw className="w-4 h-4" />
-                        Reset to Defaults
-                    </Button>
-                </div>
+                <Card className="bg-amber-500/20 border border-amber-500/30">
+                    <CardContent className="p-4">
+                        <p className="text-sm text-amber-300 mb-4">
+                            Reset all settings to their default values. This action cannot be undone.
+                        </p>
+                        <Button
+                            onClick={resetToDefaults}
+                            variant="outline"
+                            className="bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 font-medium border-amber-600/30"
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                            Reset to Defaults
+                        </Button>
+                    </CardContent>
+                </Card>
             </section>
 
             {/* Future Settings Placeholder */}
@@ -134,28 +118,30 @@ export const SettingsPage = () => {
                     Coming Soon
                 </h2>
 
-                <div className="bg-gray-50 dark:bg-zinc-900/30 border border-white/5 rounded-lg p-4">
-                    <p className="text-sm text-zinc-500">
-                        Additional settings will be available in future updates:
-                    </p>
-                    <ul className="mt-2 space-y-1 text-sm text-zinc-500">
-                        <li className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
-                            Language & Locale
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
-                            Notification Preferences
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
-                            Keyboard Shortcuts
-                            <span className="text-xs text-zinc-600">
-                                (Undo: Ctrl/Cmd+Z, Redo: Ctrl/Cmd+Shift+Z)
-                            </span>
-                        </li>
-                    </ul>
-                </div>
+                <Card className="bg-gray-50 dark:bg-zinc-900/30 border-white/5">
+                    <CardContent className="p-4">
+                        <p className="text-sm text-zinc-500">
+                            Additional settings will be available in future updates:
+                        </p>
+                        <ul className="mt-2 space-y-1 text-sm text-zinc-500">
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
+                                Language & Locale
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
+                                Notification Preferences
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
+                                Keyboard Shortcuts
+                                <span className="text-xs text-zinc-600">
+                                    (Undo: Ctrl/Cmd+Z, Redo: Ctrl/Cmd+Shift+Z)
+                                </span>
+                            </li>
+                        </ul>
+                    </CardContent>
+                </Card>
             </section>
         </div>
     );

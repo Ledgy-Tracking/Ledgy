@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import {
     ReactFlow,
     Background,
@@ -212,9 +213,11 @@ export const NodeCanvas: React.FC = () => {
 
             {isLoading && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-white dark:bg-black/20 backdrop-blur-[2px]">
-                    <div className="bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-4 py-2 rounded-lg text-zinc-400 text-sm animate-pulse">
-                        Synchronizing Graph...
-                    </div>
+                    <Card className="bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-4 py-2 rounded-lg text-zinc-400 text-sm animate-pulse">
+                        <CardContent>
+                            Synchronizing Graph...
+                        </CardContent>
+                    </Card>
                 </div>
             )}
         </div>

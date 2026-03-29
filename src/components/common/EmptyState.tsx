@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../ui/button';
 
 interface EmptyStateProps {
     /** Main heading text */
@@ -37,7 +38,6 @@ export function EmptyState({
     return (
         <div
             className={`flex flex-col items-center justify-center p-8 text-center ${className}`}
-            role="status"
             aria-label={title}
         >
             {icon && (
@@ -57,14 +57,14 @@ export function EmptyState({
             )}
 
             {actionLabel && onAction && (
-                <button
-                    type="button"
+                <Button
                     onClick={onAction}
-                    className="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-zinc-900 dark:text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-gray-900 transition-colors"
+                    className="mt-6"
                 >
                     {actionLabel}
-                </button>
+                </Button>
             )}
         </div>
     );
 }
+

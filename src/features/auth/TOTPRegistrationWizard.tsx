@@ -4,6 +4,7 @@ import { useErrorStore } from '../../stores/useErrorStore';
 import { QRCodeDisplay } from './QRCodeDisplay';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import { generateSecret, encodeSecret, generateTOTPURI, generateBackupCodes, getSecondsUntilNextCode } from '../../lib/totp';
 import { Shield, CheckCircle, AlertCircle, RefreshCw, HelpCircle } from 'lucide-react';
 
@@ -177,156 +178,163 @@ export const TOTPRegistrationWizard = () => {
 
             {/* Help Modal */}
             {showHelp && (
-                <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">
-                        What is Two-Factor Authentication?
-                    </h3>
-                    <p className="text-sm text-blue-700 dark:text-blue-400 mb-2">
-                        Two-factor authentication (2FA) adds an extra layer of security to your account.
-                        After entering your password, you'll need to enter a code from your authenticator app.
-                    </p>
-                    <p className="text-sm text-blue-700 dark:text-blue-400">
-                        Popular authenticator apps include: Google Authenticator, Authy, Microsoft Authenticator, and 1Password.
-                    </p>
-                </div>
+                <Card className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <CardContent>
+                        <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                            What is Two-Factor Authentication?
+                        </h3>
+                        <p className="text-sm text-blue-700 dark:text-blue-400 mb-2">
+                            Two-factor authentication (2FA) adds an extra layer of security to your account.
+                            After entering your password, you'll need to enter a code from your authenticator app.
+                        </p>
+                        <p className="text-sm text-blue-700 dark:text-blue-400">
+                            Popular authenticator apps include: Google Authenticator, Authy, Microsoft Authenticator, and 1Password.
+                        </p>
+                    </CardContent>
+                </Card>
             )}
 
             {/* Progress Indicator */}
             {progressIndicator}
 
             {/* Step Content */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-                {/* Step 1: Generate */}
-                {step === 'generate' && (
-                    <div className="space-y-6">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white text-center">
-                            Scan QR Code with Your Authenticator App
-                        </h2>
-                        <QRCodeDisplay
-                            totpUri={totpUri}
-                            secret={secret}
-                            accountName="user@ledgy.app"
-                        />
-                        <div className="flex justify-center">
-                            <Button
-                                onClick={() => setStep('verify')}
-                                variant="default"
-                                className="bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                                Continue to Verification
-                            </Button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Step 2: Verify */}
-                {step === 'verify' && (
-                    <div className="space-y-6">
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white text-center">
-                            Enter Verification Code
-                        </h2>
-                        
-                        {/* Countdown Timer */}
-                        <div className="flex items-center justify-center gap-2">
-                            <div className="text-sm text-gray-600 dark:text-gray-400">
-                                Next code in:
-                            </div>
-                            <div
-                                className={`px-3 py-1 rounded font-mono font-semibold ${
-                                    secondsLeft <= 5
-                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                                }`}
-                            >
-                                {secondsLeft}s
-                            </div>
-                        </div>
-
-                        {/* Code Input */}
-                        <div className="flex justify-center">
-                            <Input
-                                type="text"
-                                value={totpCode}
-                                onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                placeholder="000000"
-                                maxLength={6}
-                                className="w-48 text-center text-2xl font-mono tracking-widest border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
-                                aria-label="6-digit TOTP code from authenticator app"
-                            />
-                        </div>
-
-                        {/* Status */}
-                        {isVerifying && (
-                            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                                Verifying...
-                            </p>
-                        )}
-
-                        {/* Actions */}
-                        <div className="flex justify-center gap-4">
-                            <Button
-                                onClick={handleRegenerate}
-                                variant="ghost"
-                                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                            >
-                                <RefreshCw className="w-4 h-4" />
-                                Rescan QR Code
-                            </Button>
-                        </div>
-                    </div>
-                )}
-
-                {/* Step 3: Success */}
-                {step === 'success' && (
-                    <div className="space-y-6">
-                        <div className="text-center">
-                            <CheckCircle className="w-16 h-16 text-green-600 dark:text-green-400 mx-auto mb-4" />
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                Two-Factor Authentication Enabled!
+            <Card className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                <CardContent>
+                    {/* Step 1: Generate */}
+                    {step === 'generate' && (
+                        <div className="space-y-6">
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white text-center">
+                                Scan QR Code with Your Authenticator App
                             </h2>
+                            <QRCodeDisplay
+                                totpUri={totpUri}
+                                secret={secret}
+                                accountName="user@ledgy.app"
+                            />
+                            <div className="flex justify-center">
+                                <Button
+                                    onClick={() => setStep('verify')}
+                                    variant="default"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                                >
+                                    Continue to Verification
+                                </Button>
+                            </div>
                         </div>
+                    )}
 
-                        {/* Backup Codes */}
-                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                            <div className="flex items-start gap-3 mb-3">
-                                <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
-                                <div>
-                                    <h3 className="font-semibold text-yellow-800 dark:text-yellow-300">
-                                        Save Your Backup Codes
-                                    </h3>
-                                    <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
-                                        These codes can be used to access your account if you lose your authenticator device.
-                                        Store them in a safe place!
-                                    </p>
+                    {/* Step 2: Verify */}
+                    {step === 'verify' && (
+                        <div className="space-y-6">
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white text-center">
+                                Enter Verification Code
+                            </h2>
+                            
+                            {/* Countdown Timer */}
+                            <div className="flex items-center justify-center gap-2">
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    Next code in:
+                                </div>
+                                <div
+                                    className={`px-3 py-1 rounded font-mono font-semibold ${
+                                        secondsLeft <= 5
+                                            ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
+                                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                    }`}
+                                >
+                                    {secondsLeft}s
                                 </div>
                             </div>
-                            
-                            <div className="grid grid-cols-2 gap-2 mb-4">
-                                {backupCodes.map((code, index) => (
-                                    <code
-                                        key={index}
-                                        className="px-3 py-2 bg-white dark:bg-gray-900 rounded font-mono text-sm text-center border border-gray-200 dark:border-gray-700"
-                                    >
-                                        {code}
-                                    </code>
-                                ))}
+
+                            {/* Code Input */}
+                            <div className="flex justify-center">
+                                <Input
+                                    type="text"
+                                    autoComplete="one-time-code"
+                                    value={totpCode}
+                                    onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                    placeholder="000000"
+                                    maxLength={6}
+                                    className="w-48 text-center text-2xl font-mono tracking-widest border-2 border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400"
+                                    aria-label="6-digit TOTP code from authenticator app"
+                                />
                             </div>
 
-                            <Button
-                                onClick={handleCopyBackupCodes}
-                                variant="default"
-                                className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
-                            >
-                                Copy Backup Codes
-                            </Button>
-                        </div>
+                            {/* Status */}
+                            {isVerifying && (
+                                <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                                    Verifying...
+                                </p>
+                            )}
 
-                        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                            You can now use your authenticator app to log in securely.
-                        </p>
-                    </div>
-                )}
-            </div>
+                            {/* Actions */}
+                            <div className="flex justify-center gap-4">
+                                <Button
+                                    onClick={handleRegenerate}
+                                    variant="ghost"
+                                    className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                                >
+                                    <RefreshCw className="w-4 h-4" />
+                                    Rescan QR Code
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 3: Success */}
+                    {step === 'success' && (
+                        <div className="space-y-6">
+                            <div className="text-center">
+                                <CheckCircle className="w-16 h-16 text-green-600 dark:text-green-400 mx-auto mb-4" />
+                                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                                    Two-Factor Authentication Enabled!
+                                </h2>
+                            </div>
+
+                            {/* Backup Codes */}
+                            <Card className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                                <CardContent>
+                                    <div className="flex items-start gap-3 mb-3">
+                                        <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                            <h3 className="font-semibold text-yellow-800 dark:text-yellow-300">
+                                                Save Your Backup Codes
+                                            </h3>
+                                            <p className="text-sm text-yellow-700 dark:text-yellow-400 mt-1">
+                                                These codes can be used to access your account if you lose your authenticator device.
+                                                Store them in a safe place!
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-2 mb-4">
+                                        {backupCodes.map((code, index) => (
+                                            <code
+                                                key={index}
+                                                className="px-3 py-2 bg-white dark:bg-gray-900 rounded font-mono text-sm text-center border border-gray-200 dark:border-gray-700"
+                                            >
+                                                {code}
+                                            </code>
+                                        ))}
+                                    </div>
+
+                                    <Button
+                                        onClick={handleCopyBackupCodes}
+                                        variant="default"
+                                        className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                                    >
+                                        Copy Backup Codes
+                                    </Button>
+                                </CardContent>
+                            </Card>
+
+                            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                                You can now use your authenticator app to log in securely.
+                            </p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     );
 };

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { useErrorStore } from '../../stores/useErrorStore';
+import { useNodeStore } from '../../stores/useNodeStore';
 
 export interface Widget {
     id: string;
@@ -42,6 +43,8 @@ interface DashboardState {
     // Memory Sweep
     clearProfileData: () => void;
 }
+
+const nodeSubscriptions = new Map<string, () => void>();
 
 export const useDashboardStore = create<DashboardState>((set, get) => ({
     // Initial state
@@ -144,17 +147,33 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
 
     // Subscription structure - full wiring in Story 1.5
     subscribeToNodeOutput: (nodeId: string) => {
-        // TODO: Implement actual subscription to useNodeStore in Story 1.5
-        // This is a placeholder for the subscription mechanism
-        console.log(`[DashboardStore] Subscribing to node output: ${nodeId}`);
+        if (nodeSubscriptions.has(nodeId)) {
+            return;
+        }
+
+        const unsubscribe = useNodeStore.subscribe(
+            (state) => state.nodes.find((n) => n.id === nodeId),
+            (node) => {
+                // TODO: Handle node output updates in Story 1.5
+                console.log(`[DashboardStore] Node updated: ${nodeId}`, node);
+            }
+        );
+
+        nodeSubscriptions.set(nodeId, unsubscribe);
     },
 
     unsubscribeFromNodeOutput: (nodeId: string) => {
-        // TODO: Implement actual unsubscription in Story 1.5
-        console.log(`[DashboardStore] Unsubscribing from node output: ${nodeId}`);
+        const unsubscribe = nodeSubscriptions.get(nodeId);
+        if (unsubscribe) {
+            unsubscribe();
+            nodeSubscriptions.delete(nodeId);
+        }
     },
 
     clearProfileData: () => {
+        nodeSubscriptions.forEach((unsubscribe) => unsubscribe());
+        nodeSubscriptions.clear();
+
         set({
             widgets: [],
             layout: { widgets: [] },

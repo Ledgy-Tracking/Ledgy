@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { Zap, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
@@ -78,62 +82,71 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
                     {getStatusIcon()}
                     <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Trigger</span>
                 </div>
-                <button
+                <Button
                     onClick={() => setIsConfigOpen(!isConfigOpen)}
-                    className="p-1 hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
                     title="Configure"
                     aria-label="Configure node"
                     aria-expanded={isConfigOpen}
                 >
                     <Settings size={14} />
-                </button>
+                </Button>
             </div>
 
             {/* Configuration Panel */}
             {isConfigOpen && (
-                <div className="p-3 space-y-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50">
+                <Card className="p-3 space-y-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 rounded-none border-x-0 border-t-0">
                     {/* Ledger Selector */}
                     <div>
-                        <label className="text-xs text-zinc-400 block mb-1">Listen to Ledger:</label>
-                        <select
+                        <Label className="text-xs text-zinc-400 block mb-1">Listen to Ledger:</Label>
+                        <Select
                             value={nodeData.ledgerId || ''}
-                            onChange={(e) => handleLedgerChange(e.target.value)}
-                            className="w-full bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            onValueChange={(value) => handleLedgerChange(value)}
                         >
-                            <option value="">-- Choose a ledger --</option>
-                            {schemas.map(schema => (
-                                <option key={schema._id} value={schema._id}>
-                                    {schema.name}
-                                </option>
-                            ))}
-                        </select>
+                            <SelectTrigger className="w-full bg-gray-50 dark:bg-zinc-900 border-zinc-700 h-8 text-xs">
+                                <SelectValue placeholder="-- Choose a ledger --" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {schemas.map(schema => (
+                                    <SelectItem key={schema._id} value={schema._id}>
+                                        {schema.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* Event Type Selector */}
                     <div>
-                        <label className="text-xs text-zinc-400 block mb-1">Event Type:</label>
+                        <Label className="text-xs text-zinc-400 block mb-1">Event Type:</Label>
                         <div className="flex gap-2">
-                            <button
+                            <Button
                                 onClick={() => handleEventTypeChange('on-create')}
-                                className={`flex-1 px-2 py-1.5 text-xs rounded border transition-colors ${nodeData.eventType === 'on-create'
+                                variant={nodeData.eventType === 'on-create' ? 'default' : 'outline'}
+                                size="xs"
+                                className={nodeData.eventType === 'on-create' 
                                     ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white'
-                                    : 'bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                                    }`}
+                                    : 'text-zinc-400'
+                                }
                             >
                                 On Create
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                                 onClick={() => handleEventTypeChange('on-edit')}
-                                className={`flex-1 px-2 py-1.5 text-xs rounded border transition-colors ${nodeData.eventType === 'on-edit'
+                                variant={nodeData.eventType === 'on-edit' ? 'default' : 'outline'}
+                                size="xs"
+                                className={nodeData.eventType === 'on-edit'
                                     ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white'
-                                    : 'bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-400 hover:border-zinc-600'
-                                    }`}
+                                    : 'text-zinc-400'
+                                }
                             >
                                 On Edit
-                            </button>
+                            </Button>
                         </div>
                     </div>
-                </div>
+                </Card>
             )}
 
             {/* Status Display */}

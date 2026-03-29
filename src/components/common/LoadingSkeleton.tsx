@@ -1,3 +1,5 @@
+import { Skeleton } from '../ui/skeleton';
+
 interface LoadingSkeletonProps {
     /** Number of skeleton items to display */
     count?: number;
@@ -35,15 +37,13 @@ export function LoadingSkeleton({
     return (
         <div
             className={`space-y-3 ${className}`}
-            role="status"
             aria-label={ariaLabel}
             aria-busy="true"
         >
             {Array.from({ length: count }).map((_, index) => (
-                <div
+                <Skeleton
                     key={index}
-                    className={`w-full ${heightClass} bg-gray-200 dark:bg-gray-700 rounded animate-pulse`}
-                    style={{ animationDuration: '1.5s' }}
+                    className={`w-full ${heightClass} rounded`}
                 />
             ))}
             <span className="sr-only">Loading...</span>

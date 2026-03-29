@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 import { Check } from 'lucide-react';
+import { Button } from './button';
 
 export interface ColorPickerProps {
     value?: string;
@@ -36,9 +37,10 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
             {presetColors.map((colorClass) => {
                 const isSelected = value === colorClass;
                 return (
-                    <button
+                    <Button
                         key={colorClass}
-                        type="button"
+                        variant="ghost"
+                        size="icon"
                         role="radio"
                         aria-checked={isSelected}
                         aria-label={`Select color ${colorClass.replace('bg-', '').replace('-500', '')}`}
@@ -52,7 +54,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
                         {isSelected && (
                             <Check className="h-4 w-4 sm:h-5 sm:w-5 text-zinc-900 dark:text-white drop-shadow-md animate-in zoom-in duration-200" />
                         )}
-                    </button>
+                    </Button>
                 );
             })}
         </div>

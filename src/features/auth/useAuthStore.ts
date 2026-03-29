@@ -9,7 +9,6 @@ import {
     deriveKeyFromPassphrase,
     encryptPayload,
     decryptPayload,
-    HKDF_SALT_BYTES,
     EncryptedSecret,
     deriveUserIdFromSecret,
 } from '../../lib/crypto';
@@ -21,6 +20,9 @@ import {
     getRemainingLockoutTime,
     cleanupExpiredEntries,
 } from '../../lib/rateLimiter';
+
+/** Pre-encoded HKDF salt for legacy support. Newer profiles use a unique generated salt. */
+const LEGACY_HKDF_SALT_BYTES = new TextEncoder().encode('ledgy-salt-v1');
 
 // ---------------------------------------------------------------------------
 // Session expiry options (shown as a dropdown in the unlock UI)
@@ -187,8 +189,8 @@ export const useAuthStore = create<AuthState>()(
                     if (isValid) {
                         // Reset rate limit on success
                         resetRateLimit('default-account');
-                        const hkdfSalt = salt ? decodeSecret(salt) : HKDF_SALT_BYTES;
-                        const key = await deriveKeyFromTotp(rawSecret, hkdfSalt);
+                        const hkdfSalt = salt ? decodeSecret(salt) : LEGACY_HKDF_SALT_BYTES;
+                        const { key } = await deriveKeyFromTotp(rawSecret, hkdfSalt);
 
                         const expiryTimestamp =
                             remember && expiryMs != null ? Date.now() + expiryMs : null;
@@ -275,8 +277,8 @@ export const useAuthStore = create<AuthState>()(
                     const ciphertext = new Uint8Array(encryptedTotpSecret.ciphertext).buffer;
                     const totpSecret = await decryptPayload(passphraseKey, iv, ciphertext);
 
-                    const hkdfSalt = salt ? decodeSecret(salt) : HKDF_SALT_BYTES;
-                    const key = await deriveKeyFromTotp(decodeSecret(totpSecret), hkdfSalt);
+                    const hkdfSalt = salt ? decodeSecret(salt) : LEGACY_HKDF_SALT_BYTES;
+                    const { key } = await deriveKeyFromTotp(decodeSecret(totpSecret), hkdfSalt);
 
                     // Compute a fresh expiry using the stored duration so the session
                     // doesn't become eternal after the previous one expired.
@@ -314,9 +316,8 @@ export const useAuthStore = create<AuthState>()(
                     const isValid = await verifyTOTP(rawSecret, code);
 
                     if (isValid) {
-                        const saltBytes = crypto.getRandomValues(new Uint8Array(16));
-                        const saltBase32 = encodeSecret(saltBytes);
-                        const key = await deriveKeyFromTotp(rawSecret, saltBytes);
+                        const { key, salt: generatedSalt } = await deriveKeyFromTotp(rawSecret);
+                        const saltBase32 = encodeSecret(generatedSalt);
 
                         const expiryTimestamp =
                             remember && expiryMs != null ? Date.now() + expiryMs : null;

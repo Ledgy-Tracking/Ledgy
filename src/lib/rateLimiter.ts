@@ -18,7 +18,7 @@ const GRACE_PERIOD_MS = 5000; // 5 seconds for clock skew
 const STORAGE_KEY = 'ledgy-auth-rate-limit';
 const HMAC_KEY_STORAGE_KEY = 'ledgy-rate-limit-hmac-key';
 
-interface RateLimitState {
+export interface RateLimitState {
     account: string;
     attempts: number;
     lastAttempt: number;

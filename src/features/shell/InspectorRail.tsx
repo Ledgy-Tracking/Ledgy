@@ -1,4 +1,6 @@
 import { useUIStore } from '../../stores/useUIStore';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronRight, ChevronLeft, Settings, Info } from 'lucide-react';
 
 export const InspectorRail = () => {
@@ -22,17 +24,19 @@ export const InspectorRail = () => {
                     <Settings className="w-5 h-5 text-emerald-400" />
                     <span className="font-semibold text-zinc-900 dark:text-white">Inspector</span>
                 </div>
-                <button
+                <Button
                     onClick={toggleInspector}
-                    className="p-1 rounded hover:bg-gray-200 dark:hover:bg-zinc-700/50 transition-all duration-300 ease-in-out"
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-zinc-400"
                     aria-label="Collapse inspector"
                 >
-                    <ChevronRight className="w-4 h-4 text-zinc-400" />
-                </button>
+                    <ChevronRight className="w-4 h-4" />
+                </Button>
             </div>
 
             {/* Inspector Content - Placeholder for contextual tools */}
-            <div className={`flex-1 overflow-y-auto p-4 ${!inspectorOpen && 'hidden'}`}>
+            <ScrollArea className={`flex-1 p-4 ${!inspectorOpen && 'hidden'}`}>
                 <div className="text-sm text-zinc-400">
                     <div className="flex items-start gap-3 p-3 bg-emerald-500/20 rounded-lg ring-1 ring-emerald-500/30">
                         <Info className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
@@ -50,17 +54,19 @@ export const InspectorRail = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </ScrollArea>
 
             {/* Toggle Button (when collapsed) */}
             <div className={`absolute -left-3 top-1/2 transform -translate-y-1/2 ${inspectorOpen && 'hidden'}`}>
-                <button
+                <Button
                     onClick={toggleInspector}
-                    className="p-1.5 rounded-full bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md hover:bg-gray-200 dark:hover:bg-zinc-700/50 transition-all duration-300 ease-in-out"
+                    variant="outline"
+                    size="icon-sm"
+                    className="rounded-full bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md text-zinc-400"
                     aria-label="Expand inspector"
                 >
-                    <ChevronLeft className="w-4 h-4 text-zinc-400" />
-                </button>
+                    <ChevronLeft className="w-4 h-4" />
+                </Button>
             </div>
         </aside>
     );

@@ -25,16 +25,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Install pnpm
+      - name: Setup Node.js
         uses: pnpm/action-setup@v4
         with:
           version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -80,16 +78,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Install pnpm
+      - name: Setup Node.js
         uses: pnpm/action-setup@v4
         with:
           version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -132,16 +128,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4.1.0
 
-      - name: Install pnpm
+      - name: Setup Node.js
         uses: pnpm/action-setup@v4
         with:
           version: 9
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable

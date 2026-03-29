@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { ResponsiveGridLayout } from 'react-grid-layout';
 import { useContainerWidth } from '../../hooks/useContainerWidth';
 
@@ -10,6 +11,7 @@ import { useNodeStore } from '../../stores/useNodeStore';
 import { TextWidget, TrendWidget, ChartWidget, WidgetConfig } from './widgets';
 import { Plus, Trash2, BarChart3, TrendingUp, Type, Settings } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { WidgetConfigSheet } from './WidgetConfigSheet';
 
 interface DashboardViewProps {
@@ -115,8 +117,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                     {/* Widget Type Selector Dropdown */}
                     {isAddingWidget && (
-                        <div className="absolute right-0 mt-1 w-48 bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-xl z-50">
-                            <div className="p-2">
+                        <Card className="absolute right-0 mt-1 w-48 bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-xl z-50">
+                            <CardContent className="p-2">
                                 <Button
                                     onClick={() => handleAddWidget('chart')}
                                     variant="ghost"
@@ -141,14 +143,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     <Type size={16} className="text-purple-400" />
                                     Text Widget
                                 </Button>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
                     )}
                 </div>
             </div>
 
             {/* Widget Grid */}
-            <div ref={containerRef} className="flex-1 overflow-auto p-4">
+            <ScrollArea ref={containerRef} className="flex-1 overflow-auto p-4">
                 {!isLoaded ? (
                     <div className="h-full flex items-center justify-center text-zinc-500">
                         Loading dashboard...
@@ -206,7 +208,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         ))}
                     </ResponsiveGridLayout>
                 )}
-            </div>
+            </ScrollArea>
 
             <WidgetConfigSheet
                 widget={selectedWidget}
@@ -224,10 +226,10 @@ interface WidgetContentProps {
 }
 
 const WidgetContent: React.FC<WidgetContentProps> = ({ widget }) => {
-    const { nodes } = useNodeStore();
-
-    // Find the source node for this widget (Story 4-5, AC 1 & 3)
-    const sourceNode = nodes.find(n => n.id === widget.nodeId);
+    // Select specific node to prevent unnecessary re-renders when unrelated nodes update
+    const sourceNode = useNodeStore(
+        state => state.nodes.find(n => n.id === widget.nodeId)
+    );
 
     // Extract data from the source node (prefer live computation result)
     const nodeData = (sourceNode?.data || {}) as any;
