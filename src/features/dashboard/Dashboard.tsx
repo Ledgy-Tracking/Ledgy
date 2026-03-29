@@ -58,7 +58,7 @@ export const Dashboard: React.FC = () => {
                             variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                             size="icon-sm"
                             onClick={() => setViewMode('grid')}
-                            title="Metric Grid"
+                            title="Metric Grid View"
                             aria-label="Metric Grid View"
                             aria-pressed={viewMode === 'grid'}
                         >
@@ -129,4 +129,3 @@ export const Dashboard: React.FC = () => {
         </div>
     );
 };
-

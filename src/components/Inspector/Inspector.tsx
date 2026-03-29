@@ -22,6 +22,7 @@ import { Info, X } from 'lucide-react';
                     variant="ghost"
                     size="icon"
                     onClick={() => setRightInspector(false)}
+                    className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 transition-colors"
                     aria-label="Close Inspector"
                  >
                     <X size={16} />
