@@ -1,5 +1,6 @@
 import React from 'react';
 import { RefreshCw, CheckCircle2, AlertCircle, CloudOff, Wifi } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useSyncStore } from '../../stores/useSyncStore';
 import { useAuthStore } from '../auth/useAuthStore';
 
@@ -60,9 +61,10 @@ export const SyncStatusButton: React.FC<SyncStatusButtonProps> = ({ profileId, o
     };
 
     return (
-        <button
+        <Button
+            variant="outline"
             onClick={onClick}
-            className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition-all group shrink-0 ${(isLoading || syncStatus.status === 'syncing') ? 'ring-2 ring-emerald-500/20 animate-pulse' : ''
+            className={`flex items-center gap-2.5 px-3 py-1.5 transition-all group shrink-0 ${(isLoading || syncStatus.status === 'syncing') ? 'ring-2 ring-emerald-500/20 animate-pulse' : ''
                 }`}
             title="Open Sync Settings"
         >
@@ -84,6 +86,6 @@ export const SyncStatusButton: React.FC<SyncStatusButtonProps> = ({ profileId, o
             >
                 <RefreshCw size={12} className={isLoading || syncStatus.status === 'syncing' ? 'animate-spin' : ''} />
             </div>
-        </button>
+        </Button>
     );
 };

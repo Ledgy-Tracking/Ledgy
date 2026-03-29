@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { ResponsiveGridLayout } from 'react-grid-layout';
 import { useContainerWidth } from '../../hooks/useContainerWidth';
 
@@ -10,6 +11,7 @@ import { useNodeStore } from '../../stores/useNodeStore';
 import { TextWidget, TrendWidget, ChartWidget, WidgetConfig } from './widgets';
 import { Plus, Trash2, BarChart3, TrendingUp, Type, Settings } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { WidgetConfigSheet } from './WidgetConfigSheet';
 
 interface DashboardViewProps {
@@ -97,14 +99,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     };
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-zinc-950 text-zinc-50 overflow-hidden">
+        <div className="flex-1 flex flex-col h-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-900">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900">
                 <h1 className="text-lg font-semibold">Dashboard</h1>
                 <div className="relative">
                     <Button
                         onClick={() => setIsAddingWidget(!isAddingWidget)}
-                        className="bg-emerald-600 hover:bg-emerald-500 text-white"
+                        className="bg-emerald-600 hover:bg-emerald-500 text-zinc-900 dark:text-white"
                         size="sm"
                         aria-haspopup="true"
                         aria-expanded={isAddingWidget}
@@ -115,37 +117,40 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                     {/* Widget Type Selector Dropdown */}
                     {isAddingWidget && (
-                        <div className="absolute right-0 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-50">
-                            <div className="p-2">
-                                <button
+                        <Card className="absolute right-0 mt-1 w-48 bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-xl z-50">
+                            <CardContent className="p-2">
+                                <Button
                                     onClick={() => handleAddWidget('chart')}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors"
+                                    variant="ghost"
+                                    className="w-full justify-start text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
                                 >
                                     <BarChart3 size={16} className="text-blue-400" />
                                     Chart Widget
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={() => handleAddWidget('trend')}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors"
+                                    variant="ghost"
+                                    className="w-full justify-start text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
                                 >
                                     <TrendingUp size={16} className="text-emerald-400" />
                                     Trend Widget
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={() => handleAddWidget('text')}
-                                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors"
+                                    variant="ghost"
+                                    className="w-full justify-start text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
                                 >
                                     <Type size={16} className="text-purple-400" />
                                     Text Widget
-                                </button>
-                            </div>
-                        </div>
+                                </Button>
+                            </CardContent>
+                        </Card>
                     )}
                 </div>
             </div>
 
             {/* Widget Grid */}
-            <div ref={containerRef} className="flex-1 overflow-auto p-4">
+            <ScrollArea ref={containerRef} className="flex-1 overflow-auto p-4">
                 {!isLoaded ? (
                     <div className="h-full flex items-center justify-center text-zinc-500">
                         Loading dashboard...
@@ -167,27 +172,31 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         dragConfig={{ handle: '.widget-drag-handle' }}
                     >
                         {widgets.map((widget) => (
-                            <div key={widget.id} className="relative group bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden flex flex-col">
+                            <div key={widget.id} className="relative group bg-gray-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden flex flex-col">
                                 {/* Widget Drag Handle & Actions */}
                                 <div className="absolute top-0 left-0 right-0 h-8 opacity-0 group-hover:opacity-100 transition-opacity flex justify-between items-center px-2 bg-gradient-to-b from-black/50 to-transparent z-10">
                                     <div className="widget-drag-handle flex-1 h-full cursor-grab active:cursor-grabbing" />
                                     <div className="flex items-center gap-1">
-                                        <button
+                                        <Button
                                             onClick={() => setSelectedWidget(widget)}
-                                            className="p-1 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 rounded transition-colors"
+                                            variant="ghost"
+                                            size="icon-xs"
+                                            className="text-zinc-400 hover:text-zinc-800 dark:text-zinc-200 hover:bg-gray-200 dark:hover:bg-zinc-800"
                                             title="Widget settings"
                                             aria-label="Widget settings"
                                         >
                                             <Settings size={14} />
-                                        </button>
-                                        <button
+                                        </Button>
+                                        <Button
                                             onClick={() => removeWidget(widget.id)}
-                                            className="p-1 hover:bg-red-900/50 text-zinc-400 hover:text-red-400 rounded transition-colors"
+                                            variant="ghost"
+                                            size="icon-xs"
+                                            className="text-zinc-400 hover:text-red-400 hover:bg-red-900/50"
                                             title="Remove widget"
                                             aria-label="Remove widget"
                                         >
                                             <Trash2 size={14} />
-                                        </button>
+                                        </Button>
                                     </div>
                                 </div>
 
@@ -199,7 +208,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         ))}
                     </ResponsiveGridLayout>
                 )}
-            </div>
+            </ScrollArea>
 
             <WidgetConfigSheet
                 widget={selectedWidget}
@@ -217,10 +226,10 @@ interface WidgetContentProps {
 }
 
 const WidgetContent: React.FC<WidgetContentProps> = ({ widget }) => {
-    const { nodes } = useNodeStore();
-
-    // Find the source node for this widget (Story 4-5, AC 1 & 3)
-    const sourceNode = nodes.find(n => n.id === widget.nodeId);
+    // Select specific node to prevent unnecessary re-renders when unrelated nodes update
+    const sourceNode = useNodeStore(
+        state => state.nodes.find(n => n.id === widget.nodeId)
+    );
 
     // Extract data from the source node (prefer live computation result)
     const nodeData = (sourceNode?.data || {}) as any;

@@ -17,6 +17,7 @@
 ## Existing Documentation
 - [README.md](../README.md)
 - [Project Context](./project-context.md)
+- **[Security](./security/)** — Security issues, fixes, and best practices
 - [Product Requirements](../_bmad-output/planning-artifacts/prd.md)
 - [Architecture](../_bmad-output/planning-artifacts/architecture.md)
 - [Epics](../_bmad-output/planning-artifacts/epics.md)

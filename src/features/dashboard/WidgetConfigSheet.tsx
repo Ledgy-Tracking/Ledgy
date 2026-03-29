@@ -47,7 +47,7 @@ export const WidgetConfigSheet: React.FC<WidgetConfigSheetProps> = ({
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent className="sm:max-w-md bg-zinc-950 border-zinc-800 text-zinc-100">
+            <SheetContent className="sm:max-w-md bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-900 dark:text-zinc-100">
                 <SheetHeader>
                     <SheetTitle className="text-zinc-50">Widget Configuration</SheetTitle>
                     <SheetDescription className="text-zinc-400">
@@ -62,17 +62,17 @@ export const WidgetConfigSheet: React.FC<WidgetConfigSheetProps> = ({
                             id="widget-title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="bg-zinc-900 border-zinc-700 text-zinc-100"
+                            className="bg-gray-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
                         />
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="widget-source" className="text-zinc-300">Data Source (Node)</Label>
                         <Select value={nodeId || 'none'} onValueChange={(v) => setNodeId(v === 'none' ? undefined : v)}>
-                            <SelectTrigger id="widget-source" className="bg-zinc-900 border-zinc-700 text-zinc-100">
+                            <SelectTrigger id="widget-source" className="bg-gray-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100">
                                 <SelectValue placeholder="Select a node..." />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-700 text-zinc-100">
+                            <SelectContent className="bg-gray-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100">
                                 <SelectItem value="none">Manual / Unlinked</SelectItem>
                                 {outputNodes.map((node: any) => (
                                     <SelectItem key={node.id} value={node.id}>
@@ -87,10 +87,10 @@ export const WidgetConfigSheet: React.FC<WidgetConfigSheetProps> = ({
                     <div className="space-y-2">
                         <Label htmlFor="widget-type" className="text-zinc-300">Display Type</Label>
                         <Select value={type} onValueChange={(v) => setType(v as any)}>
-                            <SelectTrigger id="widget-type" className="bg-zinc-900 border-zinc-700 text-zinc-100">
+                            <SelectTrigger id="widget-type" className="bg-gray-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100">
                                 <SelectValue placeholder="Select type" />
                             </SelectTrigger>
-                            <SelectContent className="bg-zinc-900 border-zinc-700">
+                            <SelectContent className="bg-gray-50 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700">
                                 <SelectItem value="text">Text (Value Only)</SelectItem>
                                 <SelectItem value="trend">Trend (Value + Change)</SelectItem>
                                 <SelectItem value="chart">Chart (Historical Data)</SelectItem>
@@ -101,7 +101,7 @@ export const WidgetConfigSheet: React.FC<WidgetConfigSheetProps> = ({
                     <div className="pt-4">
                         <Button
                             onClick={handleSave}
-                            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white"
+                            className="w-full bg-emerald-600 hover:bg-emerald-500 text-zinc-900 dark:text-white"
                         >
                             Save Changes
                         </Button>

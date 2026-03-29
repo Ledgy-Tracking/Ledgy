@@ -1,6 +1,8 @@
 import { QRCodeSVG } from 'qrcode.react';
 import { useMemo, useState } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface QRCodeDisplayProps {
     totpUri: string;
@@ -33,32 +35,33 @@ export const QRCodeDisplay = ({ totpUri, secret, accountName }: QRCodeDisplayPro
     };
 
     return (
-        <div className="flex flex-col items-center gap-4 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-            {/* QR Code */}
-            <div className="p-4 bg-white rounded-lg border-2 border-gray-200 dark:border-gray-700">
+        <Card className="flex flex-col items-center gap-4 p-6 bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-xl shadow-lg border border-white/5">
+            <CardContent className="p-4 bg-white rounded-lg border-2 border-white/10">
                 {qrCode}
-            </div>
+            </CardContent>
 
             {/* Manual Entry Key */}
             <div className="w-full">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center">
+                <p className="text-sm font-medium text-zinc-300 mb-2 text-center">
                     Can't scan the QR code? Enter this key manually:
                 </p>
                 <div className="flex items-center gap-2">
-                    <code className="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-900 rounded-lg font-mono text-sm text-center text-gray-900 dark:text-gray-100 break-all">
+                    <code className="flex-1 px-3 py-2 bg-white dark:bg-zinc-950 rounded-lg font-mono text-sm text-center text-zinc-900 dark:text-white break-all border border-zinc-300 dark:border-white/10">
                         {secret}
                     </code>
-                    <button
+                    <Button
                         onClick={handleCopy}
-                        className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                        variant="ghost"
+                        size="icon-sm"
+                        className="bg-gray-100 dark:bg-zinc-800/50 hover:bg-zinc-700/50"
                         aria-label={copied ? 'Copied' : 'Copy secret to clipboard'}
                     >
                         {copied ? (
-                            <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
+                            <Check className="w-5 h-5 text-emerald-400" />
                         ) : (
-                            <Copy className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                            <Copy className="w-5 h-5 text-zinc-400" />
                         )}
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -68,6 +71,6 @@ export const QRCodeDisplay = ({ totpUri, secret, accountName }: QRCodeDisplayPro
                 <p>2. Scan the QR code or enter the key manually</p>
                 <p>3. Enter the 6-digit code from the app</p>
             </div>
-        </div>
+        </Card>
     );
 };
