@@ -1,6 +1,7 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useDashboardStore } from '../../../stores/useDashboardStore';
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { BarChart3, TrendingUp, Type } from 'lucide-react';
@@ -114,7 +115,7 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
                 {/* Title */}
                 <div>
                     <label className="text-xs text-zinc-400 block mb-1">Widget Title:</label>
-                    <input
+                    <Input
                         type="text"
                         value={nodeData.title || ''}
                         onChange={(e) => handleTitleChange(e.target.value)}

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { ResponsiveGridLayout } from 'react-grid-layout';
 import { useContainerWidth } from '../../hooks/useContainerWidth';
 
@@ -115,8 +116,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
                     {/* Widget Type Selector Dropdown */}
                     {isAddingWidget && (
-                        <div className="absolute right-0 mt-1 w-48 bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-xl z-50">
-                            <div className="p-2">
+                        <Card className="absolute right-0 mt-1 w-48 bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-xl z-50">
+                            <CardContent className="p-2">
                                 <Button
                                     onClick={() => handleAddWidget('chart')}
                                     variant="ghost"
@@ -141,8 +142,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                     <Type size={16} className="text-purple-400" />
                                     Text Widget
                                 </Button>
-                            </div>
-                        </div>
+                            </CardContent>
+                        </Card>
                     )}
                 </div>
             </div>

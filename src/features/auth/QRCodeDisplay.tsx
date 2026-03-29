@@ -2,6 +2,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useMemo, useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface QRCodeDisplayProps {
     totpUri: string;
@@ -34,11 +35,10 @@ export const QRCodeDisplay = ({ totpUri, secret, accountName }: QRCodeDisplayPro
     };
 
     return (
-        <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-xl shadow-lg border border-white/5">
-            {/* QR Code */}
-            <div className="p-4 bg-white rounded-lg border-2 border-white/10">
+        <Card className="flex flex-col items-center gap-4 p-6 bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-xl shadow-lg border border-white/5">
+            <CardContent className="p-4 bg-white rounded-lg border-2 border-white/10">
                 {qrCode}
-            </div>
+            </CardContent>
 
             {/* Manual Entry Key */}
             <div className="w-full">
@@ -71,6 +71,6 @@ export const QRCodeDisplay = ({ totpUri, secret, accountName }: QRCodeDisplayPro
                 <p>2. Scan the QR code or enter the key manually</p>
                 <p>3. Enter the 6-digit code from the app</p>
             </div>
-        </div>
+        </Card>
     );
 };

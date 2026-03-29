@@ -4,8 +4,8 @@ import { useProfileStore } from '../../stores/useProfileStore';
 import { useErrorStore } from '../../stores/useErrorStore';
 import { useUIStore } from '../../stores/useUIStore';
 import { ProfileCard } from './ProfileCard';
-import { EmptyState } from '../../components/ui/EmptyState';
-import { LoadingSkeleton } from '../../components/ui/LoadingSkeleton';
+import { EmptyState } from '@/components/common/EmptyState';
+import { LoadingSkeleton } from '@/components/common/LoadingSkeleton';
 
 // Note: ErrorBoundary is applied at route level (Story 1-2 pattern)
 // This component assumes it's wrapped by <ErrorBoundary> in the route definition

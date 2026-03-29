@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../components/ui/tooltip';
 import { Checkbox } from '../../components/ui/checkbox';
 import { Label } from '../../components/ui/label';
+import { Card, CardContent } from '../../components/ui/card';
 
 interface SchemaBuilderProps {
     projectId: string;
@@ -101,9 +102,11 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
 
                 <form onSubmit={handleSave} className="space-y-6 mt-4">
                     {error && (
-                        <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
-                            <p className="text-red-700 dark:text-red-500 text-sm">{error}</p>
-                        </div>
+                        <Card className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
+                            <CardContent>
+                                <p className="text-red-700 dark:text-red-500 text-sm">{error}</p>
+                            </CardContent>
+                        </Card>
                     )}
 
                     <div className="space-y-4">
@@ -369,7 +372,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 </div>
                                                 <label className="flex flex-col gap-1 mt-2">
                                                     Min Date
-                                                    <input
+                                                    <Input
                                                         type="date"
                                                         className="h-7 text-xs bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded px-2"
                                                         value={field.dateMin ?? ''}
@@ -378,7 +381,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 </label>
                                                 <label className="flex flex-col gap-1 mt-2">
                                                     Max Date
-                                                    <input
+                                                    <Input
                                                         type="date"
                                                         className="h-7 text-xs bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded px-2"
                                                         value={field.dateMax ?? ''}

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { Settings, Info, Hash, Type, Trash2 } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useNodes, useReactFlow } from '@xyflow/react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 
 export const NodeInspector: React.FC = () => {
     const { selectedNodeId, setSelectedNodeId } = useUIStore();
@@ -47,9 +48,11 @@ export const NodeInspector: React.FC = () => {
             <div className="flex-1 overflow-auto p-4 space-y-6">
                 <div className="space-y-2">
                     <Label className="text-xs text-zinc-500">Node Type</Label>
-                    <div className="px-3 py-2 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700 text-sm font-mono text-zinc-600 dark:text-zinc-400">
-                        {node.type}
-                    </div>
+                    <Card>
+                        <CardContent className="text-sm font-mono text-zinc-600 dark:text-zinc-400 p-3">
+                            {node.type}
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <div className="space-y-2">
@@ -76,7 +79,7 @@ export const NodeInspector: React.FC = () => {
                 </div>
             </div>
 
-            <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
+            <CardFooter className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
                 <Button
                     variant="destructive"
                     className="w-full gap-2"
@@ -88,7 +91,7 @@ export const NodeInspector: React.FC = () => {
                     <Trash2 size={16} />
                     Delete Node
                 </Button>
-            </div>
+            </CardFooter>
         </div>
     );
 };

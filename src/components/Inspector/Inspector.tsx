@@ -2,29 +2,31 @@ import React from 'react';
 import { useUIStore } from '../../stores/useUIStore';
 import { NodeInspector } from './NodeInspector';
 import { EntryInspector } from './EntryInspector';
+import { Button } from '@/components/ui/button';
 import { Info, X } from 'lucide-react';
-
-export const Inspector: React.FC = () => {
-    const { selectedNodeId, selectedEntryId, setRightInspector } = useUIStore();
-
-    const hasSelection = !!selectedNodeId || !!selectedEntryId;
-
-    return (
-        <aside className="h-full flex flex-col bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800">
-            {/* Header / Tabs if multiple? For now just dynamic content */}
-            <div className="h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 shrink-0">
-                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                    <Info size={16} className="text-zinc-400" />
-                    Inspector
-                </span>
-                <button
+ 
+ export const Inspector: React.FC = () => {
+     const { selectedNodeId, selectedEntryId, setRightInspector } = useUIStore();
+ 
+     const hasSelection = !!selectedNodeId || !!selectedEntryId;
+ 
+     return (
+         <aside className="h-full flex flex-col bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800">
+             {/* Header / Tabs if multiple? For now just dynamic content */}
+             <div className="h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 shrink-0">
+                 <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+                     <Info size={16} className="text-zinc-400" />
+                     Inspector
+                 </span>
+                 <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => setRightInspector(false)}
-                    className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-500 transition-colors"
                     aria-label="Close Inspector"
-                >
+                 >
                     <X size={16} />
-                </button>
-            </div>
+                 </Button>
+             </div>
 
             <div className="flex-1 overflow-hidden">
                 {!hasSelection ? (

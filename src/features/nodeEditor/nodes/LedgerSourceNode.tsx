@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
 import { useProfileStore } from '../../../stores/useProfileStore';
 import { ChevronDown, ChevronUp, Database, Settings } from 'lucide-react';
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface LedgerSourceNodeData {
     label: string;
@@ -111,18 +111,21 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
             {isConfigOpen && (
                 <div className="p-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50">
                     <label className="text-xs text-zinc-400 block mb-1">Select Ledger:</label>
-                    <select
+                    <Select
                         value={nodeData.ledgerId || ''}
-                        onChange={(e) => handleLedgerChange(e.target.value)}
-                        className="w-full bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        onValueChange={(value) => handleLedgerChange(value)}
                     >
-                        <option value="">-- Choose a ledger --</option>
-                        {schemas.map(schema => (
-                            <option key={schema._id} value={schema._id}>
-                                {schema.name}
-                            </option>
-                        ))}
-                    </select>
+                        <SelectTrigger className="w-full bg-gray-50 dark:bg-zinc-900 border-zinc-700 h-8 text-xs">
+                            <SelectValue placeholder="-- Choose a ledger --" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {schemas.map(schema => (
+                                <SelectItem key={schema._id} value={schema._id}>
+                                    {schema.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
             )}
 

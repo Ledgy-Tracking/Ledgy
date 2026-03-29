@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -244,19 +245,21 @@ export const BulkActionBar: React.FC<BulkActionBarProps> = ({ schemaId }) => {
 
     return (
         <>
-            <div className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 shadow-xl">
-                <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
-                        {selectedCount} entries selected
-                    </span>
-                    <Button size="sm" onClick={() => setDeleteDialogOpen(true)} disabled={selectedCount === 0}>
-                        Delete Selected
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={handleOpenTagDialog} disabled={selectedCount === 0}>
-                        Assign Tag
-                    </Button>
-                </div>
-            </div>
+            <Card className="fixed bottom-6 left-1/2 z-40 -translate-x-1/2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 px-4 py-3 shadow-xl">
+                <CardContent>
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
+                            {selectedCount} entries selected
+                        </span>
+                        <Button size="sm" onClick={() => setDeleteDialogOpen(true)} disabled={selectedCount === 0}>
+                            Delete Selected
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={handleOpenTagDialog} disabled={selectedCount === 0}>
+                            Assign Tag
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <DialogContent>

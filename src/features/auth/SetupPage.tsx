@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuthStore, EXPIRY_OPTIONS, RememberMeExpiry, DEFAULT_EXPIRY } from './useAuthStore';
 import { generateSecret, encodeSecret, generateOtpauthUri } from '../../lib/totp';
 
@@ -99,7 +101,7 @@ export const SetupPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 flex flex-col items-center justify-center p-4 font-sans">
-            <div className="max-w-md w-full bg-zinc-900 p-8 rounded-2xl border border-zinc-800 shadow-2xl space-y-8">
+            <Card className="max-w-md w-full bg-zinc-900 p-8 rounded-2xl border border-zinc-800 shadow-2xl space-y-8">
                 <div className="text-center space-y-2">
                     <h1 className="text-3xl font-bold text-emerald-500">Secure Your Ledgy</h1>
                     <p className="text-zinc-400">Scan this QR code with Google Authenticator or any TOTP app.</p>
@@ -117,9 +119,11 @@ export const SetupPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                    <div className="p-4 bg-white dark:bg-zinc-950/50 rounded-lg border border-zinc-300 dark:border-zinc-800 text-sm font-mono break-all text-zinc-600 dark:text-zinc-500 text-center">
-                        Secret: <span className="text-zinc-300">{tempSecret}</span>
-                    </div>
+                    <Card className="p-4 bg-white dark:bg-zinc-950/50 rounded-lg border border-zinc-300 dark:border-zinc-800 text-sm font-mono break-all text-zinc-600 dark:text-zinc-500 text-center">
+                        <CardContent>
+                            Secret: <span className="text-zinc-300">{tempSecret}</span>
+                        </CardContent>
+                    </Card>
 
                     <form onSubmit={handleFormSubmit} className="space-y-6">
                         <div className="space-y-2">
@@ -148,7 +152,7 @@ export const SetupPage: React.FC = () => {
                                     onCheckedChange={(checked) => setRememberMe(checked === true)}
                                     disabled={isSubmitting}
                                 />
-                                <Label 
+                                <Label
                                     htmlFor="remember-me"
                                     className="text-sm text-zinc-400 cursor-pointer"
                                 >
@@ -157,60 +161,66 @@ export const SetupPage: React.FC = () => {
                             </div>
 
                             {rememberMe && (
-                                <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                                    <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wide">
-                                        <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                                        Security Notice
-                                    </div>
-                                    <p className="text-xs text-zinc-400 leading-relaxed">
-                                        Your vault secret will be stored in local device storage. Set a passphrase below to encrypt it at rest.
-                                    </p>
-
-                                    {/* Expiry selector */}
-                                    <div className="space-y-1">
-                                        <label className="text-xs text-zinc-500 font-medium">Session expires after</label>
-                                        <select
-                                            value={expiryOption}
-                                            onChange={(e) => setExpiryOption(e.target.value as RememberMeExpiry)}
-                                            disabled={isSubmitting}
-                                            className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50"
-                                        >
-                                            {EXPIRY_OPTIONS.map(opt => (
-                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {/* Required passphrase */}
-                                    <div className="space-y-2">
-                                        <Label htmlFor="passphrase" className="text-xs text-zinc-500 font-medium">
-                                            Passphrase <span className="text-emerald-500">(required to encrypt the stored secret)</span>
-                                        </Label>
-                                        <div className="relative">
-                                            <Input
-                                                id="passphrase"
-                                                type={showPassphrase ? 'text' : 'password'}
-                                                value={passphrase}
-                                                onChange={(e) => setPassphrase(e.target.value)}
-                                                placeholder="Enter a secure passphrase"
-                                                required={rememberMe}
-                                                disabled={isSubmitting}
-                                                className="pr-10"
-                                            />
-                                            <Button
-                                                type="button"
-                                                onClick={() => setShowPassphrase(v => !v)}
-                                                variant="ghost"
-                                                size="icon-xs"
-                                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
-                                                tabIndex={-1}
-                                                aria-label={showPassphrase ? "Hide passphrase" : "Show passphrase"}
-                                            >
-                                                {showPassphrase ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                                            </Button>
+                                <Card className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                                    <CardContent>
+                                        <div className="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wide">
+                                            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                                            Security Notice
                                         </div>
-                                    </div>
-                                </div>
+                                        <p className="text-xs text-zinc-400 leading-relaxed">
+                                            Your vault secret will be stored in local device storage. Set a passphrase below to encrypt it at rest.
+                                        </p>
+
+                                        {/* Expiry selector */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs text-zinc-500 font-medium">Session expires after</label>
+                                            <Select
+                                                value={expiryOption}
+                                                onValueChange={(value) => setExpiryOption(value as RememberMeExpiry)}
+                                                disabled={isSubmitting}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select expiry" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {EXPIRY_OPTIONS.map(opt => (
+                                                        <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {/* Required passphrase */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="passphrase" className="text-xs text-zinc-500 font-medium">
+                                                Passphrase <span className="text-emerald-500">(required to encrypt the stored secret)</span>
+                                            </Label>
+                                            <div className="relative">
+                                                <Input
+                                                    id="passphrase"
+                                                    type={showPassphrase ? 'text' : 'password'}
+                                                    value={passphrase}
+                                                    onChange={(e) => setPassphrase(e.target.value)}
+                                                    placeholder="Enter a secure passphrase"
+                                                    required={rememberMe}
+                                                    disabled={isSubmitting}
+                                                    className="pr-10"
+                                                />
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => setShowPassphrase(v => !v)}
+                                                    variant="ghost"
+                                                    size="icon-xs"
+                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
+                                                    tabIndex={-1}
+                                                    aria-label={showPassphrase ? "Hide passphrase" : "Show passphrase"}
+                                                >
+                                                    {showPassphrase ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             )}
                         </div>
 
@@ -237,7 +247,7 @@ export const SetupPage: React.FC = () => {
                 <p className="text-xs text-zinc-600 text-center uppercase tracking-widest font-bold">
                     Ledgy is 100% Offline & Private
                 </p>
-            </div>
+            </Card>
         </div>
     );
 };
