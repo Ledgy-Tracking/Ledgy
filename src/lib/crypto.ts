@@ -153,3 +153,23 @@ export async function decryptPayload(key: CryptoKey, iv: Uint8Array, ciphertext:
         throw error;
     }
 }
+
+/**
+ * Derives a stable user identifier from TOTP secret for profile isolation.
+ * Uses SHA-256 to create a deterministic but privacy-preserving user ID.
+ * 
+ * @param totpSecret - Base32 TOTP secret string
+ * @returns Hex string user identifier
+ */
+export async function deriveUserIdFromSecret(totpSecret: string): Promise<string> {
+    try {
+        const secretBytes = encoder.encode(totpSecret);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', secretBytes);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to derive user ID';
+        useErrorStore.getState().dispatchError(errorMessage, 'error');
+        throw error;
+    }
+}

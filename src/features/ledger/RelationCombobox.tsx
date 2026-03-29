@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import { LedgerEntry } from '../../types/ledger';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Check, ChevronDown } from 'lucide-react';
 
 export const MAX_RESULTS = 50;
@@ -155,12 +158,13 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
     return (
         <div className="relative" ref={containerRef}>
             {/* Trigger */}
-            <button
+            <Button
                 ref={ref}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 onKeyDown={!isOpen ? externalKeyDown : undefined}
-                className="w-full flex items-center justify-between gap-2 px-2 py-1 bg-transparent border border-zinc-700 rounded text-sm text-zinc-100 hover:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                variant="outline"
+                className="w-full justify-between gap-2 bg-transparent text-zinc-900 dark:text-zinc-100 hover:border-zinc-600 focus:ring-emerald-500"
                 aria-expanded={isOpen}
                 aria-haspopup="listbox"
             >
@@ -168,88 +172,90 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
                     {selectedDisplay ?? placeholder}
                 </span>
                 <ChevronDown size={14} className={`text-zinc-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
+            </Button>
 
             {/* Dropdown */}
             {isOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-zinc-900 border border-zinc-700 rounded shadow-lg max-h-60 overflow-hidden">
-                    {/* Search Input */}
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setHighlightedIndex(-1);
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Tab') {
-                                e.preventDefault();
-                                setIsOpen(false);
-                                setSearchTerm('');
+                <Card className="absolute z-50 w-full mt-1 bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded shadow-lg max-h-60 overflow-hidden">
+                    <CardContent>
+                        {/* Search Input */}
+                        <Input
+                            ref={inputRef}
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => {
+                                setSearchTerm(e.target.value);
                                 setHighlightedIndex(-1);
-                                // Forward Tab/Shift+Tab to parent row's field navigator.
-                                // Cast is safe: the handler only reads e.key and e.shiftKey, which exist
-                                // identically on both input and button KeyboardEvents. The double-cast
-                                // (to unknown then to HTMLButtonElement type) is intentional for type safety.
-                                externalKeyDown?.(e as unknown as React.KeyboardEvent<HTMLButtonElement>);
-                                return;
-                            }
-                            handleKeyDown(e);
-                        }}
-                        placeholder="Search entries..."
-                        className="w-full px-3 py-2 bg-zinc-800 border-b border-zinc-700 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        aria-autocomplete="list"
-                    />
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Tab') {
+                                    e.preventDefault();
+                                    setIsOpen(false);
+                                    setSearchTerm('');
+                                    setHighlightedIndex(-1);
+                                    // Forward Tab/Shift+Tab to parent row's field navigator.
+                                    // Cast is safe: the handler only reads e.key and e.shiftKey, which exist
+                                    // identically on both input and button KeyboardEvents. The double-cast
+                                    // (to unknown then to HTMLButtonElement type) is intentional for type safety.
+                                    externalKeyDown?.(e as unknown as React.KeyboardEvent<HTMLButtonElement>);
+                                    return;
+                                }
+                                handleKeyDown(e);
+                            }}
+                            placeholder="Search entries..."
+                            className="w-full px-3 py-2 bg-gray-100 dark:bg-zinc-800 border-b border-zinc-300 dark:border-zinc-700 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            aria-autocomplete="list"
+                        />
 
-                    {/* Options List */}
-                    <ul
-                        role="listbox"
-                        className="overflow-y-auto max-h-48"
-                        aria-activedescendant={highlightedIndex >= 0 ? `option-${highlightedIndex}` : undefined}
-                    >
-                        {visibleEntries.length === 0 ? (
-                            <li className="px-3 py-2 text-sm text-zinc-500">No entries found</li>
-                        ) : (
-                            <>
-                                {visibleEntries.map((entry, index) => {
-                                    const displayValue = getDisplayValue(entry);
-                                    const isSelected = selectedValues.includes(entry._id);
-                                    const isGhost = deletedEntryIds.has(entry._id);
+                        {/* Options List */}
+                        <ul
+                            role="listbox"
+                            className="overflow-y-auto max-h-48"
+                            aria-activedescendant={highlightedIndex >= 0 ? `option-${highlightedIndex}` : undefined}
+                        >
+                            {visibleEntries.length === 0 ? (
+                                <li className="px-3 py-2 text-sm text-zinc-500">No entries found</li>
+                            ) : (
+                                <>
+                                    {visibleEntries.map((entry, index) => {
+                                        const displayValue = getDisplayValue(entry);
+                                        const isSelected = selectedValues.includes(entry._id);
+                                        const isGhost = deletedEntryIds.has(entry._id);
 
-                                    return (
-                                        <li
-                                            key={entry._id}
-                                            id={`option-${index}`}
-                                            role="option"
-                                            aria-selected={isSelected}
-                                            onClick={() => handleSelect(entry._id)}
-                                            className={`flex items-center justify-between px-3 py-2 cursor-pointer transition-colors ${
-                                                index === highlightedIndex
-                                                    ? isGhost ? 'bg-zinc-800' : 'bg-emerald-900/50'
-                                                    : 'hover:bg-zinc-800'
-                                            } ${isSelected ? 'bg-emerald-900/30' : ''}`}
-                                        >
-                                            <span className={`text-sm truncate flex-1 ${
-                                                 isGhost ? 'text-zinc-500 line-through' : 'text-zinc-200'
-                                             }`}>
-                                                {displayValue}
-                                            </span>
-                                            {isSelected && <Check size={14} className={`ml-2 ${
-                                                 isGhost ? 'text-zinc-600' : 'text-emerald-500'
-                                             }`} />}
+                                        return (
+                                            <li
+                                                key={entry._id}
+                                                id={`option-${index}`}
+                                                role="option"
+                                                aria-selected={isSelected}
+                                                onClick={() => handleSelect(entry._id)}
+                                                className={`flex items-center justify-between px-3 py-2 cursor-pointer transition-colors ${
+                                                    index === highlightedIndex
+                                                        ? isGhost ? 'bg-gray-100 dark:bg-zinc-800' : 'bg-emerald-900/50'
+                                                        : 'hover:bg-gray-200 dark:hover:bg-zinc-800'
+                                                } ${isSelected ? 'bg-emerald-900/30' : ''}`}
+                                            >
+                                                <span className={`text-sm truncate flex-1 ${
+                                                     isGhost ? 'text-zinc-500 line-through' : 'text-zinc-800 dark:text-zinc-200'
+                                                 }`}>
+                                                    {displayValue}
+                                                </span>
+                                                {isSelected && <Check size={14} className={`ml-2 ${
+                                                     isGhost ? 'text-zinc-600' : 'text-emerald-500'
+                                                 }`} />}
+                                            </li>
+                                        );
+                                    })}
+                                    {isOverflowing && (
+                                        <li className="px-3 py-1.5 text-xs text-zinc-500 border-t border-zinc-200 dark:border-zinc-800 select-none">
+                                            Showing {MAX_RESULTS} of {totalCount} — type to filter
                                         </li>
-                                    );
-                                })}
-                                {isOverflowing && (
-                                    <li className="px-3 py-1.5 text-xs text-zinc-500 border-t border-zinc-800 select-none">
-                                        Showing {MAX_RESULTS} of {totalCount} — type to filter
-                                    </li>
-                                )}
-                            </>
-                        )}
-                    </ul>
-                </div>
+                                    )}
+                                </>
+                            )}
+                        </ul>
+                    </CardContent>
+                </Card>
             )}
         </div>
     );

@@ -19,7 +19,7 @@ A **personal, AI-powered universal ledger and tracker** — not limited to finan
 | Principle | Details |
 |---|---|
 | **Single User** | No multi-user accounts, no email/password auth |
-| **Multi-Profile** | Multiple isolated profiles per instance (separate data) |
+| **Multi-Profile** | Multiple isolated profiles per instance (separate data) ✅ **Security:** Profile isolation enforced at database level |
 | **Cross-Platform** | Must work across mobile and desktop (stack TBD) |
 | **Google Ecosystem** | GCP, Firebase (sync, hosting), Google AI Studio |
 | **Open Source** | Community-driven, self-hosted |
@@ -33,6 +33,7 @@ A **personal, AI-powered universal ledger and tracker** — not limited to finan
 - **TOTP-based security** (Time-based One-Time Password)
 - Designed to work seamlessly with **Google Authenticator**
 - Lightweight but secure access control
+- **Profile Isolation:** User-scoped databases prevent cross-user data access *(Fixed: 2026-03-22)*
 
 ---
 
