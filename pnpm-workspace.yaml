@@ -1,0 +1,12 @@
+packages:
+  - '.'
+
+ignoredBuiltDependencies:
+  - leveldown
+  - msw
+
+onlyBuiltDependencies:
+  - esbuild
+
+packages:
+  - '.'

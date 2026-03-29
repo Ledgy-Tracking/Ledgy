@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { EdgeProps, getBezierPath, useReactFlow } from '@xyflow/react';
+import { Card, CardContent } from '@/components/ui/card';
 
 /**
  * Custom edge with data preview tooltip
@@ -79,14 +80,16 @@ export const DataEdge: React.FC<EdgeProps> = ({
                         height="60"
                         style={{ overflow: 'visible', pointerEvents: 'none' }}
                     >
-                        <div className="bg-zinc-900/95 border border-emerald-500/50 rounded px-2 py-1.5 text-[10px] text-zinc-200 shadow-xl z-50 backdrop-blur-sm">
-                            <div className="font-bold text-emerald-400 uppercase tracking-tighter mb-0.5 border-b border-emerald-500/20 pb-0.5">
-                                {dataType} flow
-                            </div>
-                            <div className="text-zinc-100 font-mono truncate">
-                                {typeof sampleData === 'number' ? sampleData.toFixed(4) : String(sampleData)}
-                            </div>
-                        </div>
+                        <Card className="bg-gray-50 dark:bg-zinc-900/95 border border-emerald-500/50 rounded px-2 py-1.5 text-[10px] text-zinc-800 dark:text-zinc-200 shadow-xl z-50 backdrop-blur-sm">
+                            <CardContent className="p-0">
+                                <div className="font-bold text-emerald-400 uppercase tracking-tighter mb-0.5 border-b border-emerald-500/20 pb-0.5">
+                                    {dataType} flow
+                                </div>
+                                <div className="text-zinc-900 dark:text-zinc-100 font-mono truncate">
+                                    {typeof sampleData === 'number' ? sampleData.toFixed(4) : String(sampleData)}
+                                </div>
+                            </CardContent>
+                        </Card>
                     </foreignObject>
                 </g>
             )}

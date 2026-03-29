@@ -1,8 +1,8 @@
-## $(date +%Y-%m-%d) - Optimize TOTP verification loop
+## 2024-05-24 - Optimize TOTP verification loop
 **Learning:** Checking the most likely valid time step (0 offset) first in `verifyTOTP` avoids unnecessary WebCrypto API calls for valid, on-time codes, speeding up verification by ~3x in the happy path.
 **Action:** Always consider the order of operations in loops involving expensive cryptographic functions (like `crypto.subtle.importKey` and `crypto.subtle.sign`). Prioritize the "happy path" or most likely valid state to exit the loop early.
 
-## $(date +%Y-%m-%d) - Pre-import CryptoKey outside expensive loops
+## 2024-05-24 - Pre-import CryptoKey outside expensive loops
 **Learning:** `crypto.subtle.importKey` introduces a measurable overhead (~1ms) that adds up when placed inside a loop checking multiple permutations (such as the window tolerance loop in `verifyTOTP` checking multiple time offsets and algorithms).
 **Action:** When performing repeated HMAC signing or other WebCrypto operations within a loop based on the same key material, either pass the pre-imported `CryptoKey` to the function or lazily load and cache it outside the loop.
 
@@ -17,3 +17,7 @@
 ## 2026-03-22 - Optimized widget lookup in React Grid Layout handlers
 **Learning:** In high-frequency layout handlers like `onLayoutChange` in `react-grid-layout`, using `Array.prototype.find` inside a loop over external data arrays causes $O(N^2)$ complexity. This can cause significant main thread blocking and jank when rearranging many widgets.
 **Action:** Always index local state items (e.g., `widgets`) into a `Map` by identifier before the loop. This reduces lookup complexity from $O(N)$ to $O(1)$, converting the overall operation from $O(N^2)$ to $O(N)$.
+
+## 2024-05-24 - Prevent widget re-renders with Zustand selectors
+**Learning:** Destructuring entire state arrays (like `const { nodes } = useNodeStore()`) inside list components causes all items to re-render when any array element changes.
+**Action:** Always use specific selector functions (e.g., `useNodeStore(state => state.nodes.find(n => n.id === id))`) in child components to isolate re-renders to only the elements whose specific state has changed.

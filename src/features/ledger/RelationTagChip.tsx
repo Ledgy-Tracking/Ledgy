@@ -2,6 +2,8 @@ import React from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProfileStore } from '../../stores/useProfileStore';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface RelationTagChipProps {
     value: string | string[];
@@ -55,20 +57,22 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
     return (
         <div className="flex flex-wrap gap-1">
             {values.map((val, index) => (
-                <button
+                <Badge
                     key={index}
+                    variant="outline"
                     onClick={() => handleClick(val)}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded border transition-colors ${isGhost
-                            ? 'bg-zinc-800 border-zinc-700 text-zinc-500 line-through cursor-not-allowed'
-                            : 'bg-emerald-900/30 border-emerald-800 text-emerald-400 hover:bg-emerald-900/50 hover:border-emerald-700 cursor-pointer'
-                        }`}
+                    className={cn(
+                        "cursor-pointer gap-1 transition-colors",
+                        isGhost
+                            ? "bg-zinc-800 border-zinc-700 text-zinc-500 line-through cursor-not-allowed"
+                            : "bg-emerald-900/30 border-emerald-800 text-emerald-400 hover:bg-emerald-900/50 hover:border-emerald-700"
+                    )}
                     title={targetLedgerId ? `Navigate to ${targetLedgerId}` : undefined}
-                    disabled={isGhost}
                     aria-disabled={isGhost}
                 >
                     <span className="truncate max-w-[150px]">{val}</span>
                     {!isGhost && <ExternalLink size={10} />}
-                </button>
+                </Badge>
             ))}
         </div>
     );
