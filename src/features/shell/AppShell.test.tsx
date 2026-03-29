@@ -56,7 +56,7 @@ describe('AppShell', () => {
             </MemoryRouter>
         );
 
-        const container = screen.getByTestId('sidebar').parentElement;
+        const container = screen.getByTestId('sidebar').parentElement?.parentElement;
         expect(container).toHaveClass('dark');
     });
 

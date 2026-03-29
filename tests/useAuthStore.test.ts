@@ -15,6 +15,7 @@ vi.mock('../src/lib/crypto', () => ({
         ciphertext: new ArrayBuffer(32),
     }),
     decryptPayload: vi.fn().mockResolvedValue('JBSWY3DPEHPK3PXP'),
+    deriveUserIdFromSecret: vi.fn().mockResolvedValue('mock-user-id'),
 }));
 
 vi.mock('../src/lib/totp', () => ({

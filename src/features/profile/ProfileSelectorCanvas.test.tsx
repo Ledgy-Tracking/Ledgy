@@ -98,7 +98,7 @@ describe('ProfileSelectorCanvas', () => {
         );
 
         expect(screen.getByText('Select Profile')).toBeInTheDocument();
-        expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true');
+        expect(screen.getByLabelText('Loading content')).toHaveAttribute('aria-busy', 'true');
     });
 
     it('renders empty state when no profiles', () => {

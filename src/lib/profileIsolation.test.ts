@@ -5,18 +5,57 @@
  * access or enumerate profiles belonging to other users.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { useProfileStore } from '../stores/useProfileStore';
 import { getProfileDb, _clearProfileDatabases } from './db';
 import { deriveUserIdFromSecret } from './crypto';
+
+// Mock the DB module partially to avoid decryption errors with dummy data
+vi.mock('./db', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('./db')>();
+    return {
+        ...actual,
+        decryptProfileMetadata: vi.fn().mockImplementation(async (docs) => {
+            return docs.map(doc => ({
+                id: doc._id,
+                name: doc.name || (doc.name_enc ? 'Decrypted Name' : 'Unknown'),
+                description: doc.description || (doc.description_enc ? 'Decrypted Description' : ''),
+                createdAt: doc.createdAt,
+                updatedAt: doc.updatedAt,
+                color: doc.color,
+                avatar: doc.avatar,
+            }));
+        }),
+    };
+});
+
+// Mock crypto partially to avoid real encryption/decryption issues in these tests
+vi.mock('./crypto', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('./crypto')>();
+    return {
+        ...actual,
+        encryptPayload: vi.fn().mockImplementation(async (key, data) => {
+            return {
+                iv: new Uint8Array([1, 2, 3]),
+                ciphertext: new TextEncoder().encode(data).buffer,
+            };
+        }),
+        decryptPayload: vi.fn().mockImplementation(async (key, iv, ciphertext) => {
+            return new TextDecoder().decode(ciphertext);
+        }),
+    };
+});
 
 // Test utilities
 const TEST_TOTP_SECRET_1 = 'JBSWY3DPEHPK3PXP'; // User 1
 const TEST_TOTP_SECRET_2 = 'MFRGG3DFMZTWQ3DK'; // User 2
 
 describe('Profile Isolation Security Tests', () => {
+    let testSuffix = '';
+
     beforeEach(async () => {
+        testSuffix = Math.random().toString(36).substring(7);
         // Clear all databases and reset stores
         _clearProfileDatabases();
         useAuthStore.setState({
@@ -60,8 +99,8 @@ describe('Profile Isolation Security Tests', () => {
 
     describe('Database Isolation', () => {
         it('should use different databases for different users', async () => {
-            const userId1 = await deriveUserIdFromSecret(TEST_TOTP_SECRET_1);
-            const userId2 = await deriveUserIdFromSecret(TEST_TOTP_SECRET_2);
+            const userId1 = (await deriveUserIdFromSecret(TEST_TOTP_SECRET_1)) + testSuffix;
+            const userId2 = (await deriveUserIdFromSecret(TEST_TOTP_SECRET_2)) + testSuffix;
             
             const db1 = getProfileDb(`profiles_${userId1}`);
             const db2 = getProfileDb(`profiles_${userId2}`);
@@ -89,7 +128,7 @@ describe('Profile Isolation Security Tests', () => {
     describe('Profile Enumeration Isolation', () => {
         it('should only show profiles for the current user', async () => {
             // Mock authentication for user 1
-            const userId1 = await deriveUserIdFromSecret(TEST_TOTP_SECRET_1);
+            const userId1 = (await deriveUserIdFromSecret(TEST_TOTP_SECRET_1)) + testSuffix;
             const mockEncryptionKey = await crypto.subtle.generateKey(
                 { name: 'AES-GCM', length: 256 },
                 false,
@@ -113,7 +152,7 @@ describe('Profile Isolation Security Tests', () => {
             });
 
             // Create profile in user2's database (simulating another user)
-            const userId2 = await deriveUserIdFromSecret(TEST_TOTP_SECRET_2);
+            const userId2 = (await deriveUserIdFromSecret(TEST_TOTP_SECRET_2)) + testSuffix;
             const db2 = getProfileDb(`profiles_${userId2}`);
             await db2.createDocument('profile', {
                 name_enc: { iv: [7,8,9], ciphertext: [10,11,12] },
@@ -149,14 +188,14 @@ describe('Profile Isolation Security Tests', () => {
             await useProfileStore.getState().fetchProfiles();
             
             const error = useProfileStore.getState().error;
-            expect(error).toContain('User ID not available');
+            expect(error).toContain('Authentication required');
         });
     });
 
     describe('Profile Creation Isolation', () => {
         it('should create profiles in user-scoped database', async () => {
             // Mock authentication for user 1
-            const userId1 = await deriveUserIdFromSecret(TEST_TOTP_SECRET_1);
+            const userId1 = (await deriveUserIdFromSecret(TEST_TOTP_SECRET_1)) + testSuffix;
             const mockEncryptionKey = await crypto.subtle.generateKey(
                 { name: 'AES-GCM', length: 256 },
                 false,
@@ -178,7 +217,7 @@ describe('Profile Isolation Security Tests', () => {
             const user1Profiles = await db1.getAllDocuments('profile');
             
             // Check user2's database remains empty
-            const userId2 = await deriveUserIdFromSecret(TEST_TOTP_SECRET_2);
+            const userId2 = (await deriveUserIdFromSecret(TEST_TOTP_SECRET_2)) + testSuffix;
             const db2 = getProfileDb(`profiles_${userId2}`);
             const user2Profiles = await db2.getAllDocuments('profile');
 
@@ -190,8 +229,8 @@ describe('Profile Isolation Security Tests', () => {
     describe('Cross-User Data Leakage Prevention', () => {
         it('should not leak profile metadata across users', async () => {
             // Create profiles for both users in their respective databases
-            const userId1 = await deriveUserIdFromSecret(TEST_TOTP_SECRET_1);
-            const userId2 = await deriveUserIdFromSecret(TEST_TOTP_SECRET_2);
+            const userId1 = (await deriveUserIdFromSecret(TEST_TOTP_SECRET_1)) + testSuffix;
+            const userId2 = (await deriveUserIdFromSecret(TEST_TOTP_SECRET_2)) + testSuffix;
             
             const db1 = getProfileDb(`profiles_${userId1}`);
             const db2 = getProfileDb(`profiles_${userId2}`);

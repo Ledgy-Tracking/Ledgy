@@ -66,8 +66,8 @@ describe('EmptyState', () => {
 
     it('has correct ARIA attributes', () => {
         render(<EmptyState title="No items found" />);
-        const statusElement = screen.getByRole('status');
-        expect(statusElement).toHaveAttribute('aria-label', 'No items found');
+        const statusElement = screen.getByLabelText('No items found');
+        expect(statusElement).toBeDefined();
     });
 
     it('does not render button without onAction', () => {

@@ -83,6 +83,6 @@ describe('Profile Isolation Integration', () => {
         await useProfileStore.getState().fetchProfiles();
         
         const error = useProfileStore.getState().error;
-        expect(error).toContain('User ID not available');
+        expect(error).toContain('Authentication required');
     });
 });

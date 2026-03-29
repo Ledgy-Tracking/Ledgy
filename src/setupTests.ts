@@ -15,4 +15,13 @@ globalThis.process = { ...globalThis.process, browser: true };
 // Mock scrollIntoView for Radix UI select components
 HTMLElement.prototype.scrollIntoView = () => {};
 
+// Mock ResizeObserver for Radix UI and other components
+class ResizeObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+}
+
+globalThis.ResizeObserver = ResizeObserverMock;
+
 PouchDB.plugin(PouchDBAdapterMemory);
