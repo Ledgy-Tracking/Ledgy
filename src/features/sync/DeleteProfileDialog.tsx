@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface DeleteProfileDialogProps {
     profileName: string;
@@ -50,34 +53,36 @@ export const DeleteProfileDialog: React.FC<DeleteProfileDialogProps> = ({
 
                 <div className="space-y-4">
                     {/* Warning Box */}
-                    <div className="bg-red-900/20 border border-red-900 rounded p-4 space-y-2">
-                        <div className="flex items-start gap-2">
-                            <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" />
-                            <div className="text-xs text-red-200 space-y-1">
-                                <p><strong>Warning:</strong> This action cannot be undone.</p>
-                                {hasRemoteSync && (
-                                    <>
-                                        <p>• Local PouchDB database will be destroyed</p>
-                                        <p>• Remote sync database will be deleted</p>
-                                        <p>• All encrypted data will be permanently lost</p>
-                                    </>
-                                )}
-                                {!hasRemoteSync && (
-                                    <>
-                                        <p>• Local PouchDB database will be destroyed</p>
-                                        <p>• All encrypted data will be permanently lost</p>
-                                    </>
-                                )}
+                    <Card className="bg-red-900/20 border border-red-900">
+                        <CardContent className="p-4 space-y-2">
+                            <div className="flex items-start gap-2">
+                                <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" />
+                                <div className="text-xs text-red-200 space-y-1">
+                                    <p><strong>Warning:</strong> This action cannot be undone.</p>
+                                    {hasRemoteSync && (
+                                        <>
+                                            <p>• Local PouchDB database will be destroyed</p>
+                                            <p>• Remote sync database will be deleted</p>
+                                            <p>• All encrypted data will be permanently lost</p>
+                                        </>
+                                    )}
+                                    {!hasRemoteSync && (
+                                        <>
+                                            <p>• Local PouchDB database will be destroyed</p>
+                                            <p>• All encrypted data will be permanently lost</p>
+                                        </>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
 
                     {/* Confirmation Input */}
                     <div>
-                        <label className="text-xs text-muted-foreground block mb-1.5">
+                        <Label className="text-xs text-muted-foreground block mb-1.5">
                             Type <strong className="text-foreground">"{profileName}"</strong> to confirm deletion:
-                        </label>
-                        <input
+                        </Label>
+                        <Input
                             type="text"
                             value={confirmText}
                             onChange={(e) => setConfirmText(e.target.value)}

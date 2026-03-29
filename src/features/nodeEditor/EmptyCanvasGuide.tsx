@@ -2,6 +2,7 @@ import React from 'react';
 import { Plus, MousePointer2, Move, Hand } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface EmptyCanvasGuideProps {
     onAddFirstNode?: () => void;
@@ -13,7 +14,7 @@ export const EmptyCanvasGuide: React.FC<EmptyCanvasGuideProps> = ({ onAddFirstNo
             <Card className="bg-white dark:bg-zinc-950/90 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 max-w-md text-center shadow-2xl backdrop-blur-sm">
                 <CardContent>
                     <div className="flex justify-center mb-4 relative h-16 w-16 mx-auto">
-                        <div className="absolute inset-0 bg-emerald-500/20 rounded-xl animate-pulse" />
+                        <Skeleton className="absolute inset-0 bg-emerald-500/20 rounded-xl" />
                         <Hand size={32} className="text-emerald-400 absolute inset-0 m-auto animate-bounce" />
                     </div>
                     <h2 className="text-2xl font-bold text-emerald-400 mb-4">

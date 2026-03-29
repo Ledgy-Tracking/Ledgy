@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Handle, Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
 import { useProfileStore } from '../../../stores/useProfileStore';
 import { ChevronDown, ChevronUp, Database, Settings } from 'lucide-react';
@@ -109,8 +111,8 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
 
             {/* Configuration Panel */}
             {isConfigOpen && (
-                <div className="p-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50">
-                    <label className="text-xs text-zinc-400 block mb-1">Select Ledger:</label>
+                <Card className="p-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 rounded-none border-x-0 border-t-0">
+                    <Label className="text-xs text-zinc-400 block mb-1">Select Ledger:</Label>
                     <Select
                         value={nodeData.ledgerId || ''}
                         onValueChange={(value) => handleLedgerChange(value)}
@@ -126,7 +128,7 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                             ))}
                         </SelectContent>
                     </Select>
-                </div>
+                </Card>
             )}
 
             {/* Ports */}

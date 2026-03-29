@@ -11,6 +11,7 @@ import { useNodeStore } from '../../stores/useNodeStore';
 import { TextWidget, TrendWidget, ChartWidget, WidgetConfig } from './widgets';
 import { Plus, Trash2, BarChart3, TrendingUp, Type, Settings } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { WidgetConfigSheet } from './WidgetConfigSheet';
 
 interface DashboardViewProps {
@@ -149,7 +150,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
 
             {/* Widget Grid */}
-            <div ref={containerRef} className="flex-1 overflow-auto p-4">
+            <ScrollArea ref={containerRef} className="flex-1 overflow-auto p-4">
                 {!isLoaded ? (
                     <div className="h-full flex items-center justify-center text-zinc-500">
                         Loading dashboard...
@@ -207,7 +208,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         ))}
                     </ResponsiveGridLayout>
                 )}
-            </div>
+            </ScrollArea>
 
             <WidgetConfigSheet
                 widget={selectedWidget}

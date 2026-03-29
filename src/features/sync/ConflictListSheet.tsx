@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent } from '@/components/ui/card';
 
 export interface ConflictEntry {
     entryId: string;
@@ -61,7 +63,7 @@ export const ConflictListSheet: React.FC<ConflictListSheetProps> = ({
             </div>
 
             {/* Conflict List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+            <ScrollArea className="flex-1 p-4 space-y-2">
                 {conflicts.map((conflict, index) => (
                     <Button
                         key={index}
@@ -96,14 +98,16 @@ export const ConflictListSheet: React.FC<ConflictListSheetProps> = ({
                         </div>
                     </Button>
                 ))}
-            </div>
+            </ScrollArea>
 
             {/* Footer */}
-            <div className="px-4 py-3 border-t border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50">
-                <p className="text-xs text-zinc-500">
-                    Select a conflict to review and resolve differences
-                </p>
-            </div>
+            <Card className="rounded-none border-t-0 border-x-0 border-b border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50">
+                <CardContent className="px-4 py-3">
+                    <p className="text-xs text-zinc-500">
+                        Select a conflict to review and resolve differences
+                    </p>
+                </CardContent>
+            </Card>
         </div>
     );
 };

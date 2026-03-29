@@ -2,6 +2,7 @@ import { useUIStore, Theme, Density } from '../../stores/useUIStore';
 import { Sun, Moon, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 
 export const SettingsPage = () => {
     const { theme, density, setTheme, setDensity, resetToDefaults } = useUIStore();
@@ -19,9 +20,9 @@ export const SettingsPage = () => {
                     Appearance
                 </h2>
 
-                <div className="bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl rounded-lg shadow-sm border border-white/5 divide-y divide-white/5">
+                <Card className="bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl border-white/5 divide-y divide-white/5">
                     {/* Theme Setting */}
-                    <div className="p-4 flex items-center justify-between">
+                    <CardContent className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-gray-100 dark:bg-zinc-800/50 rounded-lg">
                                 {theme === 'dark' ? (
@@ -51,10 +52,10 @@ export const SettingsPage = () => {
                                 </TabsList>
                             </Tabs>
                         </div>
-                    </div>
+                    </CardContent>
 
                     {/* Density Setting */}
-                    <div className="p-4 flex items-center justify-between">
+                    <CardContent className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-gray-100 dark:bg-zinc-800/50 rounded-lg">
                                 {density === 'compact' ? (
@@ -84,8 +85,8 @@ export const SettingsPage = () => {
                                 </TabsList>
                             </Tabs>
                         </div>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
             </section>
 
             {/* Reset Section */}
@@ -94,19 +95,21 @@ export const SettingsPage = () => {
                     Reset Settings
                 </h2>
 
-                <div className="bg-amber-500/20 border border-amber-500/30 rounded-lg p-4">
-                    <p className="text-sm text-amber-300 mb-4">
-                        Reset all settings to their default values. This action cannot be undone.
-                    </p>
-                    <Button
-                        onClick={resetToDefaults}
-                        variant="outline"
-                        className="bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 font-medium border-amber-600/30"
-                    >
-                        <RotateCcw className="w-4 h-4" />
-                        Reset to Defaults
-                    </Button>
-                </div>
+                <Card className="bg-amber-500/20 border border-amber-500/30">
+                    <CardContent className="p-4">
+                        <p className="text-sm text-amber-300 mb-4">
+                            Reset all settings to their default values. This action cannot be undone.
+                        </p>
+                        <Button
+                            onClick={resetToDefaults}
+                            variant="outline"
+                            className="bg-amber-600/30 hover:bg-amber-600/50 text-amber-300 font-medium border-amber-600/30"
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                            Reset to Defaults
+                        </Button>
+                    </CardContent>
+                </Card>
             </section>
 
             {/* Future Settings Placeholder */}
@@ -115,28 +118,30 @@ export const SettingsPage = () => {
                     Coming Soon
                 </h2>
 
-                <div className="bg-gray-50 dark:bg-zinc-900/30 border border-white/5 rounded-lg p-4">
-                    <p className="text-sm text-zinc-500">
-                        Additional settings will be available in future updates:
-                    </p>
-                    <ul className="mt-2 space-y-1 text-sm text-zinc-500">
-                        <li className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
-                            Language & Locale
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
-                            Notification Preferences
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
-                            Keyboard Shortcuts
-                            <span className="text-xs text-zinc-600">
-                                (Undo: Ctrl/Cmd+Z, Redo: Ctrl/Cmd+Shift+Z)
-                            </span>
-                        </li>
-                    </ul>
-                </div>
+                <Card className="bg-gray-50 dark:bg-zinc-900/30 border-white/5">
+                    <CardContent className="p-4">
+                        <p className="text-sm text-zinc-500">
+                            Additional settings will be available in future updates:
+                        </p>
+                        <ul className="mt-2 space-y-1 text-sm text-zinc-500">
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
+                                Language & Locale
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
+                                Notification Preferences
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-zinc-600 rounded-full" />
+                                Keyboard Shortcuts
+                                <span className="text-xs text-zinc-600">
+                                    (Undo: Ctrl/Cmd+Z, Redo: Ctrl/Cmd+Shift+Z)
+                                </span>
+                            </li>
+                        </ul>
+                    </CardContent>
+                </Card>
             </section>
         </div>
     );

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DatabaseZap, Sun, Moon, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { useUIStore } from '../../stores/useUIStore';
 
 export const WelcomePage: React.FC = () => {
@@ -33,7 +34,7 @@ export const WelcomePage: React.FC = () => {
             </Button>
 
             {/* Main content */}
-            <div className="relative z-10 max-w-2xl w-full flex flex-col items-center text-center space-y-10">
+            <Card className="relative z-10 max-w-2xl w-full flex flex-col items-center text-center space-y-10">
 
                 {/* Icon */}
                 <div
@@ -104,7 +105,7 @@ export const WelcomePage: React.FC = () => {
                 <p className="text-sm text-zinc-400 dark:text-zinc-500">
                     Profiles isolate your data — create one per project, context, or role.
                 </p>
-            </div>
+            </Card>
         </div>
     );
 };

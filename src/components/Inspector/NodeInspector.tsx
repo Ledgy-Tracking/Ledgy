@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useNodes, useReactFlow } from '@xyflow/react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export const NodeInspector: React.FC = () => {
     const { selectedNodeId, setSelectedNodeId } = useUIStore();
@@ -45,7 +46,7 @@ export const NodeInspector: React.FC = () => {
                 <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-500">Node Inspector</h2>
             </div>
 
-            <div className="flex-1 overflow-auto p-4 space-y-6">
+            <ScrollArea className="flex-1 p-4 space-y-6">
                 <div className="space-y-2">
                     <Label className="text-xs text-zinc-500">Node Type</Label>
                     <Card>
@@ -77,7 +78,7 @@ export const NodeInspector: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </ScrollArea>
 
             <CardFooter className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
                 <Button

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Outlet, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Settings,
     LogOut,
@@ -326,9 +327,9 @@ export const AppShell: React.FC = () => {
                     </header>
 
                     {/* Viewport Content */}
-                    <div className="flex-1 overflow-auto bg-zinc-50 dark:bg-zinc-950 p-6">
+                    <ScrollArea className="flex-1 p-6 bg-zinc-50 dark:bg-zinc-950">
                         <Outlet />
-                    </div>
+                    </ScrollArea>
                 </main>
 
                 {/* Right Inspector Panel */}
@@ -392,7 +393,6 @@ export const AppShell: React.FC = () => {
 
                 {/* ARIA Live Region for Sync Announcements */}
                 <div
-                    role="status"
                     aria-live="polite"
                     aria-atomic="true"
                     className="sr-only"

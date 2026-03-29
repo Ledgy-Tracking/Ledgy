@@ -10,6 +10,7 @@ import { InlineEntryRow } from './InlineEntryRow';
 import { RelationTagChip } from './RelationTagChip';
 import { BackLinksPanel } from './BackLinksPanel';
 import { Button } from '../../components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 
@@ -604,12 +605,12 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
 
                 {/* Split View for Back-links (Story 3-3, AC 4) */}
                 {selectedEntry && (
-                    <div className="w-[300px] shrink-0 border-l border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 overflow-y-auto">
+                    <ScrollArea className="w-[300px] shrink-0 border-l border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 overflow-y-auto">
                         <BackLinksPanel
                             targetEntryId={selectedEntry._id}
                             targetLedgerId={schemaId}
                         />
-                    </div>
+                    </ScrollArea>
                 )}
             </div>
         </div>

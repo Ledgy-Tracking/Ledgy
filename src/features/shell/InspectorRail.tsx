@@ -1,5 +1,6 @@
 import { useUIStore } from '../../stores/useUIStore';
 import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronRight, ChevronLeft, Settings, Info } from 'lucide-react';
 
 export const InspectorRail = () => {
@@ -35,7 +36,7 @@ export const InspectorRail = () => {
             </div>
 
             {/* Inspector Content - Placeholder for contextual tools */}
-            <div className={`flex-1 overflow-y-auto p-4 ${!inspectorOpen && 'hidden'}`}>
+            <ScrollArea className={`flex-1 p-4 ${!inspectorOpen && 'hidden'}`}>
                 <div className="text-sm text-zinc-400">
                     <div className="flex items-start gap-3 p-3 bg-emerald-500/20 rounded-lg ring-1 ring-emerald-500/30">
                         <Info className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
@@ -53,7 +54,7 @@ export const InspectorRail = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </ScrollArea>
 
             {/* Toggle Button (when collapsed) */}
             <div className={`absolute -left-3 top-1/2 transform -translate-y-1/2 ${inspectorOpen && 'hidden'}`}>

@@ -2,6 +2,8 @@ import React from 'react';
 import { X, RefreshCw, CheckCircle2, AlertCircle, CloudOff, Wifi, Info, ShieldCheck, History, ExternalLink, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSyncStore } from '../../stores/useSyncStore';
 import { useAuthStore } from '../auth/useAuthStore';
 
@@ -123,7 +125,7 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
                     </div>
                 </SheetHeader>
 
-                <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                <ScrollArea className="flex-1 p-6 space-y-8">
                     {/* Primary Status Card */}
                     <div className={`p-5 rounded-2xl border ${details.bg.replace('/10', '/5')} border-border space-y-3`}>
                         <div className="flex items-center justify-between">
@@ -149,22 +151,26 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
 
                     {/* Metadata Grid */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="p-4 bg-muted/40 border border-border rounded-xl space-y-1">
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1.5">
-                                <History size={10} /> Last Push
-                            </span>
-                            <span className="text-sm font-medium text-foreground truncate block">
-                                {syncStatus.lastSync ? 'Successful' : 'Never'}
-                            </span>
-                        </div>
-                        <div className="p-4 bg-muted/40 border border-border rounded-xl space-y-1">
-                            <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1.5">
-                                <ShieldCheck size={10} /> Encryption
-                            </span>
-                            <span className="text-sm font-medium text-foreground block">
-                                AES-256-GCM
-                            </span>
-                        </div>
+                        <Card className="bg-muted/40 border-border">
+                            <CardContent className="p-4 space-y-1">
+                                <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1.5">
+                                    <History size={10} /> Last Push
+                                </span>
+                                <span className="text-sm font-medium text-foreground truncate block">
+                                    {syncStatus.lastSync ? 'Successful' : 'Never'}
+                                </span>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-muted/40 border-border">
+                            <CardContent className="p-4 space-y-1">
+                                <span className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1.5">
+                                    <ShieldCheck size={10} /> Encryption
+                                </span>
+                                <span className="text-sm font-medium text-foreground block">
+                                    AES-256-GCM
+                                </span>
+                            </CardContent>
+                        </Card>
                     </div>
 
                     {/* Configuration Summary */}
@@ -190,45 +196,49 @@ export const SyncStatusSheet: React.FC<SyncStatusSheetProps> = ({ isOpen, onClos
 
                     {/* Conflicts Preview */}
                     {syncStatus.status === 'conflict' && (
-                        <div className="space-y-4 bg-amber-500/5 p-4 rounded-xl border border-amber-500/10">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">Conflicts Detected</h3>
-                                <Button
-                                    onClick={onResolveAll}
-                                    variant="link"
-                                    size="xs"
-                                    className="text-[10px] font-bold text-amber-600 dark:text-amber-500 hover:underline"
-                                >
-                                    Resolve All <ExternalLink size={10} />
-                                </Button>
-                            </div>
-                            <div className="space-y-2">
-                                {conflicts.slice(0, 3).map((conflict, idx) => (
-                                    <div key={idx} className="flex items-center justify-between py-2 border-b border-amber-500/10 last:border-0">
-                                        <span className="text-xs text-foreground font-medium truncate max-w-[200px]">
-                                            {conflict.ledgerName} / {conflict.entryName}
-                                        </span>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon-xs"
-                                            className="text-muted-foreground hover:text-red-500"
-                                            aria-label={`Delete conflict for ${conflict.ledgerName} ${conflict.entryName}`}
-                                        >
-                                            <Trash2 size={12} />
-                                        </Button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <Card className="bg-amber-500/5 border-amber-500/10">
+                            <CardContent className="space-y-4 p-4">
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500">Conflicts Detected</h3>
+                                    <Button
+                                        onClick={onResolveAll}
+                                        variant="link"
+                                        size="xs"
+                                        className="text-[10px] font-bold text-amber-600 dark:text-amber-500 hover:underline"
+                                    >
+                                        Resolve All <ExternalLink size={10} />
+                                    </Button>
+                                </div>
+                                <div className="space-y-2">
+                                    {conflicts.slice(0, 3).map((conflict, idx) => (
+                                        <div key={idx} className="flex items-center justify-between py-2 border-b border-amber-500/10 last:border-0">
+                                            <span className="text-xs text-foreground font-medium truncate max-w-[200px]">
+                                                {conflict.ledgerName} / {conflict.entryName}
+                                            </span>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon-xs"
+                                                className="text-muted-foreground hover:text-red-500"
+                                                aria-label={`Delete conflict for ${conflict.ledgerName} ${conflict.entryName}`}
+                                            >
+                                                <Trash2 size={12} />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
                     )}
-                </div>
+                </ScrollArea>
 
-                <div className="p-6 border-t border-border bg-muted/20 mt-auto">
-                    <p className="text-[11px] text-muted-foreground leading-relaxed">
-                        Ledgy ensures your data remains private. All sync operations are performed
-                        locally on your device. Credentials never leave this instance unencrypted.
-                    </p>
-                </div>
+                <Card className="border-t border-border bg-muted/20 mt-auto rounded-none">
+                    <CardContent className="p-6">
+                        <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            Ledgy ensures your data remains private. All sync operations are performed
+                            locally on your device. Credentials never leave this instance unencrypted.
+                        </p>
+                    </CardContent>
+                </Card>
             </SheetContent>
         </Sheet>
     );

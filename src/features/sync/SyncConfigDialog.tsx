@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import { X, Save, RefreshCw, Shield, Globe, User, Key, ArrowRightLeft, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
 import { useSyncStore } from '../../stores/useSyncStore';
 
 interface SyncConfigDialogProps {
@@ -13,14 +16,30 @@ interface SyncConfigDialogProps {
     onClose: () => void;
 }
 
+interface SyncFormValues {
+    remoteUrl: string;
+    username: string;
+    password: string;
+    syncDirection: 'upload' | 'two-way';
+    continuous: boolean;
+}
+
 export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, isOpen, onClose }) => {
     const { syncConfig, isLoading, loadSyncConfig, saveSyncConfig } = useSyncStore();
 
-    const [remoteUrl, setRemoteUrl] = useState('');
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [syncDirection, setSyncDirection] = useState<'upload' | 'two-way'>('two-way');
-    const [continuous, setContinuous] = useState(true);
+    const form = useForm<SyncFormValues>({
+        defaultValues: {
+            remoteUrl: '',
+            username: '',
+            password: '',
+            syncDirection: 'two-way',
+            continuous: true
+        }
+    });
+
+    const { setValue, watch } = form;
+    const syncDirection = watch('syncDirection');
+    const continuous = watch('continuous');
 
     useEffect(() => {
         if (isOpen) {
@@ -30,22 +49,21 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
 
     useEffect(() => {
         if (syncConfig) {
-            setRemoteUrl(syncConfig.remoteUrl || '');
-            setUsername(syncConfig.username || '');
-            setPassword(syncConfig.password || '');
-            setSyncDirection(syncConfig.syncDirection || 'two-way');
-            setContinuous(syncConfig.continuous !== undefined ? syncConfig.continuous : true);
+            setValue('remoteUrl', syncConfig.remoteUrl || '');
+            setValue('username', syncConfig.username || '');
+            setValue('password', syncConfig.password || '');
+            setValue('syncDirection', syncConfig.syncDirection || 'two-way');
+            setValue('continuous', syncConfig.continuous !== undefined ? syncConfig.continuous : true);
         }
-    }, [syncConfig]);
+    }, [syncConfig, setValue]);
 
-    const handleSave = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onSubmit = async (data: SyncFormValues) => {
         await saveSyncConfig(profileId, {
-            remoteUrl,
-            username,
-            password,
-            syncDirection,
-            continuous
+            remoteUrl: data.remoteUrl,
+            username: data.username,
+            password: data.password,
+            syncDirection: data.syncDirection,
+            continuous: data.continuous
         });
         onClose();
     };
@@ -57,9 +75,9 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
             <DialogContent className="max-w-lg" showCloseButton={false}>
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-3">
-                        <div className="p-2 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 rounded-lg">
+                        <Card className="p-2 bg-emerald-50 dark:bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 rounded-lg">
                             <RefreshCw size={24} />
-                        </div>
+                        </Card>
                         Sync Configuration
                         <Button
                             variant="ghost"
@@ -77,7 +95,8 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSave} className="space-y-6">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl p-4 flex gap-3">
                         <Shield className="text-amber-600 dark:text-amber-500 shrink-0" size={20} />
                         <p className="text-sm text-amber-800 dark:text-amber-400">
@@ -87,54 +106,78 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                     </div>
 
                     <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-muted-foreground mb-1.5 flex items-center gap-2">
-                                <Globe size={14} /> CouchDB Remote URL
-                            </label>
-                            <Input
-                                type="url"
-                                required
-                                placeholder="https://your-couchdb-instance.com/db-name"
-                                value={remoteUrl}
-                                onChange={(e) => setRemoteUrl(e.target.value)}
-                                className="bg-background border-border text-foreground focus:border-emerald-500 focus:ring-emerald-500"
+                        <FormField
+                            control={form.control}
+                            name="remoteUrl"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="flex items-center gap-2">
+                                        <Globe size={14} /> CouchDB Remote URL
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="url"
+                                            required
+                                            placeholder="https://your-couchdb-instance.com/db-name"
+                                            {...field}
+                                            className="bg-background border-border text-foreground focus:border-emerald-500 focus:ring-emerald-500"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="username"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="flex items-center gap-2">
+                                            <User size={14} /> Username
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="text"
+                                                placeholder="Admin"
+                                                {...field}
+                                                className="bg-background border-border text-foreground focus:border-emerald-500 focus:ring-emerald-500"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="flex items-center gap-2">
+                                            <Key size={14} /> Password
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="password"
+                                                placeholder="••••••••"
+                                                {...field}
+                                                className="bg-background border-border text-foreground focus:border-emerald-500 focus:ring-emerald-500"
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-muted-foreground mb-1.5 flex items-center gap-2">
-                                    <User size={14} /> Username
-                                </label>
-                                <Input
-                                    type="text"
-                                    placeholder="Admin"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    className="bg-background border-border text-foreground focus:border-emerald-500 focus:ring-emerald-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-muted-foreground mb-1.5 flex items-center gap-2">
-                                    <Key size={14} /> Password
-                                </label>
-                                <Input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="bg-background border-border text-foreground focus:border-emerald-500 focus:ring-emerald-500"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-muted-foreground mb-1.5">Sync Direction</label>
+                                <Label className="block text-sm font-medium text-muted-foreground mb-1.5">Sync Direction</Label>
                                 <div className="flex bg-muted p-1 rounded-lg">
                                     <Button
                                         type="button"
-                                        onClick={() => setSyncDirection('two-way')}
+                                        onClick={() => form.setValue('syncDirection', 'two-way')}
                                         variant="ghost"
                                         size="sm"
                                         className={`flex-1 text-xs ${syncDirection === 'two-way'
@@ -146,7 +189,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                     </Button>
                                     <Button
                                         type="button"
-                                        onClick={() => setSyncDirection('upload')}
+                                        onClick={() => form.setValue('syncDirection', 'upload')}
                                         variant="ghost"
                                         size="sm"
                                         className={`flex-1 text-xs ${syncDirection === 'upload'
@@ -166,7 +209,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                     <Switch
                                         id="continuous-sync"
                                         checked={continuous}
-                                        onCheckedChange={setContinuous}
+                                        onCheckedChange={(checked) => form.setValue('continuous', checked)}
                                     />
                                 </div>
                             </div>
@@ -183,7 +226,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                         </Button>
                         <Button
                             type="submit"
-                            disabled={!remoteUrl || isLoading}
+                            disabled={!form.watch('remoteUrl') || isLoading}
                             className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 shadow-lg shadow-emerald-500/20"
                         >
                             {isLoading ? (
@@ -194,7 +237,8 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                             Save Configuration
                         </Button>
                     </div>
-                </form>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     );

@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { InlineEntryRow } from '../src/features/ledger/InlineEntryRow';
 import { useLedgerStore } from '../src/stores/useLedgerStore';
 import { useProfileStore } from '../src/stores/useProfileStore';
+import { Table, TableBody, TableRow, TableCell } from '@/components/ui/table';
 
 // Mock stores
 vi.mock('../src/stores/useLedgerStore', () => ({
@@ -50,13 +51,19 @@ describe('InlineEntryRow', () => {
 
     it('renders input fields for each schema field', () => {
         render(
-            <table><tbody>
-                <InlineEntryRow
-                    schema={mockSchema}
-                    onCancel={mockOnCancel}
-                    onComplete={mockOnComplete}
-                />
-            </tbody></table>
+            <Table>
+                <TableBody>
+                    <TableRow>
+                        <TableCell>
+                            <InlineEntryRow
+                                schema={mockSchema}
+                                onCancel={mockOnCancel}
+                                onComplete={mockOnComplete}
+                            />
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
         );
 
         expect(screen.getByPlaceholderText(/enter name/i)).toBeInTheDocument();
@@ -65,13 +72,19 @@ describe('InlineEntryRow', () => {
 
     it('calls onCancel when Cancel button clicked', () => {
         render(
-            <table><tbody>
-                <InlineEntryRow
-                    schema={mockSchema}
-                    onCancel={mockOnCancel}
-                    onComplete={mockOnComplete}
-                />
-            </tbody></table>
+            <Table>
+                <TableBody>
+                    <TableRow>
+                        <TableCell>
+                            <InlineEntryRow
+                                schema={mockSchema}
+                                onCancel={mockOnCancel}
+                                onComplete={mockOnComplete}
+                            />
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
         );
 
         fireEvent.click(screen.getByText('Cancel'));
@@ -82,13 +95,19 @@ describe('InlineEntryRow', () => {
         mockCreateEntry.mockResolvedValue({ _id: 'entry:new' });
 
         render(
-            <table><tbody>
-                <InlineEntryRow
-                    schema={mockSchema}
-                    onCancel={mockOnCancel}
-                    onComplete={mockOnComplete}
-                />
-            </tbody></table>
+            <Table>
+                <TableBody>
+                    <TableRow>
+                        <TableCell>
+                            <InlineEntryRow
+                                schema={mockSchema}
+                                onCancel={mockOnCancel}
+                                onComplete={mockOnComplete}
+                            />
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
         );
 
         fireEvent.change(screen.getByPlaceholderText(/enter name/i), {
@@ -113,13 +132,19 @@ describe('InlineEntryRow', () => {
 
     it('validates required fields', async () => {
         render(
-            <table><tbody>
-                <InlineEntryRow
-                    schema={mockSchema}
-                    onCancel={mockOnCancel}
-                    onComplete={mockOnComplete}
-                />
-            </tbody></table>
+            <Table>
+                <TableBody>
+                    <TableRow>
+                        <TableCell>
+                            <InlineEntryRow
+                                schema={mockSchema}
+                                onCancel={mockOnCancel}
+                                onComplete={mockOnComplete}
+                            />
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
         );
 
         // Try to save without name
@@ -131,13 +156,19 @@ describe('InlineEntryRow', () => {
 
     it('cancels on Escape key', () => {
         render(
-            <table><tbody>
-                <InlineEntryRow
-                    schema={mockSchema}
-                    onCancel={mockOnCancel}
-                    onComplete={mockOnComplete}
-                />
-            </tbody></table>
+            <Table>
+                <TableBody>
+                    <TableRow>
+                        <TableCell>
+                            <InlineEntryRow
+                                schema={mockSchema}
+                                onCancel={mockOnCancel}
+                                onComplete={mockOnComplete}
+                            />
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
         );
 
         const input = screen.getByPlaceholderText(/enter name/i);
@@ -148,13 +179,19 @@ describe('InlineEntryRow', () => {
 
     it('handles number input correctly', async () => {
         render(
-            <table><tbody>
-                <InlineEntryRow
-                    schema={mockSchema}
-                    onCancel={mockOnCancel}
-                    onComplete={mockOnComplete}
-                />
-            </tbody></table>
+            <Table>
+                <TableBody>
+                    <TableRow>
+                        <TableCell>
+                            <InlineEntryRow
+                                schema={mockSchema}
+                                onCancel={mockOnCancel}
+                                onComplete={mockOnComplete}
+                            />
+                        </TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
         );
 
         fireEvent.change(screen.getByPlaceholderText(/enter name/i), {

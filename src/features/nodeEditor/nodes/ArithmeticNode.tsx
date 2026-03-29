@@ -5,6 +5,7 @@ import { ArithmeticOperation, ARITHMETIC_OPERATIONS } from '../../../types/nodeE
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface ArithmeticNodeData {
     label: string;
@@ -90,7 +91,7 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
                                 <span>{nodeData.error}</span>
                             </div>
                         ) : nodeData.isComputing ? (
-                            <div className="text-amber-400 text-xs animate-pulse">Computing...</div>
+                            <Skeleton className="text-amber-400 text-xs">Computing...</Skeleton>
                         ) : (
                             <div className={`text-lg font-bold ${nodeData.result !== null ? 'text-emerald-400' : 'text-zinc-500'}`}>
                                 {formatResult(nodeData.result)}

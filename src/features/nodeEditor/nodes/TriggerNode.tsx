@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { Zap, AlertTriangle, CheckCircle, Settings } from 'lucide-react';
@@ -94,27 +97,30 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
 
             {/* Configuration Panel */}
             {isConfigOpen && (
-                <div className="p-3 space-y-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50">
+                <Card className="p-3 space-y-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 rounded-none border-x-0 border-t-0">
                     {/* Ledger Selector */}
                     <div>
-                        <label className="text-xs text-zinc-400 block mb-1">Listen to Ledger:</label>
-                        <select
+                        <Label className="text-xs text-zinc-400 block mb-1">Listen to Ledger:</Label>
+                        <Select
                             value={nodeData.ledgerId || ''}
-                            onChange={(e) => handleLedgerChange(e.target.value)}
-                            className="w-full bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            onValueChange={(value) => handleLedgerChange(value)}
                         >
-                            <option value="">-- Choose a ledger --</option>
-                            {schemas.map(schema => (
-                                <option key={schema._id} value={schema._id}>
-                                    {schema.name}
-                                </option>
-                            ))}
-                        </select>
+                            <SelectTrigger className="w-full bg-gray-50 dark:bg-zinc-900 border-zinc-700 h-8 text-xs">
+                                <SelectValue placeholder="-- Choose a ledger --" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {schemas.map(schema => (
+                                    <SelectItem key={schema._id} value={schema._id}>
+                                        {schema.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* Event Type Selector */}
                     <div>
-                        <label className="text-xs text-zinc-400 block mb-1">Event Type:</label>
+                        <Label className="text-xs text-zinc-400 block mb-1">Event Type:</Label>
                         <div className="flex gap-2">
                             <Button
                                 onClick={() => handleEventTypeChange('on-create')}
@@ -140,7 +146,7 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
                             </Button>
                         </div>
                     </div>
-                </div>
+                </Card>
             )}
 
             {/* Status Display */}

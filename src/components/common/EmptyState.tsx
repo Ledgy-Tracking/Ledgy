@@ -38,7 +38,6 @@ export function EmptyState({
     return (
         <div
             className={`flex flex-col items-center justify-center p-8 text-center ${className}`}
-            role="status"
             aria-label={title}
         >
             {icon && (

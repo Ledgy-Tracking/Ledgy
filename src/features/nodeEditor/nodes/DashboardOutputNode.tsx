@@ -2,6 +2,7 @@ import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useDashboardStore } from '../../../stores/useDashboardStore';
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { BarChart3, TrendingUp, Type } from 'lucide-react';
@@ -65,7 +66,7 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
             <div className="p-3 space-y-3 border-b border-zinc-300 dark:border-zinc-700">
                 {/* Widget Type */}
                 <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Widget Type:</label>
+                    <Label className="text-xs text-zinc-400 block mb-1">Widget Type:</Label>
                     <div className="flex gap-1">
                         <Button
                             onClick={() => handleWidgetTypeChange('chart')}
@@ -114,7 +115,7 @@ export const DashboardOutputNode: React.FC<NodeProps> = React.memo(({ id, data, 
 
                 {/* Title */}
                 <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Widget Title:</label>
+                    <Label className="text-xs text-zinc-400 block mb-1">Widget Title:</Label>
                     <Input
                         type="text"
                         value={nodeData.title || ''}

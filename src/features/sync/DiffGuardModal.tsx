@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { X, Check, RotateCcw, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ConflictEntry } from './ConflictListSheet';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useSyncStore } from '../../stores/useSyncStore';
@@ -131,7 +133,7 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                 </DialogHeader>
 
                 {/* Diff View */}
-                <div className="flex-1 overflow-auto p-6">
+                <ScrollArea className="flex-1 p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Local Version */}
                         <div className="space-y-4">
@@ -142,36 +144,38 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                                 </div>
                                 <span className="text-[10px] text-muted-foreground font-mono">{localVersion.deviceId.slice(0, 8)}</span>
                             </div>
-                            <div className="bg-background border border-border rounded-xl p-4 space-y-3">
-                                {allFields.map(field => {
-                                    const isDifferent = conflictingFields.includes(field);
-                                    const localValue = localVersion.data?.[field];
-                                    const isSelected = mergedData[field] === localValue;
+                            <Card className="bg-background border-border">
+                                <CardContent className="p-4 space-y-3">
+                                    {allFields.map(field => {
+                                        const isDifferent = conflictingFields.includes(field);
+                                        const localValue = localVersion.data?.[field];
+                                        const isSelected = mergedData[field] === localValue;
 
-                                    return (
-                                        <div
-                                            key={field}
-                                            onClick={() => toggleFieldSource(field, 'local')}
-                                            className={`p-2.5 rounded-lg border transition-all cursor-pointer ${isDifferent
-                                                    ? isSelected
-                                                        ? 'border-blue-500 bg-blue-500/5'
-                                                        : 'border-border bg-background hover:border-blue-500/50'
-                                                    : 'border-border bg-muted/30'
-                                                }`}
-                                        >
-                                            <div className="flex justify-between items-center mb-1">
-                                                <div className="text-[10px] text-muted-foreground font-bold uppercase">{field}</div>
-                                                {isDifferent && isSelected && (
-                                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 uppercase font-bold">selected</span>
-                                                )}
+                                        return (
+                                            <div
+                                                key={field}
+                                                onClick={() => toggleFieldSource(field, 'local')}
+                                                className={`p-2.5 rounded-lg border transition-all cursor-pointer ${isDifferent
+                                                        ? isSelected
+                                                            ? 'border-blue-500 bg-blue-500/5'
+                                                            : 'border-border bg-background hover:border-blue-500/50'
+                                                        : 'border-border bg-muted/30'
+                                                    }`}
+                                            >
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <div className="text-[10px] text-muted-foreground font-bold uppercase">{field}</div>
+                                                    {isDifferent && isSelected && (
+                                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 uppercase font-bold">selected</span>
+                                                    )}
+                                                </div>
+                                                <div className={`text-sm font-medium break-all ${isDifferent ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                                    {localValue !== undefined ? String(localValue) : <span className="text-muted-foreground italic">undefined</span>}
+                                                </div>
                                             </div>
-                                            <div className={`text-sm font-medium break-all ${isDifferent ? 'text-foreground' : 'text-muted-foreground'}`}>
-                                                {localValue !== undefined ? String(localValue) : <span className="text-muted-foreground italic">undefined</span>}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </CardContent>
+                            </Card>
                         </div>
 
                         {/* Remote Version */}
@@ -183,36 +187,38 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                                 </div>
                                 <span className="text-[10px] text-muted-foreground font-mono">{remoteVersion.deviceId.slice(0, 8)}</span>
                             </div>
-                            <div className="bg-background border border-border rounded-xl p-4 space-y-3">
-                                {allFields.map(field => {
-                                    const isDifferent = conflictingFields.includes(field);
-                                    const remoteValue = remoteVersion.data?.[field];
-                                    const isSelected = mergedData[field] === remoteValue && mergedData[field] !== localVersion.data?.[field];
+                            <Card className="bg-background border-border">
+                                <CardContent className="p-4 space-y-3">
+                                    {allFields.map(field => {
+                                        const isDifferent = conflictingFields.includes(field);
+                                        const remoteValue = remoteVersion.data?.[field];
+                                        const isSelected = mergedData[field] === remoteValue && mergedData[field] !== localVersion.data?.[field];
 
-                                    return (
-                                        <div
-                                            key={field}
-                                            onClick={() => toggleFieldSource(field, 'remote')}
-                                            className={`p-2.5 rounded-lg border transition-all cursor-pointer ${isDifferent
-                                                    ? isSelected
-                                                        ? 'border-emerald-500 bg-emerald-500/5'
-                                                        : 'border-border bg-background hover:border-emerald-500/50'
-                                                    : 'border-border bg-muted/30'
-                                                }`}
-                                        >
-                                            <div className="flex justify-between items-center mb-1">
-                                                <div className="text-[10px] text-muted-foreground font-bold uppercase">{field}</div>
-                                                {isDifferent && isSelected && (
-                                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 uppercase font-bold">selected</span>
-                                                )}
+                                        return (
+                                            <div
+                                                key={field}
+                                                onClick={() => toggleFieldSource(field, 'remote')}
+                                                className={`p-2.5 rounded-lg border transition-all cursor-pointer ${isDifferent
+                                                        ? isSelected
+                                                            ? 'border-emerald-500 bg-emerald-500/5'
+                                                            : 'border-border bg-background hover:border-emerald-500/50'
+                                                        : 'border-border bg-muted/30'
+                                                    }`}
+                                            >
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <div className="text-[10px] text-muted-foreground font-bold uppercase">{field}</div>
+                                                    {isDifferent && isSelected && (
+                                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 uppercase font-bold">selected</span>
+                                                    )}
+                                                </div>
+                                                <div className={`text-sm font-medium break-all ${isDifferent ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                                    {remoteValue !== undefined ? String(remoteValue) : <span className="text-muted-foreground italic">undefined</span>}
+                                                </div>
                                             </div>
-                                            <div className={`text-sm font-medium break-all ${isDifferent ? 'text-foreground' : 'text-muted-foreground'}`}>
-                                                {remoteValue !== undefined ? String(remoteValue) : <span className="text-muted-foreground italic">undefined</span>}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </CardContent>
+                            </Card>
                         </div>
 
                         {/* Merge Preview */}
@@ -221,33 +227,35 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                                 <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                                 <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Merge Result</h3>
                             </div>
-                            <div className="bg-background rounded-xl border border-dashed border-border p-4 space-y-3">
-                                {allFields.map(field => {
-                                    const isDifferent = conflictingFields.includes(field);
-                                    const mergedValue = mergedData[field];
-                                    const isFromLocal = mergedValue === localVersion.data?.[field];
+                            <Card className="bg-background border-dashed border-border">
+                                <CardContent className="p-4 space-y-3">
+                                    {allFields.map(field => {
+                                        const isDifferent = conflictingFields.includes(field);
+                                        const mergedValue = mergedData[field];
+                                        const isFromLocal = mergedValue === localVersion.data?.[field];
 
-                                    return (
-                                        <div key={field} className="p-2 rounded-lg bg-muted/50 border border-border">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <div className="text-[10px] text-muted-foreground font-bold uppercase">{field}</div>
-                                                {isDifferent && (
-                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${isFromLocal ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'
-                                                        }`}>
-                                                        {isFromLocal ? 'from local' : 'from remote'}
-                                                    </span>
-                                                )}
+                                        return (
+                                            <div key={field} className="p-2 rounded-lg bg-muted/50 border border-border">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <div className="text-[10px] text-muted-foreground font-bold uppercase">{field}</div>
+                                                    {isDifferent && (
+                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${isFromLocal ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'
+                                                            }`}>
+                                                            {isFromLocal ? 'from local' : 'from remote'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm font-medium text-foreground break-all">
+                                                    {mergedValue !== undefined ? String(mergedValue) : <span className="text-muted-foreground italic">undefined</span>}
+                                                </div>
                                             </div>
-                                            <div className="text-sm font-medium text-foreground break-all">
-                                                {mergedValue !== undefined ? String(mergedValue) : <span className="text-muted-foreground italic">undefined</span>}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </CardContent>
+                            </Card>
                         </div>
                     </div>
-                </div>
+                </ScrollArea>
 
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between px-6 py-6 border-t border-border bg-muted/20">

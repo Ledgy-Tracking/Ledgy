@@ -1,6 +1,8 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { useErrorStore } from '../../stores/useErrorStore';
 import { AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ErrorBoundaryProps {
     children: ReactNode;
@@ -73,21 +75,23 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
             return (
                 <div className="flex items-center justify-center min-h-[200px] p-6">
-                    <div className="bg-red-950/90 border border-red-500 text-red-200 rounded-lg p-6 max-w-md shadow-2xl">
-                        <div className="flex items-start gap-3">
-                            <AlertCircle className="shrink-0 mt-0.5" size={24} />
-                            <div className="flex-grow">
-                                <h3 className="font-semibold mb-2">Something went wrong</h3>
-                                <p className="text-sm opacity-90 mb-4">{error.message}</p>
-                                <button
-                                    onClick={this.handleDismiss}
-                                    className="text-xs bg-red-800 hover:bg-red-700 px-3 py-1.5 rounded transition-colors"
-                                >
-                                    Dismiss
-                                </button>
+                    <Card className="bg-red-950/90 border-red-500 text-red-200 max-w-md shadow-2xl">
+                        <CardContent className="p-6">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="shrink-0 mt-0.5" size={24} />
+                                <div className="flex-grow">
+                                    <h3 className="font-semibold mb-2">Something went wrong</h3>
+                                    <p className="text-sm opacity-90 mb-4">{error.message}</p>
+                                    <Button
+                                        onClick={this.handleDismiss}
+                                        className="text-xs bg-red-800 hover:bg-red-700 px-3 py-1.5 rounded transition-colors"
+                                    >
+                                        Dismiss
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 </div>
             );
         }
