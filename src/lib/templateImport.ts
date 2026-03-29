@@ -80,7 +80,7 @@ export async function import_template(
 
 /**
  * Opens a native OS file dialog via Tauri to select a template file.
- * Uses Function() constructor to avoid Vite static analysis of Tauri imports.
+ * Uses dynamic import with @vite-ignore to avoid Vite static analysis of Tauri imports.
  * Returns null if the user cancels.
  */
 export async function readTemplateTauri(): Promise<TemplateExport | null> {

@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { useErrorStore } from '../../stores/useErrorStore';
+import { useNodeStore } from '../../stores/useNodeStore';
 
 export interface Widget {
     id: string;
@@ -42,6 +44,8 @@ interface DashboardState {
     clearProfileData: () => void;
 }
 
+const nodeSubscriptions = new Map<string, () => void>();
+
 export const useDashboardStore = create<DashboardState>((set, get) => ({
     // Initial state
     widgets: [],
@@ -61,9 +65,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to add widget';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -77,9 +79,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to update layout';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -95,9 +95,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to remove widget';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -115,9 +113,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to update widget';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -132,9 +128,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -147,25 +141,39 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to save dashboard';
             set({ error: errorMessage });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
     // Subscription structure - full wiring in Story 1.5
     subscribeToNodeOutput: (nodeId: string) => {
-        // TODO: Implement actual subscription to useNodeStore in Story 1.5
-        // This is a placeholder for the subscription mechanism
-        console.log(`[DashboardStore] Subscribing to node output: ${nodeId}`);
+        if (nodeSubscriptions.has(nodeId)) {
+            return;
+        }
+
+        const unsubscribe = useNodeStore.subscribe(
+            (state) => state.nodes.find((n) => n.id === nodeId),
+            (node) => {
+                // TODO: Handle node output updates in Story 1.5
+                console.log(`[DashboardStore] Node updated: ${nodeId}`, node);
+            }
+        );
+
+        nodeSubscriptions.set(nodeId, unsubscribe);
     },
 
     unsubscribeFromNodeOutput: (nodeId: string) => {
-        // TODO: Implement actual unsubscription in Story 1.5
-        console.log(`[DashboardStore] Unsubscribing from node output: ${nodeId}`);
+        const unsubscribe = nodeSubscriptions.get(nodeId);
+        if (unsubscribe) {
+            unsubscribe();
+            nodeSubscriptions.delete(nodeId);
+        }
     },
 
     clearProfileData: () => {
+        nodeSubscriptions.forEach((unsubscribe) => unsubscribe());
+        nodeSubscriptions.clear();
+
         set({
             widgets: [],
             layout: { widgets: [] },

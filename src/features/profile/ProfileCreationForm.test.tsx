@@ -14,9 +14,9 @@ const mockSetActiveProfile = vi.fn();
 const mockDispatchError = vi.fn();
 const mockNavigate = vi.fn();
 
-// Mock react-router useNavigate
-vi.mock('react-router', async (importOriginal) => {
-    const actual = await importOriginal<typeof import('react-router')>();
+// Mock react-router-dom useNavigate
+vi.mock('react-router-dom', async (importOriginal) => {
+    const actual = await importOriginal<typeof import('react-router-dom')>();
     return {
         ...actual,
         useNavigate: () => mockNavigate,

@@ -25,6 +25,31 @@ export default defineConfig(async () => ({
     },
   },
 
+  css: {
+    postcss: {},
+  },
+
+  build: {
+    cssMinify: false, // Temporarily disable to eliminate CSS warning
+    cssCodeSplit: true,
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Vendor chunks for better caching
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['lucide-react', '@radix-ui/react-slot', 'class-variance-authority', 'clsx', 'tailwind-merge'],
+          forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
+          db: ['pouchdb'],
+          flow: ['@xyflow/react'],
+          utils: ['uuid', 'base32-encode', 'base32-decode'],
+          // Store chunks to solve dynamic import issue
+          stores: ['zustand']
+        }
+      }
+    }
+  },
+
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
   // 1. prevent Vite from obscuring rust errors

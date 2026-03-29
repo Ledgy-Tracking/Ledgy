@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useErrorStore } from '../../stores/useErrorStore';
 
 export interface SyncConflict {
     entryId: string;
@@ -70,9 +71,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Sync failed';
             set({ error: errorMessage, isSyncing: false, syncStatus: 'error' });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 
@@ -89,9 +88,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to resolve conflict';
             set({ error: errorMessage, isLoading: false });
-            import('../../stores/useErrorStore').then(({ useErrorStore }) => {
-                useErrorStore.getState().dispatchError(errorMessage, 'error');
-            });
+            useErrorStore.getState().dispatchError(errorMessage, 'error');
         }
     },
 

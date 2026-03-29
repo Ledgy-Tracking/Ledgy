@@ -3,6 +3,9 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Calculator, AlertCircle } from 'lucide-react';
 import { ArithmeticOperation, ARITHMETIC_OPERATIONS } from '../../../types/nodeEditor';
 import { useNodeStore } from '../../../stores/useNodeStore';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface ArithmeticNodeData {
     label: string;
@@ -33,28 +36,32 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
 
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+            className={`bg-gray-50 dark:bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] ${selected ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'
                 } ${nodeData.error ? 'border-red-500/50' : ''}`}
         >
             {/* Header */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-zinc-800 rounded-t-md">
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-zinc-800 rounded-t-md">
                 <Calculator size={14} className="text-amber-400" />
-                <span className="text-sm font-semibold text-zinc-100">Arithmetic</span>
+                <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Arithmetic</span>
             </div>
 
             {/* Operation Selector */}
-            <div className="px-3 py-2 border-b border-zinc-700">
-                <select
+            <div className="px-3 py-2 border-b border-zinc-300 dark:border-zinc-700">
+                <Select
                     value={nodeData.operation || 'sum'}
-                    onChange={(e) => handleOperationChange(e.target.value as ArithmeticOperation)}
-                    className="w-full bg-zinc-800 border border-zinc-600 rounded px-2 py-1 text-xs text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    onValueChange={(value) => handleOperationChange(value as ArithmeticOperation)}
                 >
-                    {ARITHMETIC_OPERATIONS.map(op => (
-                        <option key={op} value={op}>
-                            {op.charAt(0).toUpperCase() + op.slice(1)}
-                        </option>
-                    ))}
-                </select>
+                    <SelectTrigger className="w-full bg-gray-100 dark:bg-zinc-800 border-zinc-600 h-8 text-xs">
+                        <SelectValue placeholder="Operation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {ARITHMETIC_OPERATIONS.map(op => (
+                            <SelectItem key={op} value={op}>
+                                {op.charAt(0).toUpperCase() + op.slice(1)}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Input Port */}
@@ -73,23 +80,25 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
 
             {/* Result Display */}
             <div className="px-3 pb-3">
-                <div className="bg-zinc-800/50 rounded p-2 border border-zinc-700">
-                    <div className="text-xs text-zinc-500 mb-1">
-                        {(nodeData.operation || 'sum').charAt(0).toUpperCase() + (nodeData.operation || 'sum').slice(1)}
-                    </div>
-                    {nodeData.error ? (
-                        <div className="flex items-center gap-1.5 text-red-400 text-xs">
-                            <AlertCircle size={12} />
-                            <span>{nodeData.error}</span>
+                <Card className="bg-gray-100 dark:bg-zinc-800/50 rounded p-2 border border-zinc-300 dark:border-zinc-700">
+                    <CardContent className="p-0">
+                        <div className="text-xs text-zinc-500 mb-1">
+                            {(nodeData.operation || 'sum').charAt(0).toUpperCase() + (nodeData.operation || 'sum').slice(1)}
                         </div>
-                    ) : nodeData.isComputing ? (
-                        <div className="text-amber-400 text-xs animate-pulse">Computing...</div>
-                    ) : (
-                        <div className={`text-lg font-bold ${nodeData.result !== null ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                            {formatResult(nodeData.result)}
-                        </div>
-                    )}
-                </div>
+                        {nodeData.error ? (
+                            <div className="flex items-center gap-1.5 text-red-400 text-xs">
+                                <AlertCircle size={12} />
+                                <span>{nodeData.error}</span>
+                            </div>
+                        ) : nodeData.isComputing ? (
+                            <Skeleton className="text-amber-400 text-xs">Computing...</Skeleton>
+                        ) : (
+                            <div className={`text-lg font-bold ${nodeData.result !== null ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                                {formatResult(nodeData.result)}
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
 
             {/* Output Port */}
@@ -108,3 +117,4 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
         </div>
     );
 });
+

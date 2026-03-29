@@ -1,9 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Handle, Position, NodeProps, useReactFlow } from '@xyflow/react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { useLedgerStore } from '../../../stores/useLedgerStore';
 import { useProfileStore } from '../../../stores/useProfileStore';
 import { ChevronDown, ChevronUp, Database, Settings } from 'lucide-react';
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface LedgerSourceNodeData {
     label: string;
@@ -73,54 +76,59 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
 
     return (
         <div
-            className={`bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] max-w-[280px] ${selected ? 'border-emerald-500' : 'border-zinc-700'
+            className={`bg-gray-50 dark:bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] max-w-[280px] ${selected ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'
                 }`}
         >
             {/* Header */}
             <div
-                className="flex items-center justify-between px-3 py-2 bg-zinc-800 rounded-t-md cursor-pointer"
+                className="flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-zinc-800 rounded-t-md cursor-pointer"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-2">
                     <Database size={14} className="text-emerald-400" />
-                    <span className="text-sm font-semibold text-zinc-100">
+                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                         {nodeData.ledgerName || 'Select Ledger...'}
                     </span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <button
+                    <Button
                         onClick={(e) => {
                             e.stopPropagation();
                             setIsConfigOpen(!isConfigOpen);
                         }}
-                        className="p-1 hover:bg-zinc-700 rounded text-zinc-400 hover:text-zinc-200"
+                        variant="ghost"
+                        size="icon-xs"
+                        className="text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
                         title="Configure"
                         aria-label="Configure node"
                         aria-expanded={isConfigOpen}
                     >
                         <Settings size={14} />
-                    </button>
+                    </Button>
                     {isExpanded ? <ChevronUp size={14} className="text-zinc-400" /> : <ChevronDown size={14} className="text-zinc-400" />}
                 </div>
             </div>
 
             {/* Configuration Panel */}
             {isConfigOpen && (
-                <div className="p-3 border-b border-zinc-700 bg-zinc-800/50">
-                    <label className="text-xs text-zinc-400 block mb-1">Select Ledger:</label>
-                    <select
+                <Card className="p-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 rounded-none border-x-0 border-t-0">
+                    <Label className="text-xs text-zinc-400 block mb-1">Select Ledger:</Label>
+                    <Select
                         value={nodeData.ledgerId || ''}
-                        onChange={(e) => handleLedgerChange(e.target.value)}
-                        className="w-full bg-zinc-900 border border-zinc-700 rounded px-2 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        onValueChange={(value) => handleLedgerChange(value)}
                     >
-                        <option value="">-- Choose a ledger --</option>
-                        {schemas.map(schema => (
-                            <option key={schema._id} value={schema._id}>
-                                {schema.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                        <SelectTrigger className="w-full bg-gray-50 dark:bg-zinc-900 border-zinc-700 h-8 text-xs">
+                            <SelectValue placeholder="-- Choose a ledger --" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {schemas.map(schema => (
+                                <SelectItem key={schema._id} value={schema._id}>
+                                    {schema.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </Card>
             )}
 
             {/* Ports */}
@@ -129,7 +137,7 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                     {nodeData.ports.map((port) => (
                         <div
                             key={port.id}
-                            className="relative flex items-center justify-between px-2 py-1.5 bg-zinc-800/30 rounded hover:bg-zinc-800/50 transition-colors"
+                            className="relative flex items-center justify-between px-2 py-1.5 bg-gray-100 dark:bg-zinc-800/30 rounded hover:bg-gray-200 dark:hover:bg-zinc-800/50 transition-colors"
                         >
                             <div className="flex items-center gap-2">
                                 <PortTypeIcon type={port.type} />

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerEntry, LedgerSchema } from '../../types/ledger';
+import { Button } from '@/components/ui/button';
 import { Trash2, RotateCcw, Archive } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 /**
  * Trash view for displaying and restoring soft-deleted entries.
@@ -24,9 +26,9 @@ export const TrashView: React.FC = () => {
                 await fetchSchemas(activeProfileId);
 
                 // Fetch entries for each schema to get soft-deleted ones
-                for (const schema of schemas) {
-                    await fetchEntries(activeProfileId, schema._id);
-                }
+                await Promise.all(
+                    schemas.map((schema) => fetchEntries(activeProfileId, schema._id))
+                );
             } catch (error) {
                 console.error('Failed to load deleted entries:', error);
             } finally {
@@ -83,9 +85,9 @@ export const TrashView: React.FC = () => {
     }
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-zinc-950 text-zinc-50 overflow-hidden">
+        <div className="flex-1 flex flex-col h-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800 bg-zinc-900">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900">
                 <Trash2 size={20} className="text-zinc-400" />
                 <h1 className="text-lg font-semibold">Trash</h1>
                 <span className="text-sm text-zinc-500 ml-2">
@@ -94,7 +96,7 @@ export const TrashView: React.FC = () => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-auto">
+            <ScrollArea className="flex-1">
                 {deletedEntries.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-zinc-500">
                         <Archive size={48} className="mb-4 opacity-50" />
@@ -103,9 +105,9 @@ export const TrashView: React.FC = () => {
                     </div>
                 ) : (
                     <div className="p-4">
-                        <div className="bg-zinc-900/50 rounded-lg border border-zinc-800 overflow-hidden">
+                        <div className="bg-gray-50 dark:bg-zinc-900/50 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
                             {/* Table Header */}
-                            <div className="flex border-b border-zinc-800 bg-zinc-800/50 text-xs font-medium text-zinc-400">
+                            <div className="flex border-b border-zinc-200 dark:border-zinc-800 bg-gray-100 dark:bg-zinc-800/50 text-xs font-medium text-zinc-400">
                                 <div className="flex-1 px-3 py-2 text-left">Entry</div>
                                 <div className="w-40 px-3 py-2 text-left">Ledger</div>
                                 <div className="w-48 px-3 py-2 text-left">Deleted At</div>
@@ -124,7 +126,7 @@ export const TrashView: React.FC = () => {
                                 return (
                                     <div
                                         key={entry._id}
-                                        className="flex border-b border-zinc-800 hover:bg-zinc-800/30 transition-colors last:border-b-0"
+                                        className="flex border-b border-zinc-200 dark:border-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-800/30 transition-colors last:border-b-0"
                                     >
                                         <div className="flex-1 px-3 py-3 text-sm text-zinc-300">
                                             <span className="line-through text-zinc-500">
@@ -138,14 +140,15 @@ export const TrashView: React.FC = () => {
                                             {deletedAt}
                                         </div>
                                         <div className="w-24 px-3 py-2 flex items-center justify-center">
-                                            <button
+                                            <Button
                                                 onClick={() => handleRestore(entry._id)}
-                                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-emerald-500 hover:bg-emerald-400 text-zinc-950 rounded font-bold transition-colors"
+                                                size="xs"
+                                                className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold"
                                                 title="Restore entry"
                                             >
                                                 <RotateCcw size={12} />
                                                 Restore
-                                            </button>
+                                            </Button>
                                         </div>
                                     </div>
                                 );
@@ -153,7 +156,7 @@ export const TrashView: React.FC = () => {
                         </div>
                     </div>
                 )}
-            </div>
+            </ScrollArea>
         </div>
     );
 };

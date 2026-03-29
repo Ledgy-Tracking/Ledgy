@@ -90,7 +90,7 @@ export function ProfileCard({
                 <div
                     className={`
                         flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center
-                        text-white font-semibold text-lg
+                        text-zinc-900 dark:text-white font-semibold text-lg
                         ${profile.color || 'bg-gray-400'}
                     `}
                     aria-hidden="true"

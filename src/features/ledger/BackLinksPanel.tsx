@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerEntry } from '../../types/ledger';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface BackLinksPanelProps {
     targetEntryId: string;
@@ -34,7 +36,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     }
 
     return (
-        <div className="mt-4 border-t border-zinc-800 pt-4">
+        <div className="mt-4 border-t border-zinc-200 dark:border-zinc-800 pt-4">
             <div className="flex items-center gap-2 mb-3">
                 <ArrowLeft size={16} className="text-emerald-400" />
                 <h3 className="text-sm font-semibold text-zinc-300">
@@ -88,31 +90,34 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => 
     const navProfileId = profileId || activeProfileId;
 
     return (
-        <div className="p-3 bg-zinc-800/30 rounded border border-zinc-700 hover:border-zinc-600 transition-colors">
-            <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                    <Link
-                        to={`/app/${navProfileId}/ledger/${entry.ledgerId}`}
-                        state={{ highlightEntryId: entry._id }}
-                        className="text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:underline truncate block"
-                    >
-                        {displayValue}
-                    </Link>
-                    <div className="text-xs text-zinc-500 mt-1">
-                        from <span className="text-zinc-400">{ledgerName}</span>
+        <Card className="p-3 bg-gray-100 dark:bg-zinc-800/30 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-600 transition-colors">
+            <CardContent>
+                <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                        <Link
+                            to={`/app/${navProfileId}/ledger/${entry.ledgerId}`}
+                            state={{ highlightEntryId: entry._id }}
+                            className="text-sm font-medium text-emerald-400 hover:text-emerald-300 hover:underline truncate block"
+                        >
+                            {displayValue}
+                        </Link>
+                        <div className="text-xs text-zinc-500 mt-1">
+                            from <span className="text-zinc-400">{ledgerName}</span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        {referencingFields.map((field, idx) => (
+                            <Badge
+                                key={idx}
+                                variant="secondary"
+                                className="text-xs bg-zinc-700 text-zinc-300 w-fit"
+                            >
+                                {field.fieldName}
+                            </Badge>
+                        ))}
                     </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                    {referencingFields.map((field, idx) => (
-                        <span
-                            key={idx}
-                            className="text-xs px-2 py-0.5 bg-zinc-700 text-zinc-300 rounded"
-                        >
-                            {field.fieldName}
-                        </span>
-                    ))}
-                </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 };

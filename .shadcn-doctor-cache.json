@@ -1,0 +1,1237 @@
+{
+  "version": 1,
+  "rootPath": "C:\\Users\\njtan\\Documents\\GitHub\\ledgy",
+  "lastScan": "2026-03-29T06:06:50.787Z",
+  "entries": {
+    "C:/Users/njtan/Documents/GitHub/ledgy/playwright.config.ts": {
+      "mtime": 1771661413351.9265,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/App.test.tsx": {
+      "mtime": 1774193395892.6355,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/App.tsx": {
+      "mtime": 1774193395895.5566,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/CommandPalette.tsx": {
+      "mtime": 1774197494082.028,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/ErrorToast.tsx": {
+      "mtime": 1774197528070.8003,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/Inspector/EntryInspector.tsx": {
+      "mtime": 1774759606130.11,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/Inspector/Inspector.tsx": {
+      "mtime": 1774754931230.4868,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/Inspector/NodeInspector.tsx": {
+      "mtime": 1774759640985.7202,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/Layout/AppShell.tsx": {
+      "mtime": 1774759710302.0022,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/NotificationToast.tsx": {
+      "mtime": 1774197542757.5537,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/common/EmptyState.test.tsx": {
+      "mtime": 1774193395914.392,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/common/EmptyState.tsx": {
+      "mtime": 1774759738524.316,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/common/LoadingSkeleton.test.tsx": {
+      "mtime": 1774193395918.0437,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/components/common/LoadingSkeleton.tsx": {
+      "mtime": 1774759765037.7034,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/AuthGuard.test.tsx": {
+      "mtime": 1774193395950.2266,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/AuthGuard.tsx": {
+      "mtime": 1774193395951.2249,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/AutoLock.test.tsx": {
+      "mtime": 1774193395953.5522,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/AutoLock.tsx": {
+      "mtime": 1774193395955.3435,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/GuestGuard.test.tsx": {
+      "mtime": 1774193395957.069,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/GuestGuard.tsx": {
+      "mtime": 1774193395959.7578,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/QRCodeDisplay.tsx": {
+      "mtime": 1774755807678.0183,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/SetupPage.tsx": {
+      "mtime": 1774760211654.0615,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/TOTPRegistrationWizard.tsx": {
+      "mtime": 1774755990559.6785,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/UnlockGuard.tsx": {
+      "mtime": 1774193395968.1736,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/UnlockPage.tsx": {
+      "mtime": 1774761132497.7659,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/useAuthStore.test.ts": {
+      "mtime": 1772931158861.4805,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/auth/useAuthStore.ts": {
+      "mtime": 1774190242137.535,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/Dashboard.tsx": {
+      "mtime": 1774756179855.196,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/DashboardView.tsx": {
+      "mtime": 1774759024438.2986,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/EmptyDashboard.tsx": {
+      "mtime": 1774196135690.8916,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/WidgetConfigSheet.tsx": {
+      "mtime": 1774195647798.6228,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/useDashboardStore.test.ts": {
+      "mtime": 1772930800202.1255,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/useDashboardStore.ts": {
+      "mtime": 1774188280032.0183,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/widgets/ChartWidget.tsx": {
+      "mtime": 1774193395984.4307,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/widgets/TextWidget.tsx": {
+      "mtime": 1774193395986.7207,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/widgets/TrendWidget.tsx": {
+      "mtime": 1774193395987.233,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/dashboard/widgets/index.ts": {
+      "mtime": 1772930800209.248,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/BackLinksPanel.tsx": {
+      "mtime": 1774756362667.4746,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/BulkActionBar.tsx": {
+      "mtime": 1774756457035.6458,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/InlineEntryRow.tsx": {
+      "mtime": 1774756540435.5547,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/LedgerTable.tsx": {
+      "mtime": 1774759196549.472,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/LedgerView.tsx": {
+      "mtime": 1774761685384.555,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/RelationCombobox.tsx": {
+      "mtime": 1774756857916.5823,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/RelationTagChip.tsx": {
+      "mtime": 1774197506365.8452,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/SchemaBuilder.tsx": {
+      "mtime": 1774761629916.7405,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/TrashView.tsx": {
+      "mtime": 1774762075205.803,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/UndoRedoHUD.tsx": {
+      "mtime": 1774193396027.754,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/useLedgerStore.test.ts": {
+      "mtime": 1772930800218.4424,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/ledger/useLedgerStore.ts": {
+      "mtime": 1772940229950.828,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/EmptyCanvasGuide.tsx": {
+      "mtime": 1774759247103.349,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/NodeCanvas.tsx": {
+      "mtime": 1774757191761.4033,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/NodeToolbar.tsx": {
+      "mtime": 1774757623765.1382,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/edges/DataEdge.tsx": {
+      "mtime": 1774757720526.5625,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/edges/index.ts": {
+      "mtime": 1772930800226.1648,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/nodes/ArithmeticNode.tsx": {
+      "mtime": 1774761979115.6301,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/nodes/CorrelationNode.tsx": {
+      "mtime": 1774761979194.3682,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/nodes/DashboardOutputNode.tsx": {
+      "mtime": 1774761998830.511,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/nodes/LedgerSourceNode.tsx": {
+      "mtime": 1774761979538.03,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/nodes/TriggerNode.tsx": {
+      "mtime": 1774761824613.3582,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/nodes/index.ts": {
+      "mtime": 1772930800232.535,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/useNodeStore.test.ts": {
+      "mtime": 1772930800232.535,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/nodeEditor/useNodeStore.ts": {
+      "mtime": 1774188302647.7783,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profile/ProfileCard.test.tsx": {
+      "mtime": 1774193396068.1326,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profile/ProfileCard.tsx": {
+      "mtime": 1774194875453.81,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profile/ProfileCreationForm.test.tsx": {
+      "mtime": 1774193396072.641,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profile/ProfileCreationForm.tsx": {
+      "mtime": 1774763777094.374,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profile/ProfileCreationPage.tsx": {
+      "mtime": 1774758776575.5571,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profile/ProfileSelectorCanvas.test.tsx": {
+      "mtime": 1774193396078.209,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profile/ProfileSelectorCanvas.tsx": {
+      "mtime": 1774754639607.8367,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profile/index.ts": {
+      "mtime": 1772930800243.5127,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profiles/ProfileSelector.test.tsx": {
+      "mtime": 1774193396087.2046,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profiles/ProfileSelector.tsx": {
+      "mtime": 1774763013654.053,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profiles/WelcomePage.test.tsx": {
+      "mtime": 1774193396094.8533,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profiles/WelcomePage.tsx": {
+      "mtime": 1774762892156.7483,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profiles/useProfileStore.test.ts": {
+      "mtime": 1772930800250.1975,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/profiles/useProfileStore.ts": {
+      "mtime": 1774188252711.0972,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/projects/ProjectDashboard.tsx": {
+      "mtime": 1774763314573.3962,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/settings/SettingsPage.tsx": {
+      "mtime": 1774763358614.132,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/shell/AppShell.test.tsx": {
+      "mtime": 1774193396109.986,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/shell/AppShell.tsx": {
+      "mtime": 1774194754837.4207,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/shell/ErrorBoundary.test.tsx": {
+      "mtime": 1774763306519.038,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/shell/ErrorBoundary.tsx": {
+      "mtime": 1774763369924.85,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/shell/InspectorRail.tsx": {
+      "mtime": 1774763323994.2737,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/shell/MainCanvas.tsx": {
+      "mtime": 1774194724328.1907,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/shell/Sidebar.tsx": {
+      "mtime": 1774763423306.7446,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/ConflictListSheet.tsx": {
+      "mtime": 1774760287972.5732,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/DeleteProfileDialog.tsx": {
+      "mtime": 1774760317952.4182,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/DiffGuardModal.tsx": {
+      "mtime": 1774763447228.315,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/SyncConfigDialog.tsx": {
+      "mtime": 1774763842705.91,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/SyncStatusBadge.tsx": {
+      "mtime": 1774197680345.5403,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/SyncStatusButton.test.tsx": {
+      "mtime": 1774193396132.8044,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/SyncStatusButton.tsx": {
+      "mtime": 1774196118527.4849,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/SyncStatusSheet.tsx": {
+      "mtime": 1774763497863.7664,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/useSyncStore.test.ts": {
+      "mtime": 1772930800276.6863,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/sync/useSyncStore.ts": {
+      "mtime": 1774188261397.4734,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/templates/ExportTemplateButton.tsx": {
+      "mtime": 1774196060887.7085,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/features/templates/ImportTemplateButton.tsx": {
+      "mtime": 1774196049419.1963,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/hooks/useContainerWidth.ts": {
+      "mtime": 1772930800280.213,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/hooks/useInactivityTimer.test.ts": {
+      "mtime": 1772930800281.2563,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/hooks/useInactivityTimer.ts": {
+      "mtime": 1772930800283.7957,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/hooks/useUndoRedoShortcuts.ts": {
+      "mtime": 1774185334394.3892,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/crypto.test.ts": {
+      "mtime": 1772985985137.0857,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/crypto.ts": {
+      "mtime": 1774190055662.7334,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/db.test.ts": {
+      "mtime": 1772930800290.2112,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/db.ts": {
+      "mtime": 1774186803401.4897,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/design-tokens.ts": {
+      "mtime": 1774191724433.4575,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/migration.ts": {
+      "mtime": 1773152612396.4807,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/profileDbManager.test.ts": {
+      "mtime": 1772930800293.7712,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/profileDbManager.ts": {
+      "mtime": 1772930800295.6326,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/profileIsolation.test.ts": {
+      "mtime": 1774193449457.745,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/profileIsolationManual.test.ts": {
+      "mtime": 1774190559007.0999,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/profileIsolationSimple.test.ts": {
+      "mtime": 1774193449457.745,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/rateLimiter.test.ts": {
+      "mtime": 1774187767415.512,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/rateLimiter.ts": {
+      "mtime": 1774187767415.512,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/shadcnAdoption.test.ts": {
+      "mtime": 1774196935526.7925,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/shadcnUtilization.test.ts": {
+      "mtime": 1774195600646.4128,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/sync_db.test.ts": {
+      "mtime": 1772930800298.382,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/templateExport.test.ts": {
+      "mtime": 1772939054050.304,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/templateExport.ts": {
+      "mtime": 1774185334397.4397,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/templateImport.test.ts": {
+      "mtime": 1772939054050.8457,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/templateImport.ts": {
+      "mtime": 1774185334398.1394,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/themeRegression.test.ts": {
+      "mtime": 1774195461257.6948,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/totp.test.ts": {
+      "mtime": 1772930800303.1575,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/totp.ts": {
+      "mtime": 1773149965984.274,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/utils.test.ts": {
+      "mtime": 1774185334398.1394,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/utils.ts": {
+      "mtime": 1772930800308.0164,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/lib/validation.ts": {
+      "mtime": 1773467316305.321,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/main.tsx": {
+      "mtime": 1774193396148.6753,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/services/computationService.ts": {
+      "mtime": 1772986846439.9934,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/services/nodeEngine.ts": {
+      "mtime": 1774185334399.197,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/services/syncService.ts": {
+      "mtime": 1772939054051.9854,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/services/triggerEngine.ts": {
+      "mtime": 1772930800315.084,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/setupTests.ts": {
+      "mtime": 1772930800316.935,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/memorySweeps.test.ts": {
+      "mtime": 1772930800319.2986,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/memorySweeps.test.tsx": {
+      "mtime": 1774193396149.8625,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useDashboardStore.ts": {
+      "mtime": 1772930800322.0222,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useErrorStore.ts": {
+      "mtime": 1772930800323.6787,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useLedgerStore.ts": {
+      "mtime": 1774185334400.7568,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useNodeStore.ts": {
+      "mtime": 1772930800326.1672,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useNotificationStore.ts": {
+      "mtime": 1772986846441.5862,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/usePluginStore.ts": {
+      "mtime": 1772930800328.9207,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useProfileStore.test.ts": {
+      "mtime": 1772930800330.0703,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useProfileStore.ts": {
+      "mtime": 1774190342078.2646,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useProjectStore.ts": {
+      "mtime": 1772930800332.7322,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useSchemaBuilderStore.ts": {
+      "mtime": 1773149770985.051,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useSyncStore.test.ts": {
+      "mtime": 1772930800333.3086,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useSyncStore.ts": {
+      "mtime": 1772939054053.5215,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useTemplateStore.test.ts": {
+      "mtime": 1772933960059.9456,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useTemplateStore.ts": {
+      "mtime": 1772933898784.3262,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useUIStore.test.ts": {
+      "mtime": 1772930800337.4363,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useUIStore.ts": {
+      "mtime": 1772930800339.26,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/stores/useUndoRedoStore.ts": {
+      "mtime": 1774186077853.8152,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/types/dashboard.ts": {
+      "mtime": 1772930800340.9475,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/types/ledger.ts": {
+      "mtime": 1773467310851.3857,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/types/nodeEditor.ts": {
+      "mtime": 1772930800343.818,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/types/plugin.ts": {
+      "mtime": 1772930800344.3948,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/types/profile.ts": {
+      "mtime": 1772939054056.0613,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/types/project.ts": {
+      "mtime": 1772930800347.331,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/types/sync.ts": {
+      "mtime": 1772930800349.0205,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/types/templates.ts": {
+      "mtime": 1772930800349.6992,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/vite-env.d.ts": {
+      "mtime": 1771661479990.6099,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/workers/computation.worker.d.ts": {
+      "mtime": 1772930800352.0862,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/src/workers/computation.worker.ts": {
+      "mtime": 1772930800352.6428,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tailwind.config.ts": {
+      "mtime": 1774188435942.3123,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/App.test.tsx": {
+      "mtime": 1772986020799.084,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/AppShell.test.tsx": {
+      "mtime": 1772986015464.4478,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/ArithmeticNode.test.tsx": {
+      "mtime": 1772986123115.3582,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/BackLinksPanel.test.tsx": {
+      "mtime": 1773469467150.849,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/ComputationWorker.test.ts": {
+      "mtime": 1772930800360.3325,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/CorrelationNode.test.tsx": {
+      "mtime": 1772986141515.7378,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/Dashboard.test.tsx": {
+      "mtime": 1772986085613.7107,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/DataEdge.test.tsx": {
+      "mtime": 1772930800364.2886,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/EmptyCanvasGuide.test.tsx": {
+      "mtime": 1772930800364.8452,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/EmptyDashboard.test.tsx": {
+      "mtime": 1772930800365.9434,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/ErrorToast.test.tsx": {
+      "mtime": 1772930800367.193,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/InlineEntryRow.test.tsx": {
+      "mtime": 1774763312723.736,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/LedgerSourceNode.test.tsx": {
+      "mtime": 1772986547789.9983,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/LedgerTable.test.tsx": {
+      "mtime": 1773155235481.8022,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/RelationCombobox.test.tsx": {
+      "mtime": 1772939054061.5146,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/RelationTagChip-ghost.test.tsx": {
+      "mtime": 1773573125763.958,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/RelationTagChip.test.tsx": {
+      "mtime": 1772930800373.3723,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/SchemaBuilder.test.tsx": {
+      "mtime": 1774763328367.5632,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/SoftDelete.test.ts": {
+      "mtime": 1772944107302.7976,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/TriggerEngine.test.ts": {
+      "mtime": 1772986044303.9597,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/TriggerNode.test.tsx": {
+      "mtime": 1772986702568.6633,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/UnlockPage.test.tsx": {
+      "mtime": 1772986028030.928,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/bidirectionalLinkWriting.test.ts": {
+      "mtime": 1773469473627.5732,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/dataLabBulkSelection.test.tsx": {
+      "mtime": 1773466518037.912,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/dataLabFocusManagement.test.tsx": {
+      "mtime": 1773456274399.504,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/dataLabHeaderSorting.test.tsx": {
+      "mtime": 1773424118080.2651,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/dataLabKeyboardInlineEntry.test.tsx": {
+      "mtime": 1773447976147.4136,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/dataLabRelationComboboxQuerying.test.tsx": {
+      "mtime": 1773454735846.7605,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/dataLabVirtualizedCore.test.tsx": {
+      "mtime": 1773156709723.5542,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/documentAdapters.test.ts": {
+      "mtime": 1772941725132.5251,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/example.spec.ts": {
+      "mtime": 1772930800380.3242,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/ghost-references.test.tsx": {
+      "mtime": 1773572467913.5542,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/schemaBuilderStore.test.ts": {
+      "mtime": 1773150560222.1982,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/schemaMigration.test.ts": {
+      "mtime": 1773153086549.4397,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/schemaValidation.test.ts": {
+      "mtime": 1773149770987.1453,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/undoRedoShortcuts.test.tsx": {
+      "mtime": 1774185334401.8135,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/useAuthStore.test.ts": {
+      "mtime": 1772986630345.6184,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/useErrorStore.test.ts": {
+      "mtime": 1772930800382.5454,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/useUIStore.test.ts": {
+      "mtime": 1772930800383.1694,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/tests/useUndoRedoStore.test.ts": {
+      "mtime": 1774185334401.8135,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    },
+    "C:/Users/njtan/Documents/GitHub/ledgy/vite.config.ts": {
+      "mtime": 1774188620176.3948,
+      "findingsCount": 0,
+      "findings": [],
+      "warnings": []
+    }
+  }
+}
