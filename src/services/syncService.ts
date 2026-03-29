@@ -28,6 +28,10 @@ export async function deleteRemoteDatabase(
 
         const headers: HeadersInit = {};
         if (remoteConfig.username && remoteConfig.password) {
+            const isLocalhost = remoteConfig.url.startsWith('http://localhost') || remoteConfig.url.startsWith('http://127.0.0.1');
+            if (!remoteConfig.url.toLowerCase().startsWith('https://') && !isLocalhost) {
+                throw new Error('Insecure remote URL: HTTPS is required for Basic Authentication');
+            }
             // Use Basic Auth for CouchDB
             const authString = btoa(`${remoteConfig.username}:${remoteConfig.password}`);
             headers['Authorization'] = `Basic ${authString}`;
