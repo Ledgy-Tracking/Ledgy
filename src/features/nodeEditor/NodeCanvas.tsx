@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import {
     ReactFlow,
     Background,
@@ -159,7 +160,7 @@ export const NodeCanvas: React.FC = () => {
 
     if (rfNodes.length === 0 && !isLoading && loadedRef.current) {
         return (
-            <div className="w-full h-full bg-zinc-950 relative">
+            <div className="w-full h-full bg-white dark:bg-zinc-950 relative">
                 <EmptyCanvasGuide onAddFirstNode={handleAddFirstNode} />
                 <ReactFlow
                     nodes={rfNodes}
@@ -171,18 +172,18 @@ export const NodeCanvas: React.FC = () => {
                     edgeTypes={edgeTypes}
                     defaultEdgeOptions={defaultEdgeOptions}
                     fitView
-                    className="bg-zinc-950"
+                    className="bg-white dark:bg-zinc-950"
                 >
                     <NodeToolbar />
                     <Background color="#3f3f46" gap={20} />
-                    <Controls className="bg-zinc-800 border-zinc-700" />
+                    <Controls className="bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700" />
                 </ReactFlow>
             </div>
         );
     }
 
     return (
-        <div className="w-full h-full bg-zinc-950 relative">
+        <div className="w-full h-full bg-white dark:bg-zinc-950 relative">
             <ReactFlow
                 nodes={rfNodes}
                 edges={rfEdges}
@@ -198,23 +199,25 @@ export const NodeCanvas: React.FC = () => {
                 defaultViewport={initialViewport}
                 panActivationKeyCode="Space"
                 selectionKeyCode="Shift"
-                className="bg-zinc-950"
+                className="bg-white dark:bg-zinc-950"
             >
                 <NodeToolbar />
                 <Background color="#3f3f46" gap={20} />
-                <Controls className="bg-zinc-800 border-zinc-700" />
+                <Controls className="bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700" />
                 <MiniMap
                     nodeColor="#10b981"
                     maskColor="rgba(24, 24, 27, 0.8)"
-                    className="bg-zinc-900 border-zinc-800"
+                    className="bg-gray-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
                 />
             </ReactFlow>
 
             {isLoading && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
-                    <div className="bg-zinc-900 border border-zinc-700 px-4 py-2 rounded-lg text-zinc-400 text-sm animate-pulse">
-                        Synchronizing Graph...
-                    </div>
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white dark:bg-black/20 backdrop-blur-[2px]">
+                    <Card className="bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-4 py-2 rounded-lg text-zinc-400 text-sm animate-pulse">
+                        <CardContent>
+                            Synchronizing Graph...
+                        </CardContent>
+                    </Card>
                 </div>
             )}
         </div>

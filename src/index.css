@@ -6,6 +6,20 @@
 */
 @custom-variant dark (&:is(.dark *));
 
+/* Fix for CSS minifier warning about invalid file:line property */
+.\[file\:line\] {
+  /* Override the problematic generated utility */
+  display: block !important;
+}
+
+@layer utilities {
+  /* Ensure the fix has high specificity */
+  .\[file\:line\] {
+    display: block;
+    flex: none;
+  }
+}
+
 @theme {
   --color-zinc-900: #18181b;
   --color-zinc-950: #09090b;

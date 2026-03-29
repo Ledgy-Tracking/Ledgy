@@ -5,6 +5,7 @@ import { useLedgerStore } from '../src/stores/useLedgerStore';
 import { useProfileStore } from '../src/stores/useProfileStore';
 import { useErrorStore } from '../src/stores/useErrorStore';
 import { useSchemaBuilderStore } from '../src/stores/useSchemaBuilderStore';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../src/components/ui/dialog';
 
 // Mock the external stores
 vi.mock('../src/stores/useLedgerStore');
@@ -13,7 +14,7 @@ vi.mock('../src/stores/useErrorStore');
 
 // Mock Radix UI Dialog to avoid focus-trap/portal issues in jsdom
 vi.mock('../src/components/ui/dialog', () => ({
-    Dialog: ({ children, open }: any) => open ? <div role="dialog">{children}</div> : null,
+    Dialog: ({ children, open }: any) => open ? <Dialog>{children}</Dialog> : null,
     DialogContent: ({ children }: any) => <div>{children}</div>,
     DialogHeader: ({ children }: any) => <div>{children}</div>,
     DialogTitle: ({ children }: any) => <h2>{children}</h2>,
