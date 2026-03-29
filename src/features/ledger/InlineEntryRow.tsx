@@ -4,6 +4,7 @@ import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { Button } from '@/components/ui/button';
 import { RelationCombobox } from './RelationCombobox';
+import { Input } from '@/components/ui/input';
 
 interface InlineEntryRowProps {
     schema: LedgerSchema;
@@ -218,7 +219,7 @@ const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLB
             switch (field.type) {
                 case 'number':
                     return (
-                        <input
+                        <Input
                             ref={ref as React.RefObject<HTMLInputElement>}
                             type="number"
                             className={baseClasses}
@@ -230,7 +231,7 @@ const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLB
                     );
                 case 'date':
                     return (
-                        <input
+                        <Input
                             ref={ref as React.RefObject<HTMLInputElement>}
                             type="date"
                             className={baseClasses}
@@ -260,7 +261,7 @@ const FieldInput = React.forwardRef<HTMLInputElement | HTMLSelectElement | HTMLB
                     );
                 default: // text
                     return (
-                        <input
+                        <Input
                             ref={ref as React.RefObject<HTMLInputElement>}
                             type="text"
                             className={baseClasses}

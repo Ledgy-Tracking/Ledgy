@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '../../components/ui/button';
+import { Card, CardContent } from '../../components/ui/card';
 import { Database, Network, Calculator, Zap, MonitorPlay } from 'lucide-react';
 import { useReactFlow } from '@xyflow/react';
 
@@ -28,14 +29,16 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = () => {
     };
 
     return (
-        <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 p-2 bg-gray-50 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl">
-            <h3 className="text-[10px] font-bold text-zinc-500 uppercase px-2 mb-1">Nodes</h3>
-            <ToolbarButton icon={<Database size={16} />} label="Ledger Source" onClick={() => addNode('ledgerSource')} color="text-emerald-400" />
-            <ToolbarButton icon={<Network size={16} />} label="Correlation" onClick={() => addNode('correlation')} color="text-blue-400" />
-            <ToolbarButton icon={<Calculator size={16} />} label="Arithmetic" onClick={() => addNode('arithmetic')} color="text-amber-400" />
-            <ToolbarButton icon={<Zap size={16} />} label="Trigger" onClick={() => addNode('trigger')} color="text-purple-400" />
-            <ToolbarButton icon={<MonitorPlay size={16} />} label="Dashboard Output" onClick={() => addNode('dashboardOutput')} color="text-pink-400" />
-        </div>
+        <Card className="absolute top-4 left-4 z-10 flex flex-col gap-2 p-2 bg-gray-50 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl">
+            <CardContent className="p-0 flex flex-col gap-2">
+                <h3 className="text-[10px] font-bold text-zinc-500 uppercase px-2 mb-1">Nodes</h3>
+                <ToolbarButton icon={<Database size={16} />} label="Ledger Source" onClick={() => addNode('ledgerSource')} color="text-emerald-400" />
+                <ToolbarButton icon={<Network size={16} />} label="Correlation" onClick={() => addNode('correlation')} color="text-blue-400" />
+                <ToolbarButton icon={<Calculator size={16} />} label="Arithmetic" onClick={() => addNode('arithmetic')} color="text-amber-400" />
+                <ToolbarButton icon={<Zap size={16} />} label="Trigger" onClick={() => addNode('trigger')} color="text-purple-400" />
+                <ToolbarButton icon={<MonitorPlay size={16} />} label="Dashboard Output" onClick={() => addNode('dashboardOutput')} color="text-pink-400" />
+            </CardContent>
+        </Card>
     );
 };
 

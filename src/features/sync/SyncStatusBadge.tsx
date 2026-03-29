@@ -1,5 +1,7 @@
 import React from 'react';
 import { Cloud, CloudOff, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export type SyncState = 'synced' | 'syncing' | 'pending' | 'offline' | 'conflict' | 'error';
 
@@ -24,9 +26,14 @@ export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
     const Icon = config.icon;
 
     return (
-        <button
+        <Badge
             onClick={onClick}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${config.bgClass} ${config.textClass} hover:opacity-80`}
+            className={cn(
+                "cursor-pointer gap-1.5 transition-all hover:opacity-80",
+                config.bgClass,
+                config.textClass
+            )}
+            variant="outline"
             role="status"
             aria-live="polite"
             aria-label={`Sync status: ${state}${lastSyncTime ? `, last synced ${formatLastSync(lastSyncTime)}` : ''}`}
@@ -35,11 +42,11 @@ export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({
             <Icon size={14} className={state === 'syncing' ? 'animate-spin' : ''} />
             <span className="hidden sm:inline">{config.label}</span>
             {state === 'conflict' && conflictCount > 0 && (
-                <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-amber-900 text-amber-100 rounded-full">
+                <Badge className="ml-1 bg-amber-900 text-amber-100 text-[10px] h-4 px-1.5">
                     {conflictCount}
-                </span>
+                </Badge>
             )}
-        </button>
+        </Badge>
     );
 };
 
@@ -48,42 +55,42 @@ function getSyncStateConfig(state: SyncState) {
         case 'synced':
             return {
                 label: 'Synced',
-                bgClass: 'bg-emerald-900/30',
+                bgClass: 'bg-emerald-900/30 border-emerald-500/30',
                 textClass: 'text-emerald-400',
                 icon: CheckCircle,
             };
         case 'syncing':
             return {
                 label: 'Syncing...',
-                bgClass: 'bg-blue-900/30',
+                bgClass: 'bg-blue-900/30 border-blue-500/30',
                 textClass: 'text-blue-400',
                 icon: RefreshCw,
             };
         case 'pending':
             return {
                 label: 'Pending',
-                bgClass: 'bg-amber-900/30',
+                bgClass: 'bg-amber-900/30 border-amber-500/30',
                 textClass: 'text-amber-400',
                 icon: Cloud,
             };
         case 'offline':
             return {
                 label: 'Offline',
-                bgClass: 'bg-gray-100 dark:bg-zinc-800',
+                bgClass: 'bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-600',
                 textClass: 'text-zinc-400',
                 icon: CloudOff,
             };
         case 'conflict':
             return {
                 label: 'Conflicts',
-                bgClass: 'bg-amber-900/30',
+                bgClass: 'bg-amber-900/30 border-amber-500/30',
                 textClass: 'text-amber-400',
                 icon: AlertTriangle,
             };
         case 'error':
             return {
                 label: 'Sync Error',
-                bgClass: 'bg-red-900/30',
+                bgClass: 'bg-red-900/30 border-red-500/30',
                 textClass: 'text-red-400',
                 icon: AlertTriangle,
             };

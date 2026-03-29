@@ -6,6 +6,7 @@ import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUndoRedoStore } from '../../stores/useUndoRedoStore';
 import { UndoRedoHUD } from './UndoRedoHUD';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 /**
  * Ledger view page that displays a ledger table with entry highlighting support.
@@ -63,9 +64,9 @@ export const LedgerView: React.FC = () => {
                     </div>
                 )}
             </div>
-            <div className="flex-1 overflow-auto">
+            <ScrollArea className="flex-1">
                 <LedgerTable schemaId={schema._id} highlightEntryId={highlightEntryId || undefined} />
-            </div>
+            </ScrollArea>
             <BulkActionBar schemaId={schema._id} />
         </div>
     );

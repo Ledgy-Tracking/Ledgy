@@ -1,6 +1,7 @@
 import { useUIStore } from '../../stores/useUIStore';
 import { Menu, ChevronLeft, ChevronRight, FolderOpen, Database, GitGraph, LayoutDashboard, Settings, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { NavigationMenu } from '@/components/ui/navigation-menu';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export const Sidebar = () => {
@@ -69,7 +70,7 @@ export const Sidebar = () => {
             )}
 
             {/* Navigation Menu */}
-            <nav className={`flex-1 overflow-y-auto p-4 ${!sidebarOpen && 'hidden'}`} role="navigation" aria-label="Main navigation">
+            <NavigationMenu viewport={false} className={`flex-1 overflow-y-auto p-4 ${!sidebarOpen && 'hidden'}`}>
                 <ul className="space-y-2">
                     {navItems.map((item) => {
                         const Icon = item.icon;
@@ -92,7 +93,7 @@ export const Sidebar = () => {
                         );
                     })}
                 </ul>
-            </nav>
+            </NavigationMenu>
 
             {/* Toggle Button (when collapsed on desktop) */}
             <div className={`hidden md:block absolute -right-3 top-1/2 transform -translate-y-1/2 ${sidebarOpen && 'hidden'}`}>

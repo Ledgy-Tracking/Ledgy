@@ -4,6 +4,7 @@ import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerEntry, LedgerSchema } from '../../types/ledger';
 import { Button } from '@/components/ui/button';
 import { Trash2, RotateCcw, Archive } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 /**
  * Trash view for displaying and restoring soft-deleted entries.
@@ -95,7 +96,7 @@ export const TrashView: React.FC = () => {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-auto">
+            <ScrollArea className="flex-1">
                 {deletedEntries.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-zinc-500">
                         <Archive size={48} className="mb-4 opacity-50" />
@@ -155,7 +156,7 @@ export const TrashView: React.FC = () => {
                         </div>
                     </div>
                 )}
-            </div>
+            </ScrollArea>
         </div>
     );
 };

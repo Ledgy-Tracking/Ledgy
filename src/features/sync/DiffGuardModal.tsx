@@ -1,5 +1,9 @@
 import React, { useMemo } from 'react';
 import { X, Check, RotateCcw, SkipForward } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ConflictEntry } from './ConflictListSheet';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useSyncStore } from '../../stores/useSyncStore';
@@ -8,6 +12,7 @@ import { useErrorStore } from '../../stores/useErrorStore';
 
 interface DiffGuardModalProps {
     conflict: ConflictEntry;
+    isOpen: boolean;
     onAcceptLocal: () => void;
     onAcceptRemote: () => void;
     onSkip: () => void;
@@ -22,6 +27,7 @@ interface DiffGuardModalProps {
  */
 export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
     conflict,
+    isOpen,
     onAcceptLocal,
     onAcceptRemote,
     onSkip,
@@ -103,63 +109,73 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50 dark:bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-zinc-200 dark:border-zinc-800">
-                {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-                    <div>
-                        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
-                            <RotateCcw size={20} className="text-amber-500" />
-                            Resolve Conflict
-                        </h2>
-                        <p className="text-sm text-zinc-400 mt-0.5 font-medium">Entry: {conflict.entryName}</p>
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col" showCloseButton={false}>
+                <DialogHeader className="px-6 py-4 border-b border-border bg-muted/20">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <DialogTitle className="flex items-center gap-2">
+                                <RotateCcw size={20} className="text-amber-500" />
+                                Resolve Conflict
+                            </DialogTitle>
+                            <DialogDescription className="font-medium">Entry: {conflict.entryName}</DialogDescription>
+                        </div>
+                        <Button
+                            onClick={onClose}
+                            variant="ghost"
+                            size="icon-sm"
+                            className="text-muted-foreground hover:text-foreground"
+                            aria-label="Close Conflict Resolution"
+                        >
+                            <X size={20} />
+                        </Button>
                     </div>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                        aria-label="Close Conflict Resolution"
-                    >
-                        <X size={20} />
-                    </button>
-                </div>
+                </DialogHeader>
 
                 {/* Diff View */}
-                <div className="flex-1 overflow-auto p-6">
+                <ScrollArea className="flex-1 p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Local Version */}
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">Local</h3>
+                                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Local</h3>
                                 </div>
-                                <span className="text-[10px] text-zinc-500 font-mono">{localVersion.deviceId.slice(0, 8)}</span>
+                                <span className="text-[10px] text-muted-foreground font-mono">{localVersion.deviceId.slice(0, 8)}</span>
                             </div>
-                            <div className="bg-white dark:bg-zinc-950/50 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 space-y-3">
-                                {allFields.map(field => {
-                                    const isDifferent = conflictingFields.includes(field);
-                                    const localValue = localVersion.data?.[field];
-                                    const isSelected = mergedData[field] === localValue;
+                            <Card className="bg-background border-border">
+                                <CardContent className="p-4 space-y-3">
+                                    {allFields.map(field => {
+                                        const isDifferent = conflictingFields.includes(field);
+                                        const localValue = localVersion.data?.[field];
+                                        const isSelected = mergedData[field] === localValue;
 
-                                    return (
-                                        <div
-                                            key={field}
-                                            onClick={() => toggleFieldSource(field, 'local')}
-                                            className={`p-2 rounded-lg cursor-pointer transition-all ${isDifferent
-                                                ? isSelected
-                                                    ? 'bg-blue-500/20 border border-blue-500/50 text-blue-400'
-                                                    : 'bg-blue-900/5 border border-transparent hover:border-blue-500/30'
-                                                : 'opacity-50'
-                                                }`}
-                                        >
-                                            <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">{field}</div>
-                                            <div className="text-sm break-all">
-                                                {localValue !== undefined ? String(localValue) : <span className="text-zinc-700 italic">undefined</span>}
+                                        return (
+                                            <div
+                                                key={field}
+                                                onClick={() => toggleFieldSource(field, 'local')}
+                                                className={`p-2.5 rounded-lg border transition-all cursor-pointer ${isDifferent
+                                                        ? isSelected
+                                                            ? 'border-blue-500 bg-blue-500/5'
+                                                            : 'border-border bg-background hover:border-blue-500/50'
+                                                        : 'border-border bg-muted/30'
+                                                    }`}
+                                            >
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <div className="text-[10px] text-muted-foreground font-bold uppercase">{field}</div>
+                                                    {isDifferent && isSelected && (
+                                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 uppercase font-bold">selected</span>
+                                                    )}
+                                                </div>
+                                                <div className={`text-sm font-medium break-all ${isDifferent ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                                    {localValue !== undefined ? String(localValue) : <span className="text-muted-foreground italic">undefined</span>}
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </CardContent>
+                            </Card>
                         </div>
 
                         {/* Remote Version */}
@@ -167,108 +183,117 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                                    <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">Remote</h3>
+                                    <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Remote</h3>
                                 </div>
-                                <span className="text-[10px] text-zinc-500 font-mono">{remoteVersion.deviceId.slice(0, 8)}</span>
+                                <span className="text-[10px] text-muted-foreground font-mono">{remoteVersion.deviceId.slice(0, 8)}</span>
                             </div>
-                            <div className="bg-white dark:bg-zinc-950/50 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 space-y-3">
-                                {allFields.map(field => {
-                                    const isDifferent = conflictingFields.includes(field);
-                                    const remoteValue = remoteVersion.data?.[field];
-                                    const isSelected = mergedData[field] === remoteValue;
+                            <Card className="bg-background border-border">
+                                <CardContent className="p-4 space-y-3">
+                                    {allFields.map(field => {
+                                        const isDifferent = conflictingFields.includes(field);
+                                        const remoteValue = remoteVersion.data?.[field];
+                                        const isSelected = mergedData[field] === remoteValue && mergedData[field] !== localVersion.data?.[field];
 
-                                    return (
-                                        <div
-                                            key={field}
-                                            onClick={() => toggleFieldSource(field, 'remote')}
-                                            className={`p-2 rounded-lg cursor-pointer transition-all ${isDifferent
-                                                ? isSelected
-                                                    ? 'bg-emerald-500/20 border border-emerald-500/50 text-emerald-400'
-                                                    : 'bg-emerald-900/5 border border-transparent hover:border-emerald-500/30'
-                                                : 'opacity-50'
-                                                }`}
-                                        >
-                                            <div className="text-[10px] text-zinc-500 font-bold uppercase mb-1">{field}</div>
-                                            <div className="text-sm break-all">
-                                                {remoteValue !== undefined ? String(remoteValue) : <span className="text-zinc-700 italic">undefined</span>}
+                                        return (
+                                            <div
+                                                key={field}
+                                                onClick={() => toggleFieldSource(field, 'remote')}
+                                                className={`p-2.5 rounded-lg border transition-all cursor-pointer ${isDifferent
+                                                        ? isSelected
+                                                            ? 'border-emerald-500 bg-emerald-500/5'
+                                                            : 'border-border bg-background hover:border-emerald-500/50'
+                                                        : 'border-border bg-muted/30'
+                                                    }`}
+                                            >
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <div className="text-[10px] text-muted-foreground font-bold uppercase">{field}</div>
+                                                    {isDifferent && isSelected && (
+                                                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 uppercase font-bold">selected</span>
+                                                    )}
+                                                </div>
+                                                <div className={`text-sm font-medium break-all ${isDifferent ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                                    {remoteValue !== undefined ? String(remoteValue) : <span className="text-muted-foreground italic">undefined</span>}
+                                                </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </CardContent>
+                            </Card>
                         </div>
 
                         {/* Merge Preview */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
                                 <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">Merge Result</h3>
+                                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Merge Result</h3>
                             </div>
-                            <div className="bg-white dark:bg-zinc-950/30 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 p-4 space-y-3">
-                                {allFields.map(field => {
-                                    const isDifferent = conflictingFields.includes(field);
-                                    const mergedValue = mergedData[field];
-                                    const isFromLocal = mergedValue === localVersion.data?.[field];
+                            <Card className="bg-background border-dashed border-border">
+                                <CardContent className="p-4 space-y-3">
+                                    {allFields.map(field => {
+                                        const isDifferent = conflictingFields.includes(field);
+                                        const mergedValue = mergedData[field];
+                                        const isFromLocal = mergedValue === localVersion.data?.[field];
 
-                                    return (
-                                        <div key={field} className="p-2 rounded-lg bg-gray-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <div className="text-[10px] text-zinc-500 font-bold uppercase">{field}</div>
-                                                {isDifferent && (
-                                                    <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${isFromLocal ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'
-                                                        }`}>
-                                                        {isFromLocal ? 'from local' : 'from remote'}
-                                                    </span>
-                                                )}
+                                        return (
+                                            <div key={field} className="p-2 rounded-lg bg-muted/50 border border-border">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <div className="text-[10px] text-muted-foreground font-bold uppercase">{field}</div>
+                                                    {isDifferent && (
+                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${isFromLocal ? 'bg-blue-500/10 text-blue-500' : 'bg-emerald-500/10 text-emerald-500'
+                                                            }`}>
+                                                            {isFromLocal ? 'from local' : 'from remote'}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm font-medium text-foreground break-all">
+                                                    {mergedValue !== undefined ? String(mergedValue) : <span className="text-muted-foreground italic">undefined</span>}
+                                                </div>
                                             </div>
-                                            <div className="text-sm font-medium text-zinc-300 break-all">
-                                                {mergedValue !== undefined ? String(mergedValue) : <span className="text-zinc-700 italic">undefined</span>}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
+                                        );
+                                    })}
+                                </CardContent>
+                            </Card>
                         </div>
                     </div>
-                </div>
+                </ScrollArea>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-between px-6 py-6 border-t border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/80">
+                <div className="flex items-center justify-between px-6 py-6 border-t border-border bg-muted/20">
                     <div className="flex items-center gap-4">
                         <div className="flex flex-col">
-                            <span className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{conflictingFields.length}</span>
-                            <span className="text-[10px] text-zinc-500 font-bold uppercase">Conflicts</span>
+                            <span className="text-lg font-bold text-foreground">{conflictingFields.length}</span>
+                            <span className="text-[10px] text-muted-foreground font-bold uppercase">Conflicts</span>
                         </div>
-                        <div className="h-8 w-px bg-zinc-800" />
-                        <button
+                        <div className="h-8 w-px bg-border" />
+                        <Button
                             onClick={handleSkip}
                             disabled={isResolving}
-                            className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 disabled:opacity-50 text-gray-700 dark:text-zinc-300 rounded-xl transition-all"
+                            variant="secondary"
                         >
                             <SkipForward size={16} />
                             Decline All
-                        </button>
+                        </Button>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button
+                        <Button
                             onClick={handleAcceptLocal}
                             disabled={isResolving}
-                            className="px-5 py-2.5 text-sm bg-gray-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 hover:border-blue-500/50 hover:bg-gray-200 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded-xl transition-all"
+                            variant="outline"
                         >
                             Accept Local
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={handleAcceptRemote}
                             disabled={isResolving}
-                            className="px-5 py-2.5 text-sm bg-gray-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 hover:border-emerald-500/50 hover:bg-gray-200 dark:hover:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded-xl transition-all"
+                            variant="outline"
                         >
                             Accept Remote
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={handleAcceptMerge}
                             disabled={isResolving}
-                            className="px-6 py-2.5 text-sm bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-zinc-950 rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-2"
+                            className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold shadow-lg shadow-emerald-500/10"
                         >
                             {isResolving ? (
                                 <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
@@ -276,10 +301,10 @@ export const DiffGuardModal: React.FC<DiffGuardModalProps> = ({
                                 <Check size={18} />
                             )}
                             Accept Merge Result
-                        </button>
+                        </Button>
                     </div>
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
