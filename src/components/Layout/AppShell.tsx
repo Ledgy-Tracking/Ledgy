@@ -178,6 +178,7 @@ export const AppShell: React.FC = () => {
                             variant="ghost"
                             onClick={() => navigate(`/app/${profileId}/projects`)}
                             title="Projects"
+                            aria-label="Projects"
                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group ${location.pathname.includes('/projects')
                                 ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
                                 : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
@@ -197,6 +198,7 @@ export const AppShell: React.FC = () => {
                                         key={schema._id}
                                         onClick={() => navigate(`/app/${profileId}/project/${projectId}/ledger/${schema._id}`)}
                                         title={schema.name}
+                                        aria-label={schema.name}
                                         className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-300 ease-in-out text-left ${location.pathname.includes(schema._id)
                                             ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
                                             : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
@@ -215,6 +217,7 @@ export const AppShell: React.FC = () => {
                                 variant="ghost"
                                 onClick={() => navigate(`/app/${profileId}/project/${projectId}/node-forge`)}
                                 title="Node Forge"
+                                aria-label="Node Forge"
                                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group ${location.pathname.includes('/node-forge')
                                     ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
                                     : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white'
@@ -230,6 +233,7 @@ export const AppShell: React.FC = () => {
                             variant="ghost"
                             onClick={() => navigate(`/app/${profileId}/trash`)}
                             title="Trash"
+                            aria-label="Trash"
                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group ${location.pathname.includes('/trash')
                                 ? 'bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/30'
                                 : 'text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-white'
@@ -268,6 +272,7 @@ export const AppShell: React.FC = () => {
                             variant="ghost"
                             onClick={() => navigate(`/app/${profileId}/settings`)}
                             title="Settings"
+                            aria-label="Settings"
                             className={`w-full flex items-center gap-3 px-3 py-2 text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50 hover:text-white rounded-lg transition-all duration-300 ease-in-out group ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                         >
                             <Settings size={18} className="shrink-0" />
@@ -277,6 +282,7 @@ export const AppShell: React.FC = () => {
                             variant="ghost"
                             onClick={handleLockVault}
                             title="Lock Vault"
+                            aria-label="Lock Vault"
                             className={`w-full flex items-center gap-3 px-3 py-2 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-lg transition-all duration-300 ease-in-out group ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                         >
                             <LogOut size={18} className="shrink-0" />
