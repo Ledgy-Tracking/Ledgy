@@ -39,15 +39,23 @@ export function pearsonCorrelation(x: number[], y: number[]): number {
     return NaN;
   }
 
-  // Use only the overlapping data
-  const xSlice = x.slice(0, n);
-  const ySlice = y.slice(0, n);
+  // Use only the overlapping data and compute sums in a single pass
+  // to avoid redundant O(N) iterations and memory allocations
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumX2 = 0;
+  let sumY2 = 0;
 
-  const sumX = xSlice.reduce((a, b) => a + b, 0);
-  const sumY = ySlice.reduce((a, b) => a + b, 0);
-  const sumXY = xSlice.reduce((sum, xi, i) => sum + xi * ySlice[i], 0);
-  const sumX2 = xSlice.reduce((sum, xi) => sum + xi * xi, 0);
-  const sumY2 = ySlice.reduce((sum, yi) => sum + yi * yi, 0);
+  for (let i = 0; i < n; i++) {
+    const xi = x[i];
+    const yi = y[i];
+    sumX += xi;
+    sumY += yi;
+    sumXY += xi * yi;
+    sumX2 += xi * xi;
+    sumY2 += yi * yi;
+  }
 
   const numerator = n * sumXY - sumX * sumY;
   const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
@@ -68,14 +76,32 @@ export function arithmetic(values: number[], operation: string): number {
   }
 
   switch (operation) {
-    case 'sum':
-      return values.reduce((a, b) => a + b, 0);
-    case 'average':
-      return values.reduce((a, b) => a + b, 0) / values.length;
-    case 'min':
-      return Math.min(...values);
-    case 'max':
-      return Math.max(...values);
+    case 'sum': {
+      let sum = 0;
+      for (let i = 0; i < values.length; i++) sum += values[i];
+      return sum;
+    }
+    case 'average': {
+      let sum = 0;
+      for (let i = 0; i < values.length; i++) sum += values[i];
+      return sum / values.length;
+    }
+    case 'min': {
+      let min = values[0];
+      for (let i = 1; i < values.length; i++) {
+        if (Number.isNaN(values[i])) return NaN;
+        if (values[i] < min) min = values[i];
+      }
+      return min;
+    }
+    case 'max': {
+      let max = values[0];
+      for (let i = 1; i < values.length; i++) {
+        if (Number.isNaN(values[i])) return NaN;
+        if (values[i] > max) max = values[i];
+      }
+      return max;
+    }
     default:
       return NaN;
   }
