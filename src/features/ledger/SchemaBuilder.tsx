@@ -20,6 +20,11 @@ interface SchemaBuilderFormValues {
     name: string;
 }
 
+interface SchemaBuilderProps {
+    projectId?: string;
+    onClose?: () => void;
+}
+
 export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose }) => {
     const { activeProfileId } = useProfileStore();
     const { schemas } = useLedgerStore();
@@ -30,7 +35,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         isLoading,
         editingSchemaId,
         initCreate,
-        setDraftName,
+        setDraftName: _setDraftName,
         addField,
         removeField,
         updateField,
@@ -48,7 +53,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
     });
 
     useEffect(() => {
-        initCreate(projectId);
+        initCreate(projectId || '');
     }, [projectId, initCreate]);
 
     // Sync form value with draftName
@@ -84,7 +89,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         });
     };
 
-    const handleSave = async (data: SchemaBuilderFormValues) => {
+    const handleSave = async (_data: SchemaBuilderFormValues) => {
         if (!activeProfileId) {
             const msg = 'No active profile. Please select a profile before saving.';
             useSchemaBuilderStore.setState({ error: msg });
@@ -94,7 +99,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         try {
             await commit(activeProfileId);
             // Only close if validation passed (no error set by commit)
-            if (!useSchemaBuilderStore.getState().error) {
+            if (!useSchemaBuilderStore.getState().error && onClose) {
                 onClose();
             }
         } catch (err) {
@@ -423,7 +428,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                        <Button type="button" variant="outline" onClick={() => { discard(); onClose(); }}>
+                        <Button type="button" variant="outline" onClick={() => { discard(); onClose && onClose(); }}>
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isLoading} className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400">

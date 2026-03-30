@@ -17,7 +17,7 @@ vi.mock('./db', async (importOriginal) => {
     return {
         ...actual,
         decryptProfileMetadata: vi.fn().mockImplementation(async (docs) => {
-            return docs.map(doc => ({
+            return docs.map((doc: any) => ({
                 id: doc._id,
                 name: doc.name || (doc.name_enc ? 'Decrypted Name' : 'Unknown'),
                 description: doc.description || (doc.description_enc ? 'Decrypted Description' : ''),
@@ -35,13 +35,13 @@ vi.mock('./crypto', async (importOriginal) => {
     const actual = await importOriginal<typeof import('./crypto')>();
     return {
         ...actual,
-        encryptPayload: vi.fn().mockImplementation(async (key, data) => {
+        encryptPayload: vi.fn().mockImplementation(async (_key, data) => {
             return {
                 iv: new Uint8Array([1, 2, 3]),
                 ciphertext: new TextEncoder().encode(data).buffer,
             };
         }),
-        decryptPayload: vi.fn().mockImplementation(async (key, iv, ciphertext) => {
+        decryptPayload: vi.fn().mockImplementation(async (_key, _iv, ciphertext) => {
             return new TextDecoder().decode(ciphertext);
         }),
     };

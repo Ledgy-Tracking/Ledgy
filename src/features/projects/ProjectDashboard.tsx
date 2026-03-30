@@ -17,7 +17,7 @@ export const ProjectDashboard: React.FC = () => {
     const navigate = useNavigate();
     const { projects, fetchProjects, createProject, deleteProject, isLoading, setActiveProject } = useProjectStore();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [newProjectDesc, setNewProjectDesc] = useState('');
+    const [_newProjectDesc, setNewProjectDesc] = useState('');
 
     const form = useForm<{ name: string; description: string }>({
         defaultValues: {
