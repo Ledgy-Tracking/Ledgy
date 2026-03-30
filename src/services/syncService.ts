@@ -26,6 +26,12 @@ export async function deleteRemoteDatabase(
     try {
         console.log(`Deleting remote database at: ${remoteConfig.url}`);
 
+        // 🛡️ Sentinel: Enforce HTTPS for remote connections to prevent credential leakage
+        const isLocalhost = remoteConfig.url.startsWith('http://localhost') || remoteConfig.url.startsWith('http://127.0.0.1');
+        if (!remoteConfig.url.startsWith('https://') && !isLocalhost) {
+            throw new Error('Insecure Connection: Remote URL must use HTTPS');
+        }
+
         const headers: HeadersInit = {};
         if (remoteConfig.username && remoteConfig.password) {
             // Use Basic Auth for CouchDB
