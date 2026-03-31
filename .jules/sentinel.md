@@ -17,3 +17,8 @@
 **Vulnerability:** Sensitive inputs (TOTP codes, passphrases, remote database credentials) lacked appropriate `autoComplete` attributes. This could allow password managers or browsers to improperly suggest or save credentials, leading to accidental credential leakage or usability issues preventing proper password manager functionality.
 **Learning:** React components handling sensitive authentication and configuration data must explicitly declare `autoComplete` strategies. For passphrases, use `"new-password"` or `"current-password"` to guide password managers. For TOTP inputs, use `"one-time-code"` to allow OS-level auto-filling from SMS/Mail. For custom credentials (like remote DB URLs/passwords), use `"off"` to prevent incorrect browser auto-filling.
 **Prevention:** Always add explicit `autoComplete` attributes to any `<input type="password">` or sensitive text/number input handling security credentials.
+
+## 2025-05-24 - Enforce HTTPS for Basic Authentication
+**Vulnerability:** Remote sync configuration (both `setup_sync` and `deleteRemoteDatabase`) was transmitting plaintext credentials via HTTP Basic Authentication without verifying the connection protocol.
+**Learning:** Basic Authentication merely base64 encodes credentials; without TLS (HTTPS), these credentials are trivially intercepted over the network. Localhost exceptions must be explicitly managed.
+**Prevention:** Always validate URL schemes before applying `Authorization: Basic` headers or embedding credentials in URLs. Ensure exceptions are limited strictly to local development addresses (localhost / 127.0.0.1).

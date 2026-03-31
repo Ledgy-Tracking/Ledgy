@@ -1,3 +1,4 @@
+import { isLocalNetwork } from '../utils/network';
 import PouchDB from 'pouchdb';
 import { v4 as uuidv4 } from 'uuid';
 import { LedgyDocument, ProfileMetadata } from '../types/profile';
@@ -1639,16 +1640,26 @@ export function setup_sync(
 ): PouchDB.Replication.Sync<{}> | PouchDB.Replication.Replication<{}> {
     const db = getProfileDb(profileId);
 
+
     // Construct remote URL with credentials
     // Note: This is sensitive, so we only do it in memory
     let remoteUrl = config.remoteUrl;
     if (config.username && config.password && remoteUrl) {
         try {
             const url = new URL(remoteUrl);
+
+            // Enforce HTTPS for Basic Authentication (allow local networks for self-hosted sync)
+            if (url.protocol !== 'https:' && !isLocalNetwork(url.hostname)) {
+                throw new Error('Insecure connection: HTTPS is required for authenticated remote sync operations.');
+            }
+
             url.username = config.username;
             url.password = config.password;
             remoteUrl = url.toString();
-        } catch (e) {
+        } catch (e: any) {
+            if (e.message.includes('Insecure connection')) {
+                throw e; // Rethrow security error
+            }
             console.error('Invalid remote URL:', remoteUrl);
         }
     }
