@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ProfileSelector } from './ProfileSelector';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { BrowserRouter } from 'react-router-dom';
