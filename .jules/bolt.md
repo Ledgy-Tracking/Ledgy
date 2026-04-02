@@ -21,3 +21,7 @@
 ## 2024-05-24 - Prevent widget re-renders with Zustand selectors
 **Learning:** Destructuring entire state arrays (like `const { nodes } = useNodeStore()`) inside list components causes all items to re-render when any array element changes.
 **Action:** Always use specific selector functions (e.g., `useNodeStore(state => state.nodes.find(n => n.id === id))`) in child components to isolate re-renders to only the elements whose specific state has changed.
+
+## 2024-05-25 - Avoid Call Stack Limits with Math.max/min
+**Learning:** Spreading large computation arrays into `Math.min(...values)` or `Math.max(...values)` causes "Maximum call stack size exceeded" errors in heavy worker computations.
+**Action:** When aggregating large numeric arrays (like in `arithmetic`), use standard `for` loops instead of spread operations. Critically, ensure explicit `Number.isNaN(values[i])` checks are present inside the loop to return `NaN` and maintain strict parity with the native `Math.min`/`Math.max` behavior.
