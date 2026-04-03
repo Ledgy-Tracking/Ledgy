@@ -20,6 +20,11 @@ interface SchemaBuilderFormValues {
     name: string;
 }
 
+interface SchemaBuilderProps {
+    projectId: string;
+    onClose: () => void;
+}
+
 export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose }) => {
     const { activeProfileId } = useProfileStore();
     const { schemas } = useLedgerStore();
@@ -30,7 +35,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         isLoading,
         editingSchemaId,
         initCreate,
-        setDraftName,
+        setDraftName: _setDraftName,
         addField,
         removeField,
         updateField,
@@ -84,7 +89,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         });
     };
 
-    const handleSave = async (data: SchemaBuilderFormValues) => {
+    const handleSave = async (_data: SchemaBuilderFormValues) => {
         if (!activeProfileId) {
             const msg = 'No active profile. Please select a profile before saving.';
             useSchemaBuilderStore.setState({ error: msg });
