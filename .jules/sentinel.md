@@ -17,3 +17,8 @@
 **Vulnerability:** Sensitive inputs (TOTP codes, passphrases, remote database credentials) lacked appropriate `autoComplete` attributes. This could allow password managers or browsers to improperly suggest or save credentials, leading to accidental credential leakage or usability issues preventing proper password manager functionality.
 **Learning:** React components handling sensitive authentication and configuration data must explicitly declare `autoComplete` strategies. For passphrases, use `"new-password"` or `"current-password"` to guide password managers. For TOTP inputs, use `"one-time-code"` to allow OS-level auto-filling from SMS/Mail. For custom credentials (like remote DB URLs/passwords), use `"off"` to prevent incorrect browser auto-filling.
 **Prevention:** Always add explicit `autoComplete` attributes to any `<input type="password">` or sensitive text/number input handling security credentials.
+
+## 2024-03-24 - Client-Side Denial of Service via Large File Uploads
+**Vulnerability:** The application was using the native `FileReader` API in `readTemplateBrowser` (`src/lib/templateImport.ts`) to read user-uploaded template files without first validating the file size. This could lead to a client-side Denial of Service (DoS) or browser memory exhaustion if a user uploaded an excessively large payload.
+**Learning:** Browser environments have limited memory allocations compared to server environments. Unbounded client-side file reading, especially when loading data into memory using `readAsText()`, presents a significant stability and security risk.
+**Prevention:** Always enforce a reasonable file size limit (e.g., 5MB) by checking `file.size` before instantiating a `FileReader` or processing file contents.
