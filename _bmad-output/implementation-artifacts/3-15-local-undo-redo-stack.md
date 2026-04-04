@@ -1,6 +1,6 @@
 # Story 3.15: Local Undo/Redo Stack
 
-Status: review
+Status: done
 
 <!-- Validation: Multi-agent party mode review completed 2026-03-15. Approved for development. 5 clarifications documented; no blockers. Quality gate documented. -->
 
