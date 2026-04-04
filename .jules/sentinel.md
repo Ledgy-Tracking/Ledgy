@@ -29,6 +29,6 @@
 **Prevention:** Always validate URL schemes before applying `Authorization: Basic` headers or embedding credentials in URLs. Use `isLocalNetwork()` to allow private IP ranges for self-hosted CouchDB instances while enforcing HTTPS for public connections.
 
 ## 2024-03-24 - File Import Denial of Service (DoS)
-**Vulnerability:** Calling `FileReader.readAsText()` on user-uploaded files without size constraints. The `readTemplateBrowser` function could process arbitrarily large files, leading to browser memory exhaustion or crash.
-**Learning:** Browser environments have limited memory allocations. Maliciously large JSON payloads can exhaust browser memory and freeze or crash the client application during import.
-**Prevention:** Always enforce a reasonable file size limit (e.g., `file.size > 5 * 1024 * 1024` for 5MB) by checking `file.size` before instantiating a `FileReader` or processing file contents.
+**Vulnerability:** The `templateImport.ts` module was reading user-provided files directly into memory using `FileReader.readAsText()` without any size limitations. Maliciously large JSON payloads can exhaust browser memory and freeze or crash the client application during import.
+**Learning:** Browser APIs like `FileReader` load entire file contents into RAM. Relying on implicit browser limits is insufficient, especially for large JSON formats which further multiply memory footprint.
+**Prevention:** Always enforce strict file size limits (e.g., 5MB for JSON templates) by checking `file.size` before initiating any file reading operations.
