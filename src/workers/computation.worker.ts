@@ -39,9 +39,6 @@ export function pearsonCorrelation(x: number[], y: number[]): number {
     return NaN;
   }
 
-  // Use only the overlapping data
-  // Optimization: Consolidate multiple O(N) array slicing and reduce loops into a single pass.
-  // This minimizes heap allocation overhead and reduces complexity from O(7N) to O(N).
   let sumX = 0;
   let sumY = 0;
   let sumXY = 0;
@@ -51,6 +48,12 @@ export function pearsonCorrelation(x: number[], y: number[]): number {
   for (let i = 0; i < n; i++) {
     const xi = x[i];
     const yi = y[i];
+
+    // Fast path: fail if NaN is encountered as it taints all operations
+    if (Number.isNaN(xi) || Number.isNaN(yi)) {
+      return NaN;
+    }
+
     sumX += xi;
     sumY += yi;
     sumXY += xi * yi;
@@ -76,12 +79,11 @@ export function arithmetic(values: number[], operation: string): number {
     return NaN;
   }
 
-  // Optimization: Replacing Array.reduce and Math.min/max with single-pass loops
-  // Math.min(...values) triggers "Maximum call stack size exceeded" for large arrays.
   switch (operation) {
     case 'sum': {
       let sum = 0;
       for (let i = 0; i < values.length; i++) {
+        if (Number.isNaN(values[i])) return NaN;
         sum += values[i];
       }
       return sum;
@@ -89,6 +91,7 @@ export function arithmetic(values: number[], operation: string): number {
     case 'average': {
       let sum = 0;
       for (let i = 0; i < values.length; i++) {
+        if (Number.isNaN(values[i])) return NaN;
         sum += values[i];
       }
       return sum / values.length;
@@ -96,18 +99,16 @@ export function arithmetic(values: number[], operation: string): number {
     case 'min': {
       let min = Infinity;
       for (let i = 0; i < values.length; i++) {
-        const val = values[i];
-        if (Number.isNaN(val)) return NaN;
-        if (val < min) min = val;
+        if (Number.isNaN(values[i])) return NaN;
+        if (values[i] < min) min = values[i];
       }
       return min;
     }
     case 'max': {
       let max = -Infinity;
       for (let i = 0; i < values.length; i++) {
-        const val = values[i];
-        if (Number.isNaN(val)) return NaN;
-        if (val > max) max = val;
+        if (Number.isNaN(values[i])) return NaN;
+        if (values[i] > max) max = values[i];
       }
       return max;
     }

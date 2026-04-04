@@ -35,7 +35,6 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         isLoading,
         editingSchemaId,
         initCreate,
-        // setDraftName, // Unused
         addField,
         removeField,
         updateField,
@@ -53,7 +52,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
     });
 
     useEffect(() => {
-        initCreate(projectId);
+        initCreate(projectId || '');
     }, [projectId, initCreate]);
 
     // Sync form value with draftName
@@ -89,7 +88,10 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         });
     };
 
-    const handleSave = async (_data: SchemaBuilderFormValues) => {
+    const handleSave = async (data: SchemaBuilderFormValues) => {
+        // Sync form data to store before committing
+        setDraftName(data.name);
+
         if (!activeProfileId) {
             const msg = 'No active profile. Please select a profile before saving.';
             useSchemaBuilderStore.setState({ error: msg });
@@ -139,6 +141,10 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                         <FormControl>
                                             <Input
                                                 {...field}
+                                                onChange={(e) => {
+                                                    field.onChange(e);
+                                                    setDraftName(e.target.value);
+                                                }}
                                                 placeholder="e.g. Coffee Tracker, Sleep Log"
                                             />
                                         </FormControl>
@@ -179,6 +185,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                     variant="ghost"
                                                     size="icon-xs"
                                                     className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                                                    aria-label="Move field up"
                                                 >
                                                     <ChevronUp size={14} />
                                                 </Button>
@@ -189,6 +196,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                     variant="ghost"
                                                     size="icon-xs"
                                                     className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                                                    aria-label="Move field down"
                                                 >
                                                     <ChevronDown size={14} />
                                                 </Button>
@@ -272,6 +280,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 size="icon"
                                                 onClick={() => handleRemoveField(index)}
                                                 className="text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                                                aria-label="Remove field"
                                             >
                                                 <Trash2 size={14} />
                                             </Button>
@@ -440,7 +449,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                         </Button>
                     </div>
                 </form>
-            </Form>
+                </Form>
             </DialogContent>
             </TooltipProvider>
         </Dialog>
