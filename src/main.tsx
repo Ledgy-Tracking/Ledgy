@@ -2,22 +2,15 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-import { useAuthStore } from "./features/auth/useAuthStore";
 import "./index.css";
 
-// Await initSession before rendering so the app never renders with stale auth
-// state — prevents the TOTP-screen flash for passphrase-protected sessions on
-// cold start and ensures unhandled initSession rejections are surfaced.
-useAuthStore
-  .getState()
-  .initSession()
-  .catch(console.error)
-  .finally(() => {
-    ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-      <React.StrictMode>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </React.StrictMode>,
-    );
-  });
+// initSession is now called in onRehydrateStorage callback after localStorage
+// state is restored — prevents the race condition where initSession ran before
+// encryptedTotpSecret was loaded from storage.
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>,
+);

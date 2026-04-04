@@ -18,7 +18,7 @@
 **Learning:** React components handling sensitive authentication and configuration data must explicitly declare `autoComplete` strategies. For passphrases, use `"new-password"` or `"current-password"` to guide password managers. For TOTP inputs, use `"one-time-code"` to allow OS-level auto-filling from SMS/Mail. For custom credentials (like remote DB URLs/passwords), use `"off"` to prevent incorrect browser auto-filling.
 **Prevention:** Always add explicit `autoComplete` attributes to any `<input type="password">` or sensitive text/number input handling security credentials.
 
-## 2024-05-24 - Secure Remote Sync Authentication
-**Vulnerability:** The application was sending CouchDB/PouchDB Basic Authentication credentials (username and password) over unencrypted HTTP connections if configured with a non-HTTPS remote URL. This could lead to credential interception (CWE-319) on local or wide area networks.
-**Learning:** Security mechanisms like Basic Authentication offer no meaningful protection if the transport layer is unencrypted. However, blindly enforcing HTTPS can break local development workflows that rely on `http://localhost` or `http://127.0.0.1`.
-**Prevention:** Always enforce HTTPS for any remote connections that transmit sensitive credentials or authentication headers. Crucially, explicitly exempt local loopback addresses (`localhost` and `127.0.0.1`) to maintain developer experience without compromising production security.
+## 2025-05-24 - Enforce HTTPS for Basic Authentication
+**Vulnerability:** Remote sync configuration (both `setup_sync` and `deleteRemoteDatabase`) was transmitting plaintext credentials via HTTP Basic Authentication without verifying the connection protocol. This could lead to credential interception (CWE-319) on local or wide area networks.
+**Learning:** Basic Authentication merely base64 encodes credentials; without TLS (HTTPS), these credentials are trivially intercepted over the network. Localhost and private network exceptions (10.x, 172.16-31.x, 192.168.x) must be explicitly managed for local self-hosted sync to work.
+**Prevention:** Always validate URL schemes before applying `Authorization: Basic` headers or embedding credentials in URLs. Use `isLocalNetwork()` to allow private IP ranges for self-hosted CouchDB instances while enforcing HTTPS for public connections.

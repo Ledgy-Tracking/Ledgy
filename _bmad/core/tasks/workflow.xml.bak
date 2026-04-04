@@ -14,7 +14,6 @@
     <rule n="2">Optional steps: Ask user unless #yolo mode active</rule>
     <rule n="3">Template-output tags: Save content, discuss with the user the section completed, and NEVER proceed until the users indicates
       to proceed (unless YOLO mode has been activated)</rule>
-    <rule n="4">Sprint Status Updates: Whenever `sprint-status.yaml` is modified, you MUST always perform a git commit, and you MUST require user review of the commit message before committing.</rule>
   </WORKFLOW-RULES>
 
   <flow>

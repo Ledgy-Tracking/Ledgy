@@ -1,3 +1,4 @@
+import { isLocalNetwork } from '../utils/network';
 /**
  * Sync Service
  * Handles PouchDB replication and conflict resolution
@@ -26,12 +27,15 @@ export async function deleteRemoteDatabase(
     try {
         console.log(`Deleting remote database at: ${remoteConfig.url}`);
 
+
         const headers: HeadersInit = {};
         if (remoteConfig.username && remoteConfig.password) {
-            const isLocalhost = remoteConfig.url.startsWith('http://localhost') || remoteConfig.url.startsWith('http://127.0.0.1');
-            if (!remoteConfig.url.toLowerCase().startsWith('https://') && !isLocalhost) {
-                throw new Error('Insecure remote URL: HTTPS is required for Basic Authentication');
+            // Enforce HTTPS for Basic Authentication (allow local networks for self-hosted sync)
+            const url = new URL(remoteConfig.url);
+            if (url.protocol !== 'https:' && !isLocalNetwork(url.hostname)) {
+                throw new Error('Insecure connection: HTTPS is required for authenticated remote sync operations.');
             }
+
             // Use Basic Auth for CouchDB
             const authString = btoa(`${remoteConfig.username}:${remoteConfig.password}`);
             headers['Authorization'] = `Basic ${authString}`;
