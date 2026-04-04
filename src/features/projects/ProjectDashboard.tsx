@@ -17,7 +17,6 @@ export const ProjectDashboard: React.FC = () => {
     const navigate = useNavigate();
     const { projects, fetchProjects, createProject, deleteProject, isLoading, setActiveProject } = useProjectStore();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [_newProjectDesc, setNewProjectDesc] = useState('');
 
     const form = useForm<{ name: string; description: string }>({
         defaultValues: {
@@ -36,7 +35,6 @@ export const ProjectDashboard: React.FC = () => {
         if (profileId && data.name) {
             await createProject(profileId, data.name, data.description);
             form.reset();
-            setNewProjectDesc('');
             setIsCreateModalOpen(false);
         }
     };
@@ -150,8 +148,8 @@ export const ProjectDashboard: React.FC = () => {
                             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Define a new container for your tracking ecosystems.</p>
                         </CardHeader>
                         <CardContent>
-                            <Form {...form}>
-                                <form onSubmit={form.handleSubmit(handleCreateProject)} className="space-y-4">
+                            <form onSubmit={form.handleSubmit(handleCreateProject)} className="space-y-4">
+                                <Form {...form}>
                                     <FormField
                                         control={form.control}
                                         name="name"
@@ -207,8 +205,8 @@ export const ProjectDashboard: React.FC = () => {
                                             Create Project
                                         </Button>
                                     </div>
-                                </form>
-                            </Form>
+                                </Form>
+                            </form>
                         </CardContent>
                     </Card>
                 </div>

@@ -25,7 +25,7 @@ import { NodeCanvas } from "./features/nodeEditor/NodeCanvas";
 import { ReactFlowProvider } from "@xyflow/react";
 import { SettingsPage } from "./features/settings/SettingsPage";
 import { ErrorBoundary } from "./features/shell/ErrorBoundary";
-import { AppShell } from "./features/shell/AppShell";
+import { AppShell } from "./components/Layout/AppShell";
 
 function App() {
   const theme = useUIStore((state) => state.theme);

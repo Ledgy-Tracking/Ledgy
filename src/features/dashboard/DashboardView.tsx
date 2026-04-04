@@ -5,6 +5,8 @@ import { useContainerWidth } from '../../hooks/useContainerWidth';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
+
+// Theme palette reference: bg-gray-100 dark:bg-zinc-800
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useDashboardStore } from '../../stores/useDashboardStore';
 import { useNodeStore } from '../../stores/useNodeStore';
@@ -122,7 +124,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 <Button
                                     onClick={() => handleAddWidget('chart')}
                                     variant="ghost"
-                                    className="w-full justify-start text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
+                                    className="w-full justify-start text-sm text-zinc-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800"
                                 >
                                     <BarChart3 size={16} className="text-blue-400" />
                                     Chart Widget
@@ -130,7 +132,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 <Button
                                     onClick={() => handleAddWidget('trend')}
                                     variant="ghost"
-                                    className="w-full justify-start text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
+                                    className="w-full justify-start text-sm text-zinc-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800"
                                 >
                                     <TrendingUp size={16} className="text-emerald-400" />
                                     Trend Widget
@@ -138,7 +140,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                 <Button
                                     onClick={() => handleAddWidget('text')}
                                     variant="ghost"
-                                    className="w-full justify-start text-sm text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-800"
+                                    className="w-full justify-start text-sm text-zinc-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800"
                                 >
                                     <Type size={16} className="text-purple-400" />
                                     Text Widget
@@ -181,7 +183,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                                             onClick={() => setSelectedWidget(widget)}
                                             variant="ghost"
                                             size="icon-xs"
-                                            className="text-zinc-400 hover:text-zinc-800 dark:text-zinc-200 hover:bg-gray-200 dark:hover:bg-zinc-800"
+                                            className="text-zinc-400 hover:text-zinc-800 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800"
                                             title="Widget settings"
                                             aria-label="Widget settings"
                                         >
