@@ -71,7 +71,7 @@ describe('ProfileSelector', () => {
 
         renderWithRouter(<ProfileSelector />);
 
-        const newProfileBtn = screen.getByText('New Profile');
+        const newProfileBtn = screen.getByText('Create New Profile');
         fireEvent.click(newProfileBtn);
 
         // Find the "Name" label in the create dialog

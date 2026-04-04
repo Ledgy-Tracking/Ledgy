@@ -18,11 +18,11 @@ describe('RelationTagChip - Ghost Reference Styling', () => {
                 />
             );
 
-            const button = container.querySelector('button');
-            expect(button).toHaveClass('bg-zinc-800');
-            expect(button).toHaveClass('border-zinc-700');
-            expect(button).toHaveClass('text-zinc-500');
-            expect(button).toHaveClass('line-through');
+            const badge = container.querySelector('[data-slot="badge"]');
+            expect(badge).toHaveClass('bg-zinc-800');
+            expect(badge).toHaveClass('border-zinc-700');
+            expect(badge).toHaveClass('text-zinc-500');
+            expect(badge).toHaveClass('line-through');
         });
 
         it('sets cursor to not-allowed for ghosts', () => {
@@ -34,8 +34,8 @@ describe('RelationTagChip - Ghost Reference Styling', () => {
                 />
             );
 
-            const button = container.querySelector('button');
-            expect(button).toHaveClass('cursor-not-allowed');
+            const badge = container.querySelector('[data-slot="badge"]');
+            expect(badge).toHaveClass('cursor-not-allowed');
         });
 
         it('hides external link icon for ghosts', () => {
@@ -77,8 +77,8 @@ describe('RelationTagChip - Ghost Reference Styling', () => {
                 />
             );
 
-            const button = container.querySelector('button');
-            fireEvent.click(button!);
+            const badge = container.querySelector('[data-slot="badge"]');
+            fireEvent.click(badge!);
 
             expect(onClick).not.toHaveBeenCalled();
         });
@@ -92,8 +92,8 @@ describe('RelationTagChip - Ghost Reference Styling', () => {
                 />
             );
 
-            const button = container.querySelector('button');
-            expect(button).toHaveAttribute('disabled');
+            const badge = container.querySelector('[data-slot="badge"]');
+            expect(badge).toHaveAttribute('aria-disabled', 'true');
         });
     });
 
@@ -107,8 +107,8 @@ describe('RelationTagChip - Ghost Reference Styling', () => {
                 />
             );
 
-            const button = container.querySelector('button');
-            expect(button).toHaveAttribute('disabled');
+            const badge = container.querySelector('[data-slot="badge"]');
+            expect(badge).toHaveAttribute('aria-disabled', 'true');
         });
     });
 });

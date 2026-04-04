@@ -71,6 +71,8 @@ interface AuthState {
     // Zustand store topology (Story 1-3)
     isLoading: boolean;
     error: string | null;
+    /** True when persist rehydration is complete — used to prevent flash of wrong UI */
+    hasHydrated: boolean;
 
     // ----- Actions -----
     setRememberMe: (val: boolean) => void;
@@ -113,10 +115,15 @@ export const useAuthStore = create<AuthState>()(
             // Zustand store topology (Story 1-3)
             isLoading: false,
             error: null,
+            hasHydrated: false,
 
             setRememberMe: (val: boolean) => set({ rememberMe: val }),
 
             initSession: async () => {
+                if (import.meta.env.DEV) {
+                    console.log('[AuthStore] initSession started');
+                }
+                
                 // Clean up expired rate limit entries
                 cleanupExpiredEntries();
 
@@ -128,6 +135,15 @@ export const useAuthStore = create<AuthState>()(
                     rememberMeExpiry,
                 } = get();
 
+                if (import.meta.env.DEV) {
+                    console.log('[AuthStore] initSession state:', {
+                        rememberMe,
+                        hasEncryptedSecret: !!encryptedTotpSecret,
+                        hasTotpSecret: !!totpSecret,
+                        rememberMeExpiry,
+                    });
+                }
+
                 // Step 1: Check session expiry
                 if (rememberMeExpiry !== null && Date.now() > rememberMeExpiry) {
                     // Session expired — force re-authentication but retain the secrets so the user is not orphaned
@@ -137,15 +153,24 @@ export const useAuthStore = create<AuthState>()(
                         userId: null,
                         rememberMeExpiry: null,
                     });
-                    // Note: We don't change `needsPassphrase` or clear secrets. The user either needs to enter
-                    // TOTP again (if plain session) or passphrase (if passphrase session) on the next unlock attempt.
+                    // Check if passphrase unlock is needed after expiry cleanup
+                    if (encryptedTotpSecret && !totpSecret) {
+                        set({ needsPassphrase: true });
+                    }
                     return;
                 }
 
                 // Step 2: Passphrase-protected remember-me — can't auto-unlock, prompt instead
                 if (rememberMe && encryptedTotpSecret && !totpSecret) {
+                    if (import.meta.env.DEV) {
+                        console.log('[AuthStore] Setting needsPassphrase = true');
+                    }
                     set({ needsPassphrase: true });
                     return;
+                }
+                
+                if (import.meta.env.DEV) {
+                    console.log('[AuthStore] initSession complete - no passphrase needed');
                 }
 
                 // Step 3: Legacy Plain remember-me — no longer auto-unlock.
@@ -416,12 +441,22 @@ export const useAuthStore = create<AuthState>()(
                 rememberMeExpiryMs: state.rememberMeExpiryMs,
                 salt: state.salt,
             } as AuthState),
+            skipHydration: false,
+            onRehydrateStorage: () => async (state) => {
+                // State is now loaded from localStorage
+                // Call initSession here after rehydration
+                if (state) {
+                    await state.initSession();
+                }
+                // Mark hydration complete AFTER initSession runs
+                useAuthStore.setState({ hasHydrated: true });
+            },
         }
     )
 );
 
-// NOTE: initSession() is called in main.tsx and awaited before the app renders.
-// This prevents the TOTP-screen flash for passphrase-protected sessions on cold start.
+// NOTE: initSession() is called in onRehydrateStorage after persist state is loaded.
+// hasHydrated flag prevents UI flash while state is being rehydrated.
 
 export const useIsRegistered = () => {
     return useAuthStore(state => !!(state.totpSecret || state.encryptedTotpSecret));

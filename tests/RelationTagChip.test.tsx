@@ -43,13 +43,13 @@ describe('RelationTagChip', () => {
     });
 
     it('renders ghost state with line-through styling', () => {
-        renderWithRouter(
+        const { container } = renderWithRouter(
             <RelationTagChip value="entry:deleted" isGhost />
         );
-        const button = screen.getByRole('button');
-        // Check for ghost state classes on the button
-        expect(button.className).toContain('line-through');
-        expect(button.className).toContain('cursor-not-allowed');
+        const badge = container.querySelector('[data-slot="badge"]');
+        // Check for ghost state classes on the badge
+        expect(badge?.className).toContain('line-through');
+        expect(badge?.className).toContain('cursor-not-allowed');
     });
 
     it('disables click on ghost chips', () => {
@@ -82,12 +82,12 @@ describe('RelationTagChip', () => {
     });
 
     it('does not display ExternalLink icon for ghost chips', () => {
-        renderWithRouter(
+        const { container } = renderWithRouter(
             <RelationTagChip value="entry:deleted" isGhost />
         );
         // Should not have the ExternalLink icon
-        const buttons = screen.getAllByRole('button');
-        expect(buttons[0].querySelector('svg')).not.toBeInTheDocument();
+        const badge = container.querySelector('[data-slot="badge"]');
+        expect(badge?.querySelector('svg')).not.toBeInTheDocument();
     });
 
     it('applies truncate class to long values', () => {
