@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import type { ResolvedRelationValue } from '../../types/ledger';
 
 interface RelationTagChipProps {
     value: string | string[];
@@ -11,6 +12,7 @@ interface RelationTagChipProps {
     entryId?: string;
     onClick?: () => void;
     isGhost?: boolean;
+    resolvedValues?: ResolvedRelationValue[];
 }
 
 /**
@@ -23,6 +25,7 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
     targetLedgerId,
     onClick,
     isGhost = false,
+    resolvedValues,
 }) => {
     const navigate = useNavigate();
     const { profileId } = useParams<{ profileId: string }>();
@@ -33,8 +36,8 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
         return <span className="text-zinc-600 italic">-</span>;
     }
 
-    const handleClick = (id: string) => {
-        if (isGhost) return;
+    const handleClick = (id: string, chipIsGhost: boolean) => {
+        if (chipIsGhost) return;
 
         // Call custom onClick if provided
         if (onClick) {
@@ -56,24 +59,30 @@ export const RelationTagChip: React.FC<RelationTagChipProps> = ({
 
     return (
         <div className="flex flex-wrap gap-1">
-            {values.map((val, index) => (
-                <Badge
-                    key={index}
-                    variant="outline"
-                    onClick={() => handleClick(val)}
-                    className={cn(
-                        "cursor-pointer gap-1 transition-colors",
-                        isGhost
-                            ? "bg-zinc-800 border-zinc-700 text-zinc-500 line-through cursor-not-allowed"
-                            : "bg-emerald-900/30 border-emerald-800 text-emerald-400 hover:bg-emerald-900/50 hover:border-emerald-700"
-                    )}
-                    title={targetLedgerId ? `Navigate to ${targetLedgerId}` : undefined}
-                    aria-disabled={isGhost}
-                >
-                    <span className="truncate max-w-[150px]">{val}</span>
-                    {!isGhost && <ExternalLink size={10} />}
-                </Badge>
-            ))}
+            {values.map((val, index) => {
+                const resolved = resolvedValues?.[index];
+                const label = resolved ? resolved.displayValue : val;
+                const chipIsGhost = resolved ? resolved.isGhost : isGhost;
+
+                return (
+                    <Badge
+                        key={index}
+                        variant="outline"
+                        onClick={() => handleClick(val, chipIsGhost)}
+                        className={cn(
+                            "cursor-pointer gap-1 transition-colors",
+                            chipIsGhost
+                                ? "bg-zinc-800 border-zinc-700 text-zinc-500 line-through cursor-not-allowed"
+                                : "bg-emerald-900/30 border-emerald-800 text-emerald-400 hover:bg-emerald-900/50 hover:border-emerald-700"
+                        )}
+                        title={val}
+                        aria-disabled={chipIsGhost}
+                    >
+                        <span className="truncate max-w-[150px]">{label}</span>
+                        {!chipIsGhost && <ExternalLink size={10} />}
+                    </Badge>
+                );
+            })}
         </div>
     );
 };

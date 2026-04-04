@@ -1,6 +1,6 @@
 # Story 3.16: Relational Data Flattening Engine
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -24,16 +24,16 @@ so that I can read and understand relational data at a glance without manually c
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Add types to `src/types/ledger.ts` (AC: #9)
-  - [ ] 1.1 Add `ResolvedRelationValue` interface: `{ id: string; displayValue: string; isGhost: boolean }`
-  - [ ] 1.2 Add `FlattenedEntry` interface: extends `LedgerEntry` with `resolvedRelations?: Record<string, ResolvedRelationValue[]>`
+- [x] Task 1 — Add types to `src/types/ledger.ts` (AC: #9)
+  - [x] 1.1 Add `ResolvedRelationValue` interface: `{ id: string; displayValue: string; isGhost: boolean }`
+  - [x] 1.2 Add `FlattenedEntry` interface: extends `LedgerEntry` with `resolvedRelations?: Record<string, ResolvedRelationValue[]>`
 
-- [ ] Task 2 — Create `src/lib/flattenRelations.ts` pure-function utility (AC: #1, #2, #3, #4, #5, #7, #9, #11)
-  - [ ] 2.1 Implement `getEntryDisplayValue(entry: LedgerEntry, schema?: LedgerSchema): string`
+- [x] Task 2 — Create `src/lib/flattenRelations.ts` pure-function utility (AC: #1, #2, #3, #4, #5, #7, #9, #11)
+  - [x] 2.1 Implement `getEntryDisplayValue(entry: LedgerEntry, schema?: LedgerSchema): string`
     - Iterate `schema.fields` in order; return the stringified value of the first field whose `data[fieldName]` is a non-empty, non-relation value
     - Fallback: if no displayable field found, return the last 8 chars of `entry._id` (e.g., `"…a3f9c2b1"`)
     - Do NOT use `_id` directly as the display — use the UUID suffix fallback
-  - [ ] 2.2 Implement `flattenEntry(entry: LedgerEntry, schema: LedgerSchema | undefined, allEntriesByLedgerId: Record<string, LedgerEntry[]>, allSchemasBySchemaId: Record<string, LedgerSchema>, depth: number, maxDepth: number, visited: Set<string>): FlattenedEntry`
+  - [x] 2.2 Implement `flattenEntry(entry: LedgerEntry, schema: LedgerSchema | undefined, allEntriesByLedgerId: Record<string, LedgerEntry[]>, allSchemasBySchemaId: Record<string, LedgerSchema>, depth: number, maxDepth: number, visited: Set<string>): FlattenedEntry`
     - `depth` starts at 0 on initial call; max is `maxDepth` (default 3)
     - For each field where `field.type === 'relation'`:
       - Normalize value to `string[]` using same logic as `normalizeRelationTargetIds` pattern from `db.ts`
@@ -44,40 +44,32 @@ so that I can read and understand relational data at a glance without manually c
         - Otherwise: add `id` to `visited` clone for this subtree, recurse to get `FlattenedEntry`, push `{ id, displayValue: getEntryDisplayValue(resolvedEntry, resolvedSchema), isGhost: false }`
     - Returns `FlattenedEntry` with `resolvedRelations` populated
     - When `depth >= maxDepth` → stop recursion and use only `getEntryDisplayValue` for display
-  - [ ] 2.3 Implement `flattenEntries(entries: LedgerEntry[], schema: LedgerSchema | undefined, allEntriesByLedgerId: Record<string, LedgerEntry[]>, allSchemasBySchemaId: Record<string, LedgerSchema>, maxDepth?: number): FlattenedEntry[]`
+  - [x] 2.3 Implement `flattenEntries(entries: LedgerEntry[], schema: LedgerSchema | undefined, allEntriesByLedgerId: Record<string, LedgerEntry[]>, allSchemasBySchemaId: Record<string, LedgerSchema>, maxDepth?: number): FlattenedEntry[]`
     - Maps over `entries`, calling `flattenEntry` for each with a fresh `visited` Set per entry
-  - [ ] 2.4 Export all three from the module
+  - [x] 2.4 Export all three from the module
 
-- [ ] Task 3 — Unit tests: `src/lib/flattenRelations.test.ts` (AC: #10)
-  - [ ] 3.1 Basic resolution: relation field UUID → display value from target entry's first text field
-  - [ ] 3.2 Multi-value: two UUIDs in one relation field → two resolved chips
-  - [ ] 3.3 Depth limit: 3-level chain A→B→C resolves all three; 4th level shows raw UUID suffix (depth exhausted)
-  - [ ] 3.4 Ghost: target entry has `isDeleted: true` → `{ displayValue: '[Deleted]', isGhost: true }`
-  - [ ] 3.5 Missing entry: UUID not found in any ledger entries → `{ displayValue: '[Deleted]', isGhost: true }`
-  - [ ] 3.6 Cycle: A.relField = B._id, B.relField = A._id → second visit returns `{ displayValue: '[Circular]', isGhost: false }`
-  - [ ] 3.7 Missing schema: `schema` is `undefined` → returns entry as-is (`resolvedRelations` empty)
-  - [ ] 3.8 No relation fields: schema with only text/number fields → `resolvedRelations` is empty `{}`
+- [x] Task 3 — Unit tests: `src/lib/flattenRelations.test.ts` (AC: #10)
+  - [x] 3.1 Basic resolution: relation field UUID → display value from target entry's first text field
+  - [x] 3.2 Multi-value: two UUIDs in one relation field → two resolved chips
+  - [x] 3.3 Depth limit: 3-level chain A→B→C resolves all three; 4th level shows raw UUID suffix (depth exhausted)
+  - [x] 3.4 Ghost: target entry has `isDeleted: true` → `{ displayValue: '[Deleted]', isGhost: true }`
+  - [x] 3.5 Missing entry: UUID not found in any ledger entries → `{ displayValue: '[Deleted]', isGhost: true }`
+  - [x] 3.6 Cycle: A.relField = B._id, B.relField = A._id → second visit returns `{ displayValue: '[Circular]', isGhost: false }`
+  - [x] 3.7 Missing schema: `schema` is `undefined` → returns entry as-is (`resolvedRelations` empty)
+  - [x] 3.8 No relation fields: schema with only text/number fields → `resolvedRelations` is empty `{}`
 
-- [ ] Task 4 — Update `RelationTagChip` to accept pre-resolved values (AC: #1, #4, #8)
-  - [ ] 4.1 Add optional prop `resolvedValues?: ResolvedRelationValue[]` to `RelationTagChipProps`
-  - [ ] 4.2 When `resolvedValues` is provided, render each chip using `resolvedValues[i].displayValue` as the label and `resolvedValues[i].isGhost` for ghost styling — keep `value` prop for navigation (still need IDs for `handleClick`)
-  - [ ] 4.3 When `resolvedValues` is NOT provided, keep current behavior (render raw UUID from `value`)
-  - [ ] 4.4 Ensure `title` tooltip still shows the raw ID for debugging: `title={val}` on each badge
+- [x] Task 4 — Update `RelationTagChip` to accept pre-resolved values (AC: #1, #4, #8)
+  - [x] 4.1 Add optional prop `resolvedValues?: ResolvedRelationValue[]` to `RelationTagChipProps`
+  - [x] 4.2 When `resolvedValues` is provided, render each chip using `resolvedValues[i].displayValue` as the label and `resolvedValues[i].isGhost` for ghost styling — keep `value` prop for navigation (still need IDs for `handleClick`)
+  - [x] 4.3 When `resolvedValues` is NOT provided, keep current behavior (render raw UUID from `value`)
+  - [x] 4.4 Ensure `title` tooltip still shows the raw ID for debugging: `title={val}` on each badge
 
-- [ ] Task 5 — Integrate flattening into `LedgerTable` (AC: #1, #2, #6, #7)
-  - [ ] 5.1 Import `flattenEntries` and `FlattenedEntry` in `LedgerTable.tsx`
-  - [ ] 5.2 Add `useMemo` after `sortedEntries` computation:
-    ```ts
-    const flattenedEntries = useMemo(
-      () => flattenEntries(sortedEntries, schema, entries, Object.fromEntries(schemas.map(s => [s._id, s]))),
-      [sortedEntries, schema, entries, schemas]
-    );
-    ```
-  - [ ] 5.3 Update the sort comparator for `case 'relation'` to use `resolvedRelations` display values from the (pre-sort) flattened versions when available, falling back to raw UUID
-    - Note: sort operates on `ledgerEntries` before flattening, so build a quick `Map<entryId, FlattenedEntry>` if needed, or sort `flattenedEntries` directly
-    - Simplest approach: replace `sortedEntries` sort with sorting `flattenedEntries` (computed from raw `ledgerEntries`), using `resolvedRelations[field]?.[0]?.displayValue` for relation column comparison
-  - [ ] 5.4 Update `renderFieldValue` call at line ~594 to pass the `FlattenedEntry` from `flattenedEntries`
-  - [ ] 5.5 In `renderFieldValue` (`case 'relation'`): extract `resolvedValues` from `(entry as FlattenedEntry).resolvedRelations?.[field?.name ?? '']` and pass to `RelationTagChip`
+- [x] Task 5 — Integrate flattening into `LedgerTable` (AC: #1, #2, #6, #7)
+  - [x] 5.1 Import `flattenEntries` and `FlattenedEntry` in `LedgerTable.tsx`
+  - [x] 5.2 Add `useMemo` computing `flattenedLedgerEntries` from `ledgerEntries` using `allEntries` for cross-ledger relation target lookup
+  - [x] 5.3 Updated sort comparator for `case 'relation'` to use `resolvedRelations` display values, falling back to raw UUID
+  - [x] 5.4 Updated `renderFieldValue` call to pass `FlattenedEntry` cast
+  - [x] 5.5 In `renderFieldValue` (`case 'relation'`): extracts `resolvedValues` from `entry.resolvedRelations?.[field.name]` and passes to `RelationTagChip`
 
 ## Dev Notes
 
@@ -173,6 +165,28 @@ claude-sonnet-4-6 (create-story workflow, 2026-04-05)
 
 ### Debug Log References
 
+None — implementation proceeded cleanly.
+
 ### Completion Notes List
 
+- Created `src/lib/flattenRelations.ts`: pure utility with `getEntryDisplayValue`, `flattenEntry`, `flattenEntries`. Zero Zustand/PouchDB imports; all data flows in as arguments.
+- `flattenEntry` recurses up to `maxDepth=3`, uses a cloned `visited` Set per branch to prevent siblings from blocking each other while still detecting cycles.
+- `flattenEntries` uses `allEntries` (not `entries`) in `LedgerTable` so cross-ledger relation targets are resolvable.
+- `RelationTagChip` updated with optional `resolvedValues?: ResolvedRelationValue[]` prop; per-chip `isGhost` now derived from `resolvedValues[i].isGhost`; `title={val}` preserved for raw UUID debug tooltip; backward-compatible when prop is absent.
+- `LedgerTable` sorts `flattenedLedgerEntries` (computed pre-sort from `ledgerEntries`) using resolved display values for relation columns, falling back to raw UUID. Single flattened array used for both sort and render.
+- `renderFieldValue` updated to accept `FlattenedEntry`; `case 'relation'` passes `resolvedValues` to `RelationTagChip`. Backward-compat ghost detection via `deletedEntryIds` retained for cases without resolved values.
+- Updated `tests/ghost-references.test.tsx` to match new display behavior: ghost badges now show `[Deleted]` display value, active entries without text fields show UUID suffix.
+- All 13 unit tests in `flattenRelations.test.ts` pass. All 12 ghost-references tests pass. `tsc --noEmit` zero new errors.
+
 ### File List
+
+- `src/types/ledger.ts` (modified) — added `ResolvedRelationValue`, `FlattenedEntry` interfaces
+- `src/lib/flattenRelations.ts` (created) — pure flattening utility
+- `src/lib/flattenRelations.test.ts` (created) — 13 unit tests
+- `src/features/ledger/RelationTagChip.tsx` (modified) — added `resolvedValues` prop
+- `src/features/ledger/LedgerTable.tsx` (modified) — integrated flattening, sort, render
+- `tests/ghost-references.test.tsx` (modified) — updated assertions for new display behavior
+
+## Change Log
+
+- 2026-04-05: Story implemented by claude-sonnet-4-6. Created pure flattening engine (`flattenRelations.ts`) with 13 unit tests, extended `RelationTagChip` with resolved display support, integrated into `LedgerTable` via `useMemo` pre-sort flattening with `allEntries` for cross-ledger resolution. All ACs satisfied.

@@ -70,6 +70,23 @@ export interface BackLinkMetadata {
 }
 
 /**
+ * A single resolved relation value (flattened from UUID to human-readable display).
+ */
+export interface ResolvedRelationValue {
+    id: string;
+    displayValue: string;
+    isGhost: boolean;
+}
+
+/**
+ * A LedgerEntry with optionally resolved relation fields.
+ * resolvedRelations maps field name → array of resolved values.
+ */
+export interface FlattenedEntry extends LedgerEntry {
+    resolvedRelations?: Record<string, ResolvedRelationValue[]>;
+}
+
+/**
  * Schema metadata for listing (encrypted)
  */
 export interface EncryptedLedgerSchemaMetadata {

@@ -5,7 +5,8 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useUIStore } from '../../stores/useUIStore';
 import { useProfileStore } from '../../stores/useProfileStore';
-import { LedgerEntry, SchemaField } from '../../types/ledger';
+import { LedgerEntry, SchemaField, FlattenedEntry } from '../../types/ledger';
+import { flattenEntries } from '../../lib/flattenRelations';
 import { InlineEntryRow } from './InlineEntryRow';
 import { RelationTagChip } from './RelationTagChip';
 import { BackLinksPanel } from './BackLinksPanel';
@@ -83,10 +84,22 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
 
     const ledgerEntries = entries[schemaId] || [];
 
-    const sortedEntries = useMemo(() => {
-        if (sortConfig.length === 0) return ledgerEntries;
+    // Flatten entries pre-sort so relation columns can sort by resolved display values (AC #6, #7)
+    // Use allEntries (includes target ledger entries) for cross-ledger relation resolution
+    const flattenedLedgerEntries = useMemo(
+        () => flattenEntries(
+            ledgerEntries,
+            schema,
+            allEntries,
+            Object.fromEntries(schemas.map(s => [s._id, s]))
+        ),
+        [ledgerEntries, schema, allEntries, schemas]
+    );
 
-        return [...ledgerEntries].sort((a, b) => {
+    const sortedEntries = useMemo(() => {
+        if (sortConfig.length === 0) return flattenedLedgerEntries;
+
+        return [...flattenedLedgerEntries].sort((a, b) => {
             for (const { field, direction } of sortConfig) {
                 const schemaField = schema?.fields.find(f => f.name === field);
                 const aVal = a.data[field];
@@ -111,8 +124,11 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                         cmp = (aVal ? 1 : 0) - (bVal ? 1 : 0);
                         break;
                     case 'relation': {
-                        const aFirst = Array.isArray(aVal) ? String(aVal[0] ?? '') : String(aVal);
-                        const bFirst = Array.isArray(bVal) ? String(bVal[0] ?? '') : String(bVal);
+                        // Sort by resolved display value, falling back to raw UUID (AC #6)
+                        const aResolved = a.resolvedRelations?.[field]?.[0]?.displayValue;
+                        const bResolved = b.resolvedRelations?.[field]?.[0]?.displayValue;
+                        const aFirst = aResolved ?? (Array.isArray(aVal) ? String(aVal[0] ?? '') : String(aVal));
+                        const bFirst = bResolved ?? (Array.isArray(bVal) ? String(bVal[0] ?? '') : String(bVal));
                         cmp = aFirst.localeCompare(bFirst);
                         break;
                     }
@@ -124,7 +140,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
             }
             return 0;
         });
-    }, [ledgerEntries, sortConfig, schema]);
+    }, [flattenedLedgerEntries, sortConfig, schema]);
 
     const selectedEntry = selectedRow >= 0 ? sortedEntries[selectedRow] : null;
 
@@ -591,7 +607,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
                                                             }
                                                         }}
                                                     >
-                                                        {renderFieldValue(entry.data[field.name], field.type, entry, field, deletedEntryIds)}
+                                                        {renderFieldValue(entry.data[field.name], field.type, entry as FlattenedEntry, field, deletedEntryIds)}
                                                     </div>
                                                 ))}
                                             </>
@@ -617,7 +633,7 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     );
 };
 
-function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, field?: SchemaField, deletedEntryIds?: Set<string>): React.ReactNode {
+function renderFieldValue(value: unknown, type: string, entry?: FlattenedEntry, field?: SchemaField, deletedEntryIds?: Set<string>): React.ReactNode {
     if (value === null || value === undefined || value === '') {
         return <span className="text-zinc-400 dark:text-zinc-600 italic">-</span>;
     }
@@ -627,10 +643,13 @@ function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, fie
             return new Date(value as string).toLocaleDateString();
         case 'number':
             return typeof value === 'number' ? value.toLocaleString() : String(value);
-        case 'relation':
-            // Check if target entries are deleted (ghost references - Story 3-4)
+        case 'relation': {
+            // Extract pre-resolved values from FlattenedEntry (AC #1, #4)
+            const resolvedValues = entry?.resolvedRelations?.[field?.name ?? ''];
+
+            // Backward-compat ghost detection via deletedEntryIds when no resolved values (Story 3-14)
             const values = Array.isArray(value) ? value as string[] : [value as string];
-            const hasDeletedTarget = values.some(v => deletedEntryIds?.has(v));
+            const hasDeletedTarget = !resolvedValues && values.some(v => deletedEntryIds?.has(v));
 
             // Render as Tag Chip with navigation (Story 3-3)
             return (
@@ -639,8 +658,10 @@ function renderFieldValue(value: unknown, type: string, entry?: LedgerEntry, fie
                     targetLedgerId={field?.relationTarget}
                     entryId={entry?._id}
                     isGhost={hasDeletedTarget}
+                    resolvedValues={resolvedValues}
                 />
             );
+        }
         default:
             return String(value);
     }

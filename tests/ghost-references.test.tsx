@@ -136,8 +136,8 @@ describe('Ghost Reference Rendering', () => {
             // Should render source entry with relation field
             expect(screen.getByText('Source Entry')).toBeInTheDocument();
 
-            // Ghost reference should be rendered (struck through, disabled)
-            const ghostBadges = screen.queryAllByText(/entry:target-deleted/i);
+            // Ghost reference should be rendered with "[Deleted]" display value (Story 3-16 flattening)
+            const ghostBadges = screen.queryAllByText('[Deleted]');
             expect(ghostBadges.length).toBeGreaterThan(0);
             const ghostBadge = ghostBadges[0]?.closest('[data-slot="badge"]');
             expect(ghostBadge?.className).toContain('line-through');
@@ -165,8 +165,8 @@ describe('Ghost Reference Rendering', () => {
 
             renderWithRouter(<LedgerTable schemaId="schema:source-ledger" />);
 
-            // Verify ghost references are rendered
-            const ghostBadges = screen.queryAllByText(/entry:target-deleted/i);
+            // Verify ghost references are rendered with "[Deleted]" display value (Story 3-16 flattening)
+            const ghostBadges = screen.queryAllByText('[Deleted]');
             expect(ghostBadges.length).toBeGreaterThan(0);
         });
 
@@ -374,8 +374,8 @@ describe('Ghost Reference Rendering', () => {
 
             renderWithRouter(<LedgerTable schemaId="schema:test" />);
 
-            // Find the ghost badge by checking the content, since Badge doesn't have role="button"
-            const badges = screen.queryAllByText(/entry:deleted/i);
+            // Ghost entries now display "[Deleted]" via Story 3-16 flattening engine
+            const badges = screen.queryAllByText('[Deleted]');
             expect(badges.length).toBeGreaterThan(0);
             // Check that the badge has the ghost styling
             const ghostBadge = badges[0]?.closest('[data-slot="badge"]');
@@ -453,9 +453,10 @@ describe('Ghost Reference Rendering', () => {
 
             renderWithRouter(<LedgerTable schemaId="schema:test" />);
 
-            // Both chips should render - verify multi-value relation renders both entries
-            const deletedBadges = screen.queryAllByText(/entry:deleted/i);
-            const activeBadges = screen.queryAllByText(/entry:active/i);
+            // Both chips should render - Story 3-16 resolves deleted → "[Deleted]", active → UUID suffix
+            const deletedBadges = screen.queryAllByText('[Deleted]');
+            // 'entry:active' has no text fields → UUID suffix fallback (last 8 chars of 'entry:active')
+            const activeBadges = screen.queryAllByText(/y:active/);
 
             expect(deletedBadges.length).toBeGreaterThan(0);
             expect(activeBadges.length).toBeGreaterThan(0);
