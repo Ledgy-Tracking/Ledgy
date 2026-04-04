@@ -1654,6 +1654,10 @@ export function setup_sync(
     }
 
     if (config.username && config.password && remoteUrl) {
+        const isLocalhost = remoteUrl.startsWith('http://localhost') || remoteUrl.startsWith('http://127.0.0.1');
+        if (!remoteUrl.toLowerCase().startsWith('https://') && !isLocalhost) {
+            throw new Error('Insecure remote URL: HTTPS is required for Basic Authentication');
+        }
         try {
             const url = new URL(remoteUrl);
 

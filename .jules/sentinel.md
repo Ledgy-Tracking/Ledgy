@@ -19,6 +19,6 @@
 **Prevention:** Always add explicit `autoComplete` attributes to any `<input type="password">` or sensitive text/number input handling security credentials.
 
 ## 2025-05-24 - Enforce HTTPS for Basic Authentication
-**Vulnerability:** Remote sync configuration (both `setup_sync` and `deleteRemoteDatabase`) was transmitting plaintext credentials via HTTP Basic Authentication without verifying the connection protocol.
-**Learning:** Basic Authentication merely base64 encodes credentials; without TLS (HTTPS), these credentials are trivially intercepted over the network. Localhost exceptions must be explicitly managed.
-**Prevention:** Always validate URL schemes before applying `Authorization: Basic` headers or embedding credentials in URLs. Ensure exceptions are limited strictly to local development addresses (localhost / 127.0.0.1).
+**Vulnerability:** Remote sync configuration (both `setup_sync` and `deleteRemoteDatabase`) was transmitting plaintext credentials via HTTP Basic Authentication without verifying the connection protocol. This could lead to credential interception (CWE-319) on local or wide area networks.
+**Learning:** Basic Authentication merely base64 encodes credentials; without TLS (HTTPS), these credentials are trivially intercepted over the network. Localhost and private network exceptions (10.x, 172.16-31.x, 192.168.x) must be explicitly managed for local self-hosted sync to work.
+**Prevention:** Always validate URL schemes before applying `Authorization: Basic` headers or embedding credentials in URLs. Use `isLocalNetwork()` to allow private IP ranges for self-hosted CouchDB instances while enforcing HTTPS for public connections.
