@@ -123,6 +123,13 @@ export function readTemplateBrowser(): Promise<TemplateExport | null> {
             const file = input.files?.[0];
             if (!file) { resolve(null); return; }
 
+            // Security: Enforce a strict 5MB limit to prevent client-side DoS
+            // and memory exhaustion when loading large JSON templates.
+            if (file.size > 5 * 1024 * 1024) {
+                reject(new Error('File too large (max 5MB)'));
+                return;
+            }
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {

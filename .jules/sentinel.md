@@ -22,3 +22,8 @@
 **Vulnerability:** Remote sync configuration (both `setup_sync` and `deleteRemoteDatabase`) was transmitting plaintext credentials via HTTP Basic Authentication without verifying the connection protocol.
 **Learning:** Basic Authentication merely base64 encodes credentials; without TLS (HTTPS), these credentials are trivially intercepted over the network. Localhost exceptions must be explicitly managed.
 **Prevention:** Always validate URL schemes before applying `Authorization: Basic` headers or embedding credentials in URLs. Ensure exceptions are limited strictly to local development addresses (localhost / 127.0.0.1).
+
+## 2026-03-24 - Client-Side DoS via Unrestricted FileReader
+**Vulnerability:** The `templateImport.ts` module was reading user-provided files directly into memory using `FileReader.readAsText()` without any size limitations. An attacker or unsuspecting user could upload an excessively large file (e.g., hundreds of megabytes or more), causing the browser tab to exhaust memory, freeze, or crash, leading to a client-side Denial of Service (DoS).
+**Learning:** Browser APIs like `FileReader` load entire file contents into RAM. Relying on implicit browser limits is insufficient, especially when parsing large text formats like JSON which further multiply memory footprint.
+**Prevention:** Always enforce strict file size limits (e.g., 5MB for JSON templates) on the `File` object (`file.size`) before initiating any file reading operations.
