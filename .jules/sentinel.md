@@ -18,12 +18,17 @@
 **Learning:** React components handling sensitive authentication and configuration data must explicitly declare `autoComplete` strategies. For passphrases, use `"new-password"` or `"current-password"` to guide password managers. For TOTP inputs, use `"one-time-code"` to allow OS-level auto-filling from SMS/Mail. For custom credentials (like remote DB URLs/passwords), use `"off"` to prevent incorrect browser auto-filling.
 **Prevention:** Always add explicit `autoComplete` attributes to any `<input type="password">` or sensitive text/number input handling security credentials.
 
-## 2025-05-24 - Enforce HTTPS for Basic Authentication
-**Vulnerability:** Remote sync configuration (both `setup_sync` and `deleteRemoteDatabase`) was transmitting plaintext credentials via HTTP Basic Authentication without verifying the connection protocol.
-**Learning:** Basic Authentication merely base64 encodes credentials; without TLS (HTTPS), these credentials are trivially intercepted over the network. Localhost exceptions must be explicitly managed.
-**Prevention:** Always validate URL schemes before applying `Authorization: Basic` headers or embedding credentials in URLs. Ensure exceptions are limited strictly to local development addresses (localhost / 127.0.0.1).
+## 2025-02-18 - Client-Side Rate Limiting is Security Theater
+**Vulnerability:** Relying on client-side state (localStorage) to enforce rate limits on login/MFA attempts.
+**Learning:** In a local-first architecture without a backend server, client-side rate limiting offers no meaningful protection against malicious actors who can bypass the UI or modify local state.
+**Prevention:** Avoid investing significant security effort into client-side rate limiters; treat them strictly as UX deterrents and focus on actual vulnerabilities like file parsing DoS or cryptographic weakness.
 
-## 2026-03-24 - Client-Side DoS via Unrestricted FileReader
-**Vulnerability:** The `templateImport.ts` module was reading user-provided files directly into memory using `FileReader.readAsText()` without any size limitations. An attacker or unsuspecting user could upload an excessively large file (e.g., hundreds of megabytes or more), causing the browser tab to exhaust memory, freeze, or crash, leading to a client-side Denial of Service (DoS).
-**Learning:** Browser APIs like `FileReader` load entire file contents into RAM. Relying on implicit browser limits is insufficient, especially when parsing large text formats like JSON which further multiply memory footprint.
-**Prevention:** Always enforce strict file size limits (e.g., 5MB for JSON templates) on the `File` object (`file.size`) before initiating any file reading operations.
+## 2025-05-24 - Enforce HTTPS for Basic Authentication
+**Vulnerability:** Remote sync configuration (both `setup_sync` and `deleteRemoteDatabase`) was transmitting plaintext credentials via HTTP Basic Authentication without verifying the connection protocol. This could lead to credential interception (CWE-319) on local or wide area networks.
+**Learning:** Basic Authentication merely base64 encodes credentials; without TLS (HTTPS), these credentials are trivially intercepted over the network. Localhost and private network exceptions (10.x, 172.16-31.x, 192.168.x) must be explicitly managed for local self-hosted sync to work.
+**Prevention:** Always validate URL schemes before applying `Authorization: Basic` headers or embedding credentials in URLs. Use `isLocalNetwork()` to allow private IP ranges for self-hosted CouchDB instances while enforcing HTTPS for public connections.
+
+## 2024-03-24 - File Import Denial of Service (DoS)
+**Vulnerability:** The `templateImport.ts` module was reading user-provided files directly into memory using `FileReader.readAsText()` without any size limitations. Maliciously large JSON payloads can exhaust browser memory and freeze or crash the client application during import.
+**Learning:** Browser APIs like `FileReader` load entire file contents into RAM. Relying on implicit browser limits is insufficient, especially for large JSON formats which further multiply memory footprint.
+**Prevention:** Always enforce strict file size limits (e.g., 5MB for JSON templates) by checking `file.size` before initiating any file reading operations.

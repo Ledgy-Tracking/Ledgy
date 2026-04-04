@@ -102,7 +102,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
             await commit(activeProfileId);
             // Only close if validation passed (no error set by commit)
             if (!useSchemaBuilderStore.getState().error) {
-                if (onClose) onClose();
+                onClose();
             }
         } catch (err) {
             // PouchDB/network errors are already set in store and re-thrown
@@ -437,7 +437,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                        <Button type="button" variant="outline" onClick={() => { discard(); if (onClose) onClose(); }}>
+                        <Button type="button" variant="outline" onClick={() => { discard(); onClose(); }}>
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isLoading} className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400">
