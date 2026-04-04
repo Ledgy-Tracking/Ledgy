@@ -17,7 +17,7 @@ vi.mock('./db', async (importOriginal) => {
     return {
         ...actual,
         decryptProfileMetadata: vi.fn().mockImplementation(async (docs: any[]) => {
-            return docs.map(doc => ({
+            return docs.map((doc: any) => ({
                 id: doc._id,
                 name: doc.name || (doc.name_enc ? 'Decrypted Name' : 'Unknown'),
                 description: doc.description || (doc.description_enc ? 'Decrypted Description' : ''),

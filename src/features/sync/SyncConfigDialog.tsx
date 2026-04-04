@@ -95,8 +95,8 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                     </DialogDescription>
                 </DialogHeader>
 
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <Form {...form}>
                     <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl p-4 flex gap-3">
                         <Shield className="text-amber-600 dark:text-amber-500 shrink-0" size={20} />
                         <p className="text-sm text-amber-800 dark:text-amber-400">
@@ -240,8 +240,8 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                             Save Configuration
                         </Button>
                     </div>
-                    </form>
-                </Form>
+                    </Form>
+                </form>
             </DialogContent>
         </Dialog>
     );

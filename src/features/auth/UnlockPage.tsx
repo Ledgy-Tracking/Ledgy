@@ -51,7 +51,7 @@ export const UnlockPage: React.FC = () => {
     // Session expiry (shown when rememberMe is checked)
     const [expiryOption, setExpiryOption] = useState<RememberMeExpiry>(DEFAULT_EXPIRY);
 
-    const { unlock, unlockWithPassphrase, needsPassphrase, reset, isUnlocked } = useAuthStore();
+    const { unlock, unlockWithPassphrase, needsPassphrase, reset, isUnlocked, hasHydrated } = useAuthStore();
     const navigate = useNavigate();
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -78,6 +78,18 @@ export const UnlockPage: React.FC = () => {
             inputRef.current?.focus();
         }
     }, [currentError, code]);
+
+    // Wait for store hydration before rendering to prevent UI flash
+    if (!hasHydrated) {
+        return (
+            <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 flex flex-col items-center justify-center p-6 font-sans">
+                <div className="w-full max-w-sm space-y-8 text-center">
+                    <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mx-auto" />
+                    <p className="text-zinc-400">Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     // If already unlocked (e.g. via ?reset=true bypass), show management UI
     if (isUnlocked) {
@@ -227,12 +239,9 @@ export const UnlockPage: React.FC = () => {
 
                 {/* ── Passphrase-restore UI (needsPassphrase mode) ── */}
                 {needsPassphrase ? (
-                    <Form {...passphraseForm}>
-                        <form
-                            onSubmit={passphraseForm.handleSubmit(handlePassphraseUnlock)}
-                            className="flex flex-col w-full space-y-4"
-                        >
-                            <FormField
+                    <form onSubmit={passphraseForm.handleSubmit(handlePassphraseUnlock)} className="flex flex-col w-full space-y-4">
+                        <Form {...passphraseForm}>
+                        <FormField
                                 control={passphraseForm.control}
                                 name="passphrase"
                                 rules={{ required: 'Passphrase is required' }}
@@ -281,15 +290,12 @@ export const UnlockPage: React.FC = () => {
                                     </>
                                 )}
                             </Button>
-                        </form>
-                    </Form>
+                        </Form>
+                    </form>
                 ) : (
                     /* ── Standard TOTP unlock UI ── */
-                    <Form {...unlockForm}>
-                        <form
-                            onSubmit={unlockForm.handleSubmit(handleUnlockOptions)}
-                            className="flex flex-col items-center w-full space-y-6"
-                        >
+                    <form onSubmit={unlockForm.handleSubmit(handleUnlockOptions)} className="flex flex-col items-center w-full space-y-6">
+                        <Form {...unlockForm}>
                             <OTPInput
                                 autoFocus
                                 ref={inputRef}
@@ -433,8 +439,8 @@ export const UnlockPage: React.FC = () => {
                                     </>
                                 )}
                             </Button>
-                        </form>
-                    </Form>
+                        </Form>
+                    </form>
                 )}
 
                 <div className="pt-8 text-center space-y-4 flex flex-col items-center">
