@@ -16,8 +16,8 @@ vi.mock('./db', async (importOriginal) => {
     const actual = await importOriginal<typeof import('./db')>();
     return {
         ...actual,
-        decryptProfileMetadata: vi.fn().mockImplementation(async (docs) => {
-            return docs.map((doc: Record<string, any>) => ({
+        decryptProfileMetadata: vi.fn().mockImplementation(async (docs: any[]) => {
+            return docs.map((doc: any) => ({
                 id: doc._id,
                 name: doc.name || (doc.name_enc ? 'Decrypted Name' : 'Unknown'),
                 description: doc.description || (doc.description_enc ? 'Decrypted Description' : ''),

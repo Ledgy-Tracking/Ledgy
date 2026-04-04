@@ -88,8 +88,8 @@ export const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onCanc
     };
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full max-w-md mx-auto" noValidate>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 w-full max-w-md mx-auto" noValidate>
+            <Form {...form}>
 
                 {/* Header/Preview Area */}
                 <div className="flex flex-col items-center justify-center space-y-4 pt-4 pb-6 border-b border-white/10">
@@ -199,7 +199,7 @@ export const ProfileCreationForm: React.FC<ProfileCreationFormProps> = ({ onCanc
                         )}
                     </Button>
                 </div>
-            </form>
-        </Form>
+            </Form>
+        </form>
     );
 };
