@@ -54,9 +54,11 @@ describe("ErrorToast Component", () => {
         });
 
         render(<ErrorToast />);
-        const toastContainer = screen.getByText("Error message").parentElement;
-        expect(toastContainer).toHaveClass("bg-red-950/90");
-        expect(toastContainer).toHaveClass("border-red-500");
+        // Navigate up to Alert element (span -> AlertDescription -> Alert)
+        // Get the Alert component which has the styling
+        const alert = screen.getByText("Error message").closest('[role="alert"]');
+        expect(alert).toHaveClass("bg-red-950/90");
+        expect(alert).toHaveClass("border-red-500");
     });
 
     it("applies correct styles for 'warning' type", () => {
@@ -71,9 +73,10 @@ describe("ErrorToast Component", () => {
         });
 
         render(<ErrorToast />);
-        const toastContainer = screen.getByText("Warning message").parentElement;
-        expect(toastContainer).toHaveClass("bg-amber-900/90");
-        expect(toastContainer).toHaveClass("border-amber-500");
+        // Get the Alert component which has the styling
+        const alert = screen.getByText("Warning message").closest('[role="alert"]');
+        expect(alert).toHaveClass("bg-amber-900/90");
+        expect(alert).toHaveClass("border-amber-500");
     });
 
     it("applies correct styles for 'info' type", () => {
@@ -88,9 +91,10 @@ describe("ErrorToast Component", () => {
         });
 
         render(<ErrorToast />);
-        const toastContainer = screen.getByText("Info message").parentElement;
-        expect(toastContainer).toHaveClass("bg-blue-900/90");
-        expect(toastContainer).toHaveClass("border-blue-500");
+        // Get the Alert component which has the styling
+        const alert = screen.getByText("Info message").closest('[role="alert"]');
+        expect(alert).toHaveClass("bg-blue-900/90");
+        expect(alert).toHaveClass("border-blue-500");
     });
 
     it("closes when close button is clicked", () => {

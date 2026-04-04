@@ -1,131 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { useUIStore } from '../../stores/useUIStore';
-import { PanelRightOpen } from 'lucide-react';
-import { EmptyDashboard } from './EmptyDashboard';
-import { SchemaBuilder } from '../ledger/SchemaBuilder';
-import { useLedgerStore } from '../../stores/useLedgerStore';
-import { LedgerTable } from '../ledger/LedgerTable';
-import { ExportTemplateButton } from '../templates/ExportTemplateButton';
-import { ImportTemplateButton } from '../templates/ImportTemplateButton';
 import { DashboardView } from './DashboardView';
-import { Table, LayoutGrid } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const Dashboard: React.FC = () => {
-    const { profileId, projectId } = useParams<{ profileId: string, projectId: string }>();
-    const { toggleRightInspector, rightInspectorOpen, schemaBuilderOpen, setSchemaBuilderOpen } = useUIStore();
-    const { schemas, fetchSchemas } = useLedgerStore();
-    const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
-
-    // Scoped schemas for this project
-    const projectSchemas = schemas.filter(s => s.projectId === projectId);
-    const [selectedLedgerId, setSelectedLedgerId] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (profileId) {
-            fetchSchemas(profileId);
-        }
-    }, [profileId, fetchSchemas]);
-
-    // Ledger detection: Use schema count for this specific project
-    const hasLedgers = projectSchemas.length > 0;
-
-    const handleSelectLedger = (schemaId: string) => {
-        setSelectedLedgerId(schemaId);
-    };
+    const { projectId } = useParams<{ projectId: string }>();
 
     return (
         <div className="flex-1 flex flex-col h-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 overflow-hidden">
-            {/* Toolbar */}
-            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 shrink-0">
-                <div className="flex-1 flex items-baseline gap-2">
-                    <h1 className="text-sm font-semibold italic tracking-tighter text-emerald-500 mr-2">LEDGY</h1>
-                    
-                    <div className="flex bg-gray-100 dark:bg-zinc-800 rounded-lg p-0.5 border border-zinc-300 dark:border-zinc-700">
-                        <Button
-                            variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                            size="icon-sm"
-                            onClick={() => setViewMode('table')}
-                            title="Table View"
-                            aria-label="Table View"
-                            aria-pressed={viewMode === 'table'}
-                        >
-                            <Table size={14} />
-                        </Button>
-                        <Button
-                            variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                            size="icon-sm"
-                            onClick={() => setViewMode('grid')}
-                            title="Metric Grid View"
-                            aria-label="Metric Grid View"
-                            aria-pressed={viewMode === 'grid'}
-                        >
-                            <LayoutGrid size={14} />
-                        </Button>
-                    </div>
-
-                    {viewMode === 'table' && hasLedgers && (
-                        <Select
-                            value={selectedLedgerId || ''}
-                            onValueChange={(value) => handleSelectLedger(value)}
-                        >
-                            <SelectTrigger className="ml-4 w-[180px]">
-                                <SelectValue placeholder="Select a ledger..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {projectSchemas.map(schema => (
-                                    <SelectItem key={schema._id} value={schema._id}>
-                                        {schema.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                    <ImportTemplateButton profileId={profileId!} projectId={projectId!} />
-                    {hasLedgers && <ExportTemplateButton />}
-
-                    {!rightInspectorOpen && (
-                        <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={toggleRightInspector}
-                            title="Open Inspector"
-                            aria-label="Open inspector panel"
-                        >
-                            <PanelRightOpen size={16} />
-                        </Button>
-                    )}
-                </div>
-            </div>
-
-            {/* Table Area / Main Content */}
             <div className="flex-1 overflow-hidden">
-                {!hasLedgers && viewMode === 'table' ? (
-                    <div className="h-full flex items-center justify-center">
-                        <EmptyDashboard onActionClick={() => setSchemaBuilderOpen(true)} />
-                    </div>
-                ) : viewMode === 'grid' ? (
-                    <DashboardView dashboardId={projectId || 'default'} />
-                ) : selectedLedgerId ? (
-                    <LedgerTable schemaId={selectedLedgerId} />
-                ) : (
-                    <div className="h-full flex items-center justify-center text-zinc-500">
-                        <p>Select a ledger to view entries</p>
-                    </div>
-                )}
+                <DashboardView dashboardId={projectId || 'default'} />
             </div>
-
-            {schemaBuilderOpen && profileId && projectId && (
-                <SchemaBuilder
-                    projectId={projectId}
-                    onClose={() => setSchemaBuilderOpen(false)}
-                />
-            )}
         </div>
     );
 };

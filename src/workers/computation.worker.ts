@@ -39,8 +39,6 @@ export function pearsonCorrelation(x: number[], y: number[]): number {
     return NaN;
   }
 
-  // Use only the overlapping data and compute sums in a single pass
-  // to avoid redundant O(N) iterations and memory allocations
   let sumX = 0;
   let sumY = 0;
   let sumXY = 0;
@@ -50,6 +48,12 @@ export function pearsonCorrelation(x: number[], y: number[]): number {
   for (let i = 0; i < n; i++) {
     const xi = x[i];
     const yi = y[i];
+
+    // Fast path: fail if NaN is encountered as it taints all operations
+    if (Number.isNaN(xi) || Number.isNaN(yi)) {
+      return NaN;
+    }
+
     sumX += xi;
     sumY += yi;
     sumXY += xi * yi;
@@ -78,25 +82,31 @@ export function arithmetic(values: number[], operation: string): number {
   switch (operation) {
     case 'sum': {
       let sum = 0;
-      for (let i = 0; i < values.length; i++) sum += values[i];
+      for (let i = 0; i < values.length; i++) {
+        if (Number.isNaN(values[i])) return NaN;
+        sum += values[i];
+      }
       return sum;
     }
     case 'average': {
       let sum = 0;
-      for (let i = 0; i < values.length; i++) sum += values[i];
+      for (let i = 0; i < values.length; i++) {
+        if (Number.isNaN(values[i])) return NaN;
+        sum += values[i];
+      }
       return sum / values.length;
     }
     case 'min': {
-      let min = values[0];
-      for (let i = 1; i < values.length; i++) {
+      let min = Infinity;
+      for (let i = 0; i < values.length; i++) {
         if (Number.isNaN(values[i])) return NaN;
         if (values[i] < min) min = values[i];
       }
       return min;
     }
     case 'max': {
-      let max = values[0];
-      for (let i = 1; i < values.length; i++) {
+      let max = -Infinity;
+      for (let i = 0; i < values.length; i++) {
         if (Number.isNaN(values[i])) return NaN;
         if (values[i] > max) max = values[i];
       }
