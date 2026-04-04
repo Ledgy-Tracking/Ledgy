@@ -22,6 +22,5 @@
 **Learning:** Destructuring entire state arrays (like `const { nodes } = useNodeStore()`) inside list components causes all items to re-render when any array element changes.
 **Action:** Always use specific selector functions (e.g., `useNodeStore(state => state.nodes.find(n => n.id === id))`) in child components to isolate re-renders to only the elements whose specific state has changed.
 
-## 2024-05-25 - Avoid call stack overflow with Math.min/max spread
-**Learning:** Spreading large arrays into `Math.min(...values)` or `Math.max(...values)` causes 'Maximum call stack size exceeded' errors because JS engines limit the number of arguments a function can take.
-**Action:** When calculating min/max on potentially large arrays (like in web workers or data processing nodes), use a `for` loop to track the min/max value manually instead of using spread syntax. Remember to handle `NaN` propagation correctly to match native Math behavior.
+## 2024-05-25 - Avoid Call Stack Limits with Math.max/min
+**Learning:** Spreading large computation arrays into `Math.min(...values)` or `Math.max(...values)` causes "Maximum call stack size exceeded" errors in heavy worker computations. Use explicit `for` loops with `Number.isNaN()` checks to maintain NaN propagation parity with native Math behavior.
