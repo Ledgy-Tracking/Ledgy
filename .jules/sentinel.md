@@ -22,3 +22,8 @@
 **Vulnerability:** Remote sync configuration (both `setup_sync` and `deleteRemoteDatabase`) was transmitting plaintext credentials via HTTP Basic Authentication without verifying the connection protocol. This could lead to credential interception (CWE-319) on local or wide area networks.
 **Learning:** Basic Authentication merely base64 encodes credentials; without TLS (HTTPS), these credentials are trivially intercepted over the network. Localhost and private network exceptions (10.x, 172.16-31.x, 192.168.x) must be explicitly managed for local self-hosted sync to work.
 **Prevention:** Always validate URL schemes before applying `Authorization: Basic` headers or embedding credentials in URLs. Use `isLocalNetwork()` to allow private IP ranges for self-hosted CouchDB instances while enforcing HTTPS for public connections.
+
+## 2024-03-24 - Client-Side Denial of Service via Large File Uploads
+**Vulnerability:** The application was using the native `FileReader` API in `readTemplateBrowser` (`src/lib/templateImport.ts`) to read user-uploaded template files without first validating the file size. This could lead to a client-side Denial of Service (DoS) or browser memory exhaustion if a user uploaded an excessively large payload.
+**Learning:** Browser environments have limited memory allocations compared to server environments. Unbounded client-side file reading, especially when loading data into memory using `readAsText()`, presents a significant stability and security risk.
+**Prevention:** Always enforce a reasonable file size limit (e.g., 5MB) by checking `file.size` before instantiating a `FileReader` or processing file contents.
