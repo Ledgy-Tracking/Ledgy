@@ -7,6 +7,7 @@ import {
     CommandInput,
     CommandItem,
     CommandList,
+    CommandShortcut,
 } from './ui/command';
 import { Badge } from './ui/badge';
 import { useProfileStore } from '../stores/useProfileStore';
@@ -63,7 +64,8 @@ export const CommandPalette: React.FC = () => {
                                 window.dispatchEvent(new KeyboardEvent('keydown', { key: 'n' }));
                             })}>
                                 <Plus className="mr-2 h-4 w-4 text-zinc-400" />
-                                <span>New Entry in this Ledger (N)</span>
+                                <span>New Entry in this Ledger</span>
+                                <CommandShortcut>N</CommandShortcut>
                             </CommandItem>
                         )}
                         <CommandItem onSelect={() => runCommand(() => setSchemaBuilderOpen(true))}>

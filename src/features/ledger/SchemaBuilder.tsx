@@ -52,7 +52,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
     });
 
     useEffect(() => {
-        initCreate(projectId);
+        initCreate(projectId || '');
     }, [projectId, initCreate]);
 
     // Sync form value with draftName
@@ -88,7 +88,10 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         });
     };
 
-    const handleSave = async (_data: SchemaBuilderFormValues) => {
+    const handleSave = async (data: SchemaBuilderFormValues) => {
+        // Sync form data to store before committing
+        setDraftName(data.name);
+
         if (!activeProfileId) {
             const msg = 'No active profile. Please select a profile before saving.';
             useSchemaBuilderStore.setState({ error: msg });
@@ -99,7 +102,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
             await commit(activeProfileId);
             // Only close if validation passed (no error set by commit)
             if (!useSchemaBuilderStore.getState().error) {
-                onClose();
+                if (onClose) onClose();
             }
         } catch (err) {
             // PouchDB/network errors are already set in store and re-thrown
@@ -138,6 +141,10 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                         <FormControl>
                                             <Input
                                                 {...field}
+                                                onChange={(e) => {
+                                                    field.onChange(e);
+                                                    setDraftName(e.target.value);
+                                                }}
                                                 placeholder="e.g. Coffee Tracker, Sleep Log"
                                             />
                                         </FormControl>
@@ -178,6 +185,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                     variant="ghost"
                                                     size="icon-xs"
                                                     className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                                                    aria-label="Move field up"
                                                 >
                                                     <ChevronUp size={14} />
                                                 </Button>
@@ -188,6 +196,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                     variant="ghost"
                                                     size="icon-xs"
                                                     className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                                                    aria-label="Move field down"
                                                 >
                                                     <ChevronDown size={14} />
                                                 </Button>
@@ -271,6 +280,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 size="icon"
                                                 onClick={() => handleRemoveField(index)}
                                                 className="text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                                                aria-label="Remove field"
                                             >
                                                 <Trash2 size={14} />
                                             </Button>
@@ -427,7 +437,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-800">
-                        <Button type="button" variant="outline" onClick={() => { discard(); onClose(); }}>
+                        <Button type="button" variant="outline" onClick={() => { discard(); if (onClose) onClose(); }}>
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isLoading} className="bg-emerald-500 text-zinc-950 hover:bg-emerald-400">
@@ -439,7 +449,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                         </Button>
                     </div>
                 </form>
-            </Form>
+                </Form>
             </DialogContent>
             </TooltipProvider>
         </Dialog>

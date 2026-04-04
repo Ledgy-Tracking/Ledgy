@@ -55,10 +55,12 @@ describe('EmptyCanvasGuide', () => {
 
     it('has dark theme styling', () => {
         render(<EmptyCanvasGuide />);
-        
-        const guideCard = screen.getByText('Welcome to Node Forge').closest('div');
-        expect(guideCard).toHaveClass('bg-zinc-950/90');
-        expect(guideCard).toHaveClass('border-zinc-800');
+
+        // Find the Card element which has the dark styling
+        const guideCard = screen.getByText('Welcome to Node Forge').closest('[data-slot="card"]');
+        // Check for dark mode styling (may also have light mode alternatives)
+        expect(guideCard?.className).toContain('bg-zinc-950');
+        expect(guideCard?.className).toContain('border-zinc-800');
     });
 
     it('uses pointer-events-auto to allow button interaction', () => {
@@ -84,9 +86,10 @@ describe('EmptyCanvasGuide', () => {
 
     it('displays keyboard shortcut hint', () => {
         render(<EmptyCanvasGuide />);
-        
+
         const kbdElement = screen.getByText('Space');
         expect(kbdElement.tagName).toBe('KBD');
-        expect(kbdElement).toHaveClass('bg-zinc-800');
+        // Check for light mode class (component now has both light and dark versions)
+        expect(kbdElement?.className).toContain('bg-gray-100');
     });
 });

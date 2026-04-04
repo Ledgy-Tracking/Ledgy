@@ -1,0 +1,3 @@
+## 2024-04-02 - Add Keyboard Shortcut Hints to Command Palette Items
+**Learning:** Hardcoded text hints for keyboard shortcuts (like `(N)`) inside command palettes are often overlooked and break visual consistency. Existing UI libraries often provide dedicated sub-components (like `CommandShortcut` in shadcn/ui cmdk) designed explicitly for standardizing these hints with appropriate muted styles and right-alignment.
+**Action:** Always search the UI component library for semantic structural components (like `CommandShortcut`) before relying on inline text for UI elements like shortcut hints to maintain standard design system UX and accessibility patterns.
