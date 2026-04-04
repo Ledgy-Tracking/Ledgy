@@ -32,6 +32,7 @@ import { SyncStatusSheet } from '../../features/sync/SyncStatusSheet';
 import { ConflictListSheet, ConflictEntry } from '../../features/sync/ConflictListSheet';
 import { DiffGuardModal } from '../../features/sync/DiffGuardModal';
 import { CommandPalette } from '../CommandPalette';
+import { SchemaBuilder } from '../../features/ledger/SchemaBuilder';
 import { nodeEngine } from '../../services/nodeEngine';
 import { executeTrigger } from '../../services/triggerEngine';
 import { Inspector } from '../Inspector/Inspector';
@@ -48,6 +49,7 @@ export const AppShell: React.FC = () => {
         setLeftSidebar,
         theme,
         toggleTheme,
+        schemaBuilderOpen,
         setSchemaBuilderOpen
     } = useUIStore();
 
@@ -181,7 +183,7 @@ export const AppShell: React.FC = () => {
                         {!leftSidebarOpen && <Network size={20} className="text-emerald-600 dark:text-emerald-400" />}
                     </div>
 
-                    <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+                    <nav className="flex-1 overflow-y-auto p-2 pt-6 space-y-2">
                         {/* Projects */}
                         <Button
                             variant="ghost"
@@ -189,10 +191,10 @@ export const AppShell: React.FC = () => {
                             title="Projects"
                             aria-label="Projects"
                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group 
-  border-b-2 border-r-2 
+  border-b border-r 
   ${location.pathname.includes('/projects')
     ? 'text-emerald-600 dark:text-emerald-400 font-medium border-b-emerald-500 border-r-emerald-500 shadow-[4px_4px_20px_rgba(16,185,129,0.25)] dark:shadow-[4px_4px_20px_rgba(16,185,129,0.35)] rounded-br-lg bg-emerald-50/30 dark:bg-emerald-500/10'
-    : 'text-zinc-600 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
+    : 'text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
   } 
   ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                         >
@@ -208,10 +210,10 @@ export const AppShell: React.FC = () => {
                                 title="Dashboard"
                                 aria-label="Dashboard"
                                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group 
-  border-b-2 border-r-2 
+  border-b border-r 
   ${location.pathname === `/app/${profileId}/project/${projectId}`
     ? 'text-emerald-600 dark:text-emerald-400 font-medium border-b-emerald-500 border-r-emerald-500 shadow-[4px_4px_20px_rgba(16,185,129,0.25)] dark:shadow-[4px_4px_20px_rgba(16,185,129,0.35)] rounded-br-lg bg-emerald-50/30 dark:bg-emerald-500/10'
-    : 'text-zinc-600 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
+    : 'text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
   } 
   ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                             >
@@ -222,20 +224,20 @@ export const AppShell: React.FC = () => {
 
                         {/* Ledgers for the current project */}
                         {leftSidebarOpen && projectId && (
-                            <div className="pl-4 space-y-0.5">
+                            <div className="space-y-0.5">
                                 <p className="px-3 pt-2 pb-1 text-[10px] font-bold uppercase tracking-widest text-zinc-500">Ledgers</p>
                                 {projectSchemas.map(schema => (
                                     <Button
-                                        variant="ghost"
+                                    variant="ghost"
                                         key={schema._id}
                                         onClick={() => navigate(`/app/${profileId}/project/${projectId}/ledger/${schema._id}`)}
                                         title={schema.name}
                                         aria-label={schema.name}
                                     className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-300 ease-in-out text-left 
-  border-b-2 border-r-2 
+  border-b border-r 
   ${location.pathname.includes(schema._id)
     ? 'text-emerald-600 dark:text-emerald-400 font-medium border-b-emerald-500 border-r-emerald-500 shadow-[4px_4px_20px_rgba(16,185,129,0.25)] dark:shadow-[4px_4px_20px_rgba(16,185,129,0.35)] rounded-br-lg bg-emerald-50/30 dark:bg-emerald-500/10'
-    : 'text-zinc-600 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
+    : 'bg-transparent text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
   } 
   ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                                     >
@@ -248,7 +250,7 @@ export const AppShell: React.FC = () => {
                                     onClick={() => setSchemaBuilderOpen(true)}
                                     title="New Ledger"
                                     aria-label="New Ledger"
-                                    className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-700 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:border-emerald-300 dark:hover:border-emerald-500/30"
+                                    className="w-full flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-emerald-300 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20"
                                 >
                                     <Plus size={14} className="shrink-0" />
                                     <span className="text-xs font-medium">+ New Ledger</span>
@@ -264,10 +266,10 @@ export const AppShell: React.FC = () => {
                                 title="Node Forge"
                                 aria-label="Node Forge"
                                 className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group 
-  border-b-2 border-r-2 
+  border-b border-r 
   ${location.pathname.includes('/node-forge')
     ? 'text-emerald-600 dark:text-emerald-400 font-medium border-b-emerald-500 border-r-emerald-500 shadow-[4px_4px_20px_rgba(16,185,129,0.25)] dark:shadow-[4px_4px_20px_rgba(16,185,129,0.35)] rounded-br-lg bg-emerald-50/30 dark:bg-emerald-500/10'
-    : 'text-zinc-600 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
+    : 'text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
   } 
   ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                             >
@@ -283,10 +285,10 @@ export const AppShell: React.FC = () => {
                             title="Trash"
                             aria-label="Trash"
                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group 
-  border-b-2 border-r-2 
+  border-b border-r 
   ${location.pathname.includes('/trash')
     ? 'text-emerald-600 dark:text-emerald-400 font-medium border-b-emerald-500 border-r-emerald-500 shadow-[4px_4px_20px_rgba(16,185,129,0.25)] dark:shadow-[4px_4px_20px_rgba(16,185,129,0.35)] rounded-br-lg bg-emerald-50/30 dark:bg-emerald-500/10'
-    : 'text-zinc-600 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
+    : 'text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
   } 
   ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                         >
@@ -352,10 +354,10 @@ export const AppShell: React.FC = () => {
                             title="Settings"
                             aria-label="Settings"
                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group 
-  border-b-2 border-r-2 
+  border-b border-r 
   ${location.pathname.includes('/settings')
     ? 'text-emerald-600 dark:text-emerald-400 font-medium border-b-emerald-500 border-r-emerald-500 shadow-[4px_4px_20px_rgba(16,185,129,0.25)] dark:shadow-[4px_4px_20px_rgba(16,185,129,0.35)] rounded-br-lg bg-emerald-50/30 dark:bg-emerald-500/10'
-    : 'text-zinc-600 dark:text-zinc-400 border-transparent hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
+    : 'text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 hover:border-b-emerald-400/50 hover:border-r-emerald-400/50 hover:shadow-[4px_4px_16px_rgba(16,185,129,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(16,185,129,0.2)]'
   } 
   ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                         >
@@ -368,10 +370,10 @@ export const AppShell: React.FC = () => {
                             title="Lock Vault"
                             aria-label="Lock Vault"
                             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ease-in-out group 
-  border-b-2 border-r-2 
+  border-b border-r 
   ${location.pathname.includes('/lock')
     ? 'text-red-600 dark:text-red-400 font-medium border-b-red-500 border-r-red-500 shadow-[4px_4px_20px_rgba(239,68,68,0.25)] dark:shadow-[4px_4px_20px_rgba(239,68,68,0.35)] rounded-br-lg bg-red-50/30 dark:bg-red-500/10'
-    : 'text-red-600 dark:text-red-400 border-transparent hover:text-red-700 dark:hover:text-red-300 hover:border-b-red-400/50 hover:border-r-red-400/50 hover:shadow-[4px_4px_16px_rgba(239,68,68,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(239,68,68,0.2)]'
+    : 'text-red-600 dark:text-red-400 border-zinc-200 dark:border-zinc-800 hover:text-red-700 dark:hover:text-red-300 hover:border-b-red-400/50 hover:border-r-red-400/50 hover:shadow-[4px_4px_16px_rgba(239,68,68,0.15)] dark:hover:shadow-[4px_4px_16px_rgba(239,68,68,0.2)]'
   } 
   ${!leftSidebarOpen ? 'justify-center px-0' : ''}`}
                         >
@@ -513,6 +515,14 @@ export const AppShell: React.FC = () => {
                 </div>
 
                 <CommandPalette />
+
+                {/* Schema Builder Modal */}
+                {schemaBuilderOpen && projectId && (
+                    <SchemaBuilder
+                        projectId={projectId}
+                        onClose={() => setSchemaBuilderOpen(false)}
+                    />
+                )}
             </div>
         </div>
     );

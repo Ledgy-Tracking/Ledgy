@@ -150,7 +150,7 @@ export const ProfileSelector: React.FC = () => {
                 <p className="text-zinc-500 dark:text-zinc-400">Choose a workspace to continue</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl w-full">
                 {profiles.map((profile) => (
                     <div key={profile.id} className="relative group">
                         {/* Card button — full clickable area, keyboard accessible */}
@@ -158,19 +158,21 @@ export const ProfileSelector: React.FC = () => {
                             onClick={() => handleSelectProfile(profile.id)}
                             variant="outline"
                             aria-label={`Select profile ${profile.name}`}
-                            className="justify-start text-left w-full h-auto bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 hover:dark:border-emerald-500/50 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/5 dark:hover:shadow-2xl dark:hover:shadow-emerald-500/10 focus:ring-emerald-500/50"
+                            className="justify-start text-left w-full h-full min-h-[180px] bg-white dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 hover:border-emerald-500 hover:dark:border-emerald-500/50 rounded-2xl p-6 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10 dark:hover:shadow-2xl dark:hover:shadow-emerald-500/10 focus:ring-emerald-500/50"
                         >
-                            <div className="flex items-start mb-4">
-                                <Card className="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300">
-                                    <User size={24} />
-                                </Card>
-                            </div>
-                            <h3 className="text-xl font-semibold mb-2 text-zinc-900 dark:text-zinc-100">{profile.name}</h3>
-                            <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-4">
-                                {profile.description || 'No description provided'}
-                            </p>
-                            <div className="text-xs text-zinc-400 dark:text-zinc-500">
-                                Created: {new Date(profile.createdAt).toLocaleDateString()}
+                            <div className="flex flex-col w-full h-full">
+                                <div className="flex items-start justify-between mb-4">
+                                    <Card className="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 text-zinc-500 dark:text-zinc-400 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300">
+                                        <User size={24} />
+                                    </Card>
+                                </div>
+                                <h3 className="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-100 line-clamp-1">{profile.name}</h3>
+                                <p className="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-2 mb-3 min-h-[40px]">
+                                    {profile.description || 'No description provided'}
+                                </p>
+                                <div className="text-xs text-zinc-400 dark:text-zinc-500 mt-auto">
+                                    Created {new Date(profile.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </div>
                             </div>
                         </Button>
                         {/* Delete button — sibling to card button, absolutely positioned in top-right */}
@@ -179,9 +181,9 @@ export const ProfileSelector: React.FC = () => {
                             variant="ghost"
                             size="icon-sm"
                             aria-label={`Delete profile ${profile.name}`}
-                            className="absolute top-4 right-4 text-zinc-400 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 focus:ring-red-500/50"
+                            className="absolute top-3 right-3 text-zinc-400 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 focus:ring-red-500/50 rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                         >
-                            <Trash2 size={18} />
+                            <Trash2 size={16} />
                         </Button>
                     </div>
                 ))}
@@ -189,12 +191,18 @@ export const ProfileSelector: React.FC = () => {
                 <Button
                     onClick={handleOpenCreate}
                     variant="outline"
-                    className="h-auto flex-col bg-zinc-50 dark:bg-zinc-900/30 border-dashed border-zinc-300 dark:border-zinc-800 hover:border-emerald-500 hover:dark:border-emerald-500/50 rounded-2xl p-6 transition-all duration-300 group"
+                    className="h-full min-h-[180px] flex-col bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900/30 dark:to-zinc-800/30 border-2 border-dashed border-zinc-300 dark:border-zinc-700 hover:border-emerald-400 hover:dark:border-emerald-500/50 rounded-2xl p-6 transition-all duration-300 group hover:shadow-lg hover:shadow-emerald-500/5"
                 >
-                    <Card className="p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-500/20 text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-colors duration-300 mb-4">
-                        <Plus size={24} />
-                    </Card>
-                    <span className="font-semibold text-zinc-800 dark:text-zinc-200 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">New Profile</span>
+                    <div className="flex flex-col items-center justify-center h-full">
+                        <div className="relative mb-4">
+                            <div className="absolute inset-0 bg-emerald-400/20 rounded-full blur-xl group-hover:bg-emerald-400/30 transition-all duration-300"></div>
+                            <Card className="relative p-4 rounded-2xl bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 group-hover:border-emerald-400 dark:group-hover:border-emerald-500/50 text-zinc-400 dark:text-zinc-500 group-hover:text-emerald-500 dark:group-hover:text-emerald-400 transition-all duration-300 shadow-sm group-hover:shadow-md">
+                                <Plus size={28} strokeWidth={2.5} />
+                            </Card>
+                        </div>
+                        <span className="font-semibold text-lg text-zinc-700 dark:text-zinc-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-300">Create New Profile</span>
+                        <span className="text-sm text-zinc-400 dark:text-zinc-500 mt-1">Set up a new workspace</span>
+                    </div>
                 </Button>
             </div>
 
@@ -214,8 +222,8 @@ export const ProfileSelector: React.FC = () => {
                         </DialogDescription>
                     </DialogHeader>
                     
-                    <Form {...createForm}>
-                        <form onSubmit={createForm.handleSubmit(handleConfirmCreate)}>
+                    <form onSubmit={createForm.handleSubmit(handleConfirmCreate)}>
+                        <Form {...createForm}>
                             <div className="space-y-4 mb-6">
                                 <FormField
                                     control={createForm.control}
@@ -276,8 +284,8 @@ export const ProfileSelector: React.FC = () => {
                                     Create
                                 </Button>
                             </DialogFooter>
-                        </form>
-                    </Form>
+                        </Form>
+                    </form>
                 </DialogContent>
             </Dialog>
 
@@ -299,10 +307,10 @@ export const ProfileSelector: React.FC = () => {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <Form {...renameForm}>
-                        <form onSubmit={renameForm.handleSubmit(() => {
+                    <form onSubmit={renameForm.handleSubmit(() => {
                             if (isDeleteConfirmed && !isDeleting) handleConfirmDelete(false);
                         })}>
+                        <Form {...renameForm}>
                             <div className="space-y-4 mb-6">
                                 {profileToDelete?.remoteSyncEndpoint ? (
                                     <div className="space-y-4">
@@ -407,8 +415,8 @@ export const ProfileSelector: React.FC = () => {
                                     </Button>
                                 )}
                             </DialogFooter>
-                        </form>
-                    </Form>
+                        </Form>
+                    </form>
                 </DialogContent>
             </Dialog>
         </div>
