@@ -18,7 +18,19 @@ export const ChartWidget: React.FC<ChartWidgetProps> = ({
     data = [],
     className = '',
 }) => {
-    const maxValue = data.length > 0 ? Math.max(...data.map(d => d.value)) : 1;
+    // Bolt Optimization: Replace Math.max(...data.map()) with a single pass loop
+    // to prevent Maximum call stack size exceeded on large arrays and avoid O(N) memory allocation
+    let maxValue = 1;
+    if (data.length > 0) {
+        maxValue = data[0].value;
+        for (let i = 1; i < data.length; i++) {
+            if (data[i].value > maxValue) {
+                maxValue = data[i].value;
+            }
+        }
+        // Ensure we don't divide by zero if max is 0 or less
+        if (maxValue <= 0) maxValue = 1;
+    }
 
     return (
         <div className={`p-4 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors ${className}`}>

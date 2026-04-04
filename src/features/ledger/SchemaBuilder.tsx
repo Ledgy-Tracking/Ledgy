@@ -30,6 +30,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
     const { schemas } = useLedgerStore();
     const {
         draftName,
+        setDraftName,
         draftFields,
         error,
         isLoading,
@@ -90,7 +91,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
 
     const handleSave = async (data: SchemaBuilderFormValues) => {
         // Sync form data to store before committing
-        setDraftName(data.name);
+        setDraftName(data.name || '');
 
         if (!activeProfileId) {
             const msg = 'No active profile. Please select a profile before saving.';
@@ -143,7 +144,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                 {...field}
                                                 onChange={(e) => {
                                                     field.onChange(e);
-                                                    setDraftName(e.target.value);
+                                                    setDraftName(e.target.value || '');
                                                 }}
                                                 placeholder="e.g. Coffee Tracker, Sleep Log"
                                             />

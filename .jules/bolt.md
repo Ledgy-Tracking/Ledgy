@@ -25,3 +25,7 @@
 ## 2024-05-25 - Avoid call stack overflow with Math.min/max spread
 **Learning:** Spreading large arrays into `Math.min(...values)` or `Math.max(...values)` causes 'Maximum call stack size exceeded' errors because JS engines limit the number of arguments a function can take.
 **Action:** When calculating min/max on potentially large arrays (like in web workers or data processing nodes), use a `for` loop to track the min/max value manually instead of using spread syntax. Remember to handle `NaN` propagation correctly to match native Math behavior.
+
+## 2024-05-25 - Avoid call stack overflow with Math.min/max spread
+**Learning:** Spreading large arrays into `Math.min(...values)` or `Math.max(...values)` causes 'Maximum call stack size exceeded' errors because JS engines limit the number of arguments a function can take.
+**Action:** When calculating min/max on potentially large arrays (like in web workers or data processing nodes), use a `for` loop to track the min/max value manually instead of using spread syntax. Remember to handle `NaN` propagation correctly to match native Math behavior.
