@@ -118,9 +118,9 @@ export const SetupPage: React.FC = () => {
                         </CardContent>
                     </Card>
 
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <FormField
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <Form {...form}>
+                        <FormField
                                 control={form.control}
                                 name="code"
                                 rules={{
@@ -257,8 +257,8 @@ export const SetupPage: React.FC = () => {
                                     'Finish Setup'
                                 )}
                             </Button>
-                        </form>
-                    </Form>
+                        </Form>
+                    </form>
                 </div>
 
                 <p className="text-xs text-zinc-600 text-center uppercase tracking-widest font-bold">

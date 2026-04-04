@@ -42,7 +42,7 @@ const DEFAULT_VALUES = {
 export const useUIStore = create<UIState>()(
     persist(
         (set) => ({
-            leftSidebarOpen: true,
+            leftSidebarOpen: true, // Default to open, persisted value will override
             rightInspectorOpen: true,
             theme: 'dark',
             density: 'comfortable',
