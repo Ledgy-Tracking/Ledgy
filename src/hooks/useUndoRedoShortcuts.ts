@@ -17,6 +17,13 @@ export function useUndoRedoShortcuts(): void {
             if (!isUndo(e) && !isRedo(e)) {
                 return;
             }
+            // AC 6: If focus is inside an input or textarea, let the browser
+            // handle its native undo (text field editing). Only intercept when
+            // focus is outside form controls.
+            const target = e.target as HTMLElement | null;
+            if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target?.isContentEditable) {
+                return;
+            }
             e.preventDefault();
             const activeProfileId = useProfileStore.getState().activeProfileId;
             if (!activeProfileId) {

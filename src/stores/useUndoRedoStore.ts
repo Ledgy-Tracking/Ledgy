@@ -58,6 +58,12 @@ function actionId(): string {
     return crypto.randomUUID();
 }
 
+/**
+ * Creates a standardized UndoRedoAction record.
+ * Call this after a successful PouchDB write; do NOT call if the write fails.
+ * Schema changes (createSchema / updateSchema / deleteSchema) are intentionally
+ * excluded from the undo stack for MVP — see AC 7 and future stories for extension.
+ */
 export function createAction(
     actionType: ActionType,
     schemaId: string,
@@ -72,31 +78,71 @@ export function createAction(
     };
 }
 
+/**
+ * Re-applies all mutations in the action (applies newState for each mutation).
+ * Used by redoAction to restore a previously undone change.
+ * For 'create' actions, explicitly sets isDeleted:false because the original
+ * entry may not carry that field, and the existing doc (soft-deleted by undo)
+ * would otherwise keep isDeleted:true after the merge.
+ * Schema action types (createSchema/updateSchema/deleteSchema) are excluded
+ * from the undo stack per AC 7 and are silently ignored here as a defensive guard.
+ */
 async function applyMutationsForward(
     activeProfileId: string,
     action: UndoRedoAction,
 ): Promise<void> {
+    if (action.actionType === 'createSchema' || action.actionType === 'updateSchema' || action.actionType === 'deleteSchema') {
+        return;
+    }
     const db = getProfileDb(activeProfileId);
     for (const mutation of action.mutations) {
-        const nextDoc = mutation.newState;
-        if (!nextDoc || typeof nextDoc._id !== 'string') {
-            continue;
+        if (action.actionType === 'create') {
+            // Redo create: restore the soft-deleted entry (AC 5)
+            const newDoc = mutation.newState;
+            if (!newDoc || typeof newDoc._id !== 'string') continue;
+            await db.updateDocument(newDoc._id, { isDeleted: false });
+        } else {
+            const nextDoc = mutation.newState;
+            if (!nextDoc || typeof nextDoc._id !== 'string') continue;
+            await db.updateDocument(nextDoc._id, nextDoc);
         }
-        await db.updateDocument(nextDoc._id, nextDoc);
     }
 }
 
+/**
+ * Reverses all mutations in the action.
+ * For 'create' actions, soft-deletes the created entry (AC 4).
+ * For 'update'/'delete' actions, restores the previousState document.
+ * Schema action types (createSchema/updateSchema/deleteSchema) are excluded
+ * from the undo stack per AC 7 and are silently ignored here as a defensive guard.
+ */
 async function applyMutationsReverse(
     activeProfileId: string,
     action: UndoRedoAction,
 ): Promise<void> {
+    if (action.actionType === 'createSchema' || action.actionType === 'updateSchema' || action.actionType === 'deleteSchema') {
+        return;
+    }
     const db = getProfileDb(activeProfileId);
     for (const mutation of action.mutations) {
-        const prevDoc = mutation.previousState;
-        if (!prevDoc || typeof prevDoc._id !== 'string') {
-            continue;
+        if (action.actionType === 'create') {
+            // Undo create: soft-delete the entry so it disappears from the ledger
+            const newDoc = mutation.newState;
+            if (!newDoc || typeof newDoc._id !== 'string') continue;
+            await db.updateDocument(newDoc._id, { isDeleted: true });
+        } else if (action.actionType === 'delete') {
+            // Undo delete: restore entry to live state.
+            // previousState may not carry isDeleted:false, so set it explicitly
+            // to override the isDeleted:true now on the existing document.
+            const prevDoc = mutation.previousState;
+            if (!prevDoc || typeof prevDoc._id !== 'string') continue;
+            await db.updateDocument(prevDoc._id, { ...prevDoc, isDeleted: false });
+        } else {
+            // Undo update: restore the document to its pre-mutation state
+            const prevDoc = mutation.previousState;
+            if (!prevDoc || typeof prevDoc._id !== 'string') continue;
+            await db.updateDocument(prevDoc._id, prevDoc);
         }
-        await db.updateDocument(prevDoc._id, prevDoc);
     }
 }
 
@@ -210,7 +256,7 @@ export const useUndoRedoStore = create<UndoRedoState>((set, get) => ({
             });
         } catch (err) {
             if (isPouchConflict(err)) {
-                useErrorStore.getState().dispatchError('Undo failed: entry was modified on another device', 'error');
+                useErrorStore.getState().dispatchError('Redo failed: entry was modified on another device', 'error');
                 return;
             }
             throw err;
