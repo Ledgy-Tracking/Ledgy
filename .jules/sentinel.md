@@ -32,3 +32,8 @@
 **Vulnerability:** The `templateImport.ts` module was reading user-provided files directly into memory using `FileReader.readAsText()` without any size limitations. Maliciously large JSON payloads can exhaust browser memory and freeze or crash the client application during import.
 **Learning:** Browser APIs like `FileReader` load entire file contents into RAM. Relying on implicit browser limits is insufficient, especially for large JSON formats which further multiply memory footprint.
 **Prevention:** Always enforce strict file size limits (e.g., 5MB for JSON templates) by checking `file.size` before initiating any file reading operations.
+
+## 2025-02-21 - [HMAC Security Theater in LocalStorage]
+**Vulnerability:** The client-side rate limiter generated an HMAC key to sign its state, but stored both the key and the state in plaintext `localStorage`. This provided zero real security, as an attacker with access to modify the state could also read the key to forge a valid signature.
+**Learning:** Storing cryptographic keys (like an HMAC key) in `localStorage` to sign or protect data that is also stored in `localStorage` is an anti-pattern (security theater) and provides no meaningful tamper resistance.
+**Prevention:** Avoid adding complex cryptographic mechanisms that provide no actual security benefit. When client-side security measures are just deterrents, keep them simple and acknowledge their limitations rather than creating a false sense of security with easily bypassed cryptography.

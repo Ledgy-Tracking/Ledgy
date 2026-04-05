@@ -2,7 +2,6 @@
  * Rate Limiter for Authentication Attempts
  * 
  * Implements exponential backoff and lockout after max failed attempts.
- * Uses HMAC signature to prevent tampering with localStorage state.
  * 
  * Security Note: This is CLIENT-SIDE rate limiting only.
  * It's a deterrent, not true security. Server-side rate limiting
@@ -16,67 +15,12 @@ const BASE_DELAY_MS = 1000; // 1 second
 const MAX_DELAY_MS = 30000; // 30 seconds cap
 const GRACE_PERIOD_MS = 5000; // 5 seconds for clock skew
 const STORAGE_KEY = 'ledgy-auth-rate-limit';
-const HMAC_KEY_STORAGE_KEY = 'ledgy-rate-limit-hmac-key';
 
 export interface RateLimitState {
     account: string;
     attempts: number;
     lastAttempt: number;
     lockedUntil: number | null;
-    signature: string;
-}
-
-/**
- * Get or generate the HMAC key for signing rate limit state.
- * The key is stored in localStorage to persist across sessions,
- * but is unique per client installation.
- */
-function getOrGenerateHMACKey(): string {
-    let key = localStorage.getItem(HMAC_KEY_STORAGE_KEY);
-    if (!key) {
-        // Generate a random 256-bit key (32 bytes)
-        const bytes = crypto.getRandomValues(new Uint8Array(32));
-        key = btoa(String.fromCharCode(...bytes));
-        localStorage.setItem(HMAC_KEY_STORAGE_KEY, key);
-    }
-    return key;
-}
-
-// Cache TextEncoder and CryptoKey at module level to avoid redundant
-// instantiation and computationally expensive WebCrypto API overhead
-// on every signature generation.
-const encoder = new TextEncoder();
-let hmacCryptoKey: CryptoKey | null = null;
-/**
- * Generate HMAC signature for state
- */
-async function generateSignature(state: Omit<RateLimitState, 'signature'>): Promise<string> {
-    const data = encoder.encode(JSON.stringify(state));
-
-    const hmacKey = getOrGenerateHMACKey();
-    const keyData = new Uint8Array(atob(hmacKey).split('').map(c => c.charCodeAt(0)));
-    
-    if (!hmacCryptoKey) {
-        hmacCryptoKey = await crypto.subtle.importKey(
-            'raw',
-            keyData,
-            { name: 'HMAC', hash: 'SHA-256' },
-            false,
-            ['sign']
-        );
-    }
-    
-    const signature = await crypto.subtle.sign('HMAC', hmacCryptoKey, data);
-    return btoa(String.fromCharCode(...new Uint8Array(signature)));
-}
-
-/**
- * Verify HMAC signature for state
- */
-async function verifySignature(state: RateLimitState): Promise<boolean> {
-    const { signature, ...unsignedState } = state;
-    const expectedSignature = await generateSignature(unsignedState);
-    return signature === expectedSignature;
 }
 
 /**
@@ -103,13 +47,6 @@ export async function getRateLimitState(account: string): Promise<RateLimitState
         
         // Verify account matches
         if (state.account !== account) return null;
-        
-        // Verify signature (tamper detection)
-        const isValid = await verifySignature(state);
-        if (!isValid) {
-            console.warn('Rate limit state tampered, resetting');
-            return null;
-        }
         
         // Check if lockout has expired
         const now = Date.now();
@@ -139,7 +76,6 @@ export async function recordFailedAttempt(account: string): Promise<RateLimitSta
             attempts: 1,
             lastAttempt: now,
             lockedUntil: null,
-            signature: '',
         };
     } else if (state.lockedUntil) {
         // Already locked, extend lockout
@@ -155,10 +91,6 @@ export async function recordFailedAttempt(account: string): Promise<RateLimitSta
             state.lockedUntil = now + LOCKOUT_DURATION_MS;
         }
     }
-    
-    // Generate signature
-    const { signature, ...unsignedState } = state;
-    state.signature = await generateSignature(unsignedState);
     
     // Persist
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
