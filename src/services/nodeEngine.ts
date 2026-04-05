@@ -50,11 +50,18 @@ class NodeEngine {
                     const ports = (nodeData.ports || []) as any[];
                     const outputs: Record<string, number[]> = {};
 
+                    // ⚡ Bolt: Single-pass map/filter optimization for numerical extraction
+                    // Reduces iteration count and prevents intermediate array allocation for large ledgers
                     ports.forEach(port => {
                         if (port.type === 'number') {
-                            outputs[port.id] = ledgerEntries
-                                .map(e => Number(e.data[port.fieldName]))
-                                .filter(v => !isNaN(v));
+                            const portValues: number[] = [];
+                            for (let i = 0; i < ledgerEntries.length; i++) {
+                                const val = Number(ledgerEntries[i].data[port.fieldName]);
+                                if (!Number.isNaN(val)) {
+                                    portValues.push(val);
+                                }
+                            }
+                            outputs[port.id] = portValues;
                         }
                     });
 
