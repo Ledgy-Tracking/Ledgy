@@ -30,6 +30,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
     const { schemas } = useLedgerStore();
     const {
         draftName,
+        setDraftName,
         draftFields,
         error,
         isLoading,
