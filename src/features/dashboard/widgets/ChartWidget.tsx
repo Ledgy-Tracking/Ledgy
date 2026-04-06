@@ -18,7 +18,21 @@ export const ChartWidget: React.FC<ChartWidgetProps> = ({
     data = [],
     className = '',
 }) => {
-    const maxValue = data.length > 0 ? Math.max(...data.map(d => d.value)) : 1;
+    // ⚡ Bolt: Replace map + spread with single-pass loop to avoid "Maximum call stack size exceeded" on large data
+    // and eliminate intermediate array allocation. Checks for NaN to match native Math.max behavior.
+    let maxValue = 1;
+    if (data.length > 0) {
+        let max = -Infinity;
+        for (let i = 0; i < data.length; i++) {
+            const val = data[i].value;
+            if (Number.isNaN(val)) {
+                max = NaN;
+                break;
+            }
+            if (val > max) max = val;
+        }
+        maxValue = max === -Infinity ? 1 : max;
+    }
 
     return (
         <div className={`p-4 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-700 transition-colors ${className}`}>
