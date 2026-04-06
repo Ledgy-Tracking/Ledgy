@@ -32,3 +32,8 @@
 **Vulnerability:** The `templateImport.ts` module was reading user-provided files directly into memory using `FileReader.readAsText()` without any size limitations. Maliciously large JSON payloads can exhaust browser memory and freeze or crash the client application during import.
 **Learning:** Browser APIs like `FileReader` load entire file contents into RAM. Relying on implicit browser limits is insufficient, especially for large JSON formats which further multiply memory footprint.
 **Prevention:** Always enforce strict file size limits (e.g., 5MB for JSON templates) by checking `file.size` before initiating any file reading operations.
+
+## 2024-05-24 - Client-Side State Tampering via Exposed Keys
+**Vulnerability:** The rate limiter generated an HMAC key, stored it in `localStorage`, and used it to sign the rate limit state, which was also stored in `localStorage`. This provides no tamper resistance since an attacker modifying `localStorage` can simply read the key and forge a valid signature for their modified state.
+**Learning:** Storing cryptographic keys (like an HMAC key) in the same client-side storage as the data they are meant to protect is security theater. It provides a false sense of security against tampering.
+**Prevention:** Avoid implementing complex cryptographic signature mechanisms for client-side state where the key material cannot be kept secure from the client itself. Rely on server-side validation or accept that client-side state is fundamentally untrusted.
