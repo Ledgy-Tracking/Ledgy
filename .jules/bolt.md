@@ -24,3 +24,7 @@
 
 ## 2024-05-25 - Avoid Call Stack Limits with Math.max/min
 **Learning:** Spreading large computation arrays into `Math.min(...values)` or `Math.max(...values)` causes "Maximum call stack size exceeded" errors in heavy worker computations. Use explicit `for` loops with `Number.isNaN()` checks to maintain NaN propagation parity with native Math behavior.
+
+## 2024-05-26 - Single-pass loop optimization for data extraction
+**Learning:** In data processing pipelines like `NodeEngine`, chaining array methods such as `.map().filter()` over potentially large arrays creates redundant iterations and intermediate array allocations, significantly degrading performance on large datasets.
+**Action:** Replace chained `.map().filter()` or similar array reduction chains with a single-pass `for` loop to avoid intermediate allocations and reduce total O(N) operations.
