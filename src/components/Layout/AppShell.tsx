@@ -3,6 +3,7 @@ import { useNavigate, useParams, Outlet, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import {
     Settings,
     LogOut,
@@ -386,59 +387,87 @@ export const AppShell: React.FC = () => {
                 {/* Main Content Area */}
                 <main className="flex-1 h-full flex flex-col min-w-0 bg-white dark:bg-zinc-950 relative">
                     {/* Header / Toolbar */}
-                    <header className="h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white/80 dark:bg-zinc-900/50 backdrop-blur-md z-10 shrink-0">
-                        <div className="flex items-center gap-4">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={toggleLeftSidebar}
-                                aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-                                className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                            >
-                                {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
-                            </Button>
-                            <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
-                            <h1 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                                {activeProfile ? `Ledger: ${profileName}` : 'Select Profile'}
-                            </h1>
-                        </div>
+                    <TooltipProvider delayDuration={300}>
+                        <header className="h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 bg-white/80 dark:bg-zinc-900/50 backdrop-blur-md z-10 shrink-0">
+                            <div className="flex items-center gap-4">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={toggleLeftSidebar}
+                                            aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                                            className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                        >
+                                            {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                                <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
+                                <h1 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
+                                    {activeProfile ? `Ledger: ${profileName}` : 'Select Profile'}
+                                </h1>
+                            </div>
 
-                        <div className="flex items-center gap-2">
-                            {/* View Toggle Button - Only show on Dashboard route */}
-                            {location.pathname === `/app/${profileId}/project/${projectId}` && (
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => setDashboardViewMode(prev => prev === 'grid' ? 'table' : 'grid')}
-                                    title={dashboardViewMode === 'grid' ? 'Switch to Table View' : 'Switch to Grid View'}
-                                    aria-label={dashboardViewMode === 'grid' ? 'Switch to Table View' : 'Switch to Grid View'}
-                                    className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                                >
-                                    {dashboardViewMode === 'grid' ? <Table size={18} /> : <Grid3X3 size={18} />}
-                                </Button>
-                            )}
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={toggleTheme}
-                                title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                                aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                                className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                            >
-                                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-                            </Button>
-                            <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={toggleRightInspector}
-                                aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
-                                className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                            >
-                                <PanelRightClose size={18} className={rightInspectorOpen ? '' : 'rotate-180'} />
-                            </Button>
-                        </div>
-                    </header>
+                            <div className="flex items-center gap-2">
+                                {/* View Toggle Button - Only show on Dashboard route */}
+                                {location.pathname === `/app/${profileId}/project/${projectId}` && (
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={() => setDashboardViewMode(prev => prev === 'grid' ? 'table' : 'grid')}
+                                                aria-label={dashboardViewMode === 'grid' ? 'Switch to Table View' : 'Switch to Grid View'}
+                                                className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                            >
+                                                {dashboardViewMode === 'grid' ? <Table size={18} /> : <Grid3X3 size={18} />}
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>{dashboardViewMode === 'grid' ? 'Switch to Table View' : 'Switch to Grid View'}</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                )}
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={toggleTheme}
+                                            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                            className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                        >
+                                            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                                <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={toggleRightInspector}
+                                            aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
+                                            className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                                        >
+                                            <PanelRightClose size={18} className={rightInspectorOpen ? '' : 'rotate-180'} />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{rightInspectorOpen ? 'Close inspector' : 'Open inspector'}</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </div>
+                        </header>
+                    </TooltipProvider>
 
                     {/* Viewport Content */}
                     <ScrollArea className="flex-1 p-6 bg-zinc-50 dark:bg-zinc-950">
