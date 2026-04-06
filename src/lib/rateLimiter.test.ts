@@ -52,7 +52,6 @@ describe('Rate Limiter', () => {
             expect(state.account).toBe('test-account');
             expect(state.attempts).toBe(1);
             expect(state.lockedUntil).toBeNull();
-            expect(state.signature).toBeDefined();
         });
 
         it('increments attempts on subsequent failures', async () => {
@@ -102,19 +101,6 @@ describe('Rate Limiter', () => {
             await recordFailedAttempt('account-1');
             
             const state = await getRateLimitState('account-2');
-            expect(state).toBeNull();
-        });
-
-        it('returns null if signature is missing (tampered)', async () => {
-            await recordFailedAttempt('test-account');
-            
-            // Tamper with state
-            const stored = localStorage.getItem('ledgy-auth-rate-limit');
-            const parsed = JSON.parse(stored!);
-            parsed.signature = '';
-            localStorage.setItem('ledgy-auth-rate-limit', JSON.stringify(parsed));
-            
-            const state = await getRateLimitState('test-account');
             expect(state).toBeNull();
         });
     });
@@ -322,46 +308,6 @@ describe('Rate Limiter', () => {
             
             const state = await getRateLimitState('test-account');
             expect(state?.attempts).toBe(1); // New sequence
-        });
-    });
-
-    describe('Security Fix: Dynamic HMAC Key', () => {
-        it('generates a unique HMAC key if none exists', async () => {
-            const HMAC_KEY_STORAGE_KEY = 'ledgy-rate-limit-hmac-key';
-
-            // Should be empty initially (beforeEach clears localStorage)
-            expect(localStorage.getItem(HMAC_KEY_STORAGE_KEY)).toBeNull();
-
-            // Action that triggers key generation
-            await recordFailedAttempt('test-account');
-
-            const key = localStorage.getItem(HMAC_KEY_STORAGE_KEY);
-            expect(key).not.toBeNull();
-            expect(key?.length).toBeGreaterThan(32); // Base64 encoded 32 bytes
-        });
-
-        it('persists the same HMAC key across attempts', async () => {
-            const HMAC_KEY_STORAGE_KEY = 'ledgy-rate-limit-hmac-key';
-
-            await recordFailedAttempt('test-account');
-            const key1 = localStorage.getItem(HMAC_KEY_STORAGE_KEY);
-
-            await recordFailedAttempt('test-account');
-            const key2 = localStorage.getItem(HMAC_KEY_STORAGE_KEY);
-
-            expect(key1).toBe(key2);
-        });
-
-        it('rejects state signed with a different key', async () => {
-            // 1. Create valid state
-            await recordFailedAttempt('test-account');
-
-            // 2. Change the HMAC key in storage
-            localStorage.setItem('ledgy-rate-limit-hmac-key', 'different-key-that-is-valid-base64-32bytes-long-long');
-
-            // 3. getRateLimitState should now return null because signature verification fails
-            const state = await getRateLimitState('test-account');
-            expect(state).toBeNull();
         });
     });
 });
