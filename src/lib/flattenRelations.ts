@@ -41,22 +41,27 @@ function normalizeIds(value: unknown): string[] {
  * @param schema             The schema for this entry (may be undefined).
  * @param allEntriesByLedgerId  All loaded entries keyed by ledgerId/schemaId.
  * @param allSchemasBySchemaId  All loaded schemas keyed by schema _id.
- * @param depth              Current recursion depth (0 = root call).
- * @param maxDepth           Maximum recursion depth (default 3).
- * @param visited            Set of entry _ids already visited in this chain (cycle prevention).
+ * @param _depth             Reserved — vestigial, not used for display logic.
+ * @param _maxDepth          Reserved — vestigial, not used for display logic.
+ * @param visited            Set of entry _ids to treat as already-visited (cycle prevention).
  */
 export function flattenEntry(
     entry: LedgerEntry,
     schema: LedgerSchema | undefined,
     allEntriesByLedgerId: Record<string, LedgerEntry[]>,
     allSchemasBySchemaId: Record<string, LedgerSchema>,
-    depth: number,
-    maxDepth: number,
+    _depth: number,
+    _maxDepth: number,
     visited: Set<string>
 ): FlattenedEntry {
     if (!schema) {
         return { ...entry, resolvedRelations: {} };
     }
+
+    // Pre-seed with this entry's own _id so that any back-reference to the current entry
+    // is detected as circular rather than recursed into.
+    const effectiveVisited = new Set(visited);
+    effectiveVisited.add(entry._id);
 
     const resolvedRelations: Record<string, ResolvedRelationValue[]> = {};
 
@@ -69,9 +74,9 @@ export function flattenEntry(
         const resolved: ResolvedRelationValue[] = [];
 
         for (const id of ids) {
-            // Cycle detection
-            if (visited.has(id)) {
-                resolved.push({ id, displayValue: '[Circular]', isGhost: false });
+            // Cycle detection — id is already in the ancestor chain
+            if (effectiveVisited.has(id)) {
+                resolved.push({ id, displayValue: '[Circular]', isGhost: true });
                 continue;
             }
 
@@ -86,39 +91,13 @@ export function flattenEntry(
                 continue;
             }
 
-            if (depth >= maxDepth) {
-                // Depth exhausted — show display value without further recursion
-                const targetSchema = allSchemasBySchemaId[targetEntry.schemaId ?? targetLedgerId];
-                resolved.push({
-                    id,
-                    displayValue: getEntryDisplayValue(targetEntry, targetSchema),
-                    isGhost: false,
-                });
-                continue;
-            }
-
-            // Recurse into target, passing a copy of visited (siblings don't block each other)
-            const nextVisited = new Set(visited);
-            nextVisited.add(id);
+            // Resolve display value from the target entry's own non-relation fields
             const targetSchema = allSchemasBySchemaId[targetEntry.schemaId ?? targetLedgerId];
-            const flattened = flattenEntry(
-                targetEntry,
-                targetSchema,
-                allEntriesByLedgerId,
-                allSchemasBySchemaId,
-                depth + 1,
-                maxDepth,
-                nextVisited
-            );
-
             resolved.push({
                 id,
                 displayValue: getEntryDisplayValue(targetEntry, targetSchema),
                 isGhost: false,
             });
-            // flattened is computed but we only need the display value at this level;
-            // deeper resolution is embedded in the returned FlattenedEntry structure if needed.
-            void flattened;
         }
 
         if (resolved.length > 0) {

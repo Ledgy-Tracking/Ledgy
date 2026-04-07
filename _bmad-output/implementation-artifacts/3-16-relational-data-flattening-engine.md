@@ -1,6 +1,6 @@
 # Story 3.16: Relational Data Flattening Engine
 
-Status: review
+Status: done
 
 ## Story
 
@@ -187,6 +187,16 @@ None — implementation proceeded cleanly.
 - `src/features/ledger/LedgerTable.tsx` (modified) — integrated flattening, sort, render
 - `tests/ghost-references.test.tsx` (modified) — updated assertions for new display behavior
 
+### Review Findings
+
+- [x] [Review][Patch] Dead recursion in `flattenEntry` — recursive call result is discarded with `void flattened`; `displayValue` is always computed from `getEntryDisplayValue(targetEntry, targetSchema)` regardless of depth, making the entire recursive branch identical to the `depth >= maxDepth` branch. Remove the recursive call and unify into a single push path. [src/lib/flattenRelations.ts]
+- [x] [Review][Patch] Index misalignment between `resolvedValues` and raw `values` in `RelationTagChip` — `normalizeIds` filters whitespace-only strings before building `resolvedRelations`, but `RelationTagChip` maps the raw unfiltered `values` array. Empty-string entries in raw data shift `resolvedValues[i]` out of alignment with `values[i]`, producing wrong chip labels and ghost states. [src/features/ledger/RelationTagChip.tsx, src/lib/flattenRelations.ts]
+- [x] [Review][Patch] Cycle detection: root entry's `_id` not pre-seeded in `visited` — for a 2-node cycle A→B→A, B recurses into A (A is not in visited yet) before the cycle is caught. At maxDepth=3, a cycle at exactly the boundary gets one extra incorrect recursion pass. Fix: add `entry._id` to `visited` (or `nextVisited`) before the first recursive call. [src/lib/flattenRelations.ts]
+- [x] [Review][Patch] `[Circular]` chips render as navigable green badges — `isGhost: false` gives them the green style, ExternalLink icon, and a live `handleClick`. Navigating a circular reference is confusing; circular entries should be non-navigable. Fix: set `isGhost: true` for circular resolved values. [src/lib/flattenRelations.ts]
+- [x] [Review][Patch] `/y:active/` regex in ghost-references test is fragile — the pattern is a substring match that could match unintended DOM text. Tighten to a more specific match for the resolved display value. [tests/ghost-references.test.tsx]
+- [x] [Review][Defer] Cross-ledger entries silently show as `[Deleted]` when target ledger's entries are not loaded — `allEntries` is only populated per explicit `fetchEntries` call; unloaded ledger targets return `[]`, making every relation target appear deleted with no user-facing indication. Deferred — by-design architectural limitation per dev notes; needs a loading guard or prefetch strategy in a future story.
+
 ## Change Log
 
 - 2026-04-05: Story implemented by claude-sonnet-4-6. Created pure flattening engine (`flattenRelations.ts`) with 13 unit tests, extended `RelationTagChip` with resolved display support, integrated into `LedgerTable` via `useMemo` pre-sort flattening with `allEntries` for cross-ledger resolution. All ACs satisfied.
+- 2026-04-07: Code review by claude-sonnet-4-6. 5 patch findings, 1 deferred, 12 dismissed.

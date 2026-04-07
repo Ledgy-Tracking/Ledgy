@@ -166,7 +166,7 @@ describe('flattenEntry', () => {
         expect(result.resolvedRelations?.ref?.[0].isGhost).toBe(true);
     });
 
-    it('3.6 — cycle: A.ref=B, B.ref=A → second visit returns "[Circular]", isGhost false', () => {
+    it('3.6 — cycle: A.ref=B, B.ref=A → second visit returns "[Circular]", isGhost true', () => {
         const schemaA = makeSchema('s:A', [{ name: 'ref', type: 'relation', relationTarget: 's:B' }]);
         const schemaB = makeSchema('s:B', [{ name: 'ref', type: 'relation', relationTarget: 's:A' }]);
         const entryA = makeEntry('e:A', 's:A', { ref: 'e:B' });
@@ -188,7 +188,7 @@ describe('flattenEntry', () => {
         const visitedB = new Set<string>(['e:A']);
         const resultB = flattenEntry(entryB, schemaB, allEntries, allSchemas, 0, 3, visitedB);
         expect(resultB.resolvedRelations?.ref?.[0].displayValue).toBe('[Circular]');
-        expect(resultB.resolvedRelations?.ref?.[0].isGhost).toBe(false);
+        expect(resultB.resolvedRelations?.ref?.[0].isGhost).toBe(true);
     });
 
     it('3.7 — missing schema: schema undefined → resolvedRelations is empty {}', () => {

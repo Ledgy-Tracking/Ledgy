@@ -21,3 +21,7 @@
 - **[D9][Low] `applyMutationsReverse` for `delete` bypasses schema validation** — restoring an old snapshot via `db.updateDocument` skips `validateEntryAgainstSchema`. If the schema added required fields after the entry was deleted, the restored document may not satisfy the current schema.
 
 - **[D10][Low] Unhandled non-conflict error in `useUndoRedoShortcuts`** — if `undoAction/redoAction` re-throws a non-409 error, `fetchEntries` is skipped and the rejection propagates to the window event handler, silently swallowed by the browser with no user feedback.
+
+## Deferred from: code review of 3-16-relational-data-flattening-engine (2026-04-07)
+
+- **[D11][High] Cross-ledger entries silently show as `[Deleted]` when target ledger's entries are not loaded** — `allEntries` in `useLedgerStore` is only populated per explicit `fetchEntries` call. If a relation field points to a ledger whose entries haven't been loaded, `allEntriesByLedgerId[targetLedgerId]` returns `[]` and every target appears as `[Deleted]` with no user-facing indication. Needs a loading guard or cross-ledger prefetch strategy. (`src/lib/flattenRelations.ts`, `src/features/ledger/LedgerTable.tsx`)

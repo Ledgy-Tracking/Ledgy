@@ -456,7 +456,7 @@ describe('Ghost Reference Rendering', () => {
             // Both chips should render - Story 3-16 resolves deleted → "[Deleted]", active → UUID suffix
             const deletedBadges = screen.queryAllByText('[Deleted]');
             // 'entry:active' has no text fields → UUID suffix fallback (last 8 chars of 'entry:active')
-            const activeBadges = screen.queryAllByText(/y:active/);
+            const activeBadges = screen.queryAllByText('…y:active');
 
             expect(deletedBadges.length).toBeGreaterThan(0);
             expect(activeBadges.length).toBeGreaterThan(0);
