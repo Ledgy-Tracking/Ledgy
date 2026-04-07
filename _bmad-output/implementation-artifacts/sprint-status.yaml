@@ -85,7 +85,7 @@ development_status:
   epic-3-retrospective: optional
 
   epic-4: in-progress
-  4-1-react-flow-canvas-core-viewport: ready-for-dev
+  4-1-react-flow-canvas-core-viewport: review
   4-2-node-store-debounced-persistence: backlog
   4-3-minimap-zoom-to-fit-controls: backlog
   4-4-ledger-source-node-component: backlog

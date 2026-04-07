@@ -1,6 +1,6 @@
 # Story 4.1: React Flow Canvas Core & Viewport
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -20,32 +20,32 @@ so that I can build and navigate visual node graphs without being constrained by
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Delete stale localStorage-based store (AC: #4)
-  - [ ] 1.1 Delete `src/features/nodeEditor/useNodeStore.ts` (localStorage store — superseded by `src/stores/useNodeStore.ts`)
-  - [ ] 1.2 Delete `src/features/nodeEditor/useNodeStore.test.ts` (tests the deleted store)
-  - [ ] 1.3 Verify no imports of `../../features/nodeEditor/useNodeStore` or `./useNodeStore` from the nodeEditor feature folder remain; fix any if found
+- [x] Task 1 — Delete stale localStorage-based store (AC: #4)
+  - [x] 1.1 Delete `src/features/nodeEditor/useNodeStore.ts` (localStorage store — superseded by `src/stores/useNodeStore.ts`)
+  - [x] 1.2 Delete `src/features/nodeEditor/useNodeStore.test.ts` (tests the deleted store)
+  - [x] 1.3 Verify no imports of `../../features/nodeEditor/useNodeStore` or `./useNodeStore` from the nodeEditor feature folder remain; fix any if found
 
-- [ ] Task 2 — Fix type casts in `NodeCanvas.tsx` (AC: #5)
-  - [ ] 2.1 Change `const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([])` to `useNodesState<CanvasNode>([])`; import `CanvasNode` from `../../types/nodeEditor`
-  - [ ] 2.2 Change `const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([])` to `useEdgesState<CanvasEdge>([])`; import `CanvasEdge` from `../../types/nodeEditor`
-  - [ ] 2.3 Remove `as unknown as Node[]`, `as unknown as Edge[]`, `as unknown as CanvasNode[]`, and `as any` casts from `setRfNodes`, `setRfEdges`, and `saveCanvas` call sites
-  - [ ] 2.4 Run `npx tsc --noEmit` and fix any new type errors introduced
+- [x] Task 2 — Fix type casts in `NodeCanvas.tsx` (AC: #5)
+  - [x] 2.1 Change `const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([])` to `useNodesState<CanvasNode>([])`; import `CanvasNode` from `../../types/nodeEditor`
+  - [x] 2.2 Change `const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([])` to `useEdgesState<CanvasEdge>([])`; import `CanvasEdge` from `../../types/nodeEditor`
+  - [x] 2.3 Remove `as unknown as Node[]`, `as unknown as Edge[]`, `as unknown as CanvasNode[]`, and `as any` casts from `setRfNodes`, `setRfEdges`, and `saveCanvas` call sites
+  - [x] 2.4 Run `npx tsc --noEmit` and fix any new type errors introduced
 
-- [ ] Task 3 — Reduce debounce from 3s to 1s (AC: #3)
-  - [ ] 3.1 In `NodeCanvas.tsx`, change the `setTimeout` delay from `3000` to `1000`
-  - [ ] 3.2 Update the comment to reflect the 1-second debounce
+- [x] Task 3 — Reduce debounce from 3s to 1s (AC: #3)
+  - [x] 3.1 In `NodeCanvas.tsx`, change the `setTimeout` delay from `3000` to `1000`
+  - [x] 3.2 Update the comment to reflect the 1-second debounce
 
-- [ ] Task 4 — Write unit tests for `src/stores/useNodeStore.ts` (AC: #6)
-  - [ ] 4.1 Create `src/stores/useNodeStore.test.ts`
-  - [ ] 4.2 Mock `src/lib/db` (`getProfileDb`, `save_canvas`, `load_canvas`) and `src/features/auth/useAuthStore` using `vi.mock`
-  - [ ] 4.3 Test: initial state has `nodes: []`, `edges: []`, `viewport: { x:0, y:0, zoom:1 }`, `isLoading: false`, `error: null`
-  - [ ] 4.4 Test: `setNodes([...])` updates nodes in store
-  - [ ] 4.5 Test: `setEdges([...])` updates edges in store
-  - [ ] 4.6 Test: `setViewport({x:100, y:200, zoom:1.5})` updates viewport in store
-  - [ ] 4.7 Test: `updateNodeData('id', { label: 'new' })` merges data into matching node
-  - [ ] 4.8 Test: `clearProfileData()` resets all state back to initial values
-  - [ ] 4.9 Test: `loadCanvas` — when `load_canvas` mock returns a canvas doc, nodes/edges/viewport are set; when it returns null, state falls back to empty defaults
-  - [ ] 4.10 Test: `saveCanvas` — calls `save_canvas` with correct args when `isUnlocked: true`; returns early when `isUnlocked: false`
+- [x] Task 4 — Write unit tests for `src/stores/useNodeStore.ts` (AC: #6)
+  - [x] 4.1 Create `src/stores/useNodeStore.test.ts`
+  - [x] 4.2 Mock `src/lib/db` (`getProfileDb`, `save_canvas`, `load_canvas`) and `src/features/auth/useAuthStore` using `vi.mock`
+  - [x] 4.3 Test: initial state has `nodes: []`, `edges: []`, `viewport: { x:0, y:0, zoom:1 }`, `isLoading: false`, `error: null`
+  - [x] 4.4 Test: `setNodes([...])` updates nodes in store
+  - [x] 4.5 Test: `setEdges([...])` updates edges in store
+  - [x] 4.6 Test: `setViewport({x:100, y:200, zoom:1.5})` updates viewport in store
+  - [x] 4.7 Test: `updateNodeData('id', { label: 'new' })` merges data into matching node
+  - [x] 4.8 Test: `clearProfileData()` resets all state back to initial values
+  - [x] 4.9 Test: `loadCanvas` — when `load_canvas` mock returns a canvas doc, nodes/edges/viewport are set; when it returns null, state falls back to empty defaults
+  - [x] 4.10 Test: `saveCanvas` — calls `save_canvas` with correct args when `isUnlocked: true`; returns early when `isUnlocked: false`
 
 ## Dev Notes
 
@@ -118,19 +118,29 @@ so that I can build and navigate visual node graphs without being constrained by
 
 ### Agent Model Used
 
-_To be filled by dev agent_
+claude-sonnet-4-6
 
 ### Debug Log References
 
-_To be filled by dev agent_
+- Verified pre-existing TS errors in SchemaBuilder.tsx (`setDraftName`) are unrelated to this story — zero new errors introduced.
+- Confirmed the 21 remaining test failures are all pre-existing (SchemaBuilder, Dashboard, ArithmeticNode, AppShell, etc.) — my changes introduced zero new failures and actually fixed 4 previously-broken test files.
+- `memorySweeps.test.ts` was importing from stale `features/nodeEditor/useNodeStore` — updated import to canonical `./useNodeStore` in `src/stores/`.
 
 ### Completion Notes List
 
-_To be filled by dev agent_
+- Deleted stale localStorage-based `src/features/nodeEditor/useNodeStore.ts` and its test file.
+- Updated `src/stores/memorySweeps.test.ts` to import `useNodeStore` from the canonical store path.
+- Fixed `NodeCanvas.tsx`: replaced `useNodesState<Node>` → `useNodesState<CanvasNode>`, `useEdgesState<Edge>` → `useEdgesState<CanvasEdge>`, and removed all `as unknown as` / `as any` casts from `setRfNodes`, `setRfEdges`, `saveCanvas` call sites, and type annotations in callbacks.
+- Reduced debounce delay in `NodeCanvas.tsx` from 3000ms to 1000ms.
+- Created `src/stores/useNodeStore.test.ts` with 10 passing tests covering all AC#6 requirements (initial state, setNodes, setEdges, setViewport, updateNodeData, clearProfileData, loadCanvas with/without data, saveCanvas locked/unlocked).
 
 ### File List
 
-_To be filled by dev agent_
+- `src/features/nodeEditor/useNodeStore.ts` — DELETED (stale localStorage scaffold)
+- `src/features/nodeEditor/useNodeStore.test.ts` — DELETED (tests the deleted store)
+- `src/features/nodeEditor/NodeCanvas.tsx` — MODIFIED (type fixes, debounce reduced to 1s)
+- `src/stores/memorySweeps.test.ts` — MODIFIED (import updated to canonical store)
+- `src/stores/useNodeStore.test.ts` — CREATED (10 unit tests for canonical store)
 
 ### Review Findings
 
@@ -139,3 +149,4 @@ _To be filled by code review agent_
 ## Change Log
 
 - 2026-04-07: Story created by claude-sonnet-4-6 (create-story workflow).
+- 2026-04-08: Story implemented by claude-sonnet-4-6. Deleted stale localStorage store, fixed NodeCanvas.tsx type casts, reduced debounce to 1s, created 10-test unit suite for useNodeStore. All ACs satisfied.
