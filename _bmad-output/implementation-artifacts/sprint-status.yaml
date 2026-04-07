@@ -85,21 +85,23 @@ development_status:
   epic-3-retrospective: optional
 
   epic-4: in-progress
-  4-1-react-flow-canvas-core-viewport: review
-  4-2-node-store-debounced-persistence: backlog
-  4-3-minimap-zoom-to-fit-controls: backlog
-  4-4-ledger-source-node-component: backlog
-  4-5-correlation-node-math-component: backlog
-  4-6-complex-edge-connection-snapping: backlog
-  4-7-strict-edge-type-validation: backlog
-  4-8-sub-graph-container-grouping: backlog
-  4-9-graph-pouchdb-hydration-hooks: backlog
-  4-10-web-worker-computation-offloading: backlog
-  4-11-cyclic-dependency-prevention-engine: backlog
-  4-12-autonomous-trigger-nodes-on-create: backlog
-  4-13-autonomous-trigger-action-nodes: backlog
-  4-14-trigger-execution-depth-limiter: backlog
-  4-15-node-engine-keyboard-shortcuts-group-ops: backlog
+  4-1-workflow-script-list-and-management: backlog
+  4-2-react-flow-canvas-core-viewport: backlog
+  4-3-node-store-debounced-persistence: backlog
+  4-4-minimap-zoom-to-fit-controls: backlog
+  4-5-ledger-source-node-component: backlog
+  4-6-correlation-node-math-component: backlog
+  4-7-complex-edge-connection-snapping: backlog
+  4-8-strict-edge-type-validation: backlog
+  4-9-sub-graph-container-grouping: backlog
+  4-10-graph-pouchdb-hydration-hooks: backlog
+  4-11-web-worker-computation-offloading: backlog
+  4-12-cyclic-dependency-prevention-engine: backlog
+  4-13-autonomous-trigger-nodes-on-create: backlog
+  4-14-autonomous-trigger-action-nodes: backlog
+  4-15-trigger-execution-depth-limiter: backlog
+  4-16-node-engine-keyboard-shortcuts-group-ops: backlog
+  4-17-profile-scoped-cross-project-workflow-engine: backlog
   epic-4-retrospective: optional
 
   epic-5: backlog

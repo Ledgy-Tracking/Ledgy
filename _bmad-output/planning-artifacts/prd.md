@@ -20,10 +20,12 @@ classification:
   complexity: 'medium'
   projectContext: 'brownfield'
 date: '2026-02-28'
-lastEdited: '2026-02-28'
+lastEdited: '2026-04-08'
 editHistory:
   - date: '2026-02-28'
     changes: 'Rewrote FRs and NFRs to BMAD standards; added Project-Type section; added test metrics to Success Criteria; covered broken traceability with new User Journeys.'
+  - date: '2026-04-08'
+    changes: 'Added missing Node Forge FRs for multi-workflow-per-project and cross-project profile-scoped workflows (recovered from brainstorming FP8 and Stage 4 roadmap intent).'
 ---
 
 # Product Requirements Document - ledgy
@@ -189,6 +191,10 @@ The system requires exhaustive capability specifications to ensure all functiona
 - **FR28:** Users can insert specific "Trigger Nodes" that autonomously initiate logic flow executions based on defined events (e.g., "On Entry Created in Ledger X", "On Scheduled Interval").
 - **FR29:** Users can insert "Operator Nodes" providing native support for arithmetic (Add, Subtract), logic (If/Else, AND/OR), temporal calculations (Date Diff), and string manipulation capabilities.
 - **FR30:** Users can interact with nodes seamlessly; canvas panning, zooming, and node repositioning must execute without lagging the underlying application state.
+- **FR44:** Users can create, rename, and delete named node workflow scripts within a project, with each workflow maintaining its own independent canvas, node graph, and execution state.
+- **FR45:** The Node Forge home screen for a project displays a list of all workflow scripts belonging to that project, showing each workflow's name, last-modified date, and a one-line description, allowing users to open any workflow or create a new one.
+- **FR46:** Users can create profile-level cross-project workflow scripts that source input data from ledgers across multiple projects, enabling correlations and automations that span project boundaries.
+- **FR47:** The system scopes workflow script execution appropriately: project-scoped workflows can only read and write ledgers within their parent project; profile-scoped workflows can read from any project ledger within the active profile but require explicit user permission grants per project at workflow creation time.
 
 ### 5. Sync Engine, Administration & Security
 - **FR31:** The system can automatically detect the presence of network connectivity and resume the replication of incremental data deltas to the user's configured remote storage endpoint.

@@ -17,7 +17,7 @@ This document provides the deeply granular epic and atomic story breakdown for l
 1. **Epic 1: App Foundation & Core Security** (11 Stories)
 2. **Epic 2: Profiles & Project Management** (8 Stories)
 3. **Epic 3: Relational Ledger Engine** (16 Stories)
-4. **Epic 4: Node Forge (Visual Scripting Engine)** (15 Stories)
+4. **Epic 4: Node Forge (Visual Scripting Engine)** (17 Stories)
 5. **Epic 5: Dashboard & Live Widgets** (7 Stories)
 6. **Epic 6: Offline Sync, Conflicts & Data Sovereignty** (10 Stories)
 7. **Epic 7: Plugin Runtime & AI Capture** (8 Stories)
@@ -78,23 +78,25 @@ The absolute core of the data layer. 15 atomic stories capturing the validation,
 ---
 
 ## Epic 4: Node Forge (Visual Scripting Engine)
-The drag-and-drop workspace where schemas talk to each other.
+The drag-and-drop workspace where schemas talk to each other. Each project contains multiple named, independent workflow scripts; Node Forge opens to a workflow list where users pick or create a workflow before editing its canvas.
 
-- **4.1 React Flow Canvas Core & Viewport:** The main infinite `<ReactFlow>` wrapper spanning the screen layout.
-- **4.2 Node Store & Debounced Persistence:** The global state tracking X/Y coordinates, serializing to PouchDB 1 second after drag stop.
-- **4.3 Minimap & Zoom-to-Fit Controls:** The HUD elements allowing fast navigation of massive 100+ node graphs.
-- **4.4 Ledger Source Node Component:** Visual block exposing a ledger's schema fields as hookable outputs.
-- **4.5 Correlation Node (Math) Component:** Visual block defining basic arithmetic or Pearson's coefficient targets.
-- **4.6 Complex Edge Connection Snapping:** The magnetic wire logic connecting node handles.
-- **4.7 Strict Edge Type Validation:** Logic to explicitly reject wiring a Text output into a Date input, dropping the dragged wire gracefully.
-- **4.8 Sub-Graph Container Grouping:** Ability to lasso 5 nodes and bundle them into a single parent folder node for workspace tidiness.
-- **4.9 Graph PouchDB Hydration Hooks:** The real-time queries pushing live ledger numbers into the visual Graph memory.
-- **4.10 Web Worker Computation Offloading:** Thread isolation so complex Pearson correlation math on 10k rows doesn't freeze the canvas pan/zoom thread.
-- **4.11 Cyclic Dependency Prevention Engine:** The traversal algorithm executing on wire-drop that throws an error if A triggers B triggers A.
-- **4.12 Autonomous Trigger Nodes (On-Create):** Nodes listening to the global event bus for specific Ledger mutations to fire.
-- **4.13 Autonomous Trigger Action Nodes:** The final tail nodes that successfully write *new* data back into PouchDB autonomously.
-- **4.14 Trigger Execution Depth Limiter:** The safety circuit breaker stopping rogue scripts after 100 recursive hops.
-- **4.15 Node Engine Keyboard Shortcuts & Group Ops:** `Shift+Click` multi-select, copy (`Cmd+C`), paste (`Cmd+V`) graph segments, and `Delete`.
+- **4.1 Workflow Script List & Management:** The home screen for Node Forge within a project — lists all named workflow scripts, supports create, rename, and delete operations, and navigates into the selected workflow's canvas.
+- **4.2 React Flow Canvas Core & Viewport:** The main infinite `<ReactFlow>` wrapper scoped to a single named workflow, spanning the screen layout when a workflow is opened from the list.
+- **4.3 Node Store & Debounced Persistence:** The global state tracking X/Y coordinates, serializing to PouchDB 1 second after drag stop.
+- **4.4 Minimap & Zoom-to-Fit Controls:** The HUD elements allowing fast navigation of massive 100+ node graphs.
+- **4.5 Ledger Source Node Component:** Visual block exposing a ledger's schema fields as hookable outputs.
+- **4.6 Correlation Node (Math) Component:** Visual block defining basic arithmetic or Pearson's coefficient targets.
+- **4.7 Complex Edge Connection Snapping:** The magnetic wire logic connecting node handles.
+- **4.8 Strict Edge Type Validation:** Logic to explicitly reject wiring a Text output into a Date input, dropping the dragged wire gracefully.
+- **4.9 Sub-Graph Container Grouping:** Ability to lasso 5 nodes and bundle them into a single parent folder node for workspace tidiness.
+- **4.10 Graph PouchDB Hydration Hooks:** The real-time queries pushing live ledger numbers into the visual Graph memory.
+- **4.11 Web Worker Computation Offloading:** Thread isolation so complex Pearson correlation math on 10k rows doesn't freeze the canvas pan/zoom thread.
+- **4.12 Cyclic Dependency Prevention Engine:** The traversal algorithm executing on wire-drop that throws an error if A triggers B triggers A.
+- **4.13 Autonomous Trigger Nodes (On-Create):** Nodes listening to the global event bus for specific Ledger mutations to fire.
+- **4.14 Autonomous Trigger Action Nodes:** The final tail nodes that successfully write *new* data back into PouchDB autonomously.
+- **4.15 Trigger Execution Depth Limiter:** The safety circuit breaker stopping rogue scripts after 100 recursive hops.
+- **4.16 Node Engine Keyboard Shortcuts & Group Ops:** `Shift+Click` multi-select, copy (`Cmd+C`), paste (`Cmd+V`) graph segments, and `Delete`.
+- **4.17 Profile-Scoped Cross-Project Workflow Engine:** Profile-level workflows that can source ledger data from multiple projects simultaneously, enabling cross-domain correlations and automations beyond a single project's boundary.
 
 ---
 

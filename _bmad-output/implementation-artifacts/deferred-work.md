@@ -25,3 +25,17 @@
 ## Deferred from: code review of 3-16-relational-data-flattening-engine (2026-04-07)
 
 - **[D11][High] Cross-ledger entries silently show as `[Deleted]` when target ledger's entries are not loaded** — `allEntries` in `useLedgerStore` is only populated per explicit `fetchEntries` call. If a relation field points to a ledger whose entries haven't been loaded, `allEntriesByLedgerId[targetLedgerId]` returns `[]` and every target appears as `[Deleted]` with no user-facing indication. Needs a loading guard or cross-ledger prefetch strategy. (`src/lib/flattenRelations.ts`, `src/features/ledger/LedgerTable.tsx`)
+
+## Deferred from: code review of 4-1-react-flow-canvas-core-viewport (2026-04-08)
+
+- **[W1][Med] `handleAddFirstNode` positions node in screen pixels, not viewport-space coordinates** — `window.innerWidth/2 - 100` is not corrected for pan/zoom; node appears off-center at non-default viewports. (`src/features/nodeEditor/NodeCanvas.tsx:148`)
+
+- **[W2][Med] `saveCanvas` catch block never updates `state.error`** — errors are dispatched to `useErrorStore` but `useNodeStore.error` stays null, inconsistent with `loadCanvas` which does set `state.error`. (`src/stores/useNodeStore.ts`)
+
+- **[W3][Med] `save_canvas` has no PouchDB revision/conflict handling** — two concurrent tab sessions can both call `save_canvas` within the debounce window and the second write silently overwrites the first with no conflict detection. (`src/lib/db.ts`)
+
+- **[W4][Med] Store `onNodesChange`/`onEdgesChange` defined but never wired to `<ReactFlow>`** — `NodeCanvas` uses `useNodesState`'s handlers, not the store's. The store's `nodes` diverges from React Flow local state after any drag/select, breaking any store-driven subscriber or `updateNodeData` call. (`src/stores/useNodeStore.ts`, `src/features/nodeEditor/NodeCanvas.tsx`)
+
+- **[W5][Low] `Date.now()`-based node ID not collision-resistant** — rapid programmatic adds within the same millisecond produce duplicate IDs; React Flow silently discards or merges duplicate nodes. (`src/features/nodeEditor/NodeCanvas.tsx:149`)
+
+- **[W6][Low] Auth-lock asymmetry: `loadCanvas` throws on locked vault, `saveCanvas` silently no-ops** — a mid-session vault lock causes saves to silently discard with no user feedback. (`src/stores/useNodeStore.ts`)
