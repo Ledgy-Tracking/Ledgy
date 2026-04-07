@@ -5,8 +5,6 @@ import {
     Background,
     Controls,
     MiniMap,
-    Node,
-    Edge,
     IsValidConnection,
     useNodesState,
     useEdgesState,
@@ -18,7 +16,7 @@ import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
-import { CanvasNode } from '../../types/nodeEditor';
+import { CanvasNode, CanvasEdge } from '../../types/nodeEditor';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
@@ -72,8 +70,8 @@ export const NodeCanvas: React.FC = () => {
     const initialViewport = useMemo(() => useNodeStore.getState().viewport, []);
 
     // 2. React Flow State (Local ownership)
-    const [rfNodes, setRfNodes, onNodesChange] = useNodesState<Node>([]);
-    const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<Edge>([]);
+    const [rfNodes, setRfNodes, onNodesChange] = useNodesState<CanvasNode>([]);
+    const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<CanvasEdge>([]);
 
     const loadedRef = useRef(false);
     const renderCountRef = useRef(0);
@@ -93,8 +91,8 @@ export const NodeCanvas: React.FC = () => {
 
         useNodeStore.getState().loadCanvas(activeProfileId, projectId).then(() => {
             const { nodes, edges } = useNodeStore.getState();
-            setRfNodes(nodes as unknown as Node[]);
-            setRfEdges(edges as unknown as Edge[]);
+            setRfNodes(nodes);
+            setRfEdges(edges);
         });
     }, [activeProfileId, projectId, setRfNodes, setRfEdges]);
 
@@ -106,10 +104,10 @@ export const NodeCanvas: React.FC = () => {
             useNodeStore.getState().saveCanvas(
                 activeProfileId,
                 projectId,
-                rfNodes as unknown as CanvasNode[],
-                rfEdges as any
+                rfNodes,
+                rfEdges
             );
-        }, 3000); // 3s debounce for stability
+        }, 1000); // 1s debounce — saves after 1 second of inactivity
 
         return () => clearTimeout(timer);
     }, [rfNodes, rfEdges, activeProfileId, projectId]);
@@ -136,7 +134,7 @@ export const NodeCanvas: React.FC = () => {
         return targetType === 'any' || sourceType === 'any' || sourceType === targetType;
     }, []);
 
-    const handleSelectionChange = useCallback(({ nodes: selected }: { nodes: Node[] }) => {
+    const handleSelectionChange = useCallback(({ nodes: selected }: { nodes: CanvasNode[] }) => {
         const first = selected[0];
         if (first) {
             setSelectedNodeId(first.id);
@@ -147,7 +145,7 @@ export const NodeCanvas: React.FC = () => {
     }, [setSelectedNodeId, setRightInspector]);
 
     const handleAddFirstNode = useCallback(() => {
-        const newNode: Node = {
+        const newNode: CanvasNode = {
             id: `ledgerSource-${Date.now()}`,
             type: 'ledgerSource',
             position: { x: window.innerWidth / 2 - 100, y: window.innerHeight / 2 - 100 },

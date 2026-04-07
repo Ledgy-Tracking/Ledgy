@@ -3,7 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { useProfileStore } from '../features/profiles/useProfileStore';
 import { useLedgerStore } from '../features/ledger/useLedgerStore';
-import { useNodeStore } from '../features/nodeEditor/useNodeStore';
+import { useNodeStore } from './useNodeStore';
 import { useDashboardStore } from '../features/dashboard/useDashboardStore';
 import { useSyncStore } from '../features/sync/useSyncStore';
 import { useEffect } from 'react';
