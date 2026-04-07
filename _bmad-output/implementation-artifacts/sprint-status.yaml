@@ -33,7 +33,7 @@
 # - SM typically creates next story after previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
-generated: 2026-03-15 01:57
+generated: 2026-04-08
 project: ledgy
 project_key: NOKEY
 tracking_system: file-system
@@ -85,7 +85,7 @@ development_status:
   epic-3-retrospective: optional
 
   epic-4: in-progress
-  4-1-workflow-script-list-and-management: backlog
+  4-1-workflow-script-list-and-management: ready-for-dev
   4-2-react-flow-canvas-core-viewport: backlog
   4-3-node-store-debounced-persistence: backlog
   4-4-minimap-zoom-to-fit-controls: backlog
