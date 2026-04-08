@@ -37,3 +37,8 @@
 **Vulnerability:** The rate limiter generated an HMAC key, stored it in `localStorage`, and used it to sign the rate limit state, which was also stored in `localStorage`. This provides no tamper resistance since an attacker modifying `localStorage` can simply read the key and forge a valid signature for their modified state.
 **Learning:** Storing cryptographic keys (like an HMAC key) in the same client-side storage as the data they are meant to protect is security theater. It provides a false sense of security against tampering.
 **Prevention:** Avoid implementing complex cryptographic signature mechanisms for client-side state where the key material cannot be kept secure from the client itself. Rely on server-side validation or accept that client-side state is fundamentally untrusted.
+
+## 2024-05-25 - Redundant HTTPS Validation Breaking Local Network Access
+**Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
+**Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
+**Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
