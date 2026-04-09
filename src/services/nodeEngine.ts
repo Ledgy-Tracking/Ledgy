@@ -76,7 +76,11 @@ class NodeEngine {
                             const sourceData = nodeResults.get(edge.source);
                             const val = sourceData?.[edge.sourceHandle!];
                             if (Array.isArray(val)) {
-                                inputValues.push(...val);
+                                // ⚡ Bolt: Use for-loop instead of push(...val) to avoid "Maximum call stack size exceeded"
+                                // errors and improve performance when dealing with large datasets.
+                                for (let i = 0; i < val.length; i++) {
+                                    inputValues.push(val[i]);
+                                }
                             } else if (typeof val === 'number') {
                                 inputValues.push(val);
                             }
