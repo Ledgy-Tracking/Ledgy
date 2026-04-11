@@ -225,7 +225,7 @@ export const NodeCanvas: React.FC = () => {
 
     if (nodes.length === 0 && !isLoading && loadedWorkflowRef.current === workflowId) {
         return (
-            <div style={{ width: '100%', height: '100dvh' }} className="bg-white dark:bg-zinc-950 relative">
+            <div style={{ width: '100%', height: '100%' }} className="bg-white dark:bg-zinc-950 relative">
                 <EmptyCanvasGuide onAddFirstNode={handleAddFirstNode} />
                 <ReactFlow
                     nodes={nodes}
@@ -248,7 +248,7 @@ export const NodeCanvas: React.FC = () => {
     }
 
     return (
-        <div style={{ width: '100%', height: '100dvh' }} className="bg-white dark:bg-zinc-950 relative">
+        <div style={{ width: '100%', height: '100%' }} className="bg-white dark:bg-zinc-950 relative">
             <ReactFlow
                 nodes={nodes}
                 edges={edges}

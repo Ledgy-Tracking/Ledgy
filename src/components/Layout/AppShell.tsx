@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Outlet, useLocation } from 'react-router-dom';
+import { useNavigate, useParams, Outlet, useLocation, useMatch } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -67,6 +67,7 @@ export const AppShell: React.FC = () => {
     const [selectedConflict, setSelectedConflict] = useState<ConflictEntry | null>(null);
     const [dashboardViewMode, setDashboardViewMode] = useState<'grid' | 'table'>('grid');
     const { syncStatus, conflicts } = useSyncStore();
+    const isNodeForgeCanvas = useMatch('/app/:profileId/project/:projectId/node-forge/:workflowId');
     const { lock } = useAuthStore();
 
     // Fetch profile name for display
@@ -470,9 +471,15 @@ export const AppShell: React.FC = () => {
                     </TooltipProvider>
 
                     {/* Viewport Content */}
-                    <ScrollArea className="flex-1 p-6 bg-zinc-50 dark:bg-zinc-950">
-                        <Outlet />
-                    </ScrollArea>
+                    {isNodeForgeCanvas ? (
+                        <div className="flex-1 overflow-hidden min-h-0">
+                            <Outlet />
+                        </div>
+                    ) : (
+                        <ScrollArea className="flex-1 p-6 bg-zinc-50 dark:bg-zinc-950">
+                            <Outlet />
+                        </ScrollArea>
+                    )}
                 </main>
 
                 {/* Right Inspector Panel */}
