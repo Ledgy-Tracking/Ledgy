@@ -15,7 +15,7 @@ import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
 import { CanvasNode } from '../../types/nodeEditor';
-import { useShallow } from 'zustand/react';
+import { useShallow } from 'zustand/react/shallow';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
