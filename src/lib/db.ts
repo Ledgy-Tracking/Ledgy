@@ -109,6 +109,36 @@ export class Database {
         }
     }
 
+    /**
+     * Create-or-update a document with a known, deterministic ID.
+     * Use this when the caller owns the ID (e.g. canvas:workflowId).
+     * Unlike createDocument, this does NOT auto-generate a UUID.
+     */
+    async upsertDocument<T extends object>(id: string, data: T): Promise<PouchDB.Core.Response> {
+        validateDocumentFields(data as Partial<LedgyDocument>);
+        const now = new Date().toISOString();
+        try {
+            const existing = await this.db.get<LedgyDocument>(id);
+            const { _id, _rev, createdAt, type, ...restData } = data as any;
+            return await this.db.put({
+                ...existing,
+                ...restData,
+                updatedAt: now,
+            });
+        } catch (e: any) {
+            if (e.status === 404) {
+                const { _id: _i, _rev: _r, ...restData } = data as any;
+                return await this.db.put({
+                    _id: id,
+                    createdAt: now,
+                    updatedAt: now,
+                    ...restData,
+                });
+            }
+            throw e;
+        }
+    }
+
     async removeRevision(id: string, rev: string): Promise<PouchDB.Core.Response> {
         return await this.db.remove(id, rev);
     }
@@ -1361,19 +1391,8 @@ export async function save_canvas(
         canvasData.edges = edges;
     }
 
-    try {
-        // Try to get existing canvas
-        await db.getDocument<NodeCanvas>(canvasDocId);
-        await db.updateDocument(canvasDocId, canvasData);
-        return canvasDocId;
-    } catch (e: any) {
-        if (e.status === 404) {
-            // Canvas doesn't exist, create it
-            const response = await db.createDocument<NodeCanvas>('canvas', canvasData);
-            return response.id;
-        }
-        throw e;
-    }
+    await db.upsertDocument(canvasDocId, canvasData);
+    return canvasDocId;
 }
 
 /**

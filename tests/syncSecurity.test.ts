@@ -14,7 +14,7 @@ describe('Sync Security Validation', () => {
             continuous: true
         };
 
-        expect(() => setup_sync('test-profile', config)).toThrow(/Insecure Connection: Remote URL must use HTTPS/);
+        expect(() => setup_sync('test-profile', config)).toThrow(/Insecure connection: HTTPS is required/);
     });
 
     it('allows setup_sync with HTTP on localhost', () => {
