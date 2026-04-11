@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { applyNodeChanges, applyEdgeChanges } from '@xyflow/react';
 import { useNodeStore } from './useNodeStore';
 
 // Mock db module (save_canvas, load_canvas, getProfileDb)

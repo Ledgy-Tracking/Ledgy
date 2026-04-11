@@ -8,6 +8,7 @@ import {
     IsValidConnection,
     Connection,
     OnConnect,
+    Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
@@ -50,9 +51,10 @@ const defaultEdgeOptions = {
  * Store Integration:
  * 1. Subscribes to useNodeStore.nodes/edges via useShallow for shallow comparison.
  * 2. Uses store's onNodesChange/onEdgesChange to keep Zustand store in sync with RF.
- * 3. Handles workflowId changes via loadedWorkflowRef reset.
- * 4. Debounced save with workflowId captured in ref to prevent cross-workflow saves.
+ * 3. Handles workflowId changes via proper debounce cleanup.
+ * 4. Uses store's debouncedSaveCanvas for persistence.
  * 5. Viewport-space node positioning for handleAddFirstNode.
+ * 6. Event handlers wired to trigger debounced saves.
  */
 export const NodeCanvas: React.FC = () => {
     // 1. Precise selectors for stable dependencies
@@ -79,17 +81,22 @@ export const NodeCanvas: React.FC = () => {
         console.warn(`[NodeCanvas] High render count detected: ${renderCountRef.current}. Nodes: ${nodes.length}`);
     }
 
-    // Task 1: Reset loadedRef when workflowId changes
+    // Reset loadedRef when workflowId changes
     useEffect(() => {
         loadedWorkflowRef.current = null;
     }, [workflowId]);
 
-    // 3. Initial Load (per workflowId)
+    // Initial Load (per workflowId) - with proper cleanup
     useEffect(() => {
         if (!activeProfileId || !projectId || !workflowId) return;
         if (loadedWorkflowRef.current === workflowId) return;
 
         console.log('[NodeCanvas] Initial load triggered');
+        
+        // CRITICAL ORDER: 1. Clear debounce, 2. Mark not loaded, 3. Load
+        useNodeStore.getState().clearDebouncedSave();
+        useNodeStore.getState().setIsCanvasLoaded(false);
+        
         loadedWorkflowRef.current = workflowId;
         loadAbortRef.current = false;
 
@@ -97,53 +104,65 @@ export const NodeCanvas: React.FC = () => {
             .catch(() => { /* load errors handled in store */ });
     }, [activeProfileId, projectId, workflowId]);
 
+    // Cleanup on unmount or workflow change
     useEffect(() => {
         return () => {
             loadAbortRef.current = true;
+            useNodeStore.getState().clearDebouncedSave();
         };
     }, [workflowId]);
 
-    // Task 3: Debounced Save with workflowId captured in ref to prevent cross-workflow saves
-    const workflowIdRef = useRef<string | null>(workflowId ?? null);
-    useEffect(() => { workflowIdRef.current = workflowId ?? null; }, [workflowId]);
-
-    useEffect(() => {
-        if (loadedWorkflowRef.current !== workflowId || !activeProfileId || !projectId || !workflowId) return;
-
-        const currentWorkflowId = workflowIdRef.current;
-        const timer = setTimeout(() => {
-            if (workflowIdRef.current !== currentWorkflowId) return;
-            useNodeStore.getState().saveCanvas(
-                activeProfileId,
-                projectId,
-                workflowIdRef.current!,
-                nodes,
-                edges
-            );
-        }, 1000);
-
-        return () => clearTimeout(timer);
-    }, [nodes, edges, activeProfileId, projectId, workflowId]);
-
     // 5. Stable Handlers - use store's onConnect to keep store in sync
+    // Task 5: Wire structural changes to debounced save
     const onNodesChange = useCallback(
-        (changes: any) => useNodeStore.getState().onNodesChange(changes),
+        (changes: any) => {
+            useNodeStore.getState().onNodesChange(changes);
+            // React Flow batches multiple changes into single callback
+            // Call debounced save after structural changes
+            if (changes.length > 0) {
+                useNodeStore.getState().debouncedSaveCanvas();
+            }
+        },
         []
     );
 
     const onEdgesChange = useCallback(
-        (changes: any) => useNodeStore.getState().onEdgesChange(changes),
+        (changes: any) => {
+            useNodeStore.getState().onEdgesChange(changes);
+            // Call debounced save after structural changes
+            if (changes.length > 0) {
+                useNodeStore.getState().debouncedSaveCanvas();
+            }
+        },
         []
     );
 
     const onConnect: OnConnect = useCallback(
-        (connection: Connection) => useNodeStore.getState().onConnect(connection),
+        (connection: Connection) => {
+            useNodeStore.getState().onConnect(connection);
+            // Call debounced save after new connection
+            useNodeStore.getState().debouncedSaveCanvas();
+        },
         []
     );
 
+    // Task 6: Implement viewport change persistence
     const onViewportChange = useCallback(
         (vp: { x: number; y: number; zoom: number }) => {
             useNodeStore.getState().setViewport(vp);
+            // Trigger debounced save for viewport changes
+            useNodeStore.getState().debouncedSaveCanvas();
+        },
+        []
+    );
+
+    // Task 4: Wire drag stop to debounced save
+    const onNodeDragStop = useCallback(
+        (_event: React.MouseEvent, node: Node | null) => {
+            // Validate node parameter before triggering save
+            if (!node) return;
+            // Trigger debounced save after drag stop
+            useNodeStore.getState().debouncedSaveCanvas();
         },
         []
     );
@@ -179,7 +198,28 @@ export const NodeCanvas: React.FC = () => {
         };
         const currentNodes = useNodeStore.getState().nodes;
         useNodeStore.getState().setNodes([...currentNodes, newNode]);
+        // Trigger debounced save after adding node
+        useNodeStore.getState().debouncedSaveCanvas();
     }, []);
+
+    // Ctrl/Cmd+S manual save shortcut
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (!activeProfileId || !projectId || !workflowId) return;
+                const state = useNodeStore.getState();
+                if (!state.isCanvasLoaded) return;
+                state.clearDebouncedSave();
+                state.saveCanvasWithRetry(
+                    { profileId: activeProfileId, projectId, workflowId },
+                    { nodes: state.nodes, edges: state.edges, viewport: state.viewport }
+                );
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [activeProfileId, projectId, workflowId]);
 
     // --- RENDER ---
 
@@ -216,6 +256,7 @@ export const NodeCanvas: React.FC = () => {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onViewportChange={onViewportChange}
+                onNodeDragStop={onNodeDragStop}
                 onSelectionChange={handleSelectionChange}
                 isValidConnection={isValidConnection}
                 nodeTypes={nodeTypes}
@@ -236,6 +277,7 @@ export const NodeCanvas: React.FC = () => {
                 />
             </ReactFlow>
 
+            {/* Loading overlay */}
             {isLoading && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center bg-white dark:bg-black/20 backdrop-blur-[2px]">
                     <Card className="bg-gray-50 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 px-4 py-2 rounded-lg text-zinc-400 text-sm animate-pulse">
@@ -245,6 +287,7 @@ export const NodeCanvas: React.FC = () => {
                     </Card>
                 </div>
             )}
+
         </div>
     );
 };
