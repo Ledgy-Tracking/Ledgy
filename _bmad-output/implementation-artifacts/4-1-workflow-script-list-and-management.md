@@ -18,7 +18,7 @@ so that I can manage independent workflows before opening one for canvas editing
 
 4. **Create workflow** — A "New Workflow" button opens an inline or modal form with a required `name` field and an optional `description` field (single line). On submit, a new `WorkflowScript` PouchDB document is created and the list refreshes. The name must be non-empty; the form shows an inline validation error if submitted empty.
 
-5. **Rename workflow** — Each workflow card has a rename action (e.g., via a context menu or edit icon). Triggering it allows the user to edit the name in place or via a dialog. On confirm, the `WorkflowScript` document's `name` (and `updatedAt`) is updated in PouchDB and the list refreshes.
+5. **Rename workflow** — Each workflow card has a rename action (e.g., via a context menu or edit icon). Triggering it opens a dialog pre-filled with the current name. On confirm, the `WorkflowScript` document's `name` (and `updatedAt`) is updated in PouchDB and the list refreshes.
 
 6. **Delete workflow** — Each workflow card has a delete action. Triggering it shows a confirmation dialog: "Delete workflow '{name}'? This cannot be undone." On confirm, the `WorkflowScript` document is soft-deleted (`isDeleted: true`) and disappears from the list.
 
@@ -64,9 +64,10 @@ so that I can manage independent workflows before opening one for canvas editing
   - [ ] 4.8 Style: follow `ProjectDashboard.tsx` patterns — `bg-zinc-50 dark:bg-zinc-950`, `border-zinc-200 dark:border-zinc-800`, emerald CTA buttons, `ScrollArea` wrapper
 
 - [ ] Task 5 — Update routing in `src/App.tsx` (AC: #7, #8)
-  - [ ] 5.1 Change existing route `path="project/:projectId/node-forge"` element to `<WorkflowScriptList />`
-  - [ ] 5.2 Add new route `path="project/:projectId/node-forge/:workflowId"` element to `<NodeCanvas />`
-  - [ ] 5.3 Import `WorkflowScriptList` from `./features/nodeEditor/WorkflowScriptList`
+  - [ ] 5.1 Verify whether the existing `node-forge` route is a bare route or nested inside a layout `<Route>` group — if bare, a wrapping `<Route>` group may be needed to host both sibling routes cleanly
+  - [ ] 5.2 Change existing route `path="project/:projectId/node-forge"` element to `<WorkflowScriptList />`
+  - [ ] 5.3 Add new route `path="project/:projectId/node-forge/:workflowId"` element to `<NodeCanvas />`
+  - [ ] 5.4 Import `WorkflowScriptList` from `./features/nodeEditor/WorkflowScriptList`
 
 - [ ] Task 6 — Update `NodeCanvas` to use `workflowId` param (AC: #8)
   - [ ] 6.1 Change `useParams<{ projectId: string }>()` to `useParams<{ projectId: string; workflowId: string }>()`
