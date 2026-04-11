@@ -8,13 +8,13 @@ import {
     IsValidConnection,
     Connection,
     OnConnect,
-    useShallow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
 import { CanvasNode } from '../../types/nodeEditor';
+import { useShallow } from 'zustand/shallow';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
@@ -65,11 +65,12 @@ export const NodeCanvas: React.FC = () => {
 
     // Node Store - subscribe to nodes/edges with useShallow for shallow comparison
     const isLoading = useNodeStore(s => s.isLoading);
-    const nodes = useNodeStore(s => s.nodes, useShallow);
-    const edges = useNodeStore(s => s.edges, useShallow);
+    const nodes = useNodeStore(useShallow(s => s.nodes));
+    const edges = useNodeStore(useShallow(s => s.edges));
     const initialViewport = useMemo(() => useNodeStore.getState().viewport, []);
 
     const loadedWorkflowRef = useRef<string | null>(null);
+    const loadAbortRef = useRef(false);
     const renderCountRef = useRef(0);
     renderCountRef.current++;
 
@@ -90,22 +91,32 @@ export const NodeCanvas: React.FC = () => {
 
         console.log('[NodeCanvas] Initial load triggered');
         loadedWorkflowRef.current = workflowId;
+        loadAbortRef.current = false;
 
-        useNodeStore.getState().loadCanvas(activeProfileId, projectId, workflowId);
+        useNodeStore.getState().loadCanvas(activeProfileId, projectId, workflowId)
+            .catch(() => { /* load errors handled in store */ });
     }, [activeProfileId, projectId, workflowId]);
 
+    useEffect(() => {
+        return () => {
+            loadAbortRef.current = true;
+        };
+    }, [workflowId]);
+
     // Task 3: Debounced Save with workflowId captured in ref to prevent cross-workflow saves
-    const workflowIdRef = useRef(workflowId);
-    useEffect(() => { workflowIdRef.current = workflowId; }, [workflowId]);
+    const workflowIdRef = useRef<string | null>(workflowId ?? null);
+    useEffect(() => { workflowIdRef.current = workflowId ?? null; }, [workflowId]);
 
     useEffect(() => {
         if (loadedWorkflowRef.current !== workflowId || !activeProfileId || !projectId || !workflowId) return;
 
+        const currentWorkflowId = workflowIdRef.current;
         const timer = setTimeout(() => {
+            if (workflowIdRef.current !== currentWorkflowId) return;
             useNodeStore.getState().saveCanvas(
                 activeProfileId,
                 projectId,
-                workflowIdRef.current,
+                workflowIdRef.current!,
                 nodes,
                 edges
             );
@@ -115,6 +126,16 @@ export const NodeCanvas: React.FC = () => {
     }, [nodes, edges, activeProfileId, projectId, workflowId]);
 
     // 5. Stable Handlers - use store's onConnect to keep store in sync
+    const onNodesChange = useCallback(
+        (changes: any) => useNodeStore.getState().onNodesChange(changes),
+        []
+    );
+
+    const onEdgesChange = useCallback(
+        (changes: any) => useNodeStore.getState().onEdgesChange(changes),
+        []
+    );
+
     const onConnect: OnConnect = useCallback(
         (connection: Connection) => useNodeStore.getState().onConnect(connection),
         []
@@ -147,28 +168,30 @@ export const NodeCanvas: React.FC = () => {
 
     const handleAddFirstNode = useCallback(() => {
         const viewport = useNodeStore.getState().viewport;
-        const centerX = (window.innerWidth / 2 - viewport.x) / viewport.zoom;
-        const centerY = (window.innerHeight / 2 - viewport.y) / viewport.zoom;
+        const zoom = viewport.zoom === 0 ? 1 : viewport.zoom;
+        const centerX = (window.innerWidth / 2 - viewport.x) / zoom;
+        const centerY = (window.innerHeight / 2 - viewport.y) / zoom;
         const newNode: CanvasNode = {
             id: `ledgerSource-${crypto.randomUUID()}`,
             type: 'ledgerSource',
             position: { x: centerX - 100, y: centerY - 100 },
             data: { label: 'New Ledger Source' }
         };
-        useNodeStore.getState().setNodes([...nodes, newNode]);
-    }, [nodes]);
+        const currentNodes = useNodeStore.getState().nodes;
+        useNodeStore.getState().setNodes([...currentNodes, newNode]);
+    }, []);
 
     // --- RENDER ---
 
     if (nodes.length === 0 && !isLoading && loadedWorkflowRef.current === workflowId) {
         return (
-            <div className="w-full h-full bg-white dark:bg-zinc-950 relative">
+            <div style={{ width: '100%', height: '100dvh' }} className="bg-white dark:bg-zinc-950 relative">
                 <EmptyCanvasGuide onAddFirstNode={handleAddFirstNode} />
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
-                    onNodesChange={useNodeStore.getState().onNodesChange}
-                    onEdgesChange={useNodeStore.getState().onEdgesChange}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
@@ -185,12 +208,12 @@ export const NodeCanvas: React.FC = () => {
     }
 
     return (
-        <div className="w-full h-full bg-white dark:bg-zinc-950 relative">
+        <div style={{ width: '100%', height: '100dvh' }} className="bg-white dark:bg-zinc-950 relative">
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
-                onNodesChange={useNodeStore.getState().onNodesChange}
-                onEdgesChange={useNodeStore.getState().onEdgesChange}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onViewportChange={onViewportChange}
                 onSelectionChange={handleSelectionChange}

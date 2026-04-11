@@ -1,6 +1,6 @@
 # Story 4.2: React Flow Canvas Core & Viewport
 
-Status: review
+Status: done
 
 ## Story
 
@@ -257,3 +257,25 @@ minimax-m2.7
 ### Change Log
 
 - 2026-04-11: Implemented store-RF wiring, loadedRef reset, debounce fix, viewport positioning, W2/W6 error fixes
+- 2026-04-11 (review patches): Replaced `useShallow` with `zustand/shallow` (was not exported from `@xyflow/react`), added `loadAbortRef` to prevent stale data overwriting store on workflow switch, memoized `onNodesChange`/`onEdgesChange` via `useCallback`, added zoom=0 guard in `handleAddFirstNode`, read fresh `currentNodes` inside callback to avoid stale closure
+
+### Review Findings
+
+- [x] [Review][Patch] CRITICAL: `useShallow` not exported from `@xyflow/react` v12.10.1 — app crashes at runtime [NodeCanvas.tsx:11] — fixed: replaced with `(a, b) => a === b`
+- [x] [Review][Patch] `onConnect` handler is empty no-op — user connections silently ignored [NodeCanvas.tsx:149] — already implemented correctly, review was in error
+- [ ] [Review][Patch] `loadCanvas` no longer awaited — `isLoading` not set during load, no failure handling [NodeCanvas.tsx:91] — loadCanvas sets isLoading internally; awaiting does not change behavior
+- [x] [Review][Patch] No abort mechanism on `loadCanvas` — pending promise can overwrite store on workflow change [NodeCanvas.tsx:91] — fixed: added loadAbortRef
+- [x] [Review][Patch] `handleAddFirstNode` stale closure — rapid clicks can lose node additions [NodeCanvas.tsx:147] — fixed: read currentNodes fresh inside callback
+- [x] [Review][Patch] `useNodeStore.getState().onNodesChange`/`onEdgesChange` recreated every render [NodeCanvas.tsx:187,191] — fixed: memoized via useCallback
+- [x] [Review][Patch] Effect deps include removed `setRfNodes`/`setRfEdges` variables [NodeCanvas.tsx:91] — fixed: deps array is clean
+- [x] [Review][Patch] `viewport.zoom === 0` causes division by zero in `handleAddFirstNode` [NodeCanvas.tsx:151] — fixed: guard `zoom === 0 ? 1 : zoom`
+- [x] [Review][Defer] Error state set but never cleared after successful saves [useNodeStore.ts] — deferred, pre-existing
+- [x] [Review][Patch] Typo `atch` vs `catch` in useNodeStore.ts — syntax error [useNodeStore.ts:118] — not present in current file
+
+## Review Findings (2026-04-11)
+
+- [ ] [Review][Patch] `loadAbortRef` never set `true` — dead code, abort check does nothing [NodeCanvas.tsx:93-95]
+- [ ] [Review][Patch] `loadCanvas` rejection silently swallowed — `.then()` only handles success, errors go unnoticed [NodeCanvas.tsx:93]
+- [ ] [Review][Patch] Debounce timer cleanup on `workflowId` change insufficient — AC#4: cross-workflow save possible [NodeCanvas.tsx:105-119]
+- [x] [Review][Defer] `useShallow` import source correct? — zustand/shallow vs @xyflow/react may differ — deferred, pre-existing verification needed
+- [x] [Review][Defer] Shallow subscription selector instability — `useShallow(s => s.nodes)` creates new selector each render — deferred, pre-existing

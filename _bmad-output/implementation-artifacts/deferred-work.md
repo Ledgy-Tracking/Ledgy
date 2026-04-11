@@ -28,6 +28,8 @@
 
 ## Deferred from: code review of 4-1-react-flow-canvas-core-viewport (2026-04-08)
 
+- **[D12][Med] Error state set but never cleared after successful saves** — `useNodeStore.saveCanvas` sets `{ error: errorMsg }` on failure, but no subsequent operation clears it. Successful saves do not reset error to null, so a stale error persists until `clearProfileData` is called. Consider clearing error on successful save or on loadCanvas start. (`src/stores/useNodeStore.ts`)
+
 - **[W1][Med] `handleAddFirstNode` positions node in screen pixels, not viewport-space coordinates** — `window.innerWidth/2 - 100` is not corrected for pan/zoom; node appears off-center at non-default viewports. (`src/features/nodeEditor/NodeCanvas.tsx:148`)
 
 - **[W2][Med] `saveCanvas` catch block never updates `state.error`** — errors are dispatched to `useErrorStore` but `useNodeStore.error` stays null, inconsistent with `loadCanvas` which does set `state.error`. (`src/stores/useNodeStore.ts`)
@@ -47,3 +49,9 @@
 - **[D2][Low] Optimistic `updatedAt` in `renameWorkflow` is slightly stale vs the DB value** — the store patches the in-memory record with `new Date().toISOString()` before `updateDocument` writes its own timestamp. Drift is negligible (milliseconds in the same call chain). Technically the sort order after a rename could briefly be wrong if two renames happen simultaneously. (`src/stores/useWorkflowStore.ts`)
 
 - **[D3][Low] `fetchWorkflows` `useEffect` has no AbortController / cleanup** — if the component unmounts while the PouchDB query is in-flight, `set({ workflows, isLoading: false })` still fires on the store. No crash in Zustand, but stale data briefly populates the store. Pre-existing pattern across all stores; needs a broader cleanup strategy. (`src/features/nodeEditor/WorkflowScriptList.tsx`)
+
+## Deferred from: code review of 4-2-react-flow-canvas-core-viewport (2026-04-11)
+
+- **[D13][Med] `useShallow` import source verification** — zustand/shallow vs @xyflow/react may have different APIs/behaviors. Need to verify zustand/shallow is correct replacement for @xyflow/react's useShallow. (`src/features/nodeEditor/NodeCanvas.tsx`)
+
+- **[D14][Med] Shallow subscription selector instability** — `useNodeStore(useShallow(s => s.nodes))` creates a new selector function on every render, defeating Zustand's selector stability optimizations and potentially causing excessive re-renders. (`src/features/nodeEditor/NodeCanvas.tsx`)

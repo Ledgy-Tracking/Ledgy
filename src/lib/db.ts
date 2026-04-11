@@ -1389,6 +1389,7 @@ export async function load_canvas(
 ): Promise<NodeCanvas | null> {
     try {
         const doc = await db.getDocument<NodeCanvas>(`canvas:${canvasId}`);
+        if (!doc) return null;
 
         if (encryptionKey) {
             if (doc.nodes_enc) {
@@ -1566,6 +1567,7 @@ export async function load_dashboard_layout(
 ): Promise<DashboardLayout | null> {
     try {
         const doc = await db.getDocument<DashboardLayout>(`dashboard:${dashboardId}`);
+        if (!doc) return null;
         if (encryptionKey && doc.widgets_enc) {
             const iv = new Uint8Array(doc.widgets_enc.iv);
             const ciphertext = new Uint8Array(doc.widgets_enc.ciphertext).buffer;
