@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { applyNodeChanges, applyEdgeChanges } from '@xyflow/react';
 import { useNodeStore } from './useNodeStore';
 
 // Mock db module (save_canvas, load_canvas, getProfileDb)
@@ -17,9 +18,10 @@ vi.mock('../features/auth/useAuthStore', () => ({
     )
 }));
 
-// Mock error store to prevent side effects
+// Mock error store to track dispatchError calls
+const mockDispatchError = vi.fn();
 vi.mock('./useErrorStore', () => ({
-    useErrorStore: { getState: () => ({ dispatchError: vi.fn() }) }
+    useErrorStore: { getState: () => ({ dispatchError: mockDispatchError }) }
 }));
 
 import * as dbModule from '../lib/db';
@@ -27,6 +29,7 @@ import * as dbModule from '../lib/db';
 describe('useNodeStore', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+        mockDispatchError.mockClear();
         useNodeStore.getState().clearProfileData();
         mockAuthState.isUnlocked = true;
         mockAuthState.encryptionKey = null;
@@ -155,6 +158,94 @@ describe('useNodeStore', () => {
             await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1');
 
             expect(dbModule.save_canvas).not.toHaveBeenCalled();
+        });
+
+        it('dispatches error when isUnlocked is false', async () => {
+            mockAuthState.isUnlocked = false;
+
+            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1');
+
+            expect(mockDispatchError).toHaveBeenCalledWith('Cannot save canvas: vault is locked');
+        });
+
+        it('sets error state and dispatches error when saveCanvas fails', async () => {
+            mockAuthState.isUnlocked = true;
+            (dbModule.save_canvas as any).mockRejectedValueOnce(new Error('Save failed'));
+
+            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1');
+
+            expect(useNodeStore.getState().error).toBe('Save failed');
+            expect(mockDispatchError).toHaveBeenCalledWith('Save failed');
+        });
+    });
+
+    describe('onNodesChange', () => {
+        it('applies node changes to store nodes', () => {
+            const initialNodes = [{ id: 'n1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } } as any];
+            useNodeStore.getState().setNodes(initialNodes);
+
+            const positionChange = [{ type: 'position' as const, id: 'n1', position: { x: 100, y: 200 } }];
+            useNodeStore.getState().onNodesChange(positionChange);
+
+            const updatedNodes = useNodeStore.getState().nodes;
+            expect(updatedNodes[0].position).toEqual({ x: 100, y: 200 });
+        });
+
+        it('removes nodes when delete change is applied', () => {
+            const initialNodes = [
+                { id: 'n1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } } as any,
+                { id: 'n2', position: { x: 0, y: 0 }, data: { label: 'Node 2' } } as any,
+            ];
+            useNodeStore.getState().setNodes(initialNodes);
+
+            const deleteChange = [{ type: 'remove' as const, id: 'n1' }];
+            useNodeStore.getState().onNodesChange(deleteChange);
+
+            const updatedNodes = useNodeStore.getState().nodes;
+            expect(updatedNodes).toHaveLength(1);
+            expect(updatedNodes[0].id).toBe('n2');
+        });
+    });
+
+    describe('onEdgesChange', () => {
+        it('applies edge changes to store edges', () => {
+            const initialEdges = [{ id: 'e1', source: 'n1', target: 'n2' } as any];
+            useNodeStore.getState().setEdges(initialEdges);
+
+            const selectChange = [{ type: 'select' as const, id: 'e1', selected: true }];
+            useNodeStore.getState().onEdgesChange(selectChange);
+
+            const updatedEdges = useNodeStore.getState().edges;
+            expect(updatedEdges[0].selected).toBe(true);
+        });
+
+        it('removes edges when delete change is applied', () => {
+            const initialEdges = [
+                { id: 'e1', source: 'n1', target: 'n2' } as any,
+                { id: 'e2', source: 'n2', target: 'n3' } as any,
+            ];
+            useNodeStore.getState().setEdges(initialEdges);
+
+            const deleteChange = [{ type: 'remove' as const, id: 'e1' }];
+            useNodeStore.getState().onEdgesChange(deleteChange);
+
+            const updatedEdges = useNodeStore.getState().edges;
+            expect(updatedEdges).toHaveLength(1);
+            expect(updatedEdges[0].id).toBe('e2');
+        });
+    });
+
+    describe('onConnect', () => {
+        it('adds a new edge to store edges', () => {
+            useNodeStore.getState().setEdges([]);
+
+            const connection = { source: 'n1', target: 'n2' } as any;
+            useNodeStore.getState().onConnect(connection);
+
+            const updatedEdges = useNodeStore.getState().edges;
+            expect(updatedEdges).toHaveLength(1);
+            expect(updatedEdges[0].source).toBe('n1');
+            expect(updatedEdges[0].target).toBe('n2');
         });
     });
 });

@@ -104,7 +104,10 @@ export const useNodeStore = create<NodeState>()(
         saveCanvas: async (profileId: string, _projectId: string, workflowId: string, nodes?: CanvasNode[], edges?: CanvasEdge[]) => {
             try {
                 const authState = useAuthStore.getState();
-                if (!authState.isUnlocked) return;
+                if (!authState.isUnlocked) {
+                    useErrorStore.getState().dispatchError('Cannot save canvas: vault is locked');
+                    return;
+                }
 
                 const state = get();
                 const n = nodes ?? state.nodes;
@@ -112,7 +115,9 @@ export const useNodeStore = create<NodeState>()(
                 const db = getProfileDb(profileId);
                 await save_canvas(db, workflowId, n, e, state.viewport, profileId, authState.encryptionKey || undefined);
             } catch (err: any) {
-                useErrorStore.getState().dispatchError(err.message || 'Failed to save canvas');
+                const errorMsg = err.message || 'Failed to save canvas';
+                set({ error: errorMsg });
+                useErrorStore.getState().dispatchError(errorMsg);
             }
         },
 

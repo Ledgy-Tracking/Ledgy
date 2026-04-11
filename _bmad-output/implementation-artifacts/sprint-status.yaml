@@ -34,6 +34,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-11
+last_updated: 2026-04-11
 project: ledgy
 project_key: NOKEY
 tracking_system: file-system
@@ -86,7 +87,7 @@ development_status:
 
   epic-4: in-progress
   4-1-workflow-script-list-and-management: done
-  4-2-react-flow-canvas-core-viewport: backlog
+  4-2-react-flow-canvas-core-viewport: review
   4-3-node-store-debounced-persistence: backlog
   4-4-minimap-zoom-to-fit-controls: backlog
   4-5-ledger-source-node-component: backlog

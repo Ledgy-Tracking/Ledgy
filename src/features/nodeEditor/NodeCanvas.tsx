@@ -6,17 +6,15 @@ import {
     Controls,
     MiniMap,
     IsValidConnection,
-    useNodesState,
-    useEdgesState,
-    addEdge,
     Connection,
     OnConnect,
+    useShallow,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
-import { CanvasNode, CanvasEdge } from '../../types/nodeEditor';
+import { CanvasNode } from '../../types/nodeEditor';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
@@ -48,13 +46,13 @@ const defaultEdgeOptions = {
 
 /**
  * NodeCanvas — The Node Forge editor.
- * 
- * Stability Fixes:
- * 1. Moved all object/array literals outside the component.
- * 2. Used useNodesState for local rendering state (controlled mode).
- * 3. Memoized all callbacks passed to ReactFlow.
- * 4. Precised Zustand selectors to avoid whole-store re-renders.
- * 5. Added debug logging (visible in dev console).
+ *
+ * Store Integration:
+ * 1. Subscribes to useNodeStore.nodes/edges via useShallow for shallow comparison.
+ * 2. Uses store's onNodesChange/onEdgesChange to keep Zustand store in sync with RF.
+ * 3. Handles workflowId changes via loadedWorkflowRef reset.
+ * 4. Debounced save with workflowId captured in ref to prevent cross-workflow saves.
+ * 5. Viewport-space node positioning for handleAddFirstNode.
  */
 export const NodeCanvas: React.FC = () => {
     // 1. Precise selectors for stable dependencies
@@ -65,13 +63,11 @@ export const NodeCanvas: React.FC = () => {
     const setSelectedNodeId = useUIStore(s => s.setSelectedNodeId);
     const setRightInspector = useUIStore(s => s.setRightInspector);
 
-    // Node Store - only subscribe to isLoading for the overlay
+    // Node Store - subscribe to nodes/edges with useShallow for shallow comparison
     const isLoading = useNodeStore(s => s.isLoading);
+    const nodes = useNodeStore(s => s.nodes, useShallow);
+    const edges = useNodeStore(s => s.edges, useShallow);
     const initialViewport = useMemo(() => useNodeStore.getState().viewport, []);
-
-    // 2. React Flow State (Local ownership)
-    const [rfNodes, setRfNodes, onNodesChange] = useNodesState<CanvasNode>([]);
-    const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<CanvasEdge>([]);
 
     const loadedWorkflowRef = useRef<string | null>(null);
     const renderCountRef = useRef(0);
@@ -79,8 +75,13 @@ export const NodeCanvas: React.FC = () => {
 
     // DEBUG: Log renders to catch loops early
     if (renderCountRef.current % 50 === 0) {
-        console.warn(`[NodeCanvas] High render count detected: ${renderCountRef.current}. Nodes: ${rfNodes.length}`);
+        console.warn(`[NodeCanvas] High render count detected: ${renderCountRef.current}. Nodes: ${nodes.length}`);
     }
+
+    // Task 1: Reset loadedRef when workflowId changes
+    useEffect(() => {
+        loadedWorkflowRef.current = null;
+    }, [workflowId]);
 
     // 3. Initial Load (per workflowId)
     useEffect(() => {
@@ -90,14 +91,13 @@ export const NodeCanvas: React.FC = () => {
         console.log('[NodeCanvas] Initial load triggered');
         loadedWorkflowRef.current = workflowId;
 
-        useNodeStore.getState().loadCanvas(activeProfileId, projectId, workflowId).then(() => {
-            const { nodes, edges } = useNodeStore.getState();
-            setRfNodes(nodes);
-            setRfEdges(edges);
-        });
-    }, [activeProfileId, projectId, workflowId, setRfNodes, setRfEdges]);
+        useNodeStore.getState().loadCanvas(activeProfileId, projectId, workflowId);
+    }, [activeProfileId, projectId, workflowId]);
 
-    // 4. Debounced Save
+    // Task 3: Debounced Save with workflowId captured in ref to prevent cross-workflow saves
+    const workflowIdRef = useRef(workflowId);
+    useEffect(() => { workflowIdRef.current = workflowId; }, [workflowId]);
+
     useEffect(() => {
         if (loadedWorkflowRef.current !== workflowId || !activeProfileId || !projectId || !workflowId) return;
 
@@ -105,24 +105,23 @@ export const NodeCanvas: React.FC = () => {
             useNodeStore.getState().saveCanvas(
                 activeProfileId,
                 projectId,
-                workflowId,
-                rfNodes,
-                rfEdges
+                workflowIdRef.current,
+                nodes,
+                edges
             );
-        }, 1000); // 1s debounce — saves after 1 second of inactivity
+        }, 1000);
 
         return () => clearTimeout(timer);
-    }, [rfNodes, rfEdges, activeProfileId, projectId, workflowId]);
+    }, [nodes, edges, activeProfileId, projectId, workflowId]);
 
-    // 5. Stable Handlers
+    // 5. Stable Handlers - use store's onConnect to keep store in sync
     const onConnect: OnConnect = useCallback(
-        (connection: Connection) => setRfEdges((eds) => addEdge(connection, eds)),
-        [setRfEdges]
+        (connection: Connection) => useNodeStore.getState().onConnect(connection),
+        []
     );
 
     const onViewportChange = useCallback(
         (vp: { x: number; y: number; zoom: number }) => {
-            // Passive update - don't trigger re-render of this component
             useNodeStore.getState().setViewport(vp);
         },
         []
@@ -147,26 +146,29 @@ export const NodeCanvas: React.FC = () => {
     }, [setSelectedNodeId, setRightInspector]);
 
     const handleAddFirstNode = useCallback(() => {
+        const viewport = useNodeStore.getState().viewport;
+        const centerX = (window.innerWidth / 2 - viewport.x) / viewport.zoom;
+        const centerY = (window.innerHeight / 2 - viewport.y) / viewport.zoom;
         const newNode: CanvasNode = {
-            id: `ledgerSource-${Date.now()}`,
+            id: `ledgerSource-${crypto.randomUUID()}`,
             type: 'ledgerSource',
-            position: { x: window.innerWidth / 2 - 100, y: window.innerHeight / 2 - 100 },
+            position: { x: centerX - 100, y: centerY - 100 },
             data: { label: 'New Ledger Source' }
         };
-        setRfNodes((nds) => [...nds, newNode]);
-    }, [setRfNodes]);
+        useNodeStore.getState().setNodes([...nodes, newNode]);
+    }, [nodes]);
 
     // --- RENDER ---
 
-    if (rfNodes.length === 0 && !isLoading && loadedWorkflowRef.current === workflowId) {
+    if (nodes.length === 0 && !isLoading && loadedWorkflowRef.current === workflowId) {
         return (
             <div className="w-full h-full bg-white dark:bg-zinc-950 relative">
                 <EmptyCanvasGuide onAddFirstNode={handleAddFirstNode} />
                 <ReactFlow
-                    nodes={rfNodes}
-                    edges={rfEdges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={useNodeStore.getState().onNodesChange}
+                    onEdgesChange={useNodeStore.getState().onEdgesChange}
                     onConnect={onConnect}
                     nodeTypes={nodeTypes}
                     edgeTypes={edgeTypes}
@@ -185,10 +187,10 @@ export const NodeCanvas: React.FC = () => {
     return (
         <div className="w-full h-full bg-white dark:bg-zinc-950 relative">
             <ReactFlow
-                nodes={rfNodes}
-                edges={rfEdges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={useNodeStore.getState().onNodesChange}
+                onEdgesChange={useNodeStore.getState().onEdgesChange}
                 onConnect={onConnect}
                 onViewportChange={onViewportChange}
                 onSelectionChange={handleSelectionChange}
