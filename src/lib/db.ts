@@ -1645,30 +1645,20 @@ export function setup_sync(
     // Note: This is sensitive, so we only do it in memory
     let remoteUrl = config.remoteUrl;
 
-    // 🛡️ Sentinel: Enforce HTTPS for remote connections to prevent credential leakage
     if (remoteUrl) {
-        const isLocalhost = remoteUrl.startsWith('http://localhost') || remoteUrl.startsWith('http://127.0.0.1');
-        if (!remoteUrl.startsWith('https://') && !isLocalhost) {
-            throw new Error('Insecure Connection: Remote URL must use HTTPS');
-        }
-    }
-
-    if (config.username && config.password && remoteUrl) {
-        const isLocalhost = remoteUrl.startsWith('http://localhost') || remoteUrl.startsWith('http://127.0.0.1');
-        if (!remoteUrl.toLowerCase().startsWith('https://') && !isLocalhost) {
-            throw new Error('Insecure remote URL: HTTPS is required for Basic Authentication');
-        }
         try {
             const url = new URL(remoteUrl);
 
-            // Enforce HTTPS for Basic Authentication (allow local networks for self-hosted sync)
+            // 🛡️ Sentinel: Enforce HTTPS for remote connections to prevent credential leakage
             if (url.protocol !== 'https:' && !isLocalNetwork(url.hostname)) {
                 throw new Error('Insecure connection: HTTPS is required for authenticated remote sync operations.');
             }
 
-            url.username = config.username;
-            url.password = config.password;
-            remoteUrl = url.toString();
+            if (config.username && config.password) {
+                url.username = config.username;
+                url.password = config.password;
+                remoteUrl = url.toString();
+            }
         } catch (e: any) {
             if (e.message.includes('Insecure connection')) {
                 throw e; // Rethrow security error
