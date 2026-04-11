@@ -28,3 +28,7 @@
 ## 2024-05-26 - Single-pass loop optimization for data extraction
 **Learning:** In data processing pipelines like `NodeEngine`, chaining array methods such as `.map().filter()` over potentially large arrays creates redundant iterations and intermediate array allocations, significantly degrading performance on large datasets.
 **Action:** Replace chained `.map().filter()` or similar array reduction chains with a single-pass `for` loop to avoid intermediate allocations and reduce total O(N) operations.
+
+## 2024-05-27 - Prevent call stack overflow with Array spread
+**Learning:** Spreading extremely large arrays directly into function calls like `Array.prototype.push(...val)` pushes all elements onto the JavaScript call stack, which can cause a "Maximum call stack size exceeded" crash for arrays exceeding ~65k-100k items.
+**Action:** Replace `push(...val)` or similar spread-into-function arguments with an explicit `for` loop to append elements sequentially, ensuring robustness against arbitrary dataset sizes without performance degradation.

@@ -170,16 +170,21 @@ export class Database {
             startkey: options?.type ? `${options.type}:` : undefined,
             endkey: options?.type ? `${options.type}:\ufff0` : undefined,
         });
-        return result.rows
-            .map(row => row.doc as unknown as T)
-            .filter(doc => {
-                if (!doc) return false;
-                // Exclude soft-deleted unless explicitly included
-                if (!options?.includeDeleted && (doc as any).isDeleted) {
-                    return false;
-                }
-                return true;
-            });
+
+        // ⚡ Bolt: Single-pass loop optimization
+        // Replaces chained .map().filter() to reduce intermediate allocations
+        // and improve iteration performance on large PouchDB queries.
+        const docs: T[] = [];
+        for (let i = 0; i < result.rows.length; i++) {
+            const doc = result.rows[i].doc as unknown as T;
+            if (!doc) continue;
+            // Exclude soft-deleted unless explicitly included
+            if (!options?.includeDeleted && (doc as any).isDeleted) {
+                continue;
+            }
+            docs.push(doc);
+        }
+        return docs;
     }
 
     async getAllDocuments<T>(type?: string): Promise<T[]> {
@@ -188,9 +193,16 @@ export class Database {
             startkey: type ? `${type}:` : undefined,
             endkey: type ? `${type}:\ufff0` : undefined,
         });
-        return result.rows
-            .map(row => row.doc as unknown as T)
-            .filter(doc => doc !== undefined);
+
+        // ⚡ Bolt: Single-pass loop optimization
+        const docs: T[] = [];
+        for (let i = 0; i < result.rows.length; i++) {
+            const doc = result.rows[i].doc as unknown as T;
+            if (doc !== undefined) {
+                docs.push(doc);
+            }
+        }
+        return docs;
     }
 
     // Example sync operation
