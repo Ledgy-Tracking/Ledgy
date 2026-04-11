@@ -1412,6 +1412,73 @@ export async function load_canvas(
 }
 
 // ============================================================================
+// Workflow Script CRUD Functions (Story 4-1)
+// ============================================================================
+
+import { WorkflowScript } from '../types/nodeEditor';
+
+/**
+ * Creates a new WorkflowScript document scoped to a project.
+ */
+export async function create_workflow(
+    db: Database,
+    profileId: string,
+    projectId: string,
+    name: string,
+    description?: string
+): Promise<WorkflowScript> {
+    const response = await db.createDocument<WorkflowScript>('workflow', {
+        profileId,
+        projectId,
+        name,
+        description,
+        scope: 'project' as const,
+    });
+    if (!response.ok) {
+        throw new Error('Failed to create workflow document');
+    }
+    return await db.getDocument<WorkflowScript>(response.id);
+}
+
+/**
+ * Lists all non-deleted WorkflowScript documents for a given project,
+ * sorted by updatedAt descending (most recently modified first).
+ */
+export async function list_workflows(
+    db: Database,
+    projectId: string
+): Promise<WorkflowScript[]> {
+    const docs = await db.queryDocuments<WorkflowScript>({ type: 'workflow', includeDeleted: false });
+    return docs
+        .filter(doc => doc.projectId === projectId)
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+}
+
+/**
+ * Renames an existing WorkflowScript document.
+ */
+export async function rename_workflow(
+    db: Database,
+    workflowDocId: string,
+    name: string
+): Promise<void> {
+    await db.updateDocument(workflowDocId, { name });
+}
+
+/**
+ * Soft-deletes a WorkflowScript document (sets isDeleted: true).
+ */
+export async function delete_workflow(
+    db: Database,
+    workflowDocId: string
+): Promise<void> {
+    await db.updateDocument(workflowDocId, {
+        isDeleted: true,
+        deletedAt: new Date().toISOString(),
+    });
+}
+
+// ============================================================================
 // Dashboard Layout Functions (Story 4-5)
 // ============================================================================
 

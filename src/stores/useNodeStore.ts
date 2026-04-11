@@ -29,8 +29,8 @@ interface NodeState {
     onConnect: OnConnect;
 
     // Actions
-    loadCanvas: (profileId: string, projectId: string) => Promise<void>;
-    saveCanvas: (profileId: string, projectId: string, nodes?: CanvasNode[], edges?: CanvasEdge[]) => Promise<void>;
+    loadCanvas: (profileId: string, projectId: string, workflowId: string) => Promise<void>;
+    saveCanvas: (profileId: string, projectId: string, workflowId: string, nodes?: CanvasNode[], edges?: CanvasEdge[]) => Promise<void>;
     setNodes: (nodes: CanvasNode[]) => void;
     setEdges: (edges: CanvasEdge[]) => void;
     setViewport: (viewport: Viewport) => void;
@@ -75,14 +75,14 @@ export const useNodeStore = create<NodeState>()(
             });
         },
 
-        loadCanvas: async (profileId: string, projectId: string) => {
+        loadCanvas: async (profileId: string, projectId: string, workflowId: string) => {
             set({ isLoading: true, error: null, activeProfileId: profileId, activeProjectId: projectId });
             try {
                 const authState = useAuthStore.getState();
                 if (!authState.isUnlocked) throw new Error('Vault must be unlocked to load canvas.');
 
                 const db = getProfileDb(profileId);
-                const canvas = await load_canvas(db, projectId, authState.encryptionKey || undefined);
+                const canvas = await load_canvas(db, workflowId, authState.encryptionKey || undefined);
 
                 if (canvas) {
                     set({
@@ -101,7 +101,7 @@ export const useNodeStore = create<NodeState>()(
             }
         },
 
-        saveCanvas: async (profileId: string, projectId: string, nodes?: CanvasNode[], edges?: CanvasEdge[]) => {
+        saveCanvas: async (profileId: string, _projectId: string, workflowId: string, nodes?: CanvasNode[], edges?: CanvasEdge[]) => {
             try {
                 const authState = useAuthStore.getState();
                 if (!authState.isUnlocked) return;
@@ -110,7 +110,7 @@ export const useNodeStore = create<NodeState>()(
                 const n = nodes ?? state.nodes;
                 const e = edges ?? state.edges;
                 const db = getProfileDb(profileId);
-                await save_canvas(db, projectId, n, e, state.viewport, profileId, authState.encryptionKey || undefined);
+                await save_canvas(db, workflowId, n, e, state.viewport, profileId, authState.encryptionKey || undefined);
             } catch (err: any) {
                 useErrorStore.getState().dispatchError(err.message || 'Failed to save canvas');
             }

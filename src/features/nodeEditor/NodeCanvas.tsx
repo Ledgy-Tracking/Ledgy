@@ -59,7 +59,7 @@ const defaultEdgeOptions = {
 export const NodeCanvas: React.FC = () => {
     // 1. Precise selectors for stable dependencies
     const activeProfileId = useProfileStore(s => s.activeProfileId);
-    const { projectId } = useParams<{ projectId: string }>();
+    const { projectId, workflowId } = useParams<{ projectId: string; workflowId: string }>();
 
     // UI Store actions - use stable selectors
     const setSelectedNodeId = useUIStore(s => s.setSelectedNodeId);
@@ -84,33 +84,34 @@ export const NodeCanvas: React.FC = () => {
 
     // 3. Initial Load (One-time)
     useEffect(() => {
-        if (!activeProfileId || !projectId || loadedRef.current) return;
+        if (!activeProfileId || !projectId || !workflowId || loadedRef.current) return;
 
         console.log('[NodeCanvas] Initial load triggered');
         loadedRef.current = true;
 
-        useNodeStore.getState().loadCanvas(activeProfileId, projectId).then(() => {
+        useNodeStore.getState().loadCanvas(activeProfileId, projectId, workflowId).then(() => {
             const { nodes, edges } = useNodeStore.getState();
             setRfNodes(nodes);
             setRfEdges(edges);
         });
-    }, [activeProfileId, projectId, setRfNodes, setRfEdges]);
+    }, [activeProfileId, projectId, workflowId, setRfNodes, setRfEdges]);
 
     // 4. Debounced Save
     useEffect(() => {
-        if (!loadedRef.current || !activeProfileId || !projectId) return;
+        if (!loadedRef.current || !activeProfileId || !projectId || !workflowId) return;
 
         const timer = setTimeout(() => {
             useNodeStore.getState().saveCanvas(
                 activeProfileId,
                 projectId,
+                workflowId,
                 rfNodes,
                 rfEdges
             );
         }, 1000); // 1s debounce — saves after 1 second of inactivity
 
         return () => clearTimeout(timer);
-    }, [rfNodes, rfEdges, activeProfileId, projectId]);
+    }, [rfNodes, rfEdges, activeProfileId, projectId, workflowId]);
 
     // 5. Stable Handlers
     const onConnect: OnConnect = useCallback(

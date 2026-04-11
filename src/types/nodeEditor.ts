@@ -68,6 +68,19 @@ export type ArithmeticOperation = 'sum' | 'average' | 'min' | 'max';
 export const ARITHMETIC_OPERATIONS: ArithmeticOperation[] = ['sum', 'average', 'min', 'max'];
 
 /**
+ * WorkflowScript document — metadata for a named Node Forge workflow.
+ * Canvas data (nodes/edges) is stored separately in a NodeCanvas document.
+ */
+export interface WorkflowScript extends LedgyDocument {
+    type: 'workflow';
+    profileId: string;
+    projectId: string;
+    name: string;
+    description?: string;
+    scope: 'project'; // 'profile' reserved for story 4.17
+}
+
+/**
  * Node store state
  */
 export interface NodeState {

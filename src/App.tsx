@@ -22,6 +22,8 @@ import { LedgerView } from "./features/ledger/LedgerView";
 import { TrashView } from "./features/ledger/TrashView";
 import { ProjectDashboard } from "./features/projects/ProjectDashboard";
 import { NodeCanvas } from "./features/nodeEditor/NodeCanvas";
+import { WorkflowScriptList } from "./features/nodeEditor/WorkflowScriptList";
+import { useWorkflowStore } from "./stores/useWorkflowStore";
 import { ReactFlowProvider } from "@xyflow/react";
 import { SettingsPage } from "./features/settings/SettingsPage";
 import { ErrorBoundary } from "./features/shell/ErrorBoundary";
@@ -40,6 +42,7 @@ function App() {
     useDashboardStore.getState().clearProfileData();
     useSyncStore.getState().clearProfileData();
     useUndoRedoStore.getState().clearAll();
+    useWorkflowStore.getState().clearProfileData();
   }, [activeProfileId]);
 
   useEffect(() => {
@@ -134,7 +137,8 @@ function App() {
             <Route index element={<Navigate to="projects" replace />} />
             <Route path="projects" element={<ProjectDashboard />} />
             <Route path="project/:projectId" element={<Dashboard />} />
-            <Route path="project/:projectId/node-forge" element={<NodeCanvas />} />
+            <Route path="project/:projectId/node-forge" element={<WorkflowScriptList />} />
+            <Route path="project/:projectId/node-forge/:workflowId" element={<NodeCanvas />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="project/:projectId/ledger/:ledgerId" element={<LedgerView />} />
             <Route path="trash" element={<TrashView />} />
