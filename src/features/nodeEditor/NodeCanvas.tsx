@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import {
     ReactFlow,
@@ -15,7 +15,7 @@ import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
 import { CanvasNode } from '../../types/nodeEditor';
-import { useShallow } from 'zustand/shallow';
+import { useShallow } from 'zustand/react';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
@@ -25,6 +25,15 @@ import { DashboardOutputNode } from './nodes/DashboardOutputNode';
 import { DataEdge } from './edges/DataEdge';
 import { useParams } from 'react-router-dom';
 import { NodeToolbar } from './NodeToolbar';
+import { NavigationToolbar } from './components/NavigationToolbar';
+import { ViewControls } from './components/ViewControls';
+import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
+import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
+import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
+import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
+import { ConnectionLine } from './components/ConnectionLine';
+import './styles/connectionLine.css';
 
 // --- STABLE CONFIGURATION (Outside component to prevent re-renders) ---
 
@@ -55,6 +64,13 @@ const defaultEdgeOptions = {
  * 4. Uses store's debouncedSaveCanvas for persistence.
  * 5. Viewport-space node positioning for handleAddFirstNode.
  * 6. Event handlers wired to trigger debounced saves.
+ * 
+ * Story 4.4 Additions:
+ * - NavigationToolbar: Zoom/fit controls (top-left)
+ * - ViewControls: Minimap/grid toggle panel (top-right)
+ * - MiniMap: Custom styled minimap (bottom-right)
+ * - ShortcutHelpPanel: Keyboard shortcuts reference (? key)
+ * - useNodeKeyboardShortcuts: Hook for keyboard navigation
  */
 export const NodeCanvas: React.FC = () => {
     // 1. Precise selectors for stable dependencies
@@ -70,11 +86,57 @@ export const NodeCanvas: React.FC = () => {
     const nodes = useNodeStore(useShallow(s => s.nodes));
     const edges = useNodeStore(useShallow(s => s.edges));
     const initialViewport = useMemo(() => useNodeStore.getState().viewport, []);
+    
+    // View controls for MiniMap (Story 4.4)
+    const viewControls = useNodeStore(s => s.viewControls);
+    const { showMinimap, showGrid, snapToGrid } = viewControls;
+
+    // Help panel state (Story 4.4)
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
+
+    // Detect dark mode for MiniMap theming
+    const [isDarkMode, setIsDarkMode] = useState(() => 
+        document.documentElement.classList.contains('dark')
+    );
+    
+    useEffect(() => {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    setIsDarkMode(document.documentElement.classList.contains('dark'));
+                }
+            });
+        });
+        
+        observer.observe(document.documentElement, { attributes: true });
+        
+        return () => observer.disconnect();
+    }, []);
 
     const loadedWorkflowRef = useRef<string | null>(null);
     const loadAbortRef = useRef(false);
     const renderCountRef = useRef(0);
     renderCountRef.current++;
+
+    // Initialize keyboard shortcuts (Story 4.4)
+    const { announcement } = useNodeKeyboardShortcuts({
+        onOpenHelp: () => setIsHelpOpen(true),
+    });
+
+    // Story 4-8: Connection tracking for rejection notifications
+    const connectionAttemptRef = useRef<{
+        isConnecting: boolean;
+        sourceHandle: string | null;
+        targetHandle: string | null;
+        source: string | null;
+        target: string | null;
+    }>({
+        isConnecting: false,
+        sourceHandle: null,
+        targetHandle: null,
+        source: null,
+        target: null,
+    });
 
     // DEBUG: Log renders to catch loops early
     if (renderCountRef.current % 50 === 0) {
@@ -110,7 +172,7 @@ export const NodeCanvas: React.FC = () => {
             loadAbortRef.current = true;
             useNodeStore.getState().clearDebouncedSave();
         };
-    }, [workflowId]);
+    }, [workflowId, activeProfileId, projectId]);
 
     // 5. Stable Handlers - use store's onConnect to keep store in sync
     // Task 5: Wire structural changes to debounced save
@@ -142,9 +204,74 @@ export const NodeCanvas: React.FC = () => {
             useNodeStore.getState().onConnect(connection);
             // Call debounced save after new connection
             useNodeStore.getState().debouncedSaveCanvas();
+            // Mark connection as successful
+            connectionAttemptRef.current.isConnecting = false;
         },
         []
     );
+
+    // Story 4-8: Track connection start for rejection detection
+    const onConnectStart = useCallback(({
+        handleId,
+        nodeId,
+    }: {
+        handleId: string | null;
+        nodeId: string;
+    }) => {
+        connectionAttemptRef.current = {
+            isConnecting: true,
+            sourceHandle: handleId,
+            source: nodeId,
+            targetHandle: null,
+            target: null,
+        };
+    }, []);
+
+    // Story 4-8: Track connection end for rejection detection and notifications
+    const onConnectEnd = useCallback((event: MouseEvent | TouchEvent) => {
+        const attempt = connectionAttemptRef.current;
+
+        // If we were connecting but onConnect was never called, it was rejected
+        if (attempt.isConnecting && attempt.source && attempt.sourceHandle) {
+            // Determine what handle we dropped on (if any)
+            const target = event.target as HTMLElement;
+            const handleElement = target?.closest('.react-flow__handle') as HTMLElement | null;
+
+            if (handleElement) {
+                const targetNodeId = handleElement.dataset.nodeid;
+                const targetHandleId = handleElement.dataset.handleid;
+
+                if (targetNodeId && targetHandleId) {
+                    // Get types for rejection notification
+                    const sourceType = getPortTypeFromHandle(
+                        attempt.source,
+                        attempt.sourceHandle,
+                        nodes
+                    );
+                    const targetType = getPortTypeFromHandle(
+                        targetNodeId,
+                        targetHandleId,
+                        nodes
+                    );
+
+                    // Show rejection notification
+                    showRejectionNotification(sourceType, targetType);
+
+                    // Announce to screen readers
+                    announceRejection(sourceType, targetType);
+                }
+            }
+        }
+
+        // Reset connection state
+        connectionAttemptRef.current = {
+            isConnecting: false,
+            sourceHandle: null,
+            source: null,
+            targetHandle: null,
+            target: null,
+        };
+    }, [nodes]);
 
     // Task 6: Implement viewport change persistence
     const onViewportChange = useCallback(
@@ -171,13 +298,54 @@ export const NodeCanvas: React.FC = () => {
         []
     );
 
+    /**
+     * Story 4-8: Strict Edge Type Validation
+     * isValidConnection callback for React Flow
+     *
+     * Validates connection attempts using the strict type compatibility matrix.
+     * Performance critical: must complete in <1ms to maintain 60fps during edge drag.
+     */
     const isValidConnection: IsValidConnection<any> = useCallback((connection) => {
-        const { sourceHandle, targetHandle } = connection;
-        if (!sourceHandle || !targetHandle) return false;
-        const sourceType = sourceHandle.split('-')[1];
-        const targetType = targetHandle.split('-')[1];
-        return targetType === 'any' || sourceType === 'any' || sourceType === targetType;
-    }, []);
+        const { sourceHandle, targetHandle, source, target } = connection;
+
+        // Basic validation: all connection fields must be present
+        if (!sourceHandle || !targetHandle || !source || !target) {
+            return false;
+        }
+
+        // Use getPortTypeFromHandle to extract types (handles all node types)
+        const sourceType = getPortTypeFromHandle(source, sourceHandle, nodes);
+        const targetType = getPortTypeFromHandle(target, targetHandle, nodes);
+
+        const isValid = isTypeCompatible(sourceType, targetType);
+
+        // Development mode: log validation attempts for debugging
+        if (process.env.NODE_ENV === 'development') {
+            const startTime = performance.now();
+            const duration = performance.now() - startTime;
+
+            if (duration > 1) {
+                console.warn(`[EdgeValidation] Slow validation: ${duration.toFixed(2)}ms`, {
+                    source: `${source}:${sourceHandle}`,
+                    target: `${target}:${targetHandle}`,
+                    sourceType,
+                    targetType,
+                });
+            }
+
+            // Log all validation attempts
+            console.log('[EdgeValidation]', {
+                source: `${source}:${sourceHandle}`,
+                target: `${target}:${targetHandle}`,
+                sourceType,
+                targetType,
+                isValid,
+                reason: isValid ? 'compatible' : (sourceType && targetType ? 'type_mismatch' : 'unknown_type'),
+            });
+        }
+
+        return isValid;
+    }, [nodes]);
 
     const handleSelectionChange = useCallback(({ nodes: selected }: { nodes: CanvasNode[] }) => {
         const first = selected[0];
@@ -191,13 +359,30 @@ export const NodeCanvas: React.FC = () => {
         }
     }, [setSelectedNodeId, setRightInspector]);
 
+// Safe UUID generator with fallback for non-HTTPS contexts
+const generateNodeId = (): string => {
+    try {
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            return crypto.randomUUID();
+        }
+    } catch {
+        // crypto.randomUUID may throw in insecure contexts
+    }
+    // Fallback: generate UUID v4 manually
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+};
+
     const handleAddFirstNode = useCallback(() => {
-        const viewport = useNodeStore.getState().viewport;
-        const zoom = viewport.zoom === 0 ? 1 : viewport.zoom;
+        const viewport = useNodeStore.getState().viewport || { x: 0, y: 0, zoom: 1 };
+        const zoom = viewport.zoom || 1;
         const centerX = (window.innerWidth / 2 - viewport.x) / zoom;
         const centerY = (window.innerHeight / 2 - viewport.y) / zoom;
         const newNode: CanvasNode = {
-            id: `ledgerSource-${crypto.randomUUID()}`,
+            id: `ledgerSource-${generateNodeId()}`,
             type: 'ledgerSource',
             position: { x: centerX - 100, y: centerY - 100 },
             data: { label: 'New Ledger Source' }
@@ -219,7 +404,7 @@ export const NodeCanvas: React.FC = () => {
                 state.clearDebouncedSave();
                 state.saveCanvasWithRetry(
                     { profileId: activeProfileId, projectId, workflowId },
-                    { nodes: state.nodes, edges: state.edges, viewport: state.viewport }
+                    { nodes: state.nodes, edges: state.edges, viewport: state.viewport, viewControls: state.viewControls }
                 );
             }
         };
@@ -233,22 +418,43 @@ export const NodeCanvas: React.FC = () => {
         return (
             <div style={{ width: '100%', height: '100%' }} className="bg-white dark:bg-zinc-950 relative">
                 <EmptyCanvasGuide onAddFirstNode={handleAddFirstNode} />
-                <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                    nodeTypes={nodeTypes}
-                    edgeTypes={edgeTypes}
-                    defaultEdgeOptions={defaultEdgeOptions}
-                    fitView
-                    className="bg-white dark:bg-zinc-950"
-                >
+            <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onConnectStart={onConnectStart}
+                onConnectEnd={onConnectEnd}
+                isValidConnection={isValidConnection}
+                nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
+                defaultEdgeOptions={defaultEdgeOptions}
+                connectionLineComponent={ConnectionLine}
+                fitView
+                className="bg-white dark:bg-zinc-950"
+            >
                     <NodeToolbar />
-                    <Background color="#3f3f46" gap={20} />
-                    <Controls className="bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700" />
+                    <NavigationToolbar />
+                    <ViewControls />
+                    {/* Built-in MiniMap with theme-aware colors - hidden when no nodes (AC2 edge case) */}
+                    {showMinimap && nodes.length > 0 && (
+                        <MiniMap
+                            bgColor={isDarkMode ? '#18181b' : '#ffffff'}
+                            maskColor={isDarkMode ? 'rgba(0, 0, 0, 0.6)' : 'rgba(240, 240, 240, 0.6)'}
+                            nodeColor={isDarkMode ? '#3f3f46' : '#e2e2e2'}
+                            maskStrokeColor={isDarkMode ? '#10b981' : '#059669'}
+                        />
+                    )}
+                    {showGrid && <Background color="#3f3f46" gap={20} />}
+                    <Controls showZoom={false} showFitView={false} showInteractive={false} />
                 </ReactFlow>
+                {/* ARIA Live region for announcements */}
+                <div aria-live="polite" aria-atomic="true" className="sr-only">
+                    {announcement}
+                </div>
+                {/* Shortcut Help Panel */}
+                <ShortcutHelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
             </div>
         );
     }
@@ -261,6 +467,8 @@ export const NodeCanvas: React.FC = () => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
+                onConnectStart={onConnectStart}
+                onConnectEnd={onConnectEnd}
                 onViewportChange={onViewportChange}
                 onNodeDragStart={onNodeDragStart}
                 onNodeDragStop={onNodeDragStop}
@@ -269,19 +477,28 @@ export const NodeCanvas: React.FC = () => {
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
+                connectionLineComponent={ConnectionLine}
                 defaultViewport={initialViewport}
-                panActivationKeyCode="Space"
-                selectionKeyCode="Shift"
+                panActivationKeyCode={['Space']}
+                selectionKeyCode={['Shift']}
                 className="bg-white dark:bg-zinc-950"
+                snapToGrid={snapToGrid}
+                snapGrid={[Math.max(1, viewControls.gridSize || 15), Math.max(1, viewControls.gridSize || 15)]}
             >
                 <NodeToolbar />
-                <Background color="#3f3f46" gap={20} />
-                <Controls className="bg-gray-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700" />
-                <MiniMap
-                    nodeColor="#10b981"
-                    maskColor="rgba(24, 24, 27, 0.8)"
-                    className="bg-gray-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
-                />
+                <NavigationToolbar />
+                <ViewControls />
+                {/* Built-in MiniMap with theme-aware colors - hidden when no nodes (AC2 edge case) */}
+                {showMinimap && nodes.length > 0 && (
+                    <MiniMap
+                        bgColor={isDarkMode ? '#18181b' : '#ffffff'}
+                        maskColor={isDarkMode ? 'rgba(0, 0, 0, 0.6)' : 'rgba(240, 240, 240, 0.6)'}
+                        nodeColor={isDarkMode ? '#3f3f46' : '#e2e2e2'}
+                        maskStrokeColor={isDarkMode ? '#10b981' : '#059669'}
+                    />
+                )}
+                {showGrid && <Background color="#3f3f46" gap={20} />}
+                <Controls showZoom={false} showFitView={false} showInteractive={false} />
             </ReactFlow>
 
             {/* Loading overlay */}
@@ -295,6 +512,15 @@ export const NodeCanvas: React.FC = () => {
                 </div>
             )}
 
+            {/* ARIA Live region for announcements (Story 4.4) */}
+            <div aria-live="polite" aria-atomic="true" className="sr-only">
+                {announcement}
+            </div>
+
+            {/* Shortcut Help Panel (Story 4.4) */}
+            <ShortcutHelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
         </div>
     );
 };
+
+export default NodeCanvas;

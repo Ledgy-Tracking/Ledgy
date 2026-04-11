@@ -1,0 +1,203 @@
+/**
+ * Connection line animations and styles
+ * Story 4-7: Complex Edge Connection Snapping
+ */
+
+/* Pulse animation for valid connection glow (AC2) */
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Subtle shake animation for invalid targets (AC2) */
+@keyframes subtle-shake {
+    0%, 100% {
+        transform: scale(1.1) translateX(0);
+    }
+    25% {
+        transform: scale(1.1) translateX(-2px);
+    }
+    75% {
+        transform: scale(1.1) translateX(2px);
+    }
+}
+
+/* Fade out animation for cancelled edges (AC5) */
+@keyframes fade-out {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+}
+
+/* Handle highlight states (AC2) */
+.handle-compatible {
+    transform: scale(1.3);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+    border-color: #10b981;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.handle-incompatible {
+    transform: scale(1.1);
+    border-color: #ef4444;
+    animation: subtle-shake 300ms ease-in-out;
+}
+
+.handle-snapped {
+    transform: scale(1.5);
+    background-color: #10b981;
+    border-color: #10b981;
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.8);
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Edge cancellation animation (AC5) */
+.edge-cancelling {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
+/* Connection line styles by state */
+.connection-line-default {
+    stroke: #a1a1aa;
+    stroke-width: 2;
+}
+
+.connection-line-valid {
+    stroke: #10b981;
+    stroke-width: 3;
+}
+
+.connection-line-invalid {
+    stroke: #ef4444;
+    stroke-width: 2;
+    stroke-dasharray: 5, 5;
+}
+
+/* Glow effect for valid connections */
+.connection-line-glow {
+    filter: blur(4px);
+    opacity: 0.3;
+    animation: pulse-glow 400ms ease-in-out infinite;
+}
+
+/* High contrast mode support (AC7) */
+@media (prefers-contrast: high) {
+    .connection-line-valid {
+        stroke: #00ff00;
+        stroke-width: 4;
+    }
+    
+    .connection-line-invalid {
+        stroke: #ff0000;
+        stroke-width: 4;
+        stroke-dasharray: 8, 4;
+    }
+    
+    .handle-compatible {
+        border-width: 3px;
+        box-shadow: 0 0 0 3px #00ff00;
+    }
+    
+    .handle-incompatible {
+        border-width: 3px;
+        box-shadow: 0 0 0 3px #ff0000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .handle-compatible,
+    .handle-incompatible,
+    .handle-snapped,
+    .connection-line-glow {
+        animation: none;
+        transition: none;
+    }
+    
+    .edge-cancelling {
+        transition: opacity 50ms ease-out;
+    }
+}
+
+/* Touch-specific styles */
+@media (pointer: coarse) {
+    .react-flow__handle {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/**
+ * Story 4-8: Wire Rejection Animation
+ * Visual feedback for invalid connection attempts
+ */
+
+/* Wire rejection shake animation */
+@keyframes wire-rejection-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-3px);
+    }
+    50% {
+        transform: translateX(0);
+    }
+    75% {
+        transform: translateX(3px);
+    }
+}
+
+/* Wire rejection flash animation */
+@keyframes wire-rejection-flash {
+    0% {
+        stroke: #ef4444; /* red-500 */
+        stroke-width: 3px;
+        opacity: 1;
+    }
+    50% {
+        stroke: #ef4444;
+        stroke-width: 4px;
+        opacity: 1;
+    }
+    100% {
+        stroke: #ef4444;
+        stroke-width: 3px;
+        opacity: 0;
+    }
+}
+
+/* Edge rejected state */
+.edge-rejected {
+    stroke: #ef4444 !important; /* red-500 */
+    stroke-width: 3px !important;
+    animation: wire-rejection-shake 200ms ease-in-out, wire-rejection-flash 500ms ease-out forwards;
+    pointer-events: none;
+}
+
+/* Connection line rejected state during drag */
+.connection-line-rejected {
+    stroke: #ef4444 !important;
+    stroke-width: 3px;
+    stroke-dasharray: 5, 5;
+    animation: wire-rejection-shake 200ms ease-in-out;
+}
+
+/* Handle rejection state */
+.handle-rejected {
+    transform: scale(1.2) !important;
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6) !important;
+    animation: wire-rejection-shake 200ms ease-in-out;
+}
