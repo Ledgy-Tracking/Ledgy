@@ -76,7 +76,12 @@ class NodeEngine {
                             const sourceData = nodeResults.get(edge.source);
                             const val = sourceData?.[edge.sourceHandle!];
                             if (Array.isArray(val)) {
-                                inputValues.push(...val);
+                                // ⚡ Bolt: Replace push(...val) spread with a loop
+                                // Prevents "Maximum call stack size exceeded" in V8 for large arrays
+                                // and improves array concatenation performance
+                                for (let i = 0; i < val.length; i++) {
+                                    inputValues.push(val[i]);
+                                }
                             } else if (typeof val === 'number') {
                                 inputValues.push(val);
                             }

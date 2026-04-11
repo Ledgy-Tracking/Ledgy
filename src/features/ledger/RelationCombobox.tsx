@@ -95,10 +95,15 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
     // Build trigger label from selected entry display values
     const selectedDisplay = (() => {
         if (selectedValues.length === 0) return null;
-        const names = selectedValues
-            .map(id => entries.find(e => e._id === id))
-            .filter((e): e is LedgerEntry => Boolean(e))
-            .map(e => getDisplayValue(e));
+        // ⚡ Bolt: Replace chained .map().filter().map() with single-pass loop
+        // Avoids O(S) intermediate array allocations and redundant iterations
+        const names: string[] = [];
+        for (let i = 0; i < selectedValues.length; i++) {
+            const entry = entries.find(e => e._id === selectedValues[i]);
+            if (entry) {
+                names.push(getDisplayValue(entry));
+            }
+        }
         if (names.length === 0) return `${selectedValues.length} selected`;
         if (names.length <= 2) return names.join(', ');
         return `${names[0]} +${names.length - 1} more`;

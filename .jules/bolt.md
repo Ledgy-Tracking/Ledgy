@@ -28,3 +28,7 @@
 ## 2024-05-26 - Single-pass loop optimization for data extraction
 **Learning:** In data processing pipelines like `NodeEngine`, chaining array methods such as `.map().filter()` over potentially large arrays creates redundant iterations and intermediate array allocations, significantly degrading performance on large datasets.
 **Action:** Replace chained `.map().filter()` or similar array reduction chains with a single-pass `for` loop to avoid intermediate allocations and reduce total O(N) operations.
+
+## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
+**Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
+**Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.

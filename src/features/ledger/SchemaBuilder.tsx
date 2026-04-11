@@ -35,7 +35,6 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
         isLoading,
         editingSchemaId,
         initCreate,
-        setDraftName: _setDraftName,
         addField,
         removeField,
         updateField,
