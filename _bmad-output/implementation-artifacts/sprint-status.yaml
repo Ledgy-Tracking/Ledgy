@@ -85,7 +85,7 @@ development_status:
   epic-3-retrospective: optional
 
   epic-4: in-progress
-  4-1-workflow-script-list-and-management: review
+  4-1-workflow-script-list-and-management: done
   4-2-react-flow-canvas-core-viewport: backlog
   4-3-node-store-debounced-persistence: backlog
   4-4-minimap-zoom-to-fit-controls: backlog

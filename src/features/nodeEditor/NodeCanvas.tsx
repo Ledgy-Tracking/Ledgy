@@ -73,7 +73,7 @@ export const NodeCanvas: React.FC = () => {
     const [rfNodes, setRfNodes, onNodesChange] = useNodesState<CanvasNode>([]);
     const [rfEdges, setRfEdges, onEdgesChange] = useEdgesState<CanvasEdge>([]);
 
-    const loadedRef = useRef(false);
+    const loadedWorkflowRef = useRef<string | null>(null);
     const renderCountRef = useRef(0);
     renderCountRef.current++;
 
@@ -82,12 +82,13 @@ export const NodeCanvas: React.FC = () => {
         console.warn(`[NodeCanvas] High render count detected: ${renderCountRef.current}. Nodes: ${rfNodes.length}`);
     }
 
-    // 3. Initial Load (One-time)
+    // 3. Initial Load (per workflowId)
     useEffect(() => {
-        if (!activeProfileId || !projectId || !workflowId || loadedRef.current) return;
+        if (!activeProfileId || !projectId || !workflowId) return;
+        if (loadedWorkflowRef.current === workflowId) return;
 
         console.log('[NodeCanvas] Initial load triggered');
-        loadedRef.current = true;
+        loadedWorkflowRef.current = workflowId;
 
         useNodeStore.getState().loadCanvas(activeProfileId, projectId, workflowId).then(() => {
             const { nodes, edges } = useNodeStore.getState();
@@ -98,7 +99,7 @@ export const NodeCanvas: React.FC = () => {
 
     // 4. Debounced Save
     useEffect(() => {
-        if (!loadedRef.current || !activeProfileId || !projectId || !workflowId) return;
+        if (loadedWorkflowRef.current !== workflowId || !activeProfileId || !projectId || !workflowId) return;
 
         const timer = setTimeout(() => {
             useNodeStore.getState().saveCanvas(
@@ -157,7 +158,7 @@ export const NodeCanvas: React.FC = () => {
 
     // --- RENDER ---
 
-    if (rfNodes.length === 0 && !isLoading && loadedRef.current) {
+    if (rfNodes.length === 0 && !isLoading && loadedWorkflowRef.current === workflowId) {
         return (
             <div className="w-full h-full bg-white dark:bg-zinc-950 relative">
                 <EmptyCanvasGuide onAddFirstNode={handleAddFirstNode} />

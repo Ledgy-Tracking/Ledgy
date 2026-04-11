@@ -1,6 +1,6 @@
 # Story 4.1: Workflow Script List & Management
 
-Status: review
+Status: done
 
 ## Story
 
@@ -208,3 +208,14 @@ Full test suite: 85/85 files, 723 passing, 1 skipped (pre-existing).
 ## Change Log
 
 - 2026-04-11: Implemented story 4.1 — WorkflowScript type, PouchDB CRUD, useWorkflowStore, WorkflowScriptList UI, routing update, NodeCanvas workflowId param, App.tsx profile-switch cleanup. Fixed 6 pre-existing test file failures.
+
+### Review Findings
+
+- [x] [Review][Patch] `loadedRef` never reset when `workflowId` changes — navigating to a second workflow renders the first workflow's canvas [`src/features/nodeEditor/NodeCanvas.tsx`]
+- [x] [Review][Patch] `handleDelete` is fire-and-forget — no `await`, rejection silently swallowed, no error feedback to user [`src/features/nodeEditor/WorkflowScriptList.tsx`]
+- [x] [Review][Patch] `create_workflow` orphaned document risk — `getDocument` round-trip can fail after `createDocument` succeeds, leaving doc in DB but not in memory [`src/lib/db.ts`]
+- [x] [Review][Patch] `CreateWorkflowModal` submit button not disabled during async submission — double-submit possible [`src/features/nodeEditor/WorkflowScriptList.tsx`]
+- [x] [Review][Patch] `formatDate` uses elapsed-ms not calendar days — "Today"/"Yesterday" wrong at timezone day boundaries [`src/features/nodeEditor/WorkflowScriptList.tsx`]
+- [x] [Review][Defer] `list_workflows` fetches all workflow docs across all projects then filters in-memory — no pagination or cap [`src/lib/db.ts`] — deferred, pre-existing query pattern, acceptable at MVP scale
+- [x] [Review][Defer] Optimistic `updatedAt` in `renameWorkflow` is slightly stale vs the DB value — negligible drift [`src/stores/useWorkflowStore.ts`] — deferred, pre-existing optimistic-update pattern
+- [x] [Review][Defer] `fetchWorkflows` `useEffect` has no AbortController cleanup — Zustand `set()` after unmount is safe but leaves stale store data [`src/features/nodeEditor/WorkflowScriptList.tsx`] — deferred, benign, pre-existing pattern across all stores

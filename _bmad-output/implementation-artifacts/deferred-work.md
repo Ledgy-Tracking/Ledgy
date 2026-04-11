@@ -39,3 +39,11 @@
 - **[W5][Low] `Date.now()`-based node ID not collision-resistant** — rapid programmatic adds within the same millisecond produce duplicate IDs; React Flow silently discards or merges duplicate nodes. (`src/features/nodeEditor/NodeCanvas.tsx:149`)
 
 - **[W6][Low] Auth-lock asymmetry: `loadCanvas` throws on locked vault, `saveCanvas` silently no-ops** — a mid-session vault lock causes saves to silently discard with no user feedback. (`src/stores/useNodeStore.ts`)
+
+## Deferred from: code review of 4-1-workflow-script-list-and-management (2026-04-11)
+
+- **[D1][Low] `list_workflows` loads all workflow docs across all projects then filters in-memory** — `queryDocuments({ type: 'workflow', includeDeleted: false })` returns every non-deleted workflow for the profile, then JS `.filter(doc.projectId === projectId)` narrows it. Grows unbounded with many projects. Acceptable at MVP scale; would require a dedicated index or keyed query to fix. (`src/lib/db.ts`)
+
+- **[D2][Low] Optimistic `updatedAt` in `renameWorkflow` is slightly stale vs the DB value** — the store patches the in-memory record with `new Date().toISOString()` before `updateDocument` writes its own timestamp. Drift is negligible (milliseconds in the same call chain). Technically the sort order after a rename could briefly be wrong if two renames happen simultaneously. (`src/stores/useWorkflowStore.ts`)
+
+- **[D3][Low] `fetchWorkflows` `useEffect` has no AbortController / cleanup** — if the component unmounts while the PouchDB query is in-flight, `set({ workflows, isLoading: false })` still fires on the store. No crash in Zustand, but stale data briefly populates the store. Pre-existing pattern across all stores; needs a broader cleanup strategy. (`src/features/nodeEditor/WorkflowScriptList.tsx`)

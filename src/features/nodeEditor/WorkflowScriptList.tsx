@@ -17,8 +17,10 @@ import { WorkflowScript } from '../../types/nodeEditor';
 function formatDate(iso: string): string {
     const date = new Date(iso);
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    // Normalize to local midnight to count calendar days, not elapsed hours
+    const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const nowDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffDays = Math.round((nowDay.getTime() - dateDay.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
@@ -37,6 +39,7 @@ const CreateWorkflowModal: React.FC<CreateWorkflowModalProps> = ({ onClose, onSu
     const form = useForm<{ name: string; description: string }>({
         defaultValues: { name: '', description: '' },
     });
+    const { isSubmitting } = form.formState;
 
     const handleSubmit = async (data: { name: string; description: string }) => {
         await onSubmit(data.name, data.description || undefined);
@@ -94,11 +97,11 @@ const CreateWorkflowModal: React.FC<CreateWorkflowModalProps> = ({ onClose, onSu
                                 )}
                             />
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                                <Button type="button" variant="outline" onClick={onClose} className="flex-1" disabled={isSubmitting}>
                                     Cancel
                                 </Button>
-                                <Button type="submit" className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold">
-                                    Create Workflow
+                                <Button type="submit" className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Creating...' : 'Create Workflow'}
                                 </Button>
                             </div>
                         </Form>
@@ -119,6 +122,7 @@ const RenameWorkflowModal: React.FC<RenameWorkflowModalProps> = ({ workflow, onC
     const form = useForm<{ name: string }>({
         defaultValues: { name: workflow.name },
     });
+    const { isSubmitting } = form.formState;
 
     const handleSubmit = async (data: { name: string }) => {
         await onSubmit(data.name);
@@ -154,11 +158,11 @@ const RenameWorkflowModal: React.FC<RenameWorkflowModalProps> = ({ workflow, onC
                                 )}
                             />
                             <div className="flex gap-3 pt-2">
-                                <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                                <Button type="button" variant="outline" onClick={onClose} className="flex-1" disabled={isSubmitting}>
                                     Cancel
                                 </Button>
-                                <Button type="submit" className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold">
-                                    Rename
+                                <Button type="submit" className="flex-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold" disabled={isSubmitting}>
+                                    {isSubmitting ? 'Renaming...' : 'Rename'}
                                 </Button>
                             </div>
                         </Form>
@@ -197,10 +201,10 @@ export const WorkflowScriptList: React.FC = () => {
         }
     };
 
-    const handleDelete = (e: React.MouseEvent, workflow: WorkflowScript) => {
+    const handleDelete = async (e: React.MouseEvent, workflow: WorkflowScript) => {
         e.stopPropagation();
         if (profileId && window.confirm(`Delete workflow '${workflow.name}'? This cannot be undone.`)) {
-            deleteWorkflow(profileId, workflow._id);
+            await deleteWorkflow(profileId, workflow._id);
         }
     };
 

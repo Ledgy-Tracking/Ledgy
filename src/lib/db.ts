@@ -1419,6 +1419,8 @@ import { WorkflowScript } from '../types/nodeEditor';
 
 /**
  * Creates a new WorkflowScript document scoped to a project.
+ * Constructs the return value in-memory to avoid a second round-trip that could
+ * fail after a successful write, leaving an orphaned document.
  */
 export async function create_workflow(
     db: Database,
@@ -1427,17 +1429,31 @@ export async function create_workflow(
     name: string,
     description?: string
 ): Promise<WorkflowScript> {
+    const now = new Date().toISOString();
     const response = await db.createDocument<WorkflowScript>('workflow', {
         profileId,
         projectId,
         name,
-        description,
+        ...(description !== undefined && { description }),
         scope: 'project' as const,
     });
     if (!response.ok) {
         throw new Error('Failed to create workflow document');
     }
-    return await db.getDocument<WorkflowScript>(response.id);
+    const workflow: WorkflowScript = {
+        _id: response.id,
+        _rev: response.rev,
+        type: 'workflow',
+        schema_version: 1,
+        createdAt: now,
+        updatedAt: now,
+        profileId,
+        projectId,
+        name,
+        scope: 'project',
+    };
+    if (description !== undefined) workflow.description = description;
+    return workflow;
 }
 
 /**
