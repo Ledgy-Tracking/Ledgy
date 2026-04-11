@@ -70,7 +70,7 @@ describe('Dashboard Component', () => {
         vi.restoreAllMocks();
     });
 
-    it('renders empty dashboard initially', () => {
+    it('renders dashboard header', () => {
         render(
             <MemoryRouter initialEntries={['/app/profile1/project/proj1']}>
                 <Routes>
@@ -79,73 +79,48 @@ describe('Dashboard Component', () => {
             </MemoryRouter>
         );
 
-        expect(screen.getByText('LEDGY')).toBeInTheDocument();
-        expect(screen.getByText('Welcome to Ledgy!')).toBeInTheDocument();
-        expect(mockFetchSchemas).toHaveBeenCalledWith('profile1');
-    });
-
-    it('opens Schema Builder when clicking Create Ledger', () => {
-        render(
-            <MemoryRouter initialEntries={['/app/profile1/project/proj1']}>
-                <Routes>
-                    <Route path="/app/:profileId/project/:projectId" element={<Dashboard />} />
-                </Routes>
-            </MemoryRouter>
-        );
-
-        const createBtn = screen.getByRole('button', { name: /Create new ledger/i });
-        fireEvent.click(createBtn);
-
-        expect(mockSetSchemaBuilderOpen).toHaveBeenCalledWith(true);
-    });
-
-    it('renders ledger list when schemas exist', () => {
-        // Mock populated store
-        (useLedgerStoreModule.useLedgerStore as any).mockReturnValue({
-            schemas: [
-                { _id: 'ledger1', name: 'My Ledger', projectId: 'proj1', fields: [] },
-                { _id: 'ledger2', name: 'Another Ledger', projectId: 'proj1', fields: [] }
-            ],
-            fetchSchemas: mockFetchSchemas,
-        });
-
-        render(
-            <MemoryRouter initialEntries={['/app/profile1/project/proj1']}>
-                <Routes>
-                    <Route path="/app/:profileId/project/:projectId" element={<Dashboard />} />
-                </Routes>
-            </MemoryRouter>
-        );
-
-        expect(screen.getByText('LEDGY')).toBeInTheDocument();
-        expect(screen.queryByText('Welcome to Ledgy!')).not.toBeInTheDocument();
-        
-        // Check for ledger selector
-        expect(screen.getByRole('combobox', { name: /Select ledger/i })).toBeInTheDocument();
-        expect(screen.getByText('My Ledger')).toBeInTheDocument();
-        expect(screen.getByText('Another Ledger')).toBeInTheDocument();
-    });
-
-    it('switches to grid view when toggle is clicked', () => {
-        // DashboardView uses useContainerWidth which creates a ResizeObserver
-        global.ResizeObserver = class ResizeObserver {
-            observe() {}
-            unobserve() {}
-            disconnect() {}
-        } as any;
-
-        render(
-            <MemoryRouter initialEntries={['/app/profile1/project/proj1']}>
-                <Routes>
-                    <Route path="/app/:profileId/project/:projectId" element={<Dashboard />} />
-                </Routes>
-            </MemoryRouter>
-        );
-
-        const gridBtn = screen.getByTitle('Metric Grid');
-        fireEvent.click(gridBtn);
-
+        expect(screen.getByText('Dashboard')).toBeInTheDocument();
         expect(screen.getByText('Add Widget')).toBeInTheDocument();
+    });
+
+    it('shows loading state while fetching widgets', () => {
+        render(
+            <MemoryRouter initialEntries={['/app/profile1/project/proj1']}>
+                <Routes>
+                    <Route path="/app/:profileId/project/:projectId" element={<Dashboard />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(screen.getByText('Loading dashboard...')).toBeInTheDocument();
+    });
+
+    it('calls fetchWidgets on mount', () => {
+        render(
+            <MemoryRouter initialEntries={['/app/profile1/project/proj1']}>
+                <Routes>
+                    <Route path="/app/:profileId/project/:projectId" element={<Dashboard />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
         expect(mockFetchWidgets).toHaveBeenCalled();
+    });
+
+    it('opens widget type dropdown when Add Widget is clicked', () => {
+        render(
+            <MemoryRouter initialEntries={['/app/profile1/project/proj1']}>
+                <Routes>
+                    <Route path="/app/:profileId/project/:projectId" element={<Dashboard />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        const addWidgetBtn = screen.getByText('Add Widget');
+        fireEvent.click(addWidgetBtn);
+
+        expect(screen.getByText('Chart Widget')).toBeInTheDocument();
+        expect(screen.getByText('Trend Widget')).toBeInTheDocument();
+        expect(screen.getByText('Text Widget')).toBeInTheDocument();
     });
 });

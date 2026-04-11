@@ -39,6 +39,30 @@ vi.mock("../src/stores/useSyncStore", () => ({
     })),
 }));
 
+vi.mock("../src/stores/useLedgerStore", () => ({
+    useLedgerStore: Object.assign(vi.fn(() => ({
+        schemas: [],
+        fetchSchemas: vi.fn(),
+        setOnEntryEvent: vi.fn(),
+    })), {
+        getState: vi.fn(() => ({ schemas: [], fetchSchemas: vi.fn(), setOnEntryEvent: vi.fn() }))
+    }),
+}));
+
+vi.mock("../src/stores/useNodeStore", () => ({
+    useNodeStore: Object.assign(vi.fn(() => ({ nodes: [] })), {
+        getState: vi.fn(() => ({ nodes: [] }))
+    }),
+}));
+
+vi.mock("../src/services/nodeEngine", () => ({
+    nodeEngine: { executeProjectGraph: vi.fn() },
+}));
+
+vi.mock("../src/services/triggerEngine", () => ({
+    executeTrigger: vi.fn(),
+}));
+
 describe("AppShell Component", () => {
     const mockUseUIStore = vi.mocked(useUIStore);
     const mockUseErrorStore = vi.mocked(useErrorStore);

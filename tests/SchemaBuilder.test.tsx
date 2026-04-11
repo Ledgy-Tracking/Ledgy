@@ -14,11 +14,24 @@ vi.mock('../src/stores/useErrorStore');
 
 // Mock Radix UI Dialog to avoid focus-trap/portal issues in jsdom
 vi.mock('../src/components/ui/dialog', () => ({
-    Dialog: ({ children, open }: any) => open ? <Dialog>{children}</Dialog> : null,
+    Dialog: ({ children, open }: any) => open ? <div>{children}</div> : null,
     DialogContent: ({ children }: any) => <div>{children}</div>,
     DialogHeader: ({ children }: any) => <div>{children}</div>,
     DialogTitle: ({ children }: any) => <h2>{children}</h2>,
     DialogDescription: ({ children }: any) => <p>{children}</p>,
+}));
+
+// Mock Radix Select as native select to avoid jsdom hang on findByRole('option')
+vi.mock('../src/components/ui/select', () => ({
+    Select: ({ children, value, onValueChange }: any) => (
+        <select value={value} onChange={(e) => onValueChange?.(e.target.value)}>
+            {children}
+        </select>
+    ),
+    SelectTrigger: ({ children }: any) => <>{children}</>,
+    SelectValue: ({ placeholder }: any) => <></>,
+    SelectContent: ({ children }: any) => <>{children}</>,
+    SelectItem: ({ children, value }: any) => <option value={value}>{children}</option>,
 }));
 
 describe('SchemaBuilder Component', () => {
@@ -115,10 +128,7 @@ describe('SchemaBuilder Component', () => {
         });
         
         const typeSelects = screen.getAllByRole('combobox');
-        fireEvent.click(typeSelects[0]);
-
-        const relationOption = await screen.findByRole('option', { name: 'Relation' });
-        fireEvent.click(relationOption);
+        fireEvent.change(typeSelects[0], { target: { value: 'relation' } });
 
         // Save without selecting target (the second combobox now exists but is empty)
         const saveButton = screen.getByRole('button', { name: /Create Schema/i });

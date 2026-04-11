@@ -18,7 +18,7 @@ describe('SyncStatusButton', () => {
         (useAuthStore as any).mockReturnValue({ isUnlocked: true });
 
         render(<SyncStatusButton profileId="test-id" onClick={() => { }} />);
-        expect(screen.getByText(/Last sync:/)).toBeDefined();
+        expect(screen.getByText(/Updated|Synced/)).toBeDefined();
     });
 
     it('renders "Syncing" state with animation', () => {
@@ -42,7 +42,7 @@ describe('SyncStatusButton', () => {
         (useAuthStore as any).mockReturnValue({ isUnlocked: true });
 
         render(<SyncStatusButton profileId="test-id" onClick={() => { }} />);
-        expect(screen.getByText('Sync Conflict')).toBeDefined();
+        expect(screen.getByText('Conflict detected')).toBeDefined();
     });
 
     it('calls onClick when button is clicked', () => {

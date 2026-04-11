@@ -106,7 +106,7 @@ describe('useNodeStore', () => {
             };
             (dbModule.load_canvas as any).mockResolvedValueOnce(mockCanvas);
 
-            await useNodeStore.getState().loadCanvas('profile-1', 'project-1');
+            await useNodeStore.getState().loadCanvas('profile-1', 'project-1', 'workflow-1');
 
             const state = useNodeStore.getState();
             expect(state.nodes).toEqual(mockCanvas.nodes);
@@ -118,7 +118,7 @@ describe('useNodeStore', () => {
         it('falls back to empty defaults when load_canvas returns null', async () => {
             (dbModule.load_canvas as any).mockResolvedValueOnce(null);
 
-            await useNodeStore.getState().loadCanvas('profile-1', 'project-1');
+            await useNodeStore.getState().loadCanvas('profile-1', 'project-1', 'workflow-1');
 
             const state = useNodeStore.getState();
             expect(state.nodes).toEqual([]);
@@ -137,12 +137,12 @@ describe('useNodeStore', () => {
             useNodeStore.getState().setEdges(edges);
             useNodeStore.getState().setViewport({ x: 1, y: 2, zoom: 0.8 });
 
-            await useNodeStore.getState().saveCanvas('profile-1', 'project-1');
+            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1');
 
             expect(dbModule.save_canvas).toHaveBeenCalledOnce();
             const [, canvasId, savedNodes, savedEdges, savedViewport, profileId] =
                 (dbModule.save_canvas as any).mock.calls[0];
-            expect(canvasId).toBe('project-1');
+            expect(canvasId).toBe('workflow-1');
             expect(savedNodes).toEqual(nodes);
             expect(savedEdges).toEqual(edges);
             expect(savedViewport).toEqual({ x: 1, y: 2, zoom: 0.8 });
@@ -152,7 +152,7 @@ describe('useNodeStore', () => {
         it('returns early without calling save_canvas when isUnlocked is false', async () => {
             mockAuthState.isUnlocked = false;
 
-            await useNodeStore.getState().saveCanvas('profile-1', 'project-1');
+            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1');
 
             expect(dbModule.save_canvas).not.toHaveBeenCalled();
         });

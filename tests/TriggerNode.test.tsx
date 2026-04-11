@@ -16,6 +16,19 @@ vi.mock('@xyflow/react', () => ({
     Position: { Right: 'right', Left: 'left' },
 }));
 
+// Mock Radix Select as a native select
+vi.mock('@/components/ui/select', () => ({
+    Select: ({ children, value, onValueChange }: any) => (
+        <select value={value} onChange={(e) => onValueChange?.(e.target.value)}>
+            {children}
+        </select>
+    ),
+    SelectTrigger: ({ children }: any) => <>{children}</>,
+    SelectValue: ({ placeholder }: any) => <></>,
+    SelectContent: ({ children }: any) => <>{children}</>,
+    SelectItem: ({ children, value }: any) => <option value={value}>{children}</option>,
+}));
+
 describe('TriggerNode', () => {
     const mockSchemas = [
         { _id: 'ledger-1', name: 'Tests' }

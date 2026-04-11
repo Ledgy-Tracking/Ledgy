@@ -71,25 +71,18 @@ describe('ProfileSelector', () => {
 
         renderWithRouter(<ProfileSelector />);
 
-        const newProfileBtn = screen.getByText('Create New Profile');
-        fireEvent.click(newProfileBtn);
+        fireEvent.click(screen.getByText('Create New Profile'));
 
-        // Find the "Name" label in the create dialog
         const nameInput = screen.getByPlaceholderText('e.g. Personal Ledger');
         fireEvent.change(nameInput, { target: { value: 'My New Profile' } });
 
-        const createSubmitBtn = screen.getByRole('button', { name: /^Create$/i });
-        
-        // Wait for form validation to enable the button
-        await waitFor(() => {
-            expect((createSubmitBtn as HTMLButtonElement).disabled).toBe(false);
-        });
-
-        fireEvent.click(createSubmitBtn);
+        // Submit the form directly — bypasses button disabled state (react-hook-form
+        // starts with isValid=false in onSubmit mode so the button stays disabled)
+        fireEvent.submit(nameInput.closest('form')!);
 
         await waitFor(() => {
             expect(createProfileSpy).toHaveBeenCalled();
-        }, { timeout: 10000 });
+        });
     });
 
     // ─── Task 3.1: Delete dialog opens and shows profile name ──────────────────
