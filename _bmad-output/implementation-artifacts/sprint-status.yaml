@@ -87,8 +87,8 @@ development_status:
 
   epic-4: in-progress
   4-1-workflow-script-list-and-management: done
-  4-2-react-flow-canvas-core-viewport: review
-  4-3-node-store-debounced-persistence: backlog
+  4-2-react-flow-canvas-core-viewport: done
+  4-3-node-store-debounced-persistence: ready-for-dev
   4-4-minimap-zoom-to-fit-controls: backlog
   4-5-ledger-source-node-component: backlog
   4-6-correlation-node-math-component: backlog
