@@ -156,12 +156,16 @@ export const NodeCanvas: React.FC = () => {
         []
     );
 
-    // Task 4: Wire drag stop to debounced save
+    const isDraggingRef = useRef(false);
+
+    const onNodeDragStart = useCallback(() => {
+        isDraggingRef.current = true;
+    }, []);
+
     const onNodeDragStop = useCallback(
         (_event: React.MouseEvent, node: Node | null) => {
-            // Validate node parameter before triggering save
+            isDraggingRef.current = false;
             if (!node) return;
-            // Trigger debounced save after drag stop
             useNodeStore.getState().debouncedSaveCanvas();
         },
         []
@@ -179,7 +183,9 @@ export const NodeCanvas: React.FC = () => {
         const first = selected[0];
         if (first) {
             setSelectedNodeId(first.id);
-            setRightInspector(true);
+            if (!isDraggingRef.current) {
+                setRightInspector(true);
+            }
         } else {
             setSelectedNodeId(null);
         }
@@ -256,6 +262,7 @@ export const NodeCanvas: React.FC = () => {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 onViewportChange={onViewportChange}
+                onNodeDragStart={onNodeDragStart}
                 onNodeDragStop={onNodeDragStop}
                 onSelectionChange={handleSelectionChange}
                 isValidConnection={isValidConnection}
