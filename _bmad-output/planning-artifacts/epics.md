@@ -17,7 +17,7 @@ This document provides the deeply granular epic and atomic story breakdown for l
 1. **Epic 1: App Foundation & Core Security** (11 Stories)
 2. **Epic 2: Profiles & Project Management** (8 Stories)
 3. **Epic 3: Relational Ledger Engine** (16 Stories)
-4. **Epic 4: Node Forge (Visual Scripting Engine)** (24 Stories — expanded 2026-04-13 after sprint review)
+4. **Epic 4: Node Forge (Visual Scripting Engine)** (25 Stories — expanded 2026-04-13 after sprint review)
 5. **Epic 5: Dashboard & Live Widgets** (7 Stories)
 6. **Epic 6: Offline Sync, Conflicts & Data Sovereignty** (10 Stories)
 7. **Epic 7: Plugin Runtime & AI Capture** (8 Stories)
@@ -104,6 +104,7 @@ The drag-and-drop workspace where schemas talk to each other. Each project conta
 - **4.22 Cross-Project Permission Grant System (FR47):** UI and enforcement model for explicitly granting profile-scoped workflows access to specific projects at creation time.
 - **4.23 Node Forge Integration Test Suite:** Dedicated integration test suite validating the full execution pipeline: source → operators → output, plus autonomous trigger → action → depth limiter recursion safety.
 - **4.24 Node Palette & Add-Node UI:** Searchable sidebar palette and right-click context menu for discovering and placing any registered node type onto the canvas.
+- **4.25 Ledger Source Execution Modes:** Amends 4.5 — adds an `executionMode` config (`Always`, `On New Item`, `On Item Updated`, `On Item Deleted`, `On Any Change`) so the Ledger Source node acts as both event trigger and scalar data provider. Rescopes 4.13 to non-ledger triggers only.
 
 ---
 

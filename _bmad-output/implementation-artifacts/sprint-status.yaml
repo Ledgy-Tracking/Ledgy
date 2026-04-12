@@ -123,6 +123,9 @@ development_status:
   4-23-node-forge-integration-test-suite: backlog
   # 4-24: node palette & add-node UI — user discovery mechanism for all node types
   4-24-node-palette-add-node-ui: backlog
+  # 4-25: ledger source execution modes — on-create/update/delete event triggers built into source node
+  # amends 4-5; rescopes 4-13 to non-ledger triggers only (schedules, app startup)
+  4-25-ledger-source-execution-modes: backlog
   epic-4-retrospective: optional
 
   epic-5: backlog
