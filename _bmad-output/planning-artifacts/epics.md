@@ -18,7 +18,7 @@ This document provides the deeply granular epic and atomic story breakdown for l
 2. **Epic 2: Profiles & Project Management** (8 Stories)
 3. **Epic 3: Relational Ledger Engine** (16 Stories)
 4. **Epic 4: Node Forge (Visual Scripting Engine)** (25 Stories — expanded 2026-04-13 after sprint review)
-5. **Epic 5: Dashboard & Live Widgets** (7 Stories)
+5. **Epic 5: Dashboard & Live Widgets** (11 Stories — expanded 2026-04-13 after sprint review)
 6. **Epic 6: Offline Sync, Conflicts & Data Sovereignty** (10 Stories)
 7. **Epic 7: Plugin Runtime & AI Capture** (8 Stories)
 8. **Epic 8: Technical Debt & System Stability** (5 Stories)
@@ -118,6 +118,10 @@ Where the computed Node outputs become glanceable health indicators.
 - **5.5 Widget to Node Forge Data Piping:** The listener hooks subscribing widgets to specific Node Store `Output` handles.
 - **5.6 Dashboard Read-Only Safeguard:** Ensuring no ledger mutations can occur from the dashboard grid.
 - **5.7 Pinned Views Navigation Sidebar:** Pin frequently accessed ledger views, node graphs, or dashboards to a persistent sidebar.
+- **5.8 Widget Configuration & Data Source Binding:** Inspector panel for configuring a widget's data source (`WidgetDataSource` — direct ledger or Node Forge output) and display options. Critical missing story — without this, rendering kernels have no data.
+- **5.9 Direct Ledger Widget Data Binding (Path A):** `useLedgerWidgetData` hook enabling widgets to query PouchDB directly (date range + aggregation), bypassing Node Forge for the novice user path. Also defines `WidgetDataPayload` as the shared contract for all rendering kernels.
+- **5.10 Scatter Plot Widget Kernel:** Two-axis scatter chart with optional trend line and Pearson correlation badge. FR18 explicitly names scatter plots — absent from original plan.
+- **5.11 Dashboard Shell, Widget Catalog & Add-Widget Flow:** Dashboard route/page container, `WidgetTypeRegistry`, widget catalog panel, edit/view mode toggle, and `▶ Run` button for manual Node Forge execution.
 
 ---
 

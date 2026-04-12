@@ -136,6 +136,15 @@ development_status:
   5-5-widget-to-node-forge-data-piping: backlog
   5-6-dashboard-read-only-safeguard: backlog
   5-7-pinned-views-navigation-sidebar: backlog
+  # --- New stories added 2026-04-13 (Party Mode Sprint Review) ---
+  # 5-8: widget configuration inspector — binds a widget to a data source (Path A ledger or Path B Node Forge)
+  5-8-widget-configuration-data-source-binding: backlog
+  # 5-9: direct ledger → widget data (Path A) — useLedgerWidgetData hook + WidgetDataPayload contract
+  5-9-direct-ledger-widget-data-binding: backlog
+  # 5-10: scatter plot widget kernel — FR18 gap; dual-axis, trend line, correlation badge
+  5-10-scatter-plot-widget-kernel: backlog
+  # 5-11: dashboard shell, widget catalog, edit/view mode, Run button — without this nothing renders
+  5-11-dashboard-shell-widget-catalog: backlog
   epic-5-retrospective: optional
 
   epic-6: backlog
