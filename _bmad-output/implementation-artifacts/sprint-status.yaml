@@ -34,7 +34,10 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-11
-last_updated: 2026-04-12
+# Epic 4 story count expanded 17 → 24 after Party Mode sprint review (2026-04-13)
+# Gaps found: missing execution runtime, FR29 logic/temporal/string nodes, output node,
+# permission grant system (split from 4-17), integration test suite, node palette UX.
+last_updated: 2026-04-13
 project: ledgy
 project_key: NOKEY
 tracking_system: file-system
@@ -102,7 +105,24 @@ development_status:
   4-14-autonomous-trigger-action-nodes: backlog
   4-15-trigger-execution-depth-limiter: backlog
   4-16-node-engine-keyboard-shortcuts-group-ops: backlog
+  # 4-17 rescoped: covers FR46 only (profile workflow hub UI + multi-project ledger source)
+  # FR47 (permission grant system) extracted to new story 4-22
   4-17-profile-scoped-cross-project-workflow-engine: backlog
+  # --- New stories added 2026-04-13 (Party Mode Sprint Review) ---
+  # 4-18: critical missing execution runtime (DAG traversal + value propagation)
+  4-18-node-graph-execution-runtime: backlog
+  # 4-19: logic gate operator nodes (If/Else, AND, OR, NOT, Compare) — FR29 gap
+  4-19-logic-gate-operator-nodes: backlog
+  # 4-20: temporal + string operator nodes (DateDiff, StringConcat, etc.) — FR29 gap
+  4-20-temporal-string-operator-nodes: backlog
+  # 4-21: result output node — bridges Node Forge computed values to Epic 5 dashboard widgets
+  4-21-result-output-node: backlog
+  # 4-22: cross-project permission grant system — extracted from 4-17 (FR47)
+  4-22-cross-project-permission-grant-system: backlog
+  # 4-23: dedicated integration test suite for full execution pipeline (safety-critical for triggers)
+  4-23-node-forge-integration-test-suite: backlog
+  # 4-24: node palette & add-node UI — user discovery mechanism for all node types
+  4-24-node-palette-add-node-ui: backlog
   epic-4-retrospective: optional
 
   epic-5: backlog
