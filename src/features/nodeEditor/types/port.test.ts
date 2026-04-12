@@ -24,9 +24,9 @@ describe('port type system', () => {
             expect(isTypeCompatible('number', 'number[]')).toBe(true);
         });
 
-        // AC1: Type coercion - number[] to number (strict - not allowed)
-        it('should NOT allow number[] to number coercion', () => {
-            expect(isTypeCompatible('number[]', 'number')).toBe(false);
+        // AC1: Type coercion - number[] to number (allowed - takes first element)
+        it('should allow number[] to number coercion', () => {
+            expect(isTypeCompatible('number[]', 'number')).toBe(true);
         });
 
         // AC1: any type accepts all types

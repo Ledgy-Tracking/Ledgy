@@ -153,6 +153,7 @@ export const NodeCanvas: React.FC = () => {
     // Reset loadedRef when workflowId changes
     useEffect(() => {
         loadedWorkflowRef.current = null;
+        loadAbortRef.current = false;
     }, [workflowId]);
 
     // Initial Load (per workflowId) - with proper cleanup
@@ -180,6 +181,38 @@ export const NodeCanvas: React.FC = () => {
             useNodeStore.getState().clearDebouncedSave();
         };
     }, [workflowId, activeProfileId, projectId]);
+
+    // Story 4-8 AC5: Schema change subscription for edge re-validation
+    // Subscribe to ledger schema changes and re-validate connected edges
+    useEffect(() => {
+        // Subscribe to schema changes in the store
+        const unsubscribe = useNodeStore.subscribe(
+            (state) => state.schemas,
+            (schemas) => {
+                // When schemas change, re-validate all edges
+                const currentNodes = useNodeStore.getState().nodes;
+                const currentEdges = useNodeStore.getState().edges;
+                
+                // Import validation function dynamically to avoid circular deps
+                import('./utils/edgeValidation').then(({ validateGraphEdges }) => {
+                    const validEdges = validateGraphEdges(currentEdges, currentNodes);
+                    
+                    // Only update if edges were removed
+                    if (validEdges.length !== currentEdges.length) {
+                        useNodeStore.getState().setEdges(validEdges);
+                        useNodeStore.getState().debouncedSaveCanvas();
+                        
+                        if (process.env.NODE_ENV === 'development') {
+                            console.log('[EdgeValidation] Removed invalid edges after schema change:', 
+                                currentEdges.length - validEdges.length);
+                        }
+                    }
+                });
+            }
+        );
+
+        return () => unsubscribe();
+    }, []);
 
     // 5. Stable Handlers - use store's onConnect to keep store in sync
     // Task 5: Wire structural changes to debounced save
@@ -235,6 +268,7 @@ export const NodeCanvas: React.FC = () => {
     }, []);
 
     // Story 4-8: Track connection end for rejection detection and notifications
+    // Use store.getState() instead of captured nodes to avoid stale closure
     const onConnectEnd = useCallback((event: MouseEvent | TouchEvent) => {
         const attempt = connectionAttemptRef.current;
 
@@ -264,16 +298,19 @@ export const NodeCanvas: React.FC = () => {
                 const targetHandleId = handleElement.dataset.handleid;
 
                 if (targetNodeId && targetHandleId) {
+                    // Get latest nodes from store to avoid stale closure
+                    const currentNodes = useNodeStore.getState().nodes;
+                    
                     // Get types for rejection notification
                     const sourceType = getPortTypeFromHandle(
                         attempt.source,
                         attempt.sourceHandle,
-                        nodes
+                        currentNodes
                     );
                     const targetType = getPortTypeFromHandle(
                         targetNodeId,
                         targetHandleId,
-                        nodes
+                        currentNodes
                     );
 
                     // Show rejection notification
@@ -293,7 +330,7 @@ export const NodeCanvas: React.FC = () => {
             targetHandle: null,
             target: null,
         };
-    }, [nodes]);
+    }, []); // No dependencies - uses store.getState() for latest data
 
     // Task 6: Implement viewport change persistence
     const onViewportChange = useCallback(

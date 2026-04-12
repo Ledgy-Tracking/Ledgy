@@ -60,8 +60,8 @@ export const compatibilityMatrix: Record<PortType, PortType[]> = {
     // Single number can connect to: number, number[], any
     number: ['number', 'number[]', 'any'],
 
-    // Number array can connect to: number[] and any (strict - no coercion to single number)
-    'number[]': ['number[]', 'any'],
+    // Number array can connect to: number[] and any (coercion: takes first element)
+    'number[]': ['number[]', 'number', 'any'],
 
     // Text fields only connect to text inputs
     text: ['text', 'any'],

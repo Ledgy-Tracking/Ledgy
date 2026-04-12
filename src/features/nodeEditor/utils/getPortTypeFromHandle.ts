@@ -73,10 +73,23 @@ const getLedgerSourcePortType = (node: Node, handleId: string): PortType | null 
     if (!Array.isArray(schemaSnapshot)) return null;
 
     // Find field by ID or name (backward compatibility)
-    const field = schemaSnapshot.find(
+    // Warn if multiple fields match to help debug ambiguous schemas
+    const matchingFields = schemaSnapshot.filter(
         (f: { id?: string; name?: string; type?: string }) =>
             f.id === fieldId || f.name === fieldId
     );
+
+    if (matchingFields.length > 1 && process.env.NODE_ENV === 'development') {
+        console.warn('[EdgeValidation] Ambiguous field match:', {
+            nodeId: node.id,
+            handleId,
+            fieldId,
+            matches: matchingFields.map(f => ({ id: f.id, name: f.name })),
+            selected: matchingFields[0]?.id || matchingFields[0]?.name,
+        });
+    }
+
+    const field = matchingFields[0];
 
     if (!field?.type) {
         // Development mode: log for debugging

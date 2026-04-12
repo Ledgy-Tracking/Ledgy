@@ -1,6 +1,6 @@
 # Story 4.9: Sub-Graph Container Grouping
 
-Status: review
+Status: done
 
 <!--
 Story Context: Comprehensive developer guide for sub-graph container grouping
@@ -112,7 +112,7 @@ so that I can organize complex workflows, reduce visual clutter, and work with h
 ```typescript
 interface ContainerNodeData {
   type: 'container';                // Type discriminator for runtime narrowing
-  label: string;                    // Default: "Group" or user-defined
+  label: string;                    // Default: "Group" or user-defined, max 50 chars, XSS sanitized
   isCollapsed: boolean;             // Expand/collapse state
   childNodeIds: string[];           // IDs of contained nodes
   createdAt: string;                // ISO 8601 timestamp
@@ -141,7 +141,7 @@ interface ContainerNodeData {
 | Element | Style |
 |---------|-------|
 | Container header | Zinc-800 background, border-b zinc-700 |
-| Label | Text input (inline editable), zinc-100 |
+| Label | Text input (inline editable), zinc-100, maxLength=50, XSS sanitized |
 | Collapse button | Chevron icon, right side of header |
 | Container body | Zinc-900/50 fill when expanded, hidden when collapsed |
 | Border | Zinc-700 (1px), emerald-500 (2px) when selected |
@@ -309,7 +309,7 @@ const ungroupPositions = (
       y: container.position.y + child.position.y,
     },
     parentNode: undefined,
-    // Remove extent constraint (was 'parent')
+    extent: undefined,  // Remove 'parent' constraint - children become free-floating
   }));
 };
 ```
@@ -378,16 +378,7 @@ interface NodeStoreState {
 ```typescript
 // Container-specific types (extends types from 4.3, 4.6)
 
-// Note: ContainerNodeData is defined in AC2 with type discriminator
-// Use that definition as the canonical source
-
-interface ContainerNodeData {
-  type: 'container';                // Type discriminator
-  label: string;
-  isCollapsed: boolean;
-  childNodeIds: string[];
-  createdAt: string;                // ISO 8601
-}
+// Note: ContainerNodeData is defined in AC2 (line 113) - use that as the canonical source
 
 // Selection state
 interface SelectionState {
@@ -433,7 +424,7 @@ interface CustomNode extends Node {
   - [x] Update existing node components with selection ring (emerald-500)
   - [x] Create `SelectionBadge.tsx` for "{N} selected" indicator
   - [x] Add keyboard shortcuts (Escape to clear, Ctrl+A select all)
-- [x] Task 1.4 — Unit tests: Selection logic (85% coverage)
+- [x] Task 1.4 — Unit tests: Selection logic (80% coverage)
 
 ### Phase 2: Container Node Component
 - [x] Task 2.1 — Create `src/features/nodeEditor/nodes/ContainerNode.tsx`
@@ -455,7 +446,7 @@ interface CustomNode extends Node {
   - [~] "Rename" option (inline editing implemented)
   - [~] "Ungroup" option (keyboard/toolbar only)
   - [ ] "Delete" option (future)
-- [x] Task 2.5 — Unit tests: ContainerNode component (80% coverage)
+- [x] Task 2.5 — Unit tests: ContainerNode component (85% coverage)
 
 ### Phase 3: Group/Ungroup Operations
 - [x] Task 3.1 — Create `src/features/nodeEditor/utils/groupNodes.ts`
@@ -547,7 +538,7 @@ interface CustomNode extends Node {
   - [ ] First-time user hint: "Press Ctrl+G to group" (dismissible) (future)
 
 ### Phase 8: Testing
-- [x] Task 8.1 — Unit tests: Selection system (85% coverage)
+- [x] Task 8.1 — Unit tests: Selection system (80% coverage)
   - [x] useNodeSelection hook tests
   - [x] Selection state management
   - [x] Keyboard shortcuts (Ctrl+A, Escape)
@@ -648,10 +639,20 @@ const childNode: Node = {
 // useNodeSelection.ts - Sync from React Flow's onSelectionChange
 export const useNodeSelection = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const latestSelectionRef = useRef<string[]>([]);
+  
+  // Keep ref in sync to prevent race conditions during rapid updates
+  useEffect(() => {
+    latestSelectionRef.current = selectedIds;
+  }, [selectedIds]);
   
   // Sync FROM React Flow - not parallel to it
   const onSelectionChange = useCallback(({ nodes }: { nodes: Node[] }) => {
-    setSelectedIds(nodes.map(n => n.id));
+    const newIds = nodes.map(n => n.id);
+    // Deduplicate and check for actual changes to prevent unnecessary updates
+    if (JSON.stringify(newIds.sort()) !== JSON.stringify(latestSelectionRef.current.sort())) {
+      setSelectedIds(newIds);
+    }
   }, []);
   
   const selectAll = useCallback((nodes: Node[]) => {
@@ -713,12 +714,19 @@ import { SelectionMode } from '@xyflow/react';
 
 ```typescript
 // groupNodes.ts
+import { nanoid } from 'nanoid';
+
 export const createContainerFromSelection = (
   selectedNodes: Node[],
   existingNodes: Node[],
   label?: string
 ): { container: Node; updatedChildren: Node[] } => {
-  // 1. Validate: Prevent nesting
+  // 1. Validate: Minimum 2 nodes required
+  if (selectedNodes.length < 2) {
+    throw new Error('At least 2 nodes are required to create a group');
+  }
+  
+  // 2. Validate: Prevent nesting
   const invalidNodes = selectedNodes.filter(
     n => n.parentNode !== undefined
   );
@@ -726,11 +734,11 @@ export const createContainerFromSelection = (
     throw new Error('Cannot group nodes already in a container');
   }
   
-  // 2. Calculate bounding box with padding
+  // 3. Calculate bounding box with padding
   const bounds = calculateBoundingBox(selectedNodes);
   const padding = 40;
   
-  // 3. Create container node
+  // 4. Create container node
   const containerId = `container_${nanoid(6)}`;
   const container: Node = {
     id: containerId,
@@ -749,7 +757,7 @@ export const createContainerFromSelection = (
     },
   };
   
-  // 4. Convert children to relative positions
+  // 5. Convert children to relative positions
   const updatedChildren = selectedNodes.map(node => ({
     ...node,
     position: {
@@ -762,6 +770,15 @@ export const createContainerFromSelection = (
   
   return { container, updatedChildren };
 };
+
+// Usage with error handling
+try {
+  const { container, updatedChildren } = createContainerFromSelection(selectedNodes, nodes);
+  // Apply changes to store
+} catch (error) {
+  // Show user-friendly error message
+  console.error('Failed to group nodes:', error);
+}
 
 const calculateBoundingBox = (nodes: Node[]) => {
   const xs = nodes.map(n => n.position.x);
@@ -821,16 +838,38 @@ export const getInternalConnections = (
    get().debouncedSaveCanvas();
    ```
 
-5. **Error Handling**: Dispatch to global error store
+5. **Input Sanitization**: Always sanitize user inputs to prevent XSS:
+   ```typescript
+   // Sanitize container labels
+   const sanitizeLabel = (label: string): string => {
+     return label
+       .replace(/[<>]/g, '') // Remove angle brackets
+       .slice(0, 50);        // Enforce max length
+   };
+   ```
+
+6. **Position Precision**: Round positions to prevent floating-point drift:
+   ```typescript
+   // Round to 2 decimal places to prevent accumulation errors
+   const roundPosition = (pos: number): number => Math.round(pos * 100) / 100;
+   
+   // Usage in group/ungroup
+   position: {
+     x: roundPosition(node.position.x - container.position.x),
+     y: roundPosition(node.position.y - container.position.y),
+   }
+   ```
+
+7. **Error Handling**: Dispatch to global error store
    ```typescript
    useErrorStore.getState().dispatchError('Failed to group nodes');
    ```
 
-6. **Styling**: Use zinc/emerald tokens from UX spec
+8. **Styling**: Use zinc/emerald tokens from UX spec
    - Container border: `border-zinc-700` (default), `border-emerald-500` (selected)
    - Background: `bg-zinc-800`, `bg-zinc-900/50`
 
-7. **Animation Timing**: Per UX spec
+9. **Animation Timing**: Per UX spec
    - Quick feedback: 150ms
    - Standard transition: 200ms
    - Easing: `cubic-bezier(0.4, 0, 0.2, 1)`
@@ -880,13 +919,15 @@ export const validateContainerIntegrity = (
     }
   });
   
-  // 3. Prevent circular references
-  const hasCircularRef = (nodeId: string, visited = new Set<string>()): boolean => {
+  // 3. Prevent circular references (with depth limit to prevent stack overflow)
+  const MAX_PARENT_DEPTH = 100;
+  const hasCircularRef = (nodeId: string, visited = new Set<string>(), depth = 0): boolean => {
+    if (depth > MAX_PARENT_DEPTH) return true; // Treat excessive depth as circular
     if (visited.has(nodeId)) return true;
     visited.add(nodeId);
     const node = nodes.find(n => n.id === nodeId);
     if (node?.parentNode) {
-      return hasCircularRef(node.parentNode, visited);
+      return hasCircularRef(node.parentNode, visited, depth + 1);
     }
     return false;
   };
@@ -978,6 +1019,40 @@ export const validateContainerIntegrity = (
   background: currentColor;
   border: 2px solid #18181b;  /* zinc-900 */
 }
+
+/* Animation state tracking - prevent toggle spam */
+.container-node.is-animating {
+  pointer-events: none; /* Prevent clicks during animation */
+}
+```
+
+#### Animation State Management
+
+Prevent race conditions during rapid expand/collapse:
+
+```typescript
+// useContainerState.ts
+export const useContainerState = () => {
+  const [isAnimating, setIsAnimating] = useState(false);
+  const { updateNodeData } = useNodeStore();
+  
+  const toggleContainer = useCallback((containerId: string) => {
+    if (isAnimating) return; // Prevent rapid toggles
+    
+    const container = useNodeStore.getState().nodes.find(n => n.id === containerId);
+    if (!container?.data) return; // Defensive check
+    
+    setIsAnimating(true);
+    const newState = !container.data.isCollapsed;
+    
+    updateNodeData(containerId, { isCollapsed: newState });
+    
+    // Reset animation lock after transition completes (200ms + buffer)
+    setTimeout(() => setIsAnimating(false), 250);
+  }, [isAnimating, updateNodeData]);
+  
+  return { toggleContainer, isAnimating };
+};
 ```
 
 ### File Structure
@@ -1031,6 +1106,79 @@ src/
 - **Advanced Layout**: Auto-layout algorithms for child nodes (future story)
 - **Minimap Integration**: Container representation in minimap (story 4.4 baseline)
 - **Undo/Redo**: Assumes existing undo/redo infrastructure (if available) — group/ungroup should be recorded as atomic operations
+
+### Implementation Safety Patterns
+
+#### ID Collision Detection
+
+Prevent duplicate IDs when generating container IDs:
+
+```typescript
+// utils/idGeneration.ts
+import { nanoid } from 'nanoid';
+
+export const generateUniqueContainerId = (existingNodes: Node[]): string => {
+  let attempts = 0;
+  let id: string;
+  
+  do {
+    id = `container_${nanoid(6)}`;
+    attempts++;
+    // Safety: limit attempts to prevent infinite loop
+    if (attempts > 100) {
+      throw new Error('Failed to generate unique container ID');
+    }
+  } while (existingNodes.some(n => n.id === id));
+  
+  return id;
+};
+```
+
+#### Operation Locking
+
+Prevent concurrent group/ungroup operations:
+
+```typescript
+// stores/useNodeStore.ts - Add operation lock
+interface NodeStoreState {
+  // ... existing state
+  isOperationLocked: boolean;
+  lockOperation: () => void;
+  unlockOperation: () => void;
+}
+
+// Usage in groupNodes
+const groupNodes = (nodeIds: string[], label?: string): string | null => {
+  if (get().isOperationLocked) {
+    console.warn('Group operation already in progress');
+    return null;
+  }
+  
+  get().lockOperation();
+  try {
+    // ... perform grouping
+    return containerId;
+  } finally {
+    get().unlockOperation();
+  }
+};
+```
+
+#### Defensive Handle ID Handling
+
+Handle null/undefined handle IDs in port calculations:
+
+```typescript
+// utils/connectionUtils.ts
+export const calculateContainerPortPosition = (
+  handleId: string | null | undefined,
+  // ... other params
+): PortPosition | null => {
+  if (!handleId) return null; // Defensive check
+  
+  // ... rest of calculation
+};
+```
 
 ### Performance Considerations
 
@@ -1144,3 +1292,47 @@ src/
 - Phase 6: Persistence integration with integrity validation
 - Phase 7: Toolbar & UI integration
 - Phase 8: Unit tests for core functionality
+
+---
+
+### Review Findings
+
+**Code Review Completed:** 2026-04-12  
+**Reviewers:** Blind Hunter, Edge Case Hunter  
+**Acceptance Auditor:** Failed (prompt size exceeded limits)
+
+**Summary:** 0 decision-needed, 16 patch, 0 defer, 8 dismissed
+
+#### Patch Findings (Completed)
+
+- [x] [Review][Patch] Duplicated ContainerNodeData interface defined twice in spec — **FIXED**: Removed duplicate, kept AC2 definition as canonical
+- [x] [Review][Patch] Contradictory comments about extent property handling — **FIXED**: Updated to explicitly set `extent: undefined` in ungroup with clear comment
+- [x] [Review][Patch] Missing nanoid import in code example — **FIXED**: Added `import { nanoid } from 'nanoid'` to groupNodes.ts example
+- [x] [Review][Patch] Missing error handling in group creation algorithm — **FIXED**: Added try/catch usage example after createContainerFromSelection
+- [x] [Review][Patch] Circular reference validation has no depth limit — **FIXED**: Added MAX_PARENT_DEPTH = 100 with depth tracking to prevent stack overflow
+- [x] [Review][Patch] Inconsistent test coverage targets — **FIXED**: Aligned all coverage targets with DoD (Container 85%, Selection 80%)
+- [x] [Review][Patch] Race condition in selection state synchronization — **FIXED**: Added useRef tracking and deduplication logic in useNodeSelection
+- [x] [Review][Patch] Missing validation for minimum 2 nodes to group — **FIXED**: Added explicit check for selectedNodes.length < 2 in createContainerFromSelection
+- [x] [Review][Patch] No input sanitization on container label — **FIXED**: Added sanitizeLabel function and updated interface docs
+- [x] [Review][Patch] Floating-point precision drift in position calculations — **FIXED**: Added roundPosition utility with 2 decimal precision
+- [x] [Review][Patch] Container toggle race condition — **FIXED**: Added isAnimating state with 250ms lock and CSS .is-animating class
+- [x] [Review][Patch] Missing defensive checks for container.data access — **FIXED**: Added null check for container?.data in toggleContainer example
+- [x] [Review][Patch] Null/undefined handle ID handling — **FIXED**: Added defensive check `if (!handleId) return null` in calculateContainerPortPosition
+- [x] [Review][Patch] No operation locking for concurrent group/ungroup — **FIXED**: Added isOperationLocked pattern with try/finally in store
+- [x] [Review][Patch] Animation desync on rapid toggle — **FIXED**: Added isAnimating state lock and pointer-events: none during animation
+- [x] [Review][Patch] Node ID collision risk with nanoid(6) — **FIXED**: Added generateUniqueContainerId with collision detection and attempt limit
+
+#### Deferred Findings
+
+None
+
+#### Dismissed Findings
+
+- CSS selector syntax is valid (false positive)
+- Date handling uses ISO 8601 correctly
+- Comment typos are cosmetic only
+- Edges dependency signature variation is acceptable
+- Selection badge negative count is not a realistic scenario
+- Max label length has maxLength attribute protection
+- Missing childNodeIds update on ungroup is by design (container deleted)
+- Async loading state is covered by existing UI patterns
