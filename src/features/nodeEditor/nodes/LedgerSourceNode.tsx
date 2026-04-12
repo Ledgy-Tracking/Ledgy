@@ -5,10 +5,12 @@ import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useLedgerStore } from '@/stores/useLedgerStore';
 import { useProfileStore } from '@/stores/useProfileStore';
-import { ChevronDown, ChevronUp, Database, Settings, AlertTriangle, GripVertical } from 'lucide-react';
+import { ChevronDown, ChevronUp, Database, Settings, AlertTriangle, GripVertical, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useLedgerSourceData, useFieldStats } from '../hooks/useLedgerSourceData';
+import { useLedgerData } from '../hooks/useLedgerData';
+import { useLiveQuery } from '../hooks/useLiveQuery';
+import { useFieldStats } from '../hooks/useLedgerSourceData';
 import { portColorMap } from '../utils/portColors';
 import { SchemaField } from '@/types/ledger';
 import { LEDGER_CACHE_SIZE_OPTIONS, LEDGER_CACHE_SIZE_MAX } from '../utils/nodeConstants';
@@ -24,6 +26,17 @@ export interface LedgerSourceNodeData {
     cacheSize: number;
     lastUpdated?: string;
     isStale?: boolean;
+    // Hydrated data from Story 4-10
+    entries?: import('@/types/ledger').LedgerEntry[];
+    count?: number;
+    aggregates?: {
+        sum?: Record<string, number>;
+        avg?: Record<string, number>;
+        min?: Record<string, number>;
+        max?: Record<string, number>;
+    };
+    isLoading?: boolean;
+    error?: string;
 }
 
 /**
@@ -83,25 +96,60 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
         showLatestValues: true,
         cacheSize: LEDGER_CACHE_SIZE_MAX,
         isStale: true,
+        entries: [],
+        count: 0,
+        isLoading: false,
     };
-    const { ledgerId, ledgerName, schemaSnapshot, showFieldTypes, showLatestValues, cacheSize } = nodeData;
+    const { ledgerId, ledgerName, schemaSnapshot, showFieldTypes, showLatestValues, cacheSize, entries: hydratedEntries, isLoading: hydratedLoading, error: hydratedError } = nodeData;
 
     // Track previous ledgerId to avoid unnecessary updates
     const prevLedgerIdRef = useRef<string | undefined>(undefined);
     const { updateNodeData } = useReactFlow();
 
-    // Fetch ledger data for previews - only if ledgerId is valid
-    const { entries, isLoading, error, lastUpdated } = useLedgerSourceData(
-        ledgerId || undefined, 
+    // Hydrate ledger data on mount and subscribe to live updates
+    const { hydrateLedgerSourceNode } = useLedgerData();
+    useLiveQuery(
+        ledgerId || undefined,
+        (entries) => {
+            // Update node data with hydrated entries
+            updateNodeData(id, { entries, count: entries.length });
+        },
         cacheSize
     );
 
-    // Update node data with lastUpdated timestamp when data changes
+    // Get data from node data (hydrated)
+    const entries = hydratedEntries || [];
+    const isLoading = hydratedLoading || false;
+    const error = hydratedError;
+
+    // Hydrate ledger data when ledgerId or schema changes
     useEffect(() => {
-        if (lastUpdated && lastUpdated !== nodeData.lastUpdated) {
-            updateNodeData(id, { lastUpdated });
-        }
-    }, [lastUpdated, nodeData.lastUpdated, id, updateNodeData]);
+        if (!ledgerId || schemaSnapshot.length === 0) return;
+
+        const hydrateData = async () => {
+            updateNodeData(id, { isLoading: true, error: undefined });
+
+            try {
+                const result = await hydrateLedgerSourceNode(ledgerId, schemaSnapshot);
+                updateNodeData(id, {
+                    entries: result.entries,
+                    count: result.count,
+                    aggregates: result.aggregates,
+                    isLoading: false,
+                    error: result.error,
+                    lastUpdated: new Date().toISOString()
+                });
+            } catch (err) {
+                const errorMessage = err instanceof Error ? err.message : 'Failed to hydrate ledger data';
+                updateNodeData(id, {
+                    isLoading: false,
+                    error: errorMessage
+                });
+            }
+        };
+
+        hydrateData();
+    }, [ledgerId, schemaSnapshot, id, updateNodeData, hydrateLedgerSourceNode]);
 
     // Fetch schemas on mount for ledger selector
     useEffect(() => {
@@ -139,14 +187,20 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
     const handleLedgerChange = useCallback((newLedgerId: string) => {
         const schema = schemas.find(s => s._id === newLedgerId);
         if (schema) {
-            updateNodeData(id, { 
+            updateNodeData(id, {
                 type: 'ledgerSource',
-                ledgerId: newLedgerId, 
-                ledgerName: schema.name, 
+                ledgerId: newLedgerId,
+                ledgerName: schema.name,
                 schemaSnapshot: schema.fields,
                 showFieldTypes: true,
                 showLatestValues: true,
                 cacheSize: LEDGER_CACHE_SIZE_MAX,
+                // Reset hydrated data
+                entries: undefined,
+                count: undefined,
+                aggregates: undefined,
+                isLoading: false,
+                error: undefined,
                 lastUpdated: new Date().toISOString()
             });
             setIsConfigOpen(false);
@@ -186,6 +240,16 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                     <div className="flex items-center gap-1 shrink-0">
                         {isLedgerDeleted && (
                             <AlertTriangle size={14} className="text-red-400" />
+                        )}
+                        {/* Entry count badge */}
+                        {ledgerId && !isLoading && !error && (
+                            <div className="text-xs bg-white/20 text-zinc-900 dark:text-white px-1.5 py-0.5 rounded">
+                                {nodeData.count || 0}
+                            </div>
+                        )}
+                        {/* Loading spinner */}
+                        {isLoading && (
+                            <Loader2 size={12} className="animate-spin text-white/70" />
                         )}
                         <Button
                             onClick={(e) => {

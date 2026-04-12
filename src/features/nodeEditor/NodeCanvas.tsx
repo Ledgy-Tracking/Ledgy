@@ -37,6 +37,10 @@ import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
 import './styles/connectionLine.css';
+import { setupNodeDataChangeSubscription } from './utils/edgeDataFlow';
+import { useLedgerData } from './hooks/useLedgerData';
+import { HydrationProgressIndicator } from './components/HydrationProgressIndicator';
+import { ledgerDataCache } from './utils/ledgerDataCache';
 
 // --- STABLE CONFIGURATION (Outside component to prevent re-renders) ---
 
@@ -101,6 +105,15 @@ export const NodeCanvas: React.FC = () => {
     // Selection state (Story 4.9)
     const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
 
+    // Hydration progress state (Story 4.10)
+    const [hydrationProgress, setHydrationProgress] = useState<{
+        isActive: boolean;
+        message: string;
+    }>({
+        isActive: false,
+        message: ''
+    });
+
     // Detect dark mode for MiniMap theming
     const [isDarkMode, setIsDarkMode] = useState(() => 
         document.documentElement.classList.contains('dark')
@@ -114,11 +127,105 @@ export const NodeCanvas: React.FC = () => {
                 }
             });
         });
-        
+
         observer.observe(document.documentElement, { attributes: true });
-        
+
         return () => observer.disconnect();
     }, []);
+
+    // Set up edge data flow subscription (Story 4.10)
+    useEffect(() => {
+        const unsubscribe = setupNodeDataChangeSubscription();
+
+        return () => {
+            unsubscribe();
+        };
+    }, []);
+
+    // Concurrent hydration of all ledger nodes (Story 4.10 AC #4)
+    const { hydrateLedgerSourceNode } = useLedgerData();
+    useEffect(() => {
+        if (!nodes.length || !isCanvasLoaded) return;
+
+        const hydrateAllLedgerNodes = async () => {
+            const ledgerNodes = nodes.filter(node => node.type === 'ledgerSource');
+            if (ledgerNodes.length === 0) return;
+
+            console.log(`[NodeCanvas] Hydrating ${ledgerNodes.length} ledger nodes concurrently`);
+
+            // Show progress indicator
+            setHydrationProgress({
+                isActive: true,
+                message: `Hydrating ${ledgerNodes.length} ledger${ledgerNodes.length > 1 ? 's' : ''}...`
+            });
+
+            // Set loading state for all ledger nodes
+            ledgerNodes.forEach(node => {
+                useNodeStore.getState().updateNodeData(node.id, {
+                    isLoading: true,
+                    error: undefined
+                });
+            });
+
+            // Track completed hydrations
+            let completedCount = 0;
+
+            // Hydrate all concurrently
+            const hydrationPromises = ledgerNodes.map(async (node) => {
+                try {
+                    const ledgerId = node.data.ledgerId;
+                    const schemaSnapshot = node.data.schemaSnapshot;
+
+                    if (!ledgerId || !schemaSnapshot?.length) {
+                        useNodeStore.getState().updateNodeData(node.id, {
+                            isLoading: false,
+                            error: 'Missing ledger ID or schema'
+                        });
+                        completedCount++;
+                        setHydrationProgress(prev => ({
+                            ...prev,
+                            message: `Hydrating... (${completedCount}/${ledgerNodes.length})`
+                        }));
+                        return;
+                    }
+
+                    const result = await hydrateLedgerSourceNode(ledgerId, schemaSnapshot);
+                    useNodeStore.getState().updateNodeData(node.id, {
+                        entries: result.entries,
+                        count: result.count,
+                        aggregates: result.aggregates,
+                        isLoading: false,
+                        error: result.error,
+                        lastUpdated: new Date().toISOString()
+                    });
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : 'Hydration failed';
+                    useNodeStore.getState().updateNodeData(node.id, {
+                        isLoading: false,
+                        error: errorMessage
+                    });
+                }
+
+                completedCount++;
+                setHydrationProgress(prev => ({
+                    ...prev,
+                    message: `Hydrating... (${completedCount}/${ledgerNodes.length})`
+                }));
+            });
+
+            await Promise.allSettled(hydrationPromises);
+
+            // Hide progress indicator
+            setHydrationProgress({
+                isActive: false,
+                message: ''
+            });
+
+            console.log(`[NodeCanvas] Completed hydration of ${ledgerNodes.length} ledger nodes`);
+        };
+
+        hydrateAllLedgerNodes();
+    }, [nodes, isCanvasLoaded, hydrateLedgerSourceNode]);
 
     const loadedWorkflowRef = useRef<string | null>(null);
     const loadAbortRef = useRef(false);
@@ -189,21 +296,25 @@ export const NodeCanvas: React.FC = () => {
         const unsubscribe = useNodeStore.subscribe(
             (state) => state.schemas,
             (schemas) => {
+                // When schemas change, invalidate cache for affected ledgers
+                console.log('[Cache] Invalidating cache due to schema changes');
+                ledgerDataCache.clear(); // For now, clear all cache on any schema change
+
                 // When schemas change, re-validate all edges
                 const currentNodes = useNodeStore.getState().nodes;
                 const currentEdges = useNodeStore.getState().edges;
-                
+
                 // Import validation function dynamically to avoid circular deps
                 import('./utils/edgeValidation').then(({ validateGraphEdges }) => {
                     const validEdges = validateGraphEdges(currentEdges, currentNodes);
-                    
+
                     // Only update if edges were removed
                     if (validEdges.length !== currentEdges.length) {
                         useNodeStore.getState().setEdges(validEdges);
                         useNodeStore.getState().debouncedSaveCanvas();
-                        
+
                         if (process.env.NODE_ENV === 'development') {
-                            console.log('[EdgeValidation] Removed invalid edges after schema change:', 
+                            console.log('[EdgeValidation] Removed invalid edges after schema change:',
                                 currentEdges.length - validEdges.length);
                         }
                     }
@@ -625,6 +736,12 @@ const generateNodeId = (): string => {
             <div aria-live="polite" aria-atomic="true" className="sr-only">
                 {announcement}
             </div>
+
+            {/* Hydration Progress Indicator (Story 4.10) */}
+            <HydrationProgressIndicator
+                isVisible={hydrationProgress.isActive}
+                message={hydrationProgress.message}
+            />
 
             {/* Shortcut Help Panel (Story 4.4) */}
             <ShortcutHelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
