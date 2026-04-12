@@ -20,7 +20,7 @@ const createMockProps = (
     fromPosition: 'top' as any,
     toPosition: 'top' as any,
     connectionLineType: 'default' as any,
-    connectionStatus: undefined,
+    connectionStatus: 'default' as any,
     ...overrides
 });
 
@@ -33,7 +33,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should render with default status', () => {
-        const props = createMockProps({ connectionStatus: undefined });
+        const props = createMockProps({ connectionStatus: 'default' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const line = container.querySelector('g[data-testid="connection-line"]');
@@ -89,7 +89,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should not render glow effect for non-valid connections', () => {
-        const props = createMockProps({ connectionStatus: undefined });
+        const props = createMockProps({ connectionStatus: 'default' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const glow = container.querySelector('.connection-line-glow');
@@ -105,7 +105,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should apply correct stroke color for default status', () => {
-        const props = createMockProps({ connectionStatus: undefined });
+        const props = createMockProps({ connectionStatus: 'default' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const path = container.querySelector('.connection-line-default');

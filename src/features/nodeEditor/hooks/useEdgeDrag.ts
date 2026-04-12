@@ -132,7 +132,7 @@ export const useEdgeDrag = ({
                     );
                     if (distanceToSource <= SNAP_RADIUS) {
                         // Cancel drag when returned to source handle
-                        cancelDrag();
+                        if(cancelDrag) cancelDrag();
                         return;
                     }
                 }
@@ -169,13 +169,13 @@ export const useEdgeDrag = ({
     const endDrag = useCallback(() => {
         if (!connectionState?.snapResult?.snapped) {
             // No valid snap - cancel
-            cancelDrag();
+            if(cancelDrag) cancelDrag();
             return;
         }
 
         // Validate snap result has required fields
         if (!connectionState.snapResult.handleId || !connectionState.snapResult.nodeId) {
-            cancelDrag();
+            if(cancelDrag) cancelDrag();
             return;
         }
 
@@ -215,7 +215,7 @@ export const useEdgeDrag = ({
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isDragging) {
                 e.preventDefault();
-                cancelDrag();
+                if(cancelDrag) cancelDrag();
             }
         };
 
@@ -239,7 +239,7 @@ export const useEdgeDrag = ({
                 if (connectionState?.snapResult?.snapped) {
                     endDrag();
                 } else {
-                    cancelDrag();
+                    if(cancelDrag) cancelDrag();
                 }
             }
         };

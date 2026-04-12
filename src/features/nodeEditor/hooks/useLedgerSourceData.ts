@@ -53,31 +53,19 @@ export const useLedgerSourceData = (
         });
 
         // Calculate stats for each field that contains numbers
-        // ⚡ Bolt: Single-pass loop optimization for stats calculation
         fieldIds.forEach(fieldId => {
-            let sum = 0;
-            let count = 0;
-            let min = Infinity;
-            let max = -Infinity;
+            const values = entries
+                .map(e => e.data[fieldId])
+                .filter((v): v is number => typeof v === 'number' && !isNaN(v));
 
-            for (let i = 0; i < entries.length; i++) {
-                const val = entries[i].data[fieldId];
-                if (typeof val === 'number' && !Number.isNaN(val)) {
-                    sum += val;
-                    count++;
-                    if (val < min) min = val;
-                    if (val > max) max = val;
-                }
-            }
-
-            if (count === 0) {
+            if (values.length === 0) {
                 result[fieldId] = null;
             } else {
                 result[fieldId] = {
-                    avg: sum / count,
-                    min: min,
-                    max: max,
-                    count: count,
+                    avg: values.reduce((a, b) => a + b, 0) / values.length,
+                    min: Math.min(...values),
+                    max: Math.max(...values),
+                    count: values.length,
                 };
             }
         });
@@ -213,29 +201,17 @@ export const useFieldStats = (
     return useMemo(() => {
         if (entries.length === 0) return null;
         
-        // ⚡ Bolt: Single-pass loop optimization for field stats
-        let sum = 0;
-        let count = 0;
-        let min = Infinity;
-        let max = -Infinity;
+        const values = entries
+            .map(e => e.data[fieldId])
+            .filter((v): v is number => typeof v === 'number' && !isNaN(v));
 
-        for (let i = 0; i < entries.length; i++) {
-            const val = entries[i].data[fieldId];
-            if (typeof val === 'number' && !Number.isNaN(val)) {
-                sum += val;
-                count++;
-                if (val < min) min = val;
-                if (val > max) max = val;
-            }
-        }
-
-        if (count === 0) return null;
+        if (values.length === 0) return null;
         
         return {
-            avg: sum / count,
-            min: min,
-            max: max,
-            count: count,
+            avg: values.reduce((a, b) => a + b, 0) / values.length,
+            min: Math.min(...values),
+            max: Math.max(...values),
+            count: values.length,
         };
     }, [entries, fieldId]);
 };
