@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { AuthLoadingScreen } from './AuthLoadingScreen';
 import { useAuthStore, useIsRegistered } from './useAuthStore';
 
 interface AuthGuardProps {
@@ -8,7 +9,12 @@ interface AuthGuardProps {
 
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     const isUnlocked = useAuthStore(state => state.isUnlocked);
+    const hasHydrated = useAuthStore(state => state.hasHydrated);
     const isRegistered = useIsRegistered();
+
+    if (!hasHydrated) {
+        return <AuthLoadingScreen />;
+    }
 
     if (!isRegistered) {
         return <Navigate to="/setup" replace />;

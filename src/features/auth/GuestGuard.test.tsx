@@ -23,7 +23,7 @@ describe('GuestGuard', () => {
     });
 
     it('redirects to /profiles when user is authenticated', () => {
-        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: true })) as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: true, hasHydrated: true })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -47,7 +47,7 @@ describe('GuestGuard', () => {
     });
 
     it('redirects to /unlock when user is registered but not on auth pages', () => {
-        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false, hasHydrated: true })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -71,7 +71,7 @@ describe('GuestGuard', () => {
     });
 
     it('renders children when user is not registered (first-time setup)', () => {
-        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false, hasHydrated: true })) as any);
         mockUseIsRegistered.mockReturnValue(false);
 
         render(
@@ -86,7 +86,7 @@ describe('GuestGuard', () => {
     });
 
     it('allows access to /unlock for registered but locked users', () => {
-        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false, hasHydrated: true })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -111,7 +111,7 @@ describe('GuestGuard', () => {
 
     it('prevents double-registration scenarios', () => {
         // User is already registered and unlocked
-        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: true })) as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: true, hasHydrated: true })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -124,5 +124,21 @@ describe('GuestGuard', () => {
 
         // Should redirect away, preventing double registration
         expect(screen.queryByTestId('setup-form')).not.toBeInTheDocument();
+    });
+
+    it('shows a loading screen while auth state is still hydrating', () => {
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false, hasHydrated: false })) as any);
+        mockUseIsRegistered.mockReturnValue(false);
+
+        render(
+            <MemoryRouter initialEntries={['/setup']}>
+                <GuestGuard>
+                    <div data-testid="guest">Guest Content</div>
+                </GuestGuard>
+            </MemoryRouter>
+        );
+
+        expect(screen.getByRole('status', { name: /loading authentication state/i })).toBeInTheDocument();
+        expect(screen.queryByTestId('guest')).not.toBeInTheDocument();
     });
 });

@@ -8,3 +8,5 @@ export { TriggerNode } from './TriggerNode';
 export type { TriggerNodeData } from './TriggerNode';
 export { DashboardOutputNode } from './DashboardOutputNode';
 export type { DashboardOutputNodeData } from './DashboardOutputNode';
+export { ContainerNode } from './ContainerNode';
+export type { ContainerNodeData } from './ContainerNode';

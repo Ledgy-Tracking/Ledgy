@@ -22,7 +22,10 @@ import { CorrelationNode } from './nodes/CorrelationNode';
 import { ArithmeticNode } from './nodes/ArithmeticNode';
 import { TriggerNode } from './nodes/TriggerNode';
 import { DashboardOutputNode } from './nodes/DashboardOutputNode';
+import { ContainerNode } from './nodes/ContainerNode';
 import { DataEdge } from './edges/DataEdge';
+import { SelectionBadge } from './components/SelectionBadge';
+import './styles/containerAnimations.css';
 import { useParams } from 'react-router-dom';
 import { NodeToolbar } from './NodeToolbar';
 import { NavigationToolbar } from './components/NavigationToolbar';
@@ -43,6 +46,7 @@ const nodeTypes = {
     arithmetic: ArithmeticNode,
     trigger: TriggerNode,
     dashboardOutput: DashboardOutputNode,
+    container: ContainerNode,
 };
 
 const edgeTypes = {
@@ -93,6 +97,9 @@ export const NodeCanvas: React.FC = () => {
 
     // Help panel state (Story 4.4)
     const [isHelpOpen, setIsHelpOpen] = useState(false);
+    
+    // Selection state (Story 4.9)
+    const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
 
     // Detect dark mode for MiniMap theming
     const [isDarkMode, setIsDarkMode] = useState(() => 
@@ -234,8 +241,23 @@ export const NodeCanvas: React.FC = () => {
         // If we were connecting but onConnect was never called, it was rejected
         if (attempt.isConnecting && attempt.source && attempt.sourceHandle) {
             // Determine what handle we dropped on (if any)
-            const target = event.target as HTMLElement;
-            const handleElement = target?.closest('.react-flow__handle') as HTMLElement | null;
+            // Use composedPath for shadow DOM support, fallback to event.target
+            const target = (event.composedPath?.()[0] ?? event.target) as EventTarget | null;
+
+            // Safely check if target is an Element before calling closest()
+            if (!(target instanceof Element)) {
+                // Reset connection state before returning
+                connectionAttemptRef.current = {
+                    isConnecting: false,
+                    sourceHandle: null,
+                    source: null,
+                    targetHandle: null,
+                    target: null,
+                };
+                return;
+            }
+
+            const handleElement = target.closest('.react-flow__handle') as HTMLElement | null;
 
             if (handleElement) {
                 const targetNodeId = handleElement.dataset.nodeid;
@@ -313,6 +335,9 @@ export const NodeCanvas: React.FC = () => {
             return false;
         }
 
+        // Development mode: measure performance
+        const startTime = process.env.NODE_ENV === 'development' ? performance.now() : 0;
+
         // Use getPortTypeFromHandle to extract types (handles all node types)
         const sourceType = getPortTypeFromHandle(source, sourceHandle, nodes);
         const targetType = getPortTypeFromHandle(target, targetHandle, nodes);
@@ -321,7 +346,6 @@ export const NodeCanvas: React.FC = () => {
 
         // Development mode: log validation attempts for debugging
         if (process.env.NODE_ENV === 'development') {
-            const startTime = performance.now();
             const duration = performance.now() - startTime;
 
             if (duration > 1) {
@@ -348,6 +372,9 @@ export const NodeCanvas: React.FC = () => {
     }, [nodes]);
 
     const handleSelectionChange = useCallback(({ nodes: selected }: { nodes: CanvasNode[] }) => {
+        const ids = selected.map(n => n.id);
+        setSelectedNodeIds(ids);
+        
         const first = selected[0];
         if (first) {
             setSelectedNodeId(first.id);
@@ -393,9 +420,10 @@ const generateNodeId = (): string => {
         useNodeStore.getState().debouncedSaveCanvas();
     }, []);
 
-    // Ctrl/Cmd+S manual save shortcut
+    // Keyboard shortcuts (Story 4.9: Grouping shortcuts)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            // Ctrl/Cmd+S manual save
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
                 if (!activeProfileId || !projectId || !workflowId) return;
@@ -406,11 +434,50 @@ const generateNodeId = (): string => {
                     { profileId: activeProfileId, projectId, workflowId },
                     { nodes: state.nodes, edges: state.edges, viewport: state.viewport, viewControls: state.viewControls }
                 );
+                return;
+            }
+            
+            // Ctrl/Cmd+A - Select all nodes
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !e.shiftKey) {
+                e.preventDefault();
+                const allNodes = useNodeStore.getState().nodes;
+                setSelectedNodeIds(allNodes.map(n => n.id));
+                return;
+            }
+            
+            // Escape - Clear selection
+            if (e.key === 'Escape') {
+                setSelectedNodeIds([]);
+                return;
+            }
+            
+            // Ctrl/Cmd+G - Group selected nodes
+            if ((e.ctrlKey || e.metaKey) && e.key === 'g' && !e.shiftKey) {
+                e.preventDefault();
+                if (selectedNodeIds.length >= 2) {
+                    useNodeStore.getState().groupNodes(selectedNodeIds);
+                    setSelectedNodeIds([]);
+                }
+                return;
+            }
+            
+            // Ctrl/Cmd+Shift+G - Ungroup selected container
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'G') {
+                e.preventDefault();
+                const state = useNodeStore.getState();
+                const selectedContainer = state.nodes.find(
+                    n => selectedNodeIds.includes(n.id) && n.type === 'container'
+                );
+                if (selectedContainer) {
+                    state.ungroupNodes(selectedContainer.id);
+                    setSelectedNodeIds([]);
+                }
+                return;
             }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [activeProfileId, projectId, workflowId]);
+    }, [activeProfileId, projectId, workflowId, selectedNodeIds]);
 
     // --- RENDER ---
 
@@ -426,12 +493,15 @@ const generateNodeId = (): string => {
                 onConnect={onConnect}
                 onConnectStart={onConnectStart}
                 onConnectEnd={onConnectEnd}
+                onSelectionChange={handleSelectionChange}
                 isValidConnection={isValidConnection}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
                 connectionLineComponent={ConnectionLine}
                 fitView
+                selectionOnDrag={true}
+                selectionKeyCode={['Shift']}
                 className="bg-white dark:bg-zinc-950"
             >
                     <NodeToolbar />
@@ -447,17 +517,19 @@ const generateNodeId = (): string => {
                         />
                     )}
                     {showGrid && <Background color="#3f3f46" gap={20} />}
-                    <Controls showZoom={false} showFitView={false} showInteractive={false} />
-                </ReactFlow>
-                {/* ARIA Live region for announcements */}
-                <div aria-live="polite" aria-atomic="true" className="sr-only">
-                    {announcement}
-                </div>
-                {/* Shortcut Help Panel */}
-                <ShortcutHelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+                <Controls showZoom={false} showFitView={false} showInteractive={false} />
+            </ReactFlow>
+            {/* Selection badge (Story 4.9) */}
+            <SelectionBadge count={selectedNodeIds.length} />
+            {/* ARIA Live region for announcements */}
+            <div aria-live="polite" aria-atomic="true" className="sr-only">
+                {announcement}
             </div>
-        );
-    }
+            {/* Shortcut Help Panel */}
+            <ShortcutHelpPanel isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+        </div>
+    );
+}
 
     return (
         <div style={{ width: '100%', height: '100%' }} className="bg-white dark:bg-zinc-950 relative">

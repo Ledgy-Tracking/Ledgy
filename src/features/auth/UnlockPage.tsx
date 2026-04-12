@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { AuthLoadingScreen } from './AuthLoadingScreen';
 import { useAuthStore, EXPIRY_OPTIONS, RememberMeExpiry, DEFAULT_EXPIRY } from './useAuthStore';
 import { useErrorStore } from '../../stores/useErrorStore';
 
@@ -51,9 +52,19 @@ export const UnlockPage: React.FC = () => {
     // Session expiry (shown when rememberMe is checked)
     const [expiryOption, setExpiryOption] = useState<RememberMeExpiry>(DEFAULT_EXPIRY);
 
-    const { unlock, unlockWithPassphrase, needsPassphrase, reset, isUnlocked, hasHydrated } = useAuthStore();
+    const {
+        unlock,
+        unlockWithPassphrase,
+        needsPassphrase,
+        reset,
+        isUnlocked,
+        hasHydrated,
+        encryptedTotpSecret,
+        totpSecret,
+    } = useAuthStore();
     const navigate = useNavigate();
     const inputRef = useRef<HTMLInputElement>(null);
+    const showPassphraseRestore = needsPassphrase || !!(encryptedTotpSecret && !totpSecret);
 
     // Form for passphrase unlock
     const passphraseForm = useForm<PassphraseFormValues>({
@@ -81,14 +92,7 @@ export const UnlockPage: React.FC = () => {
 
     // Wait for store hydration before rendering to prevent UI flash
     if (!hasHydrated) {
-        return (
-            <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 flex flex-col items-center justify-center p-6 font-sans">
-                <div className="w-full max-w-sm space-y-8 text-center">
-                    <div className="w-8 h-8 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin mx-auto" />
-                    <p className="text-zinc-400">Loading...</p>
-                </div>
-            </div>
-        );
+        return <AuthLoadingScreen />;
     }
 
     // If already unlocked (e.g. via ?reset=true bypass), show management UI
@@ -220,7 +224,7 @@ export const UnlockPage: React.FC = () => {
                 <div className="flex flex-col items-center text-center space-y-4">
                     <Card className="p-4 bg-emerald-500/10 rounded-full border border-emerald-500/20">
                         <CardContent>
-                            {needsPassphrase ? (
+                            {showPassphraseRestore ? (
                                 <KeyRound className="w-8 h-8 text-emerald-500" />
                             ) : (
                                 <Lock className="w-8 h-8 text-emerald-500" />
@@ -230,15 +234,15 @@ export const UnlockPage: React.FC = () => {
                     <div className="space-y-2">
                         <h1 className="text-3xl font-bold tracking-tight">Ledgy Locked</h1>
                         <p className="text-zinc-400">
-                            {needsPassphrase
+                            {showPassphraseRestore
                                 ? 'Enter your passphrase to restore your remembered session.'
                                 : 'Enter your 6-digit TOTP code to unlock your vault.'}
                         </p>
                     </div>
                 </div>
 
-                {/* ── Passphrase-restore UI (needsPassphrase mode) ── */}
-                {needsPassphrase ? (
+                {/* ── Passphrase-restore UI ── */}
+                {showPassphraseRestore ? (
                     <form onSubmit={passphraseForm.handleSubmit(handlePassphraseUnlock)} className="flex flex-col w-full space-y-4">
                         <Form {...passphraseForm}>
                         <FormField
@@ -315,7 +319,7 @@ export const UnlockPage: React.FC = () => {
                             />
 
                             {/* ── Security Warning (Always shown if not passphrase protected) ── */}
-                            {!needsPassphrase && !unlockForm.watch('passphrase') && (
+                            {!showPassphraseRestore && !unlockForm.watch('passphrase') && (
                                 <div className="w-full bg-amber-500/5 border border-amber-500/20 rounded-lg p-3 flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-200">
                                     <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                                     <div className="space-y-1">

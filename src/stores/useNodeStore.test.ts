@@ -135,26 +135,29 @@ describe('useNodeStore', () => {
             mockAuthState.isUnlocked = true;
             const nodes = [{ id: 'n1', position: { x: 0, y: 0 }, data: { label: 'X' } } as any];
             const edges = [{ id: 'e1', source: 'n1', target: 'n2' } as any];
+            const viewport = { x: 1, y: 2, zoom: 0.8 };
             useNodeStore.getState().setNodes(nodes);
             useNodeStore.getState().setEdges(edges);
-            useNodeStore.getState().setViewport({ x: 1, y: 2, zoom: 0.8 });
+            useNodeStore.getState().setViewport(viewport);
 
-            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1');
+            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1', nodes, edges, viewport);
 
             expect(dbModule.save_canvas).toHaveBeenCalledOnce();
-            const [, canvasId, savedNodes, savedEdges, savedViewport, profileId] =
+            const [, canvasId, savedNodes, savedEdges, savedViewport, savedViewControls, profileId] =
                 (dbModule.save_canvas as any).mock.calls[0];
             expect(canvasId).toBe('workflow-1');
             expect(savedNodes).toEqual(nodes);
             expect(savedEdges).toEqual(edges);
             expect(savedViewport).toEqual({ x: 1, y: 2, zoom: 0.8 });
+            expect(savedViewControls).toBeDefined();
+            expect(savedViewControls.showMinimap).toBeDefined();
             expect(profileId).toBe('profile-1');
         });
 
         it('returns early without calling save_canvas when isUnlocked is false', async () => {
             mockAuthState.isUnlocked = false;
 
-            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1');
+            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1', [], [], { x: 0, y: 0, zoom: 1 });
 
             expect(dbModule.save_canvas).not.toHaveBeenCalled();
         });
@@ -162,7 +165,7 @@ describe('useNodeStore', () => {
         it('dispatches error when isUnlocked is false', async () => {
             mockAuthState.isUnlocked = false;
 
-            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1');
+            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1', [], [], { x: 0, y: 0, zoom: 1 });
 
             expect(mockDispatchError).toHaveBeenCalledWith('Cannot save canvas: vault is locked');
         });
@@ -171,7 +174,10 @@ describe('useNodeStore', () => {
             mockAuthState.isUnlocked = true;
             (dbModule.save_canvas as any).mockRejectedValueOnce(new Error('Save failed'));
 
-            await useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1');
+            // saveCanvas now re-throws for retry handling - need to catch it
+            await expect(
+                useNodeStore.getState().saveCanvas('profile-1', 'project-1', 'workflow-1', [], [], { x: 0, y: 0, zoom: 1 })
+            ).rejects.toThrow('Save failed');
 
             expect(useNodeStore.getState().error).toBe('Save failed');
             expect(mockDispatchError).toHaveBeenCalledWith('Save failed');

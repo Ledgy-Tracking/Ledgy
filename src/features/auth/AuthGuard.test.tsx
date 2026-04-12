@@ -23,7 +23,7 @@ describe('AuthGuard', () => {
     });
 
     it('redirects to /setup when user is not registered', () => {
-        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false, hasHydrated: true })) as any);
         mockUseIsRegistered.mockReturnValue(false);
 
         render(
@@ -47,7 +47,7 @@ describe('AuthGuard', () => {
     });
 
     it('redirects to /unlock when user is registered but not unlocked', () => {
-        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false })) as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false, hasHydrated: true })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -71,7 +71,7 @@ describe('AuthGuard', () => {
     });
 
     it('renders children when user is authenticated', () => {
-        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: true })) as any);
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: true, hasHydrated: true })) as any);
         mockUseIsRegistered.mockReturnValue(true);
 
         render(
@@ -90,6 +90,7 @@ describe('AuthGuard', () => {
         mockUseAuthStore.mockReturnValue({
             isUnlocked: true,
             rememberMeExpiry: Date.now() - 1000, // Expired 1 second ago
+            hasHydrated: true,
         } as any);
         mockUseIsRegistered.mockReturnValue(true);
 
@@ -106,5 +107,30 @@ describe('AuthGuard', () => {
         // AuthGuard allows access if isUnlocked is true
         // Session expiry is checked in initSession() before AuthGuard is reached
         expect(screen.getByTestId('protected')).toBeInTheDocument();
+    });
+
+    it('shows a loading screen while auth state is still hydrating', () => {
+        mockUseAuthStore.mockImplementation(((selector: any) => selector({ isUnlocked: false, hasHydrated: false })) as any);
+        mockUseIsRegistered.mockReturnValue(false);
+
+        render(
+            <MemoryRouter initialEntries={['/projects']}>
+                <Routes>
+                    <Route path="/setup" element={<div data-testid="setup">Setup Page</div>} />
+                    <Route
+                        path="/projects"
+                        element={
+                            <AuthGuard>
+                                <div data-testid="protected">Protected Content</div>
+                            </AuthGuard>
+                        }
+                    />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        expect(screen.getByRole('status', { name: /loading authentication state/i })).toBeInTheDocument();
+        expect(screen.queryByTestId('setup')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('protected')).not.toBeInTheDocument();
     });
 });

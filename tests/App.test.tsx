@@ -44,6 +44,7 @@ const authState = {
     totpSecret: null as string | null,
     encryptedTotpSecret: null as string | null,
     isUnlocked: false,
+    hasHydrated: true,
 };
 
 // Mock useAuthStore and useIsRegistered
@@ -87,6 +88,7 @@ describe("App Routing Integration", () => {
         authState.totpSecret = null;
         authState.encryptedTotpSecret = null;
         authState.isUnlocked = false;
+        authState.hasHydrated = true;
     });
 
     const setupAuthState = (
@@ -97,6 +99,7 @@ describe("App Routing Integration", () => {
         authState.totpSecret = totpSecret;
         authState.encryptedTotpSecret = encryptedTotpSecret;
         authState.isUnlocked = isUnlocked;
+        authState.hasHydrated = true;
         mockUseIsRegistered.mockReturnValue(!!(totpSecret || encryptedTotpSecret));
     };
 

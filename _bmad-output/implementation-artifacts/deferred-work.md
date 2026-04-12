@@ -55,3 +55,47 @@
 - **[D13][Med] `useShallow` import source verification** — zustand/shallow vs @xyflow/react may have different APIs/behaviors. Need to verify zustand/shallow is correct replacement for @xyflow/react's useShallow. (`src/features/nodeEditor/NodeCanvas.tsx`)
 
 - **[D14][Med] Shallow subscription selector instability** — `useNodeStore(useShallow(s => s.nodes))` creates a new selector function on every render, defeating Zustand's selector stability optimizations and potentially causing excessive re-renders. (`src/features/nodeEditor/NodeCanvas.tsx`)
+
+
+## Deferred from: code review of 4-3-node-store-debounced-persistence (2026-04-11)
+
+- Accessibility Learnings Removed — .Jules/palette.md changes removed accessibility content. This is a documentation change, not a code defect introduced by this PR.
+- Type Safety Theater — Generic <T> with immediate cast to any is a pre-existing pattern in the codebase, not introduced by this change.
+- Silent Timestamp Overwrite — Relies on existing.createdAt persisting. Pre-existing data pattern issue.
+- JSDoc Misleading — Documentation gaps are real but not code defects.
+- Return Value Documentation — Missing docs don't block functionality.
+
+## Deferred from: code review of 4-4-minimap-zoom-to-fit-controls (2026-04-12)
+
+- Module-level event listeners not cleaned up — Event listeners registered at module level persist for app lifetime. Pre-existing pattern in codebase (useNodeStore.ts:389-392).
+- NodeInspector theme violations — Pre-existing hardcoded text-white in components/Inspector/NodeInspector.tsx (not modified in this PR).
+
+## Deferred from: code review of 4-5-ledger-source-node-component and 4-6-correlation-node-math-component (2026-04-12)
+
+- **[D1][Med] Field ID Immutability Not Enforced at Schema Level** — The LedgerSourceNode uses field IDs for handle stability, but the schema builder doesn't enforce immutable field IDs. Renaming a field in the schema builder currently creates a new field ID in some cases, but this is inconsistent. Requires schema builder architecture changes. (`src/stores/useSchemaBuilderStore.ts`)
+
+- **[D2][Med] Incomplete Canvas Load Error Recovery** — When `loadCanvas` fails, the store sets `isCanvasLoaded: false` but doesn't clear partially loaded `nodes`, `edges`, and `viewport`. UI displays stale/corrupted data. Pre-existing store behavior not introduced by these stories. (`src/stores/useNodeStore.ts`)
+
+- **[D3][Low] LedgerSourceNode Re-renders on Every Entry Change** — Every field output component receives full `entries` array and re-renders when any entry changes, even fields that don't need entry data. Could optimize with field-specific memoization, but acceptable performance for MVP. (`src/features/nodeEditor/nodes/LedgerSourceNode.tsx`)
+
+- **[D4][Low] Batch Decryption Not Bounded** — `useLedgerSourceData` decrypts all entries with `Promise.all()` without batching. For ledgers with 100+ entries, this could cause memory pressure. Pre-existing pattern from earlier stories. (`src/features/nodeEditor/hooks/useLedgerSourceData.ts`)
+
+## Deferred from: code review of 4-7-complex-edge-connection-snapping (2026-04-12)
+
+- **[D1][Med] DOM Query Performance on 100+ Nodes** — `querySelectorAll` + `getBoundingClientRect()` for every node on viewport change causes layout thrashing. Pre-existing React Flow integration pattern, optimization opportunity not blocking. (`src/features/nodeEditor/hooks/useHandlePositions.ts:53-82`)
+
+- **[D2][Med] Quadtree Unbounded Growth** — `HandleSpatialIndex` has insert but no remove/clear. In long-running apps with dynamic nodes, memory grows without bound. Architecture improvement for future enhancement. (`src/features/nodeEditor/utils/snapDetection.ts:47-202`)
+
+- **[D3][Low] Hardcoded Node Type Strings** — String literals for node types ('ledgerSource', 'correlation', 'arithmetic') scattered throughout. Pre-existing codebase pattern, type safety improvement. (`src/features/nodeEditor/utils/portTypeUtils.ts:44-80`)
+
+- **[D4][Low] RAF Anti-Pattern** — Cancels and re-schedules RAF on every mouse move instead of letting it run. Pre-existing performance optimization opportunity, acceptable for MVP. (`src/features/nodeEditor/hooks/useEdgeDrag.ts:85-134`)
+
+- **[D5][Low] Infinite Animation Performance** — pulse-glow animation runs continuously while valid. Visual polish, not functional defect. CSS animation should not impact 60fps target. (`src/features/nodeEditor/components/ConnectionLine.tsx:117-131`)
+
+## Deferred from: code review of 4-8-strict-edge-type-validation (2026-04-12)
+
+- **[D1][Low] nodes.find() O(n) in hot path** — `getPortTypeFromHandle` uses `nodes.find()` for every validation. Acceptable for current node counts (<100), but could become a bottleneck with larger graphs. Consider Map-based lookup if performance issues arise. (`src/features/nodeEditor/utils/getPortTypeFromHandle.ts:19-20`)
+
+- **[D2][Low] console.warn in production** — `validateGraphEdges` logs warnings to console. Acceptable for validation debugging, but should migrate to proper logging system in production. (`src/features/nodeEditor/utils/edgeValidation.ts:26-28`)
+
+- **[D3][Low] Incomplete Schema Change Handling** — Schema change listeners and field deletion edge cleanup marked as deferred in story AC5. Placeholder not implemented yet. Future enhancement when schema change events are wired up. (`src/features/nodeEditor/utils/edgeValidation.ts`)

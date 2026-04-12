@@ -1,5 +1,6 @@
 import { Node, Edge } from '@xyflow/react';
 import { LedgyDocument } from './profile';
+import { SchemaField, LedgerEntry } from './ledger';
 
 /**
  * React Flow node data structure
@@ -21,6 +22,47 @@ export interface NodeData {
     ports?: any[];
     // Index signature to satisfy React Flow's Node<T> constraint
     [key: string]: any;
+}
+
+/**
+ * Ledger Source Node Data - Story 4.5
+ * Complete data structure for ledger source nodes
+ */
+export interface LedgerSourceNodeData {
+    type: 'ledgerSource';
+    ledgerId: string;
+    ledgerName: string;
+    schemaSnapshot: SchemaField[];
+    showFieldTypes: boolean;
+    showLatestValues: boolean;
+    cacheSize: number;
+    // NOTE: entryCache intentionally NOT stored in node data
+    // Entries fetched dynamically via useLedgerSourceData hook
+    // to prevent PouchDB write storms on every data change
+    lastUpdated?: string;
+    isStale?: boolean;
+}
+
+/**
+ * Container Node Data - Story 4.9
+ * Data structure for container/group nodes
+ */
+export interface ContainerNodeData {
+    type: 'container';
+    label: string;
+    isCollapsed: boolean;
+    childNodeIds: string[];
+    createdAt: string;
+}
+
+/**
+ * Ledger cache entry for shared data management
+ */
+export interface LedgerCacheEntry {
+    entries: LedgerEntry[];
+    refCount: number;
+    lastUpdated: string;
+    expiresAt: number;
 }
 
 /**
@@ -51,6 +93,7 @@ export interface NodeCanvas extends LedgyDocument {
         ciphertext: number[];
     };
     viewport: Viewport;
+    viewControls?: ViewControlsState; // Optional for backward compatibility
 }
 
 /**
@@ -81,6 +124,28 @@ export interface WorkflowScript extends LedgyDocument {
 }
 
 /**
+ * View controls state for navigation (Story 4.4)
+ */
+export interface ViewControlsState {
+    showMinimap: boolean;
+    showGrid: boolean;
+    snapToGrid: boolean;
+    gridSize: number;
+    isViewControlsCollapsed?: boolean; // Optional for backward compatibility
+}
+
+/**
+ * Default view controls for backward compatibility
+ */
+export const DEFAULT_VIEW_CONTROLS: ViewControlsState = {
+    showMinimap: true,
+    showGrid: true,
+    snapToGrid: false,
+    gridSize: 15,
+    isViewControlsCollapsed: false,
+};
+
+/**
  * Node store state
  */
 export interface NodeState {
@@ -89,4 +154,6 @@ export interface NodeState {
     viewport: Viewport;
     isLoading: boolean;
     error: string | null;
+    // Ledger data cache for shared subscriptions (Story 4.5)
+    ledgerDataCache?: Map<string, LedgerCacheEntry>;
 }

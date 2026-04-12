@@ -7,8 +7,11 @@ export type FieldType = 'text' | 'number' | 'date' | 'relation' | 'long_text' | 
 
 /**
  * Schema field definition
+ * NOTE: id is IMMUTABLE UUID - never change after creation (Story 4.5)
+ * Schema renames must create new fieldId instead of changing existing
  */
 export interface SchemaField {
+    id: string; // IMMUTABLE UUID - critical for node connection stability
     name: string;
     type: FieldType;
     required?: boolean;

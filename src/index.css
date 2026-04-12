@@ -1,24 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-/* 
+/*
   ---break---
 */
-@custom-variant dark (&:is(.dark *));
-
-/* Fix for CSS minifier warning about invalid file:line property */
-.\[file\:line\] {
-  /* Override the problematic generated utility */
-  display: block !important;
-}
-
-@layer utilities {
-  /* Ensure the fix has high specificity */
-  .\[file\:line\] {
-    display: block;
-    flex: none;
-  }
-}
 
 @theme {
   --color-zinc-900: #18181b;
@@ -106,7 +91,8 @@
 }
 
 body {
-  @apply antialiased transition-colors duration-200 bg-white text-zinc-900;
+  -webkit-font-smoothing: antialiased;
+  @apply transition-colors duration-200 bg-white text-zinc-900;
 }
 
 .dark body {

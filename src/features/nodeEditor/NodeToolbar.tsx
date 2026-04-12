@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent } from '../../components/ui/card';
-import { Database, Network, Calculator, Zap, MonitorPlay, Save, Check, AlertCircle, Loader2 } from 'lucide-react';
-import { useReactFlow } from '@xyflow/react';
+import { Database, Network, Calculator, Zap, MonitorPlay, Save, Check, AlertCircle, Loader2, Group, Ungroup } from 'lucide-react';
+import { useReactFlow, useOnSelectionChange } from '@xyflow/react';
 import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useParams } from 'react-router-dom';
@@ -18,6 +18,23 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = () => {
     const lastSavedAt = useNodeStore(s => s.lastSavedAt);
     const saveError = useNodeStore(s => s.saveError);
     const isCanvasLoaded = useNodeStore(s => s.isCanvasLoaded);
+    
+    // Selection state for grouping (Story 4.9)
+    const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
+    
+    useOnSelectionChange({
+        onChange: ({ nodes }) => {
+            setSelectedNodeIds(nodes.map(n => n.id));
+        },
+    });
+    
+    // Check if we can group (2+ nodes selected, none are containers)
+    const canGroup = selectedNodeIds.length >= 2;
+    
+    // Check if a container is selected for ungrouping
+    const nodes = getNodes();
+    const selectedContainer = nodes.find(n => selectedNodeIds.includes(n.id) && n.type === 'container');
+    const canUngroup = !!selectedContainer;
 
     // Briefly show "Saved" indicator then fade to nothing
     const [showSaved, setShowSaved] = useState(false);
@@ -32,10 +49,10 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = () => {
         if (!activeProfileId || !projectId || !workflowId || !isCanvasLoaded) return;
         const state = useNodeStore.getState();
         state.clearDebouncedSave();
-        const { nodes, edges, viewport } = state;
+        const { nodes, edges, viewport, viewControls } = state;
         state.saveCanvasWithRetry(
             { profileId: activeProfileId, projectId, workflowId },
-            { nodes, edges, viewport }
+            { nodes, edges, viewport, viewControls }
         );
     }, [activeProfileId, projectId, workflowId, isCanvasLoaded]);
 
@@ -57,6 +74,20 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = () => {
         };
         addNodes([newNode]);
     };
+    
+    // Group selected nodes (Story 4.9)
+    const handleGroup = useCallback(() => {
+        if (selectedNodeIds.length >= 2) {
+            useNodeStore.getState().groupNodes(selectedNodeIds);
+        }
+    }, [selectedNodeIds]);
+    
+    // Ungroup selected container (Story 4.9)
+    const handleUngroup = useCallback(() => {
+        if (selectedContainer) {
+            useNodeStore.getState().ungroupNodes(selectedContainer.id);
+        }
+    }, [selectedContainer]);
 
     const saveStatusIcon = saveError
         ? <AlertCircle size={13} className="text-red-400" />
@@ -85,6 +116,27 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = () => {
                 <ToolbarButton icon={<MonitorPlay size={16} />} label="Dashboard Output" onClick={() => addNode('dashboardOutput')} color="text-pink-400" />
 
                 <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
+                
+                {/* Group/Ungroup Buttons (Story 4.9) */}
+                {canGroup && (
+                    <ToolbarButton 
+                        icon={<Group size={16} />} 
+                        label={`Group ${selectedNodeIds.length}`} 
+                        onClick={handleGroup} 
+                        color="text-emerald-400" 
+                    />
+                )}
+                {canUngroup && (
+                    <ToolbarButton 
+                        icon={<Ungroup size={16} />} 
+                        label="Ungroup" 
+                        onClick={handleUngroup} 
+                        color="text-orange-400" 
+                    />
+                )}
+                {(canGroup || canUngroup) && (
+                    <div className="my-1 border-t border-zinc-200 dark:border-zinc-700" />
+                )}
 
                 <Button
                     variant="ghost"

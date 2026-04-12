@@ -211,6 +211,35 @@ describe('UnlockPage', () => {
         expect(screen.queryByText(/Enter your 6-digit TOTP code/i)).not.toBeInTheDocument();
     });
 
+    it('shows the passphrase UI when an encrypted remembered session is restored', () => {
+        (useAuthStore as any).mockImplementation((selector: any) => {
+            const state = {
+                totpSecret: null,
+                encryptedTotpSecret: {
+                    iv: [1, 2, 3, 4],
+                    ciphertext: [5, 6, 7, 8],
+                    pbkdf2Salt: [9, 10, 11, 12],
+                },
+                isUnlocked: false,
+                needsPassphrase: false,
+                hasHydrated: true,
+                unlock: mockUnlock,
+                unlockWithPassphrase: mockUnlockWithPassphrase,
+                reset: mockReset,
+            };
+            return selector ? selector(state) : state;
+        });
+
+        render(
+            <MemoryRouter>
+                <UnlockPage />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByPlaceholderText(/Enter passphrase/i)).toBeInTheDocument();
+        expect(screen.queryByText(/Enter your 6-digit TOTP code/i)).not.toBeInTheDocument();
+    });
+
     it('calls unlockWithPassphrase on submit', async () => {
         (useAuthStore as any).mockImplementation((selector: any) => {
             const state = {

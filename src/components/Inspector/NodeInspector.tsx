@@ -186,7 +186,7 @@ const TriggerPanel: React.FC<{ id: string; data: any }> = ({ id, data }) => {
                             key={ev}
                             size="xs"
                             variant={data.eventType === ev ? 'default' : 'outline'}
-                            className={data.eventType === ev ? 'bg-emerald-600 border-emerald-500 text-white' : 'text-zinc-400'}
+                            className={data.eventType === ev ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white' : 'text-zinc-400'}
                             onClick={() => useNodeStore.getState().updateNodeData(id, { eventType: ev })}
                         >
                             {ev === 'on-create' ? 'On Create' : 'On Edit'}
@@ -248,7 +248,7 @@ const DashboardOutputPanel: React.FC<{ id: string; data: any }> = ({ id, data })
                             key={wt}
                             size="icon-xs"
                             variant={data.widgetType === wt ? 'default' : 'outline'}
-                            className={data.widgetType === wt ? `${color} text-white` : 'text-zinc-400'}
+                            className={data.widgetType === wt ? `${color} text-zinc-900 dark:text-white` : 'text-zinc-400'}
                             title={wt}
                             onClick={() => handleWidgetType(wt)}
                         >

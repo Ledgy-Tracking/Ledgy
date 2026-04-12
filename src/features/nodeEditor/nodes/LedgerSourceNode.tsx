@@ -1,27 +1,69 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Handle, Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { useLedgerStore } from '../../../stores/useLedgerStore';
-import { useProfileStore } from '../../../stores/useProfileStore';
-import { ChevronDown, ChevronUp, Database, Settings } from 'lucide-react';
+import { useLedgerStore } from '@/stores/useLedgerStore';
+import { useProfileStore } from '@/stores/useProfileStore';
+import { ChevronDown, ChevronUp, Database, Settings, AlertTriangle, GripVertical } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useLedgerSourceData, useFieldStats } from '../hooks/useLedgerSourceData';
+import { portColorMap } from '../utils/portColors';
+import { SchemaField } from '@/types/ledger';
+import { LEDGER_CACHE_SIZE_OPTIONS, LEDGER_CACHE_SIZE_MAX } from '../utils/nodeConstants';
 
 export interface LedgerSourceNodeData {
-    label: string;
-    ledgerId?: string;
-    ledgerName?: string;
-    ports?: Array<{
-        id: string;
-        type: 'text' | 'number' | 'date' | 'relation';
-        fieldName: string;
-    }>;
+    type: 'ledgerSource';
+    label?: string;
+    ledgerId: string;
+    ledgerName: string;
+    schemaSnapshot: SchemaField[];
+    showFieldTypes: boolean;
+    showLatestValues: boolean;
+    cacheSize: number;
+    lastUpdated?: string;
+    isStale?: boolean;
 }
 
 /**
+ * Runtime type guard for LedgerSourceNodeData
+ */
+function isValidLedgerSourceNodeData(data: unknown): data is LedgerSourceNodeData {
+    if (typeof data !== 'object' || data === null) return false;
+    const d = data as Record<string, unknown>;
+    return (
+        d.type === 'ledgerSource' &&
+        typeof d.ledgerId === 'string' &&
+        typeof d.ledgerName === 'string' &&
+        Array.isArray(d.schemaSnapshot) &&
+        typeof d.showFieldTypes === 'boolean' &&
+        typeof d.showLatestValues === 'boolean' &&
+        typeof d.cacheSize === 'number'
+    );
+}
+
+/**
+ * Sanitize field name for use in handle ID
+ * Replaces colons with underscores to prevent ID parsing issues
+ */
+function sanitizeFieldId(fieldId: string): string {
+    return fieldId.replace(/:/g, '_');
+}
+
+// Type badge colors per UX spec
+const typeBadgeColors: Record<string, { bg: string; text: string }> = {
+    text: { bg: 'bg-zinc-500/20', text: 'text-zinc-400' },
+    long_text: { bg: 'bg-zinc-500/20', text: 'text-zinc-400' },
+    number: { bg: 'bg-blue-500/20', text: 'text-blue-400' },
+    date: { bg: 'bg-amber-500/20', text: 'text-amber-400' },
+    relation: { bg: 'bg-purple-500/20', text: 'text-purple-400' },
+    boolean: { bg: 'bg-purple-500/20', text: 'text-purple-400' },
+};
+
+/**
  * Ledger Source Node - represents a ledger schema as a data source
- * Story 4-2: Ledger Source Nodes & Basic Wiring
+ * Story 4-5: Ledger Source Node Component with real-time data preview
  */
 export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
     const schemas = useLedgerStore(s => s.schemas);
@@ -30,156 +72,414 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
     const [isConfigOpen, setIsConfigOpen] = useState(false);
     const [isExpanded, setIsExpanded] = useState(true);
 
-    const nodeData = data as unknown as LedgerSourceNodeData;
+    // Runtime type validation with fallback
+    const nodeData = isValidLedgerSourceNodeData(data) ? data : {
+        type: 'ledgerSource' as const,
+        label: 'Invalid Node Data',
+        ledgerId: '',
+        ledgerName: 'Select Ledger...',
+        schemaSnapshot: [],
+        showFieldTypes: true,
+        showLatestValues: true,
+        cacheSize: LEDGER_CACHE_SIZE_MAX,
+        isStale: true,
+    };
+    const { ledgerId, ledgerName, schemaSnapshot, showFieldTypes, showLatestValues, cacheSize } = nodeData;
 
     // Track previous ledgerId to avoid unnecessary updates
     const prevLedgerIdRef = useRef<string | undefined>(undefined);
     const { updateNodeData } = useReactFlow();
 
+    // Fetch ledger data for previews - only if ledgerId is valid
+    const { entries, isLoading, error, lastUpdated } = useLedgerSourceData(
+        ledgerId || undefined, 
+        cacheSize
+    );
+
+    // Update node data with lastUpdated timestamp when data changes
+    useEffect(() => {
+        if (lastUpdated && lastUpdated !== nodeData.lastUpdated) {
+            updateNodeData(id, { lastUpdated });
+        }
+    }, [lastUpdated, nodeData.lastUpdated, id, updateNodeData]);
+
     // Fetch schemas on mount for ledger selector
     useEffect(() => {
         if (activeProfileId && schemas.length === 0) {
-            fetchSchemas(activeProfileId);
+            fetchSchemas(activeProfileId).catch((err: unknown) => {
+                console.error('Failed to fetch schemas:', err);
+                // Error state is handled by the store, but we log it here for debugging
+            });
         }
     }, [activeProfileId, schemas.length, fetchSchemas]);
 
-    // Update ports only when ledgerId genuinely changes
+    // Update ports when ledgerId changes or when schemas are updated
     useEffect(() => {
-        if (!nodeData.ledgerId) return;
-        // Only run if the ledgerId actually changed since last time
-        if (prevLedgerIdRef.current === nodeData.ledgerId) return;
-        prevLedgerIdRef.current = nodeData.ledgerId;
-
-        const schema = schemas.find(s => s._id === nodeData.ledgerId);
-        if (schema) {
-            const ports = schema.fields.map(field => ({
-                id: `source-${field.type}-${field.name}`,
-                type: field.type as 'text' | 'number' | 'date' | 'relation',
-                fieldName: field.name,
-            }));
-            updateNodeData(id, { ports, ledgerName: schema.name });
-        }
-    }, [nodeData.ledgerId, schemas, id, updateNodeData]);
-
-    const handleLedgerChange = useCallback((ledgerId: string) => {
+        if (!ledgerId) return;
+        
         const schema = schemas.find(s => s._id === ledgerId);
         if (schema) {
-            const ports = schema.fields.map(field => ({
-                id: `source-${field.type}-${field.name}`,
-                type: field.type as 'text' | 'number' | 'date' | 'relation',
-                fieldName: field.name,
-            }));
-            updateNodeData(id, { ledgerId, ledgerName: schema.name, ports });
+            // Only update if schema has actually changed to avoid infinite loops
+            const currentSnapshot = JSON.stringify(schemaSnapshot);
+            const newSnapshot = JSON.stringify(schema.fields);
+            const nameChanged = schema.name !== ledgerName;
+            
+            if (prevLedgerIdRef.current !== ledgerId || currentSnapshot !== newSnapshot || nameChanged) {
+                prevLedgerIdRef.current = ledgerId;
+                updateNodeData(id, { 
+                    type: 'ledgerSource',
+                    schemaSnapshot: schema.fields, 
+                    ledgerName: schema.name,
+                    lastUpdated: new Date().toISOString()
+                });
+            }
+        }
+    }, [ledgerId, schemas, id, updateNodeData, schemaSnapshot, ledgerName]);
+
+    const handleLedgerChange = useCallback((newLedgerId: string) => {
+        const schema = schemas.find(s => s._id === newLedgerId);
+        if (schema) {
+            updateNodeData(id, { 
+                type: 'ledgerSource',
+                ledgerId: newLedgerId, 
+                ledgerName: schema.name, 
+                schemaSnapshot: schema.fields,
+                showFieldTypes: true,
+                showLatestValues: true,
+                cacheSize: LEDGER_CACHE_SIZE_MAX,
+                lastUpdated: new Date().toISOString()
+            });
             setIsConfigOpen(false);
         }
     }, [schemas, id, updateNodeData]);
 
+    // Check if ledger was deleted
+    const isLedgerDeleted = useMemo(() => {
+        if (!ledgerId) return false;
+        return schemas.length > 0 && !schemas.find(s => s._id === ledgerId);
+    }, [ledgerId, schemas]);
+
+    const displayFields = schemaSnapshot || [];
+
     return (
-        <div
-            className={`bg-gray-50 dark:bg-zinc-900 border-2 rounded-lg shadow-lg min-w-[200px] max-w-[280px] ${selected ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'
+        <TooltipProvider>
+                <div
+                    className={`w-[240px] rounded-lg border shadow-lg overflow-hidden ${
+                    selected ? 'ring-2 ring-emerald-500 shadow-lg' : ''
+                } ${
+                    isLedgerDeleted 
+                        ? 'border-red-500/50 bg-red-50 dark:bg-red-950/10' 
+                        : 'border-zinc-300 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-900'
                 }`}
-        >
-            {/* Header */}
-            <div
-                className="flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-zinc-800 rounded-t-md cursor-pointer"
-                onClick={() => setIsExpanded(!isExpanded)}
             >
-                <div className="flex items-center gap-2">
-                    <Database size={14} className="text-emerald-400" />
-                    <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                        {nodeData.ledgerName || 'Select Ledger...'}
-                    </span>
-                </div>
-                <div className="flex items-center gap-1">
-                    <Button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsConfigOpen(!isConfigOpen);
-                        }}
-                        variant="ghost"
-                        size="icon-xs"
-                        className="text-zinc-400 hover:text-zinc-800 dark:text-zinc-200"
-                        title="Configure"
-                        aria-label="Configure node"
-                        aria-expanded={isConfigOpen}
-                    >
-                        <Settings size={14} />
-                    </Button>
-                    {isExpanded ? <ChevronUp size={14} className="text-zinc-400" /> : <ChevronDown size={14} className="text-zinc-400" />}
-                </div>
-            </div>
-
-            {/* Configuration Panel */}
-            {isConfigOpen && (
-                <Card className="p-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 rounded-none border-x-0 border-t-0">
-                    <Label className="text-xs text-zinc-400 block mb-1">Select Ledger:</Label>
-                    <Select
-                        value={nodeData.ledgerId || ''}
-                        onValueChange={(value) => handleLedgerChange(value)}
-                    >
-                        <SelectTrigger className="w-full bg-gray-50 dark:bg-zinc-900 border-zinc-700 h-8 text-xs">
-                            <SelectValue placeholder="-- Choose a ledger --" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {schemas.map(schema => (
-                                <SelectItem key={schema._id} value={schema._id}>
-                                    {schema.name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </Card>
-            )}
-
-            {/* Ports */}
-            {isExpanded && nodeData.ports && nodeData.ports.length > 0 && (
-                <div className="p-2 space-y-1">
-                    {nodeData.ports.map((port) => (
-                        <div
-                            key={port.id}
-                            className="relative flex items-center justify-between px-2 py-1.5 bg-gray-100 dark:bg-zinc-800/30 rounded hover:bg-gray-200 dark:hover:bg-zinc-800/50 transition-colors"
+                {/* Header - Emerald for source nodes per UX spec */}
+                <div
+                    className="flex items-center justify-between px-3 py-2 bg-emerald-600 cursor-pointer"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                >
+                    <div className="flex items-center gap-2 min-w-0">
+                        <Database size={14} className="text-zinc-900 dark:text-white shrink-0" />
+                        <span className="text-sm font-semibold text-zinc-900 dark:text-white truncate">
+                            {ledgerName || 'Select Ledger...'}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                        {isLedgerDeleted && (
+                            <AlertTriangle size={14} className="text-red-400" />
+                        )}
+                        <Button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsConfigOpen(!isConfigOpen);
+                            }}
+                            variant="ghost"
+                            size="icon-xs"
+                            className="text-zinc-700 dark:text-white/70 hover:text-zinc-900 dark:hover:text-white hover:bg-white/20"
+                            title="Configure"
+                            aria-label="Configure node"
+                            aria-expanded={isConfigOpen}
                         >
-                            <div className="flex items-center gap-2">
-                                <PortTypeIcon type={port.type} />
-                                <span className="text-xs text-zinc-300">{port.fieldName}</span>
-                            </div>
-                            {/* Output Handle */}
-                            <Handle
-                                type="source"
-                                position={Position.Right}
-                                id={port.id}
-                                className="!w-3 !h-3 !bg-emerald-500 !border-2 !border-zinc-900 hover:!bg-emerald-400 transition-colors"
-                                style={{ right: '-6px' }}
-                            />
-                        </div>
-                    ))}
+                            <Settings size={14} />
+                        </Button>
+                        {isExpanded ? <ChevronUp size={14} className="text-zinc-700 dark:text-white/70" /> : <ChevronDown size={14} className="text-zinc-700 dark:text-white/70" />}
+                    </div>
                 </div>
-            )}
 
-            {/* Empty State */}
-            {isExpanded && (!nodeData.ports || nodeData.ports.length === 0) && (
-                <div className="p-4 text-center">
-                    <p className="text-xs text-zinc-500">
-                        {nodeData.ledgerId ? 'No fields in this ledger' : 'Select a ledger to see ports'}
-                    </p>
-                </div>
-            )}
-        </div>
+                {/* Configuration Panel */}
+                {isConfigOpen && (
+                    <Card className="p-3 border-b border-zinc-300 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 rounded-none border-x-0 border-t-0 space-y-3">
+                        {/* Ledger Selector */}
+                        <div>
+                            <Label className="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Select Ledger:</Label>
+                            <Select
+                                value={ledgerId || ''}
+                                onValueChange={(value) => handleLedgerChange(value)}
+                            >
+                                <SelectTrigger className="w-full bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 h-8 text-xs">
+                                    <SelectValue placeholder="-- Choose a ledger --" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {schemas.map(schema => (
+                                        <SelectItem key={schema._id} value={schema._id}>
+                                            {schema.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Display Options */}
+                        <div className="space-y-2">
+                            <Label className="text-xs text-zinc-500 dark:text-zinc-400 block">Display Options:</Label>
+                            
+                            {/* Show Field Types Toggle */}
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs text-zinc-700 dark:text-zinc-300">Show field types</span>
+                                <Button
+                                    variant={showFieldTypes ? 'default' : 'outline'}
+                                    size="icon-xs"
+                                    onClick={() => updateNodeData(id, { showFieldTypes: !showFieldTypes })}
+                                    className={`h-5 w-8 ${showFieldTypes ? 'bg-emerald-600' : ''}`}
+                                    aria-label={showFieldTypes ? 'Hide field types' : 'Show field types'}
+                                >
+                                    <span className="text-[10px]">{showFieldTypes ? 'On' : 'Off'}</span>
+                                </Button>
+                            </div>
+
+                            {/* Show Latest Values Toggle */}
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs text-zinc-700 dark:text-zinc-300">Show latest values</span>
+                                <Button
+                                    variant={showLatestValues ? 'default' : 'outline'}
+                                    size="icon-xs"
+                                    onClick={() => updateNodeData(id, { showLatestValues: !showLatestValues })}
+                                    className={`h-5 w-8 ${showLatestValues ? 'bg-emerald-600' : ''}`}
+                                    aria-label={showLatestValues ? 'Hide latest values' : 'Show latest values'}
+                                >
+                                    <span className="text-[10px]">{showLatestValues ? 'On' : 'Off'}</span>
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Cache Size Selector */}
+                        <div>
+                            <Label className="text-xs text-zinc-500 dark:text-zinc-400 block mb-1">Cache Size:</Label>
+                            <Select
+                                value={String(cacheSize)}
+                                onValueChange={(value) => updateNodeData(id, { cacheSize: parseInt(value, 10) })}
+                            >
+                                <SelectTrigger className="w-full bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 h-8 text-xs">
+                                    <SelectValue placeholder="Cache size" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {LEDGER_CACHE_SIZE_OPTIONS.map(size => (
+                                        <SelectItem key={size} value={String(size)}>
+                                            {size} entries
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </Card>
+                )}
+
+                {/* Loading State */}
+                {isLoading && ledgerId && (
+                    <div className="px-3 py-2 bg-emerald-500/10 border-b border-emerald-500/30">
+                        <div className="flex items-center gap-2 text-emerald-400 text-xs">
+                            <span className="animate-pulse">Loading ledger data...</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Error State */}
+                {error && (
+                    <div className="px-3 py-2 bg-red-500/10 border-b border-red-500/30">
+                        <div className="flex items-center gap-2 text-red-400 text-xs">
+                            <AlertTriangle size={12} />
+                            <span>Error: {error}</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Deleted Ledger Warning */}
+                {isLedgerDeleted && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="px-3 py-2 bg-red-500/10 border-b border-red-500/30 cursor-help">
+                                <div className="flex items-center gap-2 text-red-400 text-xs">
+                                    <AlertTriangle size={12} />
+                                    <span>Ledger not found</span>
+                                </div>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-[280px] bg-zinc-800 border-zinc-700">
+                            <div className="text-xs text-zinc-300">
+                                <div className="font-medium text-red-400 mb-1">⚠️ Ledger Deleted</div>
+                                <div>The ledger this node references has been deleted.</div>
+                                <div className="text-zinc-500 mt-1">Connections are disabled. Select a different ledger or remove this node.</div>
+                            </div>
+                        </TooltipContent>
+                    </Tooltip>
+                )}
+
+                {/* Fields */}
+                {isExpanded && displayFields.length > 0 && (
+                    <div className="p-2 space-y-1 max-h-[320px] overflow-y-auto">
+                        {displayFields.map((field, index) => (
+                            <LedgerFieldOutput
+                                key={field.name}
+                                field={field}
+                                nodeId={id}
+                                index={index}
+                                showType={showFieldTypes}
+                                showLatestValue={showLatestValues}
+                                entries={entries}
+                                isLedgerDeleted={isLedgerDeleted}
+                            />
+                        ))}
+                    </div>
+                )}
+
+                {/* Empty State */}
+                {isExpanded && displayFields.length === 0 && (
+                    <div className="p-4 text-center">
+                        <p className="text-xs text-zinc-500">
+                            {ledgerId ? 'No fields in this ledger' : 'Select a ledger to see ports'}
+                        </p>
+                    </div>
+                )}
+            </div>
+        </TooltipProvider>
     );
 });
 
-const PortTypeIcon: React.FC<{ type: string }> = ({ type }) => {
-    const colors: Record<string, string> = {
-        text: 'bg-blue-500',
-        number: 'bg-amber-500',
-        date: 'bg-purple-500',
-        relation: 'bg-emerald-500',
-    };
+LedgerSourceNode.displayName = 'LedgerSourceNode';
+
+// Field Output Component with data preview tooltip
+interface LedgerFieldOutputProps {
+    field: SchemaField;
+    nodeId: string;
+    index: number;
+    showType: boolean;
+    showLatestValue: boolean;
+    entries: import('@/types/ledger').LedgerEntry[];
+    isLedgerDeleted: boolean;
+}
+
+const LedgerFieldOutput: React.FC<LedgerFieldOutputProps> = React.memo(({
+    field,
+    nodeId,
+    showType,
+    showLatestValue,
+    entries,
+    isLedgerDeleted,
+}) => {
+    // Use field.id (immutable UUID) for handle ID to prevent connection breakage on rename
+    // Sanitize to handle any edge cases with special characters
+    const fieldId = field.id ? sanitizeFieldId(field.id) : sanitizeFieldId(field.name);
+    const handleId = `${nodeId}:${fieldId}`;
+    const typeColor = typeBadgeColors[field.type] || typeBadgeColors.text;
+    
+    // Get latest value for preview
+    const latestEntry = entries[0];
+    const latestValue = latestEntry?.data[field.name];
+    
+    // Get stats for number fields
+    const stats = useFieldStats(entries, field.name);
+    
+    // Format preview text
+    const previewText = useMemo(() => {
+        if (!showLatestValue || entries.length === 0) return null;
+        
+        switch (field.type) {
+            case 'text':
+            case 'long_text':
+                const text = String(latestValue || '');
+                return `Latest: "${text.substring(0, 40)}${text.length > 40 ? '...' : ''}"`;
+                
+            case 'number':
+                if (stats) {
+                    return `Latest: ${latestValue} (Avg: ${stats.avg?.toFixed(1)}, Min: ${stats.min}, Max: ${stats.max})`;
+                }
+                return `Latest: ${latestValue}`;
+                
+            case 'date':
+                if (latestValue && typeof latestValue === 'string') {
+                    const date = new Date(latestValue);
+                    // Validate date is not Invalid Date
+                    if (!isNaN(date.getTime())) {
+                        const daysAgo = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+                        return `Latest: ${date.toLocaleDateString()} (${daysAgo} days ago)`;
+                    }
+                    return 'Latest: Invalid date';
+                }
+                return 'Latest: No date';
+                
+            case 'relation':
+                return `Latest: ${latestValue || 'No relation'}`;
+                
+            default:
+                return `Latest: ${latestValue || 'Empty'}`;
+        }
+    }, [field.type, latestValue, stats, entries.length, showLatestValue]);
 
     return (
-        <div
-            className={`w-2 h-2 rounded-full ${colors[type] || 'bg-zinc-500'}`}
-            title={type}
-        />
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div
+                    className={`relative flex items-center justify-between px-2 py-1.5 rounded transition-colors group ${
+                        isLedgerDeleted 
+                            ? 'bg-gray-200/50 dark:bg-zinc-800/30 cursor-not-allowed' 
+                            : 'bg-gray-200/50 dark:bg-zinc-800/30 hover:bg-gray-200 dark:hover:bg-zinc-800/50 cursor-pointer'
+                    }`}
+                >
+                    <div className="flex items-center gap-2 min-w-0">
+                        {/* Drag affordance icon */}
+                        <GripVertical size={12} className="text-zinc-400 dark:text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                        <span className="text-xs text-zinc-700 dark:text-zinc-300 truncate">{field.name}</span>
+                        {showType && (
+                            <span 
+                                className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${typeColor.bg} ${typeColor.text}`}
+                            >
+                                {field.type}
+                            </span>
+                        )}
+                    </div>
+                    
+                    {/* Output Handle */}
+                    <Handle
+                        type="source"
+                        position={Position.Right}
+                        id={handleId}
+                        className={`!w-3 !h-3 !border-2 !border-zinc-900 transition-colors ${
+                            isLedgerDeleted 
+                                ? '!bg-zinc-600 cursor-not-allowed' 
+                                : 'hover:!bg-emerald-400'
+                        }`}
+                        style={{ 
+                            right: '-6px',
+                            backgroundColor: portColorMap[field.type] || portColorMap.text,
+                            cursor: isLedgerDeleted ? 'not-allowed' : 'crosshair'
+                        }}
+                        aria-label={`${field.name} output handle, ${field.type} type`}
+                        aria-disabled={isLedgerDeleted}
+                    />
+                </div>
+            </TooltipTrigger>
+            
+            {/* Data Preview Tooltip */}
+            {showLatestValue && previewText && !isLedgerDeleted && (
+                <TooltipContent side="left" className="max-w-[280px] bg-zinc-800 border-zinc-700">
+                    <div className="text-xs text-zinc-300">
+                        <div className="font-medium text-zinc-100 mb-1">{field.name} ({field.type})</div>
+                        <div>{previewText}</div>
+                        <div className="text-zinc-500 mt-1 text-[10px]">Drag to connect to another node</div>
+                    </div>
+                </TooltipContent>
+            )}
+        </Tooltip>
     );
-};
+});
+
+LedgerFieldOutput.displayName = 'LedgerFieldOutput';

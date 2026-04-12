@@ -57,11 +57,11 @@ export const getPortColorClass = (type: PortType | string): string => {
  * Source Type -> Valid Target Types
  */
 export const compatibilityMatrix: Record<PortType, PortType[]> = {
-    // Single number can connect to: number, number[], correlation inputs, math inputs
+    // Single number can connect to: number, number[], any
     number: ['number', 'number[]', 'any'],
 
-    // Number array can connect to: number[] and correlation inputs (and number via coercion)
-    'number[]': ['number[]', 'number', 'any'],
+    // Number array can connect to: number[] and any (strict - no coercion to single number)
+    'number[]': ['number[]', 'any'],
 
     // Text fields only connect to text inputs
     text: ['text', 'any'],

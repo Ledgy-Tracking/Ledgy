@@ -3,6 +3,19 @@
  * Story 4-7: Complex Edge Connection Snapping
  */
 
+/* Screen reader only - visually hidden but accessible */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* Pulse animation for valid connection glow (AC2) */
 @keyframes pulse-glow {
     0%, 100% {
@@ -67,6 +80,21 @@
     transition: opacity 200ms ease-out, transform 200ms ease-out;
 }
 
+/* Specific cancellation timings per AC5 */
+.edge-cancelling-fast {
+    /* Click on empty canvas - 150ms fade-out */
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.edge-cancelling-slow {
+    /* Release on non-handle - 200ms fade-out */
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 200ms ease-out, transform 200ms ease-out;
+}
+
 /* Connection line styles by state */
 .connection-line-default {
     stroke: #a1a1aa;
@@ -76,6 +104,13 @@
 .connection-line-valid {
     stroke: #10b981;
     stroke-width: 3;
+}
+
+.connection-line-snapped {
+    stroke: #10b981;
+    stroke-width: 3;
+    /* Spring animation: overshoot and settle */
+    transition: stroke-width 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .connection-line-invalid {
@@ -93,22 +128,23 @@
 
 /* High contrast mode support (AC7) */
 @media (prefers-contrast: high) {
-    .connection-line-valid {
+    .connection-line-valid,
+    .connection-line-snapped {
         stroke: #00ff00;
         stroke-width: 4;
     }
-    
+
     .connection-line-invalid {
         stroke: #ff0000;
         stroke-width: 4;
         stroke-dasharray: 8, 4;
     }
-    
+
     .handle-compatible {
         border-width: 3px;
         box-shadow: 0 0 0 3px #00ff00;
     }
-    
+
     .handle-incompatible {
         border-width: 3px;
         box-shadow: 0 0 0 3px #ff0000;
@@ -120,12 +156,16 @@
     .handle-compatible,
     .handle-incompatible,
     .handle-snapped,
-    .connection-line-glow {
+    .connection-line-glow,
+    .edge-rejected,
+    .connection-line-rejected,
+    .handle-rejected {
         animation: none;
         transition: none;
     }
-    
-    .edge-cancelling {
+
+    .edge-cancelling,
+    .edge-rejected {
         transition: opacity 50ms ease-out;
     }
 }
@@ -159,14 +199,14 @@
     }
 }
 
-/* Wire rejection flash animation */
+/* Wire rejection flash animation - 300ms per AC3 spec */
 @keyframes wire-rejection-flash {
     0% {
         stroke: #ef4444; /* red-500 */
         stroke-width: 3px;
         opacity: 1;
     }
-    50% {
+    66% {
         stroke: #ef4444;
         stroke-width: 4px;
         opacity: 1;
@@ -182,7 +222,7 @@
 .edge-rejected {
     stroke: #ef4444 !important; /* red-500 */
     stroke-width: 3px !important;
-    animation: wire-rejection-shake 200ms ease-in-out, wire-rejection-flash 500ms ease-out forwards;
+    animation: wire-rejection-shake 200ms ease-in-out, wire-rejection-flash 300ms ease-out forwards;
     pointer-events: none;
 }
 

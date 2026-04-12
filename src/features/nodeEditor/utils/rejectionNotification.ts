@@ -68,7 +68,7 @@ export const showRejectionNotification = (
         lastRejectionTime = Date.now();
 
         rejectionDebounceTimer = null;
-    }, 300); // 300ms debounce
+    }, 500); // 500ms debounce per AC3 spec
 };
 
 /**

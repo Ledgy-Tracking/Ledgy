@@ -92,9 +92,9 @@ development_status:
   4-4-minimap-zoom-to-fit-controls: done
   4-5-ledger-source-node-component: done
   4-6-correlation-node-math-component: done
-  4-7-complex-edge-connection-snapping: review
-  4-8-strict-edge-type-validation: review
-  4-9-sub-graph-container-grouping: ready-for-dev
+  4-7-complex-edge-connection-snapping: done
+  4-8-strict-edge-type-validation: in-progress
+  4-9-sub-graph-container-grouping: review
   4-10-graph-pouchdb-hydration-hooks: backlog
   4-11-web-worker-computation-offloading: backlog
   4-12-cyclic-dependency-prevention-engine: backlog

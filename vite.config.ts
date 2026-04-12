@@ -26,7 +26,20 @@ export default defineConfig(async () => ({
   },
 
   css: {
-    postcss: {},
+    postcss: {
+      plugins: [
+        {
+          postcssPlugin: 'replace-webkit-text-size-adjust',
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          Declaration(decl: any) {
+            if (decl.prop === '-webkit-text-size-adjust') {
+              decl.cloneBefore({ prop: 'text-size-adjust' });
+              decl.remove();
+            }
+          },
+        },
+      ],
+    },
   },
 
   build: {

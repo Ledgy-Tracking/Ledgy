@@ -113,30 +113,92 @@ export class Database {
      * Create-or-update a document with a known, deterministic ID.
      * Use this when the caller owns the ID (e.g. canvas:workflowId).
      * Unlike createDocument, this does NOT auto-generate a UUID.
+     *
+     * @param id - The deterministic document ID (e.g., "canvas:workflow-123")
+     * @param data - The document data to save
+     * @returns PouchDB.Core.Response with { ok: boolean, id: string, rev: string }
+     * @throws Error if ID is invalid, database not initialized, or PouchDB operation fails
      */
     async upsertDocument<T extends object>(id: string, data: T): Promise<PouchDB.Core.Response> {
+        // Validate inputs
+        if (!this.db) {
+            throw new Error('Database not initialized');
+        }
+        if (!id?.trim()) {
+            throw new Error('Document ID is required');
+        }
+        if (!data) {
+            throw new Error('Document data is required');
+        }
+
         validateDocumentFields(data as Partial<LedgyDocument>);
         const now = new Date().toISOString();
+
+        // Ensure schemaVersion defaults to 1 if not provided
+        const dataWithVersion = {
+            ...data,
+            schemaVersion: (data as any).schemaVersion ?? 1,
+        };
+
         try {
             const existing = await this.db.get<LedgyDocument>(id);
-            const { _id, _rev, createdAt, type, ...restData } = data as any;
+            // Strip all internal/reserved fields consistently in both paths
+            const { _id, _rev, createdAt, type, ...restData } = dataWithVersion as any;
+
+            // Deep merge: preserve nested objects from existing, override with new data
+            const mergedData = this.deepMerge(existing, restData);
+
             return await this.db.put({
-                ...existing,
-                ...restData,
+                ...mergedData,
                 updatedAt: now,
             });
         } catch (e: any) {
-            if (e.status === 404) {
-                const { _id: _i, _rev: _r, ...restData } = data as any;
+            if (e?.status === 404) {
+                // Document doesn't exist, create it
+                // Strip internal fields (including type - it's immutable)
+                const { _id, _rev, type, ...restData } = dataWithVersion as any;
                 return await this.db.put({
                     _id: id,
                     createdAt: now,
                     updatedAt: now,
                     ...restData,
                 });
+            } else if (e?.status === 409) {
+                // Conflict: document was modified between get and put
+                // Retry once by re-fetching and merging
+                try {
+                    const existing = await this.db.get<LedgyDocument>(id);
+                    const { _id, _rev, createdAt, type, ...restData } = dataWithVersion as any;
+                    const mergedData = this.deepMerge(existing, restData);
+                    return await this.db.put({
+                        ...mergedData,
+                        updatedAt: now,
+                    });
+                } catch (retryError) {
+                    throw new Error(`Conflict error: Document ${id} was modified concurrently. Please retry.`);
+                }
             }
             throw e;
         }
+    }
+
+    /**
+     * Deep merge two objects. Preserves nested properties from target,
+     * overriding only specified paths from source.
+     */
+    private deepMerge(target: any, source: any): any {
+        if (!source || typeof source !== 'object') return target;
+        if (!target || typeof target !== 'object') return source;
+
+        const result = { ...target };
+        for (const key of Object.keys(source)) {
+            if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                result[key] = this.deepMerge(target[key], source[key]);
+            } else {
+                result[key] = source[key];
+            }
+        }
+        return result;
     }
 
     async removeRevision(id: string, rev: string): Promise<PouchDB.Core.Response> {
@@ -253,6 +315,20 @@ export class Database {
         const result = await this.db.close();
         delete profileDatabases[this.profileId];
         return result;
+    }
+
+    /**
+     * Subscribe to database changes feed for real-time updates.
+     * @param options - PouchDB changes feed options
+     * @returns PouchDB changes event emitter
+     */
+    changes(options?: PouchDB.Core.ChangesOptions) {
+        return this.db.changes({
+            since: 'now',
+            live: true,
+            include_docs: true,
+            ...options,
+        });
     }
 }
 
@@ -1344,7 +1420,7 @@ export async function decryptSchemaMetadata(
 
 // ==================== NODE CANVAS OPERATIONS ====================
 
-import { NodeCanvas, CanvasNode, CanvasEdge, Viewport } from '../types/nodeEditor';
+import { NodeCanvas, CanvasNode, CanvasEdge, Viewport, ViewControlsState, DEFAULT_VIEW_CONTROLS } from '../types/nodeEditor';
 
 /**
  * Creates or updates a node canvas document.
@@ -1353,6 +1429,7 @@ import { NodeCanvas, CanvasNode, CanvasEdge, Viewport } from '../types/nodeEdito
  * @param nodes - Array of canvas nodes
  * @param edges - Array of canvas edges
  * @param viewport - Viewport state
+ * @param viewControls - View controls state (Story 4.4)
  * @param profileId - Profile ID for isolation
  * @returns The canvas ID
  */
@@ -1362,12 +1439,14 @@ export async function save_canvas(
     nodes: CanvasNode[],
     edges: CanvasEdge[],
     viewport: Viewport,
+    viewControls: ViewControlsState,
     profileId: string,
     encryptionKey?: CryptoKey
 ): Promise<string> {
     const canvasDocId = `canvas:${canvasId}`;
     const canvasData: any = {
         viewport,
+        viewControls,
         profileId,
         canvasId,
     };
@@ -1424,6 +1503,12 @@ export async function load_canvas(
                 doc.edges = JSON.parse(edgesJson);
             }
         }
+        
+        // Migration: apply defaults if viewControls missing (legacy document)
+        if (!doc.viewControls) {
+            doc.viewControls = DEFAULT_VIEW_CONTROLS;
+        }
+        
         return doc;
     } catch (e: any) {
         if (e.status === 404) return null;

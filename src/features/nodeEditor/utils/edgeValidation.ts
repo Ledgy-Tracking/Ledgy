@@ -22,12 +22,24 @@ export const validateGraphEdges = (edges: Edge[], nodes: Node[]): Edge[] => {
     const invalidEdges: Edge[] = [];
 
     for (const edge of edges) {
+        // Handle nullable edge handles gracefully
+        if (!edge.sourceHandle || !edge.targetHandle) {
+            invalidEdges.push(edge);
+            if (process.env.NODE_ENV === 'development') {
+                console.warn('[EdgeValidation] Removing edge with null handles:', {
+                    edgeId: edge.id,
+                    sourceHandle: edge.sourceHandle,
+                    targetHandle: edge.targetHandle,
+                });
+            }
+            continue;
+        }
+
         const sourceType = getPortTypeFromHandle(edge.source, edge.sourceHandle, nodes);
         const targetType = getPortTypeFromHandle(edge.target, edge.targetHandle, nodes);
 
-        if (isTypeCompatible(sourceType, targetType)) {
-            validEdges.push(edge);
-        } else {
+        // Guard against undefined/null types from getPortTypeFromHandle
+        if (!sourceType || !targetType || !isTypeCompatible(sourceType, targetType)) {
             invalidEdges.push(edge);
             // Log removal for debugging
             if (process.env.NODE_ENV === 'development') {
@@ -39,6 +51,8 @@ export const validateGraphEdges = (edges: Edge[], nodes: Node[]): Edge[] => {
                     targetType,
                 });
             }
+        } else {
+            validEdges.push(edge);
         }
     }
 
@@ -57,8 +71,19 @@ export const validateGraphEdges = (edges: Edge[], nodes: Node[]): Edge[] => {
  * @returns boolean indicating if edge is valid
  */
 export const isEdgeValid = (edge: Edge, nodes: Node[]): boolean => {
+    // Handle nullable edge handles
+    if (!edge.sourceHandle || !edge.targetHandle) {
+        return false;
+    }
+
     const sourceType = getPortTypeFromHandle(edge.source, edge.sourceHandle, nodes);
     const targetType = getPortTypeFromHandle(edge.target, edge.targetHandle, nodes);
+
+    // Guard against undefined/null types
+    if (!sourceType || !targetType) {
+        return false;
+    }
+
     return isTypeCompatible(sourceType, targetType);
 };
 
@@ -82,8 +107,31 @@ export interface EdgeValidationDetails {
  * @returns Validation details
  */
 export const getEdgeValidationDetails = (edge: Edge, nodes: Node[]): EdgeValidationDetails => {
+    // Handle nullable edge handles
+    if (!edge.sourceHandle || !edge.targetHandle) {
+        return {
+            edgeId: edge.id,
+            isValid: false,
+            sourceType: null,
+            targetType: null,
+            reason: 'null_handle',
+        };
+    }
+
     const sourceType = getPortTypeFromHandle(edge.source, edge.sourceHandle, nodes);
     const targetType = getPortTypeFromHandle(edge.target, edge.targetHandle, nodes);
+
+    // Guard against undefined/null types
+    if (!sourceType || !targetType) {
+        return {
+            edgeId: edge.id,
+            isValid: false,
+            sourceType,
+            targetType,
+            reason: 'unknown_type',
+        };
+    }
+
     const isValid = isTypeCompatible(sourceType, targetType);
 
     return {
@@ -91,7 +139,7 @@ export const getEdgeValidationDetails = (edge: Edge, nodes: Node[]): EdgeValidat
         isValid,
         sourceType,
         targetType,
-        reason: isValid ? undefined : (sourceType && targetType ? 'type_mismatch' : 'unknown_type'),
+        reason: isValid ? undefined : 'type_mismatch',
     };
 };
 
@@ -179,16 +227,24 @@ export const validateGraph = (edges: Edge[], nodes: Node[]): GraphValidationResu
     const errors: string[] = [];
 
     for (const edge of edges) {
+        // Handle nullable edge handles
+        if (!edge.sourceHandle || !edge.targetHandle) {
+            invalidEdges.push(edge);
+            errors.push(`Edge ${edge.id}: null handle(s)`);
+            continue;
+        }
+
         const sourceType = getPortTypeFromHandle(edge.source, edge.sourceHandle, nodes);
         const targetType = getPortTypeFromHandle(edge.target, edge.targetHandle, nodes);
 
-        if (isTypeCompatible(sourceType, targetType)) {
-            validEdges.push(edge);
-        } else {
+        // Guard against undefined/null types
+        if (!sourceType || !targetType || !isTypeCompatible(sourceType, targetType)) {
             invalidEdges.push(edge);
             errors.push(
                 `Edge ${edge.id}: ${sourceType || 'unknown'} → ${targetType || 'unknown'} type mismatch`
             );
+        } else {
+            validEdges.push(edge);
         }
     }
 

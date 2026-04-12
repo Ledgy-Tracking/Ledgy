@@ -11,18 +11,21 @@ import {
 import { getProfileDb } from '../lib/db';
 import { useErrorStore } from './useErrorStore';
 import { useAuthStore } from '../features/auth/useAuthStore';
-import { CanvasNode, CanvasEdge, Viewport } from '../types/nodeEditor';
+import { CanvasNode, CanvasEdge, Viewport, ViewControlsState, DEFAULT_VIEW_CONTROLS } from '../types/nodeEditor';
 import { save_canvas, load_canvas } from '../lib/db';
+import { SAVE_DEBOUNCE_MS, SAVE_MAX_RETRIES, SAVE_RETRY_DELAYS_MS } from '../features/nodeEditor/utils/nodeConstants';
+import { groupNodes as groupNodesUtil } from '../features/nodeEditor/utils/groupNodes';
+import { ungroupNodes as ungroupNodesUtil } from '../features/nodeEditor/utils/ungroupNodes';
 
 // Module-level debounce timer - NOT in store state to avoid re-renders
 let saveTimeoutId: number | null = null;
 
 // Debounce delay in milliseconds
-const DEBOUNCE_DELAY = 1000;
+const DEBOUNCE_DELAY = SAVE_DEBOUNCE_MS;
 
 // Retry configuration
-const MAX_RETRIES = 3;
-const RETRY_DELAYS = [1000, 2000, 4000]; // Exponential backoff
+const MAX_RETRIES = SAVE_MAX_RETRIES;
+const RETRY_DELAYS = [...SAVE_RETRY_DELAYS_MS]; // Exponential backoff
 
 interface NodeState {
     nodes: CanvasNode[];
@@ -37,8 +40,12 @@ interface NodeState {
     // Canvas load/save state
     isCanvasLoaded: boolean;
     isSaveInProgress: boolean;
+    isProfileSwitching: boolean; // Prevents saves during profile transition
     saveError: string | null;
     lastSavedAt: number | null;
+
+    // View controls (Story 4.4) - nested to reduce subscriptions
+    viewControls: ViewControlsState;
 
     // React Flow handlers (per official docs pattern)
     onNodesChange: OnNodesChange<CanvasNode>;
@@ -47,18 +54,33 @@ interface NodeState {
 
     // Actions
     loadCanvas: (profileId: string, projectId: string, workflowId: string) => Promise<void>;
-    saveCanvas: (profileId: string, projectId: string, workflowId: string, nodes?: CanvasNode[], edges?: CanvasEdge[], viewport?: Viewport) => Promise<void>;
+    saveCanvas: (profileId: string, projectId: string, workflowId: string, nodes?: CanvasNode[], edges?: CanvasEdge[], viewport?: Viewport, viewControls?: ViewControlsState) => Promise<void>;
     setNodes: (nodes: CanvasNode[]) => void;
     setEdges: (edges: CanvasEdge[]) => void;
     setViewport: (viewport: Viewport) => void;
     updateNodeData: (nodeId: string, data: Record<string, any>) => void;
     clearProfileData: () => void;
     
+    // View control actions (Story 4.4)
+    setViewControls: (controls: Partial<ViewControlsState>) => void;
+    setShowMinimap: (show: boolean) => void;
+    setShowGrid: (show: boolean) => void;
+    setSnapToGrid: (snap: boolean) => void;
+    setGridSize: (size: number) => void;
+    setViewControlsCollapsed: (collapsed: boolean) => void;
+    
     // Debounced persistence actions
     debouncedSaveCanvas: () => void;
     clearDebouncedSave: () => void;
     saveCanvasWithRetry: (ids: SaveIds, data: SaveData, attemptCount?: number) => Promise<void>;
     setIsCanvasLoaded: (loaded: boolean) => void;
+    
+    // Container actions (Story 4.9)
+    groupNodes: (nodeIds: string[], label?: string) => string | null;
+    ungroupNodes: (containerId: string) => void;
+    expandContainer: (containerId: string) => void;
+    collapseContainer: (containerId: string) => void;
+    setContainerLabel: (containerId: string, label: string) => void;
 }
 
 interface SaveIds {
@@ -71,6 +93,7 @@ interface SaveData {
     nodes: CanvasNode[];
     edges: CanvasEdge[];
     viewport: Viewport;
+    viewControls: ViewControlsState;
 }
 
 const DEFAULT_VIEWPORT: Viewport = { x: 0, y: 0, zoom: 1 };
@@ -86,8 +109,10 @@ const initialState = {
     activeWorkflowId: null,
     isCanvasLoaded: false,
     isSaveInProgress: false,
+    isProfileSwitching: false,
     saveError: null,
     lastSavedAt: null,
+    viewControls: DEFAULT_VIEW_CONTROLS,
 };
 
 export const useNodeStore = create<NodeState>()(
@@ -132,15 +157,18 @@ export const useNodeStore = create<NodeState>()(
                 const canvas = await load_canvas(db, workflowId, authState.encryptionKey || undefined);
 
                 if (canvas) {
+                    // Migration: apply defaults if viewControls missing (legacy document)
+                    const viewControls = canvas.viewControls ?? DEFAULT_VIEW_CONTROLS;
                     set({
                         nodes: canvas.nodes || [],
                         edges: canvas.edges || [],
                         viewport: canvas.viewport || DEFAULT_VIEWPORT,
+                        viewControls,
                         isLoading: false,
                         isCanvasLoaded: true,
                     });
                 } else {
-                    set({ nodes: [], edges: [], viewport: DEFAULT_VIEWPORT, isLoading: false, isCanvasLoaded: true });
+                    set({ nodes: [], edges: [], viewport: DEFAULT_VIEWPORT, viewControls: DEFAULT_VIEW_CONTROLS, isLoading: false, isCanvasLoaded: true });
                 }
             } catch (err: any) {
                 const errorMsg = err.message || 'Failed to load canvas';
@@ -155,7 +183,8 @@ export const useNodeStore = create<NodeState>()(
             workflowId: string,
             nodes?: CanvasNode[], 
             edges?: CanvasEdge[],
-            viewport?: Viewport
+            viewport?: Viewport,
+            viewControls?: ViewControlsState
         ) => {
             try {
                 const authState = useAuthStore.getState();
@@ -168,8 +197,9 @@ export const useNodeStore = create<NodeState>()(
                 const n = nodes ?? state.nodes;
                 const e = edges ?? state.edges;
                 const v = viewport ?? state.viewport;
+                const vc = viewControls ?? state.viewControls;
                 const db = getProfileDb(profileId);
-                await save_canvas(db, workflowId, n, e, v, profileId, authState.encryptionKey || undefined);
+                await save_canvas(db, workflowId, n, e, v, vc, profileId, authState.encryptionKey || undefined);
             } catch (err: any) {
                 const errorMsg = err.message || 'Failed to save canvas';
                 set({ error: errorMsg });
@@ -183,6 +213,26 @@ export const useNodeStore = create<NodeState>()(
         setEdges: (edges: CanvasEdge[]) => set({ edges }),
 
         setViewport: (viewport: Viewport) => set({ viewport }),
+
+        // View control actions (Story 4.4)
+        setViewControls: (controls) => set((state) => ({
+            viewControls: { ...state.viewControls, ...controls }
+        })),
+        setShowMinimap: (show) => set((state) => ({
+            viewControls: { ...state.viewControls, showMinimap: show }
+        })),
+        setShowGrid: (show) => set((state) => ({
+            viewControls: { ...state.viewControls, showGrid: show }
+        })),
+        setSnapToGrid: (snap) => set((state) => ({
+            viewControls: { ...state.viewControls, snapToGrid: snap }
+        })),
+        setGridSize: (size) => set((state) => ({
+            viewControls: { ...state.viewControls, gridSize: size }
+        })),
+        setViewControlsCollapsed: (collapsed) => set((state) => ({
+            viewControls: { ...state.viewControls, isViewControlsCollapsed: collapsed }
+        })),
         
         setIsCanvasLoaded: (loaded: boolean) => set({ isCanvasLoaded: loaded }),
 
@@ -206,22 +256,20 @@ export const useNodeStore = create<NodeState>()(
         },
 
         // Debounced persistence mechanism
-        // CRITICAL: Captures IDs and data at CALL time to prevent race conditions
+        // CRITICAL: Captures IDs at CALL time, reads FRESH state at save time to prevent stale data
         debouncedSaveCanvas: () => {
             const state = get();
             
             // Don't save if canvas hasn't finished loading yet
             if (!state.isCanvasLoaded) return;
+            if (state.isSaveInProgress) return; // Prevent concurrent saves
             
-            // Capture IDs and data IMMEDIATELY at call time to prevent race conditions
+            // Capture IDs IMMEDIATELY at call time to prevent cross-workflow saves
             const capturedProfileId = state.activeProfileId;
             const capturedProjectId = state.activeProjectId;
             const capturedWorkflowId = state.activeWorkflowId;
-            const capturedNodes = state.nodes;
-            const capturedEdges = state.edges;
-            const capturedViewport = state.viewport;
             
-            // Validate captured data
+            // Validate captured IDs
             if (!capturedProfileId || !capturedProjectId || !capturedWorkflowId) return;
             
             // Clear existing timeout
@@ -229,10 +277,12 @@ export const useNodeStore = create<NodeState>()(
                 clearTimeout(saveTimeoutId);
             }
             
-            // Set new timeout using CAPTURED values (not fresh get())
+            // Set new timeout - read FRESH state at save time to prevent stale data
             saveTimeoutId = window.setTimeout(() => {
-                // Verify IDs still match before saving (prevent cross-workflow save)
+                // Read FRESH state inside timeout to get latest data
                 const current = get();
+                
+                // Verify IDs still match before saving (prevent cross-workflow save)
                 if (
                     current.activeProfileId === capturedProfileId &&
                     current.activeProjectId === capturedProjectId &&
@@ -245,9 +295,10 @@ export const useNodeStore = create<NodeState>()(
                             workflowId: capturedWorkflowId 
                         },
                         { 
-                            nodes: capturedNodes, 
-                            edges: capturedEdges, 
-                            viewport: capturedViewport 
+                            nodes: current.nodes, 
+                            edges: current.edges, 
+                            viewport: current.viewport,
+                            viewControls: current.viewControls
                         }
                     );
                 }
@@ -272,7 +323,8 @@ export const useNodeStore = create<NodeState>()(
                     ids.workflowId, 
                     data.nodes, 
                     data.edges,
-                    data.viewport
+                    data.viewport,
+                    data.viewControls
                 );
                 set({ 
                     isSaveInProgress: false, 
@@ -299,11 +351,92 @@ export const useNodeStore = create<NodeState>()(
                             current.activeProjectId === ids.projectId &&
                             current.activeWorkflowId === ids.workflowId
                         ) {
-                            get().saveCanvasWithRetry(ids, data, attemptCount + 1);
+                            // Read FRESH state on retry to avoid stale data issues
+                            const freshData: SaveData = {
+                                nodes: current.nodes,
+                                edges: current.edges,
+                                viewport: current.viewport,
+                                viewControls: current.viewControls,
+                            };
+                            get().saveCanvasWithRetry(ids, freshData, attemptCount + 1);
                         }
                     }, RETRY_DELAYS[attemptCount]);
                 }
             }
+        },
+        
+        // Container actions (Story 4.9)
+        groupNodes: (nodeIds: string[], label?: string): string | null => {
+            const state = get();
+            const result = groupNodesUtil(nodeIds, state.nodes, label);
+            
+            if (!result) return null;
+            
+            const { container, updatedChildren } = result;
+            
+            // Replace updated children and add container
+            const newNodes = state.nodes.map(n => {
+                const updated = updatedChildren.find(u => u.id === n.id);
+                return updated || n;
+            }).concat(container);
+            
+            set({ nodes: newNodes });
+            get().debouncedSaveCanvas();
+            
+            return container.id;
+        },
+        
+        ungroupNodes: (containerId: string) => {
+            const state = get();
+            const result = ungroupNodesUtil(containerId, state.nodes);
+            
+            if (!result) return;
+            
+            const { restoredNodes, childNodeIds } = result;
+            
+            // Remove container and update children
+            const newNodes = state.nodes
+                .filter(n => n.id !== containerId)
+                .map(n => {
+                    const restored = restoredNodes.find(r => r.id === n.id);
+                    return restored || n;
+                });
+            
+            set({ nodes: newNodes });
+            get().debouncedSaveCanvas();
+        },
+        
+        expandContainer: (containerId: string) => {
+            set({
+                nodes: get().nodes.map(n =>
+                    n.id === containerId 
+                        ? { ...n, data: { ...n.data, isCollapsed: false } } 
+                        : n
+                ),
+            });
+            get().debouncedSaveCanvas();
+        },
+        
+        collapseContainer: (containerId: string) => {
+            set({
+                nodes: get().nodes.map(n =>
+                    n.id === containerId 
+                        ? { ...n, data: { ...n.data, isCollapsed: true } } 
+                        : n
+                ),
+            });
+            get().debouncedSaveCanvas();
+        },
+        
+        setContainerLabel: (containerId: string, label: string) => {
+            set({
+                nodes: get().nodes.map(n =>
+                    n.id === containerId 
+                        ? { ...n, data: { ...n.data, label } } 
+                        : n
+                ),
+            });
+            get().debouncedSaveCanvas();
         },
     }))
 );
@@ -317,10 +450,12 @@ function handleVisibilityChange() {
         const state = useNodeStore.getState();
         state.clearDebouncedSave();
         
-        const { activeProfileId, activeProjectId, activeWorkflowId, nodes, edges, viewport, isCanvasLoaded } = state;
-        if (activeProfileId && activeProjectId && activeWorkflowId && isCanvasLoaded) {
+        const { activeProfileId, activeProjectId, activeWorkflowId, nodes, edges, viewport, viewControls, isCanvasLoaded, isSaveInProgress } = state;
+        
+        // Don't save if already in progress or canvas not loaded (prevents race during profile switch)
+        if (activeProfileId && activeProjectId && activeWorkflowId && isCanvasLoaded && !isSaveInProgress) {
             // Fire and forget - don't await
-            state.saveCanvas(activeProfileId, activeProjectId, activeWorkflowId, nodes, edges, viewport).catch(() => {
+            state.saveCanvas(activeProfileId, activeProjectId, activeWorkflowId, nodes, edges, viewport, viewControls).catch(() => {
                 // Error already handled in saveCanvas
             });
         }
@@ -334,10 +469,12 @@ function handleBeforeUnload(e: BeforeUnloadEvent) {
         state.clearDebouncedSave();
         
         // Attempt synchronous save (or warn user)
-        const { activeProfileId, activeProjectId, activeWorkflowId, nodes, edges, viewport, isCanvasLoaded } = state;
-        if (activeProfileId && activeProjectId && activeWorkflowId && isCanvasLoaded) {
+        const { activeProfileId, activeProjectId, activeWorkflowId, nodes, edges, viewport, viewControls, isCanvasLoaded, isSaveInProgress } = state;
+        
+        // Don't save if already in progress or canvas not loaded (prevents race during profile switch)
+        if (activeProfileId && activeProjectId && activeWorkflowId && isCanvasLoaded && !isSaveInProgress) {
             // Fire and forget - can't await in beforeunload
-            state.saveCanvas(activeProfileId, activeProjectId, activeWorkflowId, nodes, edges, viewport).catch(() => {
+            state.saveCanvas(activeProfileId, activeProjectId, activeWorkflowId, nodes, edges, viewport, viewControls).catch(() => {
                 // Error already handled in saveCanvas
             });
         }
@@ -348,11 +485,34 @@ function handleBeforeUnload(e: BeforeUnloadEvent) {
     }
 }
 
-// Register event listeners (only in browser environment)
-if (typeof document !== 'undefined') {
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('beforeunload', handleBeforeUnload);
+// Track event listener registration state
+let eventListenersRegistered = false;
+
+/**
+ * Register global event listeners for auto-save on tab hide/close
+ * Call this once when the app initializes
+ */
+export function registerAutoSaveListeners(): void {
+    if (typeof document !== 'undefined' && !eventListenersRegistered) {
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        eventListenersRegistered = true;
+    }
 }
+
+/**
+ * Unregister global event listeners (useful for testing)
+ */
+export function unregisterAutoSaveListeners(): void {
+    if (typeof document !== 'undefined' && eventListenersRegistered) {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+        eventListenersRegistered = false;
+    }
+}
+
+// Auto-register on module load (for backward compatibility)
+registerAutoSaveListeners();
 
 // Export for testing
 export { saveTimeoutId, DEBOUNCE_DELAY, MAX_RETRIES, RETRY_DELAYS };

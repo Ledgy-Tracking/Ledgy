@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { AuthLoadingScreen } from './AuthLoadingScreen';
 import { useAuthStore, useIsRegistered } from './useAuthStore';
 
 interface GuestGuardProps {
@@ -8,9 +9,14 @@ interface GuestGuardProps {
 
 export const GuestGuard: React.FC<GuestGuardProps> = ({ children }) => {
     const isUnlocked = useAuthStore(state => state.isUnlocked);
+    const hasHydrated = useAuthStore(state => state.hasHydrated);
     const isRegistered = useIsRegistered();
 
     const location = useLocation();
+
+    if (!hasHydrated) {
+        return <AuthLoadingScreen />;
+    }
 
     if (isUnlocked) {
         return <Navigate to="/profiles" replace />;
