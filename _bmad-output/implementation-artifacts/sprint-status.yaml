@@ -129,6 +129,9 @@ development_status:
   epic-4-retrospective: optional
 
   epic-5: backlog
+  # 5-0: MUST run first — reconciles existing broken dashboard scaffolding before any Epic 5 story
+  # fixes: dual store conflict, type mismatch, localStorage TODO, fetchWidgets crash, DashboardOutputNode coupling
+  5-0-dashboard-brownfield-reconciliation: backlog
   5-1-css-grid-layout-serialization: backlog
   5-2-widget-drag-drop-resizing-shell: backlog
   5-3-bar-line-trend-component-kernels: backlog

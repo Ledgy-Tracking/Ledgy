@@ -18,7 +18,7 @@ This document provides the deeply granular epic and atomic story breakdown for l
 2. **Epic 2: Profiles & Project Management** (8 Stories)
 3. **Epic 3: Relational Ledger Engine** (16 Stories)
 4. **Epic 4: Node Forge (Visual Scripting Engine)** (25 Stories — expanded 2026-04-13 after sprint review)
-5. **Epic 5: Dashboard & Live Widgets** (11 Stories — expanded 2026-04-13 after sprint review)
+5. **Epic 5: Dashboard & Live Widgets** (12 Stories — expanded 2026-04-13 after sprint review)
 6. **Epic 6: Offline Sync, Conflicts & Data Sovereignty** (10 Stories)
 7. **Epic 7: Plugin Runtime & AI Capture** (8 Stories)
 8. **Epic 8: Technical Debt & System Stability** (5 Stories)
@@ -109,6 +109,9 @@ The drag-and-drop workspace where schemas talk to each other. Each project conta
 ---
 
 ## Epic 5: Dashboard & Live Widgets
+Where computed Node outputs become glanceable health indicators.
+
+- **5.0 Dashboard Brownfield Reconciliation:** Pre-requisite for all Epic 5 stories. Fixes critical defects in existing dashboard scaffolding: dual `useDashboardStore` conflict, `Widget`/`WidgetConfig` type mismatch, localStorage→PouchDB persistence migration (overdue TODO from Story 1.5), `fetchWidgets` runtime crash, and wrong-direction `DashboardOutputNode`→`useDashboardStore` dependency.
 Where the computed Node outputs become glanceable health indicators.
 
 - **5.1 CSS Grid Layout Serialization:** The persistent array saving the X/Y width/height positions of user-arranged blocks.
