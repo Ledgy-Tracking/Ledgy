@@ -33,9 +33,16 @@ export const calculatePearsonCorrelation = (
         return { r: null, error: 'Need 2+ data points', sampleSize: x.length };
     }
 
-    // Calculate means
-    const xMean = x.reduce((a, b) => a + b, 0) / x.length;
-    const yMean = y.reduce((a, b) => a + b, 0) / y.length;
+    // ⚡ Bolt: Single-pass loop optimization for calculating means
+    // Replaces .reduce() to prevent "Maximum call stack size exceeded" on large arrays
+    let xSum = 0;
+    let ySum = 0;
+    for (let i = 0; i < x.length; i++) {
+        xSum += x[i];
+        ySum += y[i];
+    }
+    const xMean = xSum / x.length;
+    const yMean = ySum / y.length;
 
     // Calculate Pearson's r
     let numerator = 0;
@@ -75,21 +82,32 @@ export const calculateArithmetic = (
         return { value: null, error: 'No inputs provided' };
     }
 
+    // ⚡ Bolt: Single-pass loop optimization for all arithmetic operations
+    // Replaces .reduce() and Math.min/max spread syntax to prevent "Maximum call stack size exceeded" errors
     switch (operation) {
         case 'add':
-        case 'sum':
-            return { value: values.reduce((a, b) => a + b, 0) };
+        case 'sum': {
+            let sum = 0;
+            for (let i = 0; i < values.length; i++) sum += values[i];
+            return { value: sum };
+        }
 
-        case 'subtract':
+        case 'subtract': {
             if (values.length < 2) {
                 return { value: null, error: 'Need 2+ values for subtraction' };
             }
-            return { value: values.reduce((a, b) => a - b) };
+            let diff = values[0];
+            for (let i = 1; i < values.length; i++) diff -= values[i];
+            return { value: diff };
+        }
 
-        case 'multiply':
-            return { value: values.reduce((a, b) => a * b, 1) };
+        case 'multiply': {
+            let product = 1;
+            for (let i = 0; i < values.length; i++) product *= values[i];
+            return { value: product };
+        }
 
-        case 'divide':
+        case 'divide': {
             if (values.length < 2) {
                 return { value: null, error: 'Need 2 values for division' };
             }
@@ -97,15 +115,29 @@ export const calculateArithmetic = (
                 return { value: null, error: 'Division by zero' };
             }
             return { value: values[0] / values[1] };
+        }
 
-        case 'average':
-            return { value: values.reduce((a, b) => a + b, 0) / values.length };
+        case 'average': {
+            let sum = 0;
+            for (let i = 0; i < values.length; i++) sum += values[i];
+            return { value: sum / values.length };
+        }
 
-        case 'min':
-            return { value: Math.min(...values) };
+        case 'min': {
+            let min = Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (values[i] < min) min = values[i];
+            }
+            return { value: min };
+        }
 
-        case 'max':
-            return { value: Math.max(...values) };
+        case 'max': {
+            let max = -Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (values[i] > max) max = values[i];
+            }
+            return { value: max };
+        }
 
         default:
             return { value: null, error: 'Unknown operation' };
