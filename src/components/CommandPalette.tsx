@@ -54,7 +54,7 @@ export const CommandPalette: React.FC = () => {
                     <CommandGroup heading="Actions">
                         {projectId && (
                             <CommandItem onSelect={() => runCommand(() => navigate(`/app/${profileId}/project/${projectId}/node-forge`))}>
-                                <Network className="mr-2 h-4 w-4 text-zinc-400" />
+                                <Network className="mr-2 h-4 w-4 text-zinc-500 dark:text-zinc-400" />
                                 <span>Open Node Forge for this Project</span>
                             </CommandItem>
                         )}
@@ -63,17 +63,17 @@ export const CommandPalette: React.FC = () => {
                                 // Trigger the "Add Entry" UI in LedgerTable via the N shortcut
                                 window.dispatchEvent(new KeyboardEvent('keydown', { key: 'n' }));
                             })}>
-                                <Plus className="mr-2 h-4 w-4 text-zinc-400" />
+                                <Plus className="mr-2 h-4 w-4 text-zinc-500 dark:text-zinc-400" />
                                 <span>New Entry in this Ledger</span>
                                 <CommandShortcut>N</CommandShortcut>
                             </CommandItem>
                         )}
                         <CommandItem onSelect={() => runCommand(() => setSchemaBuilderOpen(true))}>
-                            <Database className="mr-2 h-4 w-4 text-zinc-400" />
+                            <Database className="mr-2 h-4 w-4 text-zinc-500 dark:text-zinc-400" />
                             <span>Create New Ledger Schema...</span>
                         </CommandItem>
                         <CommandItem onSelect={() => runCommand(() => navigate(`/app/${profileId}/projects`))}>
-                            <FolderKanban className="mr-2 h-4 w-4 text-zinc-400" />
+                            <FolderKanban className="mr-2 h-4 w-4 text-zinc-500 dark:text-zinc-400" />
                             <span>Create New Project...</span>
                         </CommandItem>
                     </CommandGroup>
@@ -89,7 +89,7 @@ export const CommandPalette: React.FC = () => {
                                     navigate(`/app/${profileId}/project/${project._id}`);
                                 })}
                             >
-                                <LayoutGrid className="mr-2 h-4 w-4 text-zinc-400" />
+                                <LayoutGrid className="mr-2 h-4 w-4 text-zinc-500 dark:text-zinc-400" />
                                 <span>{project.name}</span>
                                 {projectId === project._id && (
                                     <Badge variant="secondary" className="ml-auto bg-emerald-500/10 text-emerald-500 border-emerald-500/30 text-[10px] font-bold uppercase">
@@ -115,7 +115,7 @@ export const CommandPalette: React.FC = () => {
                                     }
                                 })}
                             >
-                                <Database className="mr-2 h-4 w-4 text-zinc-400" />
+                                <Database className="mr-2 h-4 w-4 text-zinc-500 dark:text-zinc-400" />
                                 <span>{schema.name}</span>
                             </CommandItem>
                         ))}
@@ -135,7 +135,7 @@ export const CommandPalette: React.FC = () => {
                         >
                             <Badge
                                 variant="ghost"
-                                className={`w-2 h-2 rounded-full mr-3 ${profile.id === profileId ? 'bg-emerald-500' : 'bg-zinc-700'}`}
+                                className={`w-2 h-2 rounded-full mr-3 ${profile.id === profileId ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}
                             />
                             <span>{profile.name}</span>
                         </CommandItem>
