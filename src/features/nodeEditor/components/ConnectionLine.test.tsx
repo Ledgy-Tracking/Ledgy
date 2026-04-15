@@ -6,8 +6,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
-import type { ConnectionLineComponentProps } from '@xyflow/react';
-import React from 'react';
 
 // Mock props for testing
 const createMockProps = (
