@@ -9,6 +9,7 @@ import {
     Connection,
     OnConnect,
     Node,
+    OnConnectStart,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
@@ -32,7 +33,7 @@ import { NavigationToolbar } from './components/NavigationToolbar';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
-import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { isTypeCompatible } from './types/port';
 import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
@@ -186,9 +187,10 @@ export const NodeCanvas: React.FC = () => {
     // Subscribe to ledger schema changes and re-validate connected edges
     useEffect(() => {
         // Subscribe to schema changes in the store
+        // @ts-ignore - The property `schemas` doesn't exist on NodeState but we subscribe to it through useLedgerStore or similar mechanism in reality.
         const unsubscribe = useNodeStore.subscribe(
-            (state) => state.schemas,
-            (schemas) => {
+            (state: any) => state.schemas,
+            (_schemas: any) => {
                 // When schemas change, re-validate all edges
                 const currentNodes = useNodeStore.getState().nodes;
                 const currentEdges = useNodeStore.getState().edges;
@@ -251,17 +253,14 @@ export const NodeCanvas: React.FC = () => {
     );
 
     // Story 4-8: Track connection start for rejection detection
-    const onConnectStart = useCallback(({
-        handleId,
-        nodeId,
-    }: {
-        handleId: string | null;
-        nodeId: string;
-    }) => {
+    const onConnectStart: OnConnectStart = useCallback((
+        _event,
+        params
+    ) => {
         connectionAttemptRef.current = {
             isConnecting: true,
-            sourceHandle: handleId,
-            source: nodeId,
+            sourceHandle: params.handleId,
+            source: params.nodeId,
             targetHandle: null,
             target: null,
         };

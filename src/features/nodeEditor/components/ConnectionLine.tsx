@@ -15,22 +15,21 @@ import type { ConnectionLineComponentProps } from '@xyflow/react';
 import { getConnectionPath } from '../utils/bezierPath';
 
 /**
- * Connection line visual states (AC2)
- */
-type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
-
-/**
  * Extended props including connection status and direction
  */
 interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
-    connectionStatus?: ConnectionStatus;
     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
 }
 
 /**
+ * Connection line visual states (AC2)
+ */
+export type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
+
+/**
  * Style configuration for different connection states
  */
-const getConnectionStyles = (status: ConnectionStatus) => {
+const getConnectionStyles = (status: ConnectionStatus | string | null | undefined) => {
     switch (status) {
         case 'snapped':
             return {
@@ -78,10 +77,7 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     fromY,
     toX,
     toY,
-    connectionLineType,
-    connectionStatus = 'default',
-    fromNode,
-    fromHandle,
+    connectionStatus,
     sourceDirection = 'right'
 }) => {
     // Calculate Bezier path using actual handle direction
