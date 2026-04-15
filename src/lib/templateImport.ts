@@ -46,7 +46,7 @@ export async function import_template(
             continue;
         }
         try {
-            await create_schema(db, schema.name, schema.fields, profileId, projectId);
+            await create_schema(db, schema.name, schema.fields, profileId, projectId, undefined);
             importedSchemas++;
         } catch (e: any) {
             errors.push(`Failed to import schema "${schema.name}": ${e.message}`);
