@@ -93,11 +93,11 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     const styles = useMemo(() => getConnectionStyles(connectionStatus), [connectionStatus]);
 
     // Determine if we should show the glow animation for valid/snapped connections
-    const showGlow = connectionStatus === 'valid' || connectionStatus === 'snapped';
+    const showGlow = connectionStatus === 'valid' || (connectionStatus as any) === 'snapped';
 
     // ARIA live region for screen reader announcements
     const ariaLabel = useMemo(() => {
-        switch (connectionStatus) {
+        switch (connectionStatus as any) {
             case 'snapped':
                 return 'Connection snapped to handle';
             case 'valid':
