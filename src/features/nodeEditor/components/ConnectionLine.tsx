@@ -73,17 +73,17 @@ const getConnectionStyles = (status: ConnectionStatus) => {
  * Renders during edge drag operations to show the potential connection.
  * Uses cubic Bezier curves for smooth, professional appearance.
  */
-export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
+export const ConnectionLine: any = ({
     fromX,
     fromY,
     toX,
     toY,
-    connectionLineType,
+    connectionLineType: _connectionLineType,
     connectionStatus = 'default',
-    fromNode,
-    fromHandle,
+    fromNode: _fromNode,
+    fromHandle: _fromHandle,
     sourceDirection = 'right'
-}) => {
+}: any) => {
     // Calculate Bezier path using actual handle direction
     const path = useMemo(() => {
         return getConnectionPath(
