@@ -33,30 +33,35 @@ export const calculatePearsonCorrelation = (
         return { r: null, error: 'Need 2+ data points', sampleSize: x.length };
     }
 
-    // Calculate means
-    const xMean = x.reduce((a, b) => a + b, 0) / x.length;
-    const yMean = y.reduce((a, b) => a + b, 0) / y.length;
+    const n = x.length;
 
-    // Calculate Pearson's r
-    let numerator = 0;
-    let xDenom = 0;
-    let yDenom = 0;
+    let sumX = 0;
+    let sumY = 0;
+    let sumXY = 0;
+    let sumX2 = 0;
+    let sumY2 = 0;
 
-    for (let i = 0; i < x.length; i++) {
-        const xDiff = x[i] - xMean;
-        const yDiff = y[i] - yMean;
-        numerator += xDiff * yDiff;
-        xDenom += xDiff * xDiff;
-        yDenom += yDiff * yDiff;
+    for (let i = 0; i < n; i++) {
+        const xi = x[i];
+        const yi = y[i];
+
+        sumX += xi;
+        sumY += yi;
+        sumXY += xi * yi;
+        sumX2 += xi * xi;
+        sumY2 += yi * yi;
     }
+
+    const numerator = n * sumXY - sumX * sumY;
+    const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
 
     // Check for zero variance
-    if (xDenom === 0 || yDenom === 0) {
-        return { r: null, error: 'No variance in data', sampleSize: x.length };
+    if (denominator === 0) {
+        return { r: null, error: 'No variance in data', sampleSize: n };
     }
 
-    const r = numerator / Math.sqrt(xDenom * yDenom);
-    return { r: Math.max(-1, Math.min(1, r)), sampleSize: x.length }; // Clamp to [-1, 1]
+    const r = numerator / denominator;
+    return { r: Math.max(-1, Math.min(1, r)), sampleSize: n }; // Clamp to [-1, 1]
 };
 
 /**
@@ -77,17 +82,26 @@ export const calculateArithmetic = (
 
     switch (operation) {
         case 'add':
-        case 'sum':
-            return { value: values.reduce((a, b) => a + b, 0) };
+        case 'sum': {
+            let sum = 0;
+            for (let i = 0; i < values.length; i++) sum += values[i];
+            return { value: sum };
+        }
 
-        case 'subtract':
+        case 'subtract': {
             if (values.length < 2) {
                 return { value: null, error: 'Need 2+ values for subtraction' };
             }
-            return { value: values.reduce((a, b) => a - b) };
+            let sub = values[0];
+            for (let i = 1; i < values.length; i++) sub -= values[i];
+            return { value: sub };
+        }
 
-        case 'multiply':
-            return { value: values.reduce((a, b) => a * b, 1) };
+        case 'multiply': {
+            let mult = 1;
+            for (let i = 0; i < values.length; i++) mult *= values[i];
+            return { value: mult };
+        }
 
         case 'divide':
             if (values.length < 2) {
@@ -98,14 +112,29 @@ export const calculateArithmetic = (
             }
             return { value: values[0] / values[1] };
 
-        case 'average':
-            return { value: values.reduce((a, b) => a + b, 0) / values.length };
+        case 'average': {
+            let sumAvg = 0;
+            for (let i = 0; i < values.length; i++) sumAvg += values[i];
+            return { value: sumAvg / values.length };
+        }
 
-        case 'min':
-            return { value: Math.min(...values) };
+        case 'min': {
+            let min = Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (Number.isNaN(values[i])) return { value: NaN };
+                if (values[i] < min) min = values[i];
+            }
+            return { value: min };
+        }
 
-        case 'max':
-            return { value: Math.max(...values) };
+        case 'max': {
+            let max = -Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (Number.isNaN(values[i])) return { value: NaN };
+                if (values[i] > max) max = values[i];
+            }
+            return { value: max };
+        }
 
         default:
             return { value: null, error: 'Unknown operation' };
