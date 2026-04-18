@@ -33,35 +33,30 @@ export const calculatePearsonCorrelation = (
         return { r: null, error: 'Need 2+ data points', sampleSize: x.length };
     }
 
-    const n = x.length;
+    // Calculate means
+    const xMean = x.reduce((a, b) => a + b, 0) / x.length;
+    const yMean = y.reduce((a, b) => a + b, 0) / y.length;
 
-    let sumX = 0;
-    let sumY = 0;
-    let sumXY = 0;
-    let sumX2 = 0;
-    let sumY2 = 0;
+    // Calculate Pearson's r
+    let numerator = 0;
+    let xDenom = 0;
+    let yDenom = 0;
 
-    for (let i = 0; i < n; i++) {
-        const xi = x[i];
-        const yi = y[i];
-
-        sumX += xi;
-        sumY += yi;
-        sumXY += xi * yi;
-        sumX2 += xi * xi;
-        sumY2 += yi * yi;
+    for (let i = 0; i < x.length; i++) {
+        const xDiff = x[i] - xMean;
+        const yDiff = y[i] - yMean;
+        numerator += xDiff * yDiff;
+        xDenom += xDiff * xDiff;
+        yDenom += yDiff * yDiff;
     }
-
-    const numerator = n * sumXY - sumX * sumY;
-    const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
 
     // Check for zero variance
-    if (denominator === 0) {
-        return { r: null, error: 'No variance in data', sampleSize: n };
+    if (xDenom === 0 || yDenom === 0) {
+        return { r: null, error: 'No variance in data', sampleSize: x.length };
     }
 
-    const r = numerator / denominator;
-    return { r: Math.max(-1, Math.min(1, r)), sampleSize: n }; // Clamp to [-1, 1]
+    const r = numerator / Math.sqrt(xDenom * yDenom);
+    return { r: Math.max(-1, Math.min(1, r)), sampleSize: x.length }; // Clamp to [-1, 1]
 };
 
 /**
