@@ -189,8 +189,8 @@ export const NodeCanvas: React.FC = () => {
     useEffect(() => {
         // Subscribe to schema changes in the store
         const unsubscribe = useLedgerStore.subscribe(
-            (state) => state.schemas,
-            (_schemas) => {
+            (state, prevState) => {
+                if (state.schemas === prevState.schemas) return;
                 // When schemas change, re-validate all edges
                 const currentNodes = useNodeStore.getState().nodes;
                 const currentEdges = useNodeStore.getState().edges;
