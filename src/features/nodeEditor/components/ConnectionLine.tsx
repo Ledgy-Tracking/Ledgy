@@ -22,15 +22,15 @@ type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
 /**
  * Extended props including connection status and direction
  */
-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
-    connectionStatus?: ConnectionStatus;
+interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, 'connectionStatus'> {
+    connectionStatus?: ConnectionStatus | 'valid' | 'invalid' | null;
     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
 }
 
 /**
  * Style configuration for different connection states
  */
-const getConnectionStyles = (status: ConnectionStatus) => {
+const getConnectionStyles = (status: ConnectionStatus | 'valid' | 'invalid' | null) => {
     switch (status) {
         case 'snapped':
             return {
@@ -116,7 +116,7 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     return (
         <g 
             data-testid="connection-line" 
-            data-connection-status={connectionStatus}
+            data-connection-status={connectionStatus || undefined}
             className="react-flow__connection-line"
             role="img"
             aria-label={ariaLabel}
