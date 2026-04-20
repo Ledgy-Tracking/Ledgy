@@ -32,12 +32,13 @@ import { NavigationToolbar } from './components/NavigationToolbar';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
-import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { isTypeCompatible } from './types/port';
 import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
 import './styles/connectionLine.css';
 import { v4 as uuidv4 } from 'uuid';
+import { useLedgerStore } from '../../stores/useLedgerStore';
 
 // --- STABLE CONFIGURATION (Outside component to prevent re-renders) ---
 
@@ -187,9 +188,9 @@ export const NodeCanvas: React.FC = () => {
     // Subscribe to ledger schema changes and re-validate connected edges
     useEffect(() => {
         // Subscribe to schema changes in the store
-        const unsubscribe = useNodeStore.subscribe(
+        const unsubscribe = useLedgerStore.subscribe(
             (state) => state.schemas,
-            (schemas) => {
+            (_schemas) => {
                 // When schemas change, re-validate all edges
                 const currentNodes = useNodeStore.getState().nodes;
                 const currentEdges = useNodeStore.getState().edges;
@@ -252,16 +253,15 @@ export const NodeCanvas: React.FC = () => {
     );
 
     // Story 4-8: Track connection start for rejection detection
-    const onConnectStart = useCallback(({
-        handleId,
-        nodeId,
-    }: {
-        handleId: string | null;
-        nodeId: string;
-    }) => {
+    const onConnectStart = useCallback((
+        _event: MouseEvent | TouchEvent,
+        params: { nodeId: string | null; handleId: string | null; handleType: 'source' | 'target' | null }
+    ) => {
+        const { handleId, nodeId } = params;
+        if (!nodeId) return;
         connectionAttemptRef.current = {
             isConnecting: true,
-            sourceHandle: handleId,
+            sourceHandle: handleId || null,
             source: nodeId,
             targetHandle: null,
             target: null,
