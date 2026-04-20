@@ -55,7 +55,7 @@ describe('Profile Isolation Security Tests', () => {
     let testSuffix = '';
 
     beforeEach(async () => {
-        testSuffix = Math.random().toString(36).substring(7);
+        testSuffix = crypto.randomUUID().substring(0, 7);
         // Clear all databases and reset stores
         _clearProfileDatabases();
         useAuthStore.setState({
