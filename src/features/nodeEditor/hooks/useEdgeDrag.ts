@@ -165,6 +165,18 @@ export const useEdgeDrag = ({
         });
     }, [isDragging, connectionState, spatialIndex]);
 
+    // Cancel drag operation (AC5)
+    const cancelDrag = useCallback(() => {
+        setConnectionState(null);
+
+        if (rafRef.current) {
+            cancelAnimationFrame(rafRef.current);
+            rafRef.current = null;
+        }
+
+        onCancel?.();
+    }, [onCancel]);
+
     // End drag (mouse/touch release)
     const endDrag = useCallback(() => {
         if (!connectionState?.snapResult?.snapped) {
@@ -197,18 +209,6 @@ export const useEdgeDrag = ({
             performance.measure('edge-drag', 'edge-drag-start', 'edge-drag-end');
         }
     }, [connectionState, onConnect, cancelDrag]);
-
-    // Cancel drag operation (AC5)
-    const cancelDrag = useCallback(() => {
-        setConnectionState(null);
-        
-        if (rafRef.current) {
-            cancelAnimationFrame(rafRef.current);
-            rafRef.current = null;
-        }
-
-        onCancel?.();
-    }, [onCancel]);
 
     // Escape key handler (AC5)
     useEffect(() => {
