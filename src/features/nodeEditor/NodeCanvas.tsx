@@ -12,6 +12,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
+import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
 import { CanvasNode } from '../../types/nodeEditor';
@@ -187,7 +188,7 @@ export const NodeCanvas: React.FC = () => {
     useEffect(() => {
         // Subscribe to schema changes in the store
         const unsubscribe = useLedgerStore.subscribe(
-            (state) => state.schemas,
+            (state: any) => state.schemas,
             () => {
                 // When schemas change, re-validate all edges
                 const currentNodes = useNodeStore.getState().nodes;
