@@ -12,6 +12,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useNodeStore } from '../../stores/useNodeStore';
+import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
 import { CanvasNode } from '../../types/nodeEditor';
@@ -32,7 +33,7 @@ import { NavigationToolbar } from './components/NavigationToolbar';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
-import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { isTypeCompatible } from './types/port';
 import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
@@ -186,9 +187,9 @@ export const NodeCanvas: React.FC = () => {
     // Subscribe to ledger schema changes and re-validate connected edges
     useEffect(() => {
         // Subscribe to schema changes in the store
-        const unsubscribe = useNodeStore.subscribe(
+        const unsubscribe = useLedgerStore.subscribe(
             (state) => state.schemas,
-            (schemas) => {
+            () => {
                 // When schemas change, re-validate all edges
                 const currentNodes = useNodeStore.getState().nodes;
                 const currentEdges = useNodeStore.getState().edges;
