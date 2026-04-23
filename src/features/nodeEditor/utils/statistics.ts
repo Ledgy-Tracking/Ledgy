@@ -77,17 +77,29 @@ export const calculateArithmetic = (
 
     switch (operation) {
         case 'add':
-        case 'sum':
-            return { value: values.reduce((a, b) => a + b, 0) };
+        case 'sum': {
+            // ⚡ Bolt: Replaced .reduce() with for-loop to prevent array method overhead
+            let sum = 0;
+            for (let i = 0; i < values.length; i++) sum += values[i];
+            return { value: sum };
+        }
 
-        case 'subtract':
+        case 'subtract': {
             if (values.length < 2) {
                 return { value: null, error: 'Need 2+ values for subtraction' };
             }
-            return { value: values.reduce((a, b) => a - b) };
+            // ⚡ Bolt: Replaced .reduce() with for-loop
+            let sub = values[0];
+            for (let i = 1; i < values.length; i++) sub -= values[i];
+            return { value: sub };
+        }
 
-        case 'multiply':
-            return { value: values.reduce((a, b) => a * b, 1) };
+        case 'multiply': {
+            // ⚡ Bolt: Replaced .reduce() with for-loop
+            let prod = 1;
+            for (let i = 0; i < values.length; i++) prod *= values[i];
+            return { value: prod };
+        }
 
         case 'divide':
             if (values.length < 2) {
@@ -98,14 +110,32 @@ export const calculateArithmetic = (
             }
             return { value: values[0] / values[1] };
 
-        case 'average':
-            return { value: values.reduce((a, b) => a + b, 0) / values.length };
+        case 'average': {
+            // ⚡ Bolt: Replaced .reduce() with for-loop
+            let sum = 0;
+            for (let i = 0; i < values.length; i++) sum += values[i];
+            return { value: sum / values.length };
+        }
 
-        case 'min':
-            return { value: Math.min(...values) };
+        case 'min': {
+            // ⚡ Bolt: Replaced Math.min(...values) to prevent "Maximum call stack size exceeded" on large arrays
+            let min = Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (Number.isNaN(values[i])) return { value: NaN };
+                if (values[i] < min) min = values[i];
+            }
+            return { value: min };
+        }
 
-        case 'max':
-            return { value: Math.max(...values) };
+        case 'max': {
+            // ⚡ Bolt: Replaced Math.max(...values) to prevent "Maximum call stack size exceeded" on large arrays
+            let max = -Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (Number.isNaN(values[i])) return { value: NaN };
+                if (values[i] > max) max = values[i];
+            }
+            return { value: max };
+        }
 
         default:
             return { value: null, error: 'Unknown operation' };
