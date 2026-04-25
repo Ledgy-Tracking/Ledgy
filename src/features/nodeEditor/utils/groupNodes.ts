@@ -31,10 +31,20 @@ export const calculateBoundingBox = (nodes: Node[]): ContainerBounds => {
     const widths = nodes.map(n => (n.width || 150));
     const heights = nodes.map(n => (n.height || 100));
     
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs.map((x, i) => x + widths[i]));
-    const maxY = Math.max(...ys.map((y, i) => y + heights[i]));
+    // Optimization: explicitly avoid Math.max(...array) which can exceed max call stack size
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < xs.length; i++) {
+        if (xs[i] < minX) minX = xs[i];
+        if (ys[i] < minY) minY = ys[i];
+        const right = xs[i] + widths[i];
+        if (right > maxX) maxX = right;
+        const bottom = ys[i] + heights[i];
+        if (bottom > maxY) maxY = bottom;
+    }
     
     return {
         minX,
