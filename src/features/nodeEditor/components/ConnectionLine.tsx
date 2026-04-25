@@ -22,7 +22,7 @@ type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
 /**
  * Extended props including connection status and direction
  */
-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
+interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, 'connectionStatus'> {
     connectionStatus?: ConnectionStatus;
     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
 }
@@ -78,10 +78,7 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     fromY,
     toX,
     toY,
-    connectionLineType,
     connectionStatus = 'default',
-    fromNode,
-    fromHandle,
     sourceDirection = 'right'
 }) => {
     // Calculate Bezier path using actual handle direction

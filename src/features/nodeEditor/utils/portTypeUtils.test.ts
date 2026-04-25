@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Unit tests for port type utilities
  * Story 4-7: Complex Edge Connection Snapping (AC4)
