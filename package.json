@@ -31,7 +31,6 @@
     "glob": "^13.0.6",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.575.0",
-    "nanoid": "^5.1.9",
     "pouchdb": "^9.0.0",
     "qrcode.react": "^4.2.0",
     "radix-ui": "^1.4.3",
