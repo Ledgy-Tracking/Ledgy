@@ -98,8 +98,12 @@ export const RelationCombobox = React.forwardRef<HTMLButtonElement, RelationComb
         // ⚡ Bolt: Replace chained .map().filter().map() with single-pass loop
         // Avoids O(S) intermediate array allocations and redundant iterations
         const names: string[] = [];
+
+        // ⚡ Bolt: Replace O(N) Array.find inside loop with O(1) Map lookup
+        // Converts O(S*N) complexity to O(S+N)
+        const entryMap = new Map(entries.map(e => [e._id, e]));
         for (let i = 0; i < selectedValues.length; i++) {
-            const entry = entries.find(e => e._id === selectedValues[i]);
+            const entry = entryMap.get(selectedValues[i]);
             if (entry) {
                 names.push(getDisplayValue(entry));
             }

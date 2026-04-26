@@ -46,22 +46,22 @@ function makeSchema(id: string, fields: LedgerSchema['fields']): LedgerSchema {
 
 describe('getEntryDisplayValue', () => {
     it('returns first truthy non-relation field value', () => {
-        const schema = makeSchema('s:1', [{ name: 'title', type: 'text' }]);
+        const schema = makeSchema('s:1', [{ id: 'uuid', name: 'title', type: 'text' }]);
         const entry = makeEntry('e:1', 's:1', { title: 'Hello' });
         expect(getEntryDisplayValue(entry, schema)).toBe('Hello');
     });
 
     it('skips relation fields and empty values', () => {
         const schema = makeSchema('s:1', [
-            { name: 'ref', type: 'relation', relationTarget: 's:2' },
-            { name: 'name', type: 'text' },
+            { id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:2' },
+            { id: 'uuid', name: 'name', type: 'text' },
         ]);
         const entry = makeEntry('e:1', 's:1', { ref: 'e:2', name: 'World' });
         expect(getEntryDisplayValue(entry, schema)).toBe('World');
     });
 
     it('falls back to UUID suffix when no displayable field', () => {
-        const schema = makeSchema('s:1', [{ name: 'title', type: 'text' }]);
+        const schema = makeSchema('s:1', [{ id: 'uuid', name: 'title', type: 'text' }]);
         const entry = makeEntry('e:12345678abcdef', 's:1', { title: '' });
         // entry._id = 'e:12345678abcdef' → last 8 chars = '78abcdef'
         expect(getEntryDisplayValue(entry, schema)).toBe('…78abcdef');
@@ -79,10 +79,10 @@ describe('getEntryDisplayValue', () => {
 
 describe('flattenEntry', () => {
     it('3.1 — basic resolution: UUID → display value from target entry', () => {
-        const schemaA = makeSchema('s:A', [{ name: 'ref', type: 'relation', relationTarget: 's:B' }]);
-        const schemaB = makeSchema('s:B', [{ name: 'name', type: 'text' }]);
+        const schemaA = makeSchema('s:A', [{ id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:B' }]);
+        const schemaB = makeSchema('s:B', [{ id: 'uuid', name: 'name', type: 'text' }]);
         const entryA = makeEntry('e:A', 's:A', { ref: 'e:B' });
-        const entryB = makeEntry('e:B', 's:B', { name: 'Bob' });
+        const entryB = makeEntry('e:B', 's:B', { id: 'uuid', name: 'Bob' });
 
         const result = flattenEntry(
             entryA,
@@ -99,11 +99,11 @@ describe('flattenEntry', () => {
     });
 
     it('3.2 — multi-value: two UUIDs → two resolved chips', () => {
-        const schemaA = makeSchema('s:A', [{ name: 'refs', type: 'relation', relationTarget: 's:B' }]);
-        const schemaB = makeSchema('s:B', [{ name: 'name', type: 'text' }]);
+        const schemaA = makeSchema('s:A', [{ id: 'uuid', name: 'refs', type: 'relation', relationTarget: 's:B' }]);
+        const schemaB = makeSchema('s:B', [{ id: 'uuid', name: 'name', type: 'text' }]);
         const entryA = makeEntry('e:A', 's:A', { refs: ['e:B1', 'e:B2'] });
-        const entryB1 = makeEntry('e:B1', 's:B', { name: 'Alice' });
-        const entryB2 = makeEntry('e:B2', 's:B', { name: 'Bob' });
+        const entryB1 = makeEntry('e:B1', 's:B', { id: 'uuid', name: 'Alice' });
+        const entryB2 = makeEntry('e:B2', 's:B', { id: 'uuid', name: 'Bob' });
 
         const result = flattenEntry(
             entryA,
@@ -119,15 +119,15 @@ describe('flattenEntry', () => {
     });
 
     it('3.3 — depth limit: A→B→C resolves all three; 4th level stops at display value', () => {
-        const schemaA = makeSchema('s:A', [{ name: 'ref', type: 'relation', relationTarget: 's:B' }]);
-        const schemaB = makeSchema('s:B', [{ name: 'ref', type: 'relation', relationTarget: 's:C' }]);
-        const schemaC = makeSchema('s:C', [{ name: 'ref', type: 'relation', relationTarget: 's:D' }]);
-        const schemaD = makeSchema('s:D', [{ name: 'name', type: 'text' }]);
+        const schemaA = makeSchema('s:A', [{ id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:B' }]);
+        const schemaB = makeSchema('s:B', [{ id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:C' }]);
+        const schemaC = makeSchema('s:C', [{ id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:D' }]);
+        const schemaD = makeSchema('s:D', [{ id: 'uuid', name: 'name', type: 'text' }]);
 
         const entryA = makeEntry('e:A', 's:A', { ref: 'e:B' });
         const entryB = makeEntry('e:B', 's:B', { ref: 'e:C' });
         const entryC = makeEntry('e:C', 's:C', { ref: 'e:D00000001' });
-        const entryD = makeEntry('e:D00000001', 's:D', { name: 'Deep' });
+        const entryD = makeEntry('e:D00000001', 's:D', { id: 'uuid', name: 'Deep' });
 
         const allEntries = { 's:B': [entryB], 's:C': [entryC], 's:D': [entryD] };
         const allSchemas = { 's:A': schemaA, 's:B': schemaB, 's:C': schemaC, 's:D': schemaD };
@@ -147,10 +147,10 @@ describe('flattenEntry', () => {
     });
 
     it('3.4 — ghost: isDeleted:true → displayValue "[Deleted]", isGhost true', () => {
-        const schemaA = makeSchema('s:A', [{ name: 'ref', type: 'relation', relationTarget: 's:B' }]);
-        const schemaB = makeSchema('s:B', [{ name: 'name', type: 'text' }]);
+        const schemaA = makeSchema('s:A', [{ id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:B' }]);
+        const schemaB = makeSchema('s:B', [{ id: 'uuid', name: 'name', type: 'text' }]);
         const entryA = makeEntry('e:A', 's:A', { ref: 'e:B' });
-        const entryB = makeEntry('e:B', 's:B', { name: 'Gone' }, { isDeleted: true });
+        const entryB = makeEntry('e:B', 's:B', { id: 'uuid', name: 'Gone' }, { isDeleted: true });
 
         const result = flattenEntry(entryA, schemaA, { 's:B': [entryB] }, { 's:B': schemaB }, 0, 3, new Set());
         expect(result.resolvedRelations?.ref?.[0].displayValue).toBe('[Deleted]');
@@ -158,7 +158,7 @@ describe('flattenEntry', () => {
     });
 
     it('3.5 — missing entry: UUID not found → "[Deleted]", isGhost true', () => {
-        const schemaA = makeSchema('s:A', [{ name: 'ref', type: 'relation', relationTarget: 's:B' }]);
+        const schemaA = makeSchema('s:A', [{ id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:B' }]);
         const entryA = makeEntry('e:A', 's:A', { ref: 'e:MISSING' });
 
         const result = flattenEntry(entryA, schemaA, { 's:B': [] }, {}, 0, 3, new Set());
@@ -167,8 +167,8 @@ describe('flattenEntry', () => {
     });
 
     it('3.6 — cycle: A.ref=B, B.ref=A → second visit returns "[Circular]", isGhost true', () => {
-        const schemaA = makeSchema('s:A', [{ name: 'ref', type: 'relation', relationTarget: 's:B' }]);
-        const schemaB = makeSchema('s:B', [{ name: 'ref', type: 'relation', relationTarget: 's:A' }]);
+        const schemaA = makeSchema('s:A', [{ id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:B' }]);
+        const schemaB = makeSchema('s:B', [{ id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:A' }]);
         const entryA = makeEntry('e:A', 's:A', { ref: 'e:B' });
         const entryB = makeEntry('e:B', 's:B', { ref: 'e:A' });
 
@@ -199,10 +199,10 @@ describe('flattenEntry', () => {
 
     it('3.8 — no relation fields: schema with text/number only → resolvedRelations is empty {}', () => {
         const schema = makeSchema('s:A', [
-            { name: 'name', type: 'text' },
-            { name: 'count', type: 'number' },
+            { id: 'uuid', name: 'name', type: 'text' },
+            { id: 'uuid', name: 'count', type: 'number' },
         ]);
-        const entry = makeEntry('e:A', 's:A', { name: 'Test', count: 5 });
+        const entry = makeEntry('e:A', 's:A', { id: 'uuid', name: 'Test', count: 5 });
         const result = flattenEntry(entry, schema, {}, { 's:A': schema }, 0, 3, new Set());
         expect(result.resolvedRelations).toEqual({});
     });
@@ -214,11 +214,11 @@ describe('flattenEntry', () => {
 
 describe('flattenEntries', () => {
     it('maps each entry with a fresh visited set', () => {
-        const schemaA = makeSchema('s:A', [{ name: 'ref', type: 'relation', relationTarget: 's:B' }]);
-        const schemaB = makeSchema('s:B', [{ name: 'name', type: 'text' }]);
+        const schemaA = makeSchema('s:A', [{ id: 'uuid', name: 'ref', type: 'relation', relationTarget: 's:B' }]);
+        const schemaB = makeSchema('s:B', [{ id: 'uuid', name: 'name', type: 'text' }]);
         const entryA1 = makeEntry('e:A1', 's:A', { ref: 'e:B' });
         const entryA2 = makeEntry('e:A2', 's:A', { ref: 'e:B' });
-        const entryB = makeEntry('e:B', 's:B', { name: 'Shared' });
+        const entryB = makeEntry('e:B', 's:B', { id: 'uuid', name: 'Shared' });
 
         const results = flattenEntries(
             [entryA1, entryA2],
