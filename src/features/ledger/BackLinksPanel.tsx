@@ -20,8 +20,15 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
     targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks } = useLedgerStore();
+    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
+
+    // ⚡ Bolt: Memoize schema lookup Map to change rendering complexity from O(L*N) to O(L+N)
+    const schemasMap = React.useMemo(() => {
+        const map = new Map();
+        schemas.forEach(s => map.set(s._id, s));
+        return map;
+    }, [schemas]);
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -50,6 +57,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                         entry={entry}
                         targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
+                        schemasMap={schemasMap}
                     />
                 ))}
             </div>
@@ -61,15 +69,15 @@ interface BackLinkItemProps {
     entry: LedgerEntry;
     targetEntryId: string;
     targetLedgerId: string;
+    schemasMap: Map<string, any>;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
-    const { schemas } = useLedgerStore();
+const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, schemasMap }) => {
     const { profileId } = useParams<{ profileId: string }>();
     const { activeProfileId } = useProfileStore();
 
     // Find the schema for this entry's ledger
-    const entrySchema = schemas.find(s => s._id === entry.schemaId);
+    const entrySchema = schemasMap.get(entry.schemaId);
     const ledgerName = entrySchema?.name || entry.ledgerId;
 
     // Find which fields in this entry reference the target
