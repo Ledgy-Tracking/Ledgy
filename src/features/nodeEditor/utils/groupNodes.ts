@@ -1,6 +1,11 @@
 import { Node } from '@xyflow/react';
-import { nanoid } from 'nanoid';
 import { useErrorStore } from '../../../stores/useErrorStore';
+
+// Use standard WebCrypto API for secure UUIDs instead of nanoid
+// to avoid extra dependencies and conform to our security standards.
+const generateId = (length: number = 6): string => {
+    return crypto.randomUUID().substring(0, length);
+};
 
 /**
  * Container bounds for layout calculations
@@ -108,7 +113,7 @@ export const createContainerFromSelection = (
     const bounds = calculateBoundingBox(selectedNodes);
     
     // Create container node
-    const containerId = `container_${nanoid(6)}`;
+    const containerId = `container_${generateId(6)}`;
     const container: Node = {
         id: containerId,
         type: 'container',
