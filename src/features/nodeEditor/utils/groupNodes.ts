@@ -1,4 +1,5 @@
 import { Node } from '@xyflow/react';
+import { v4 as uuidv4 } from 'uuid';
 import { useErrorStore } from '../../../stores/useErrorStore';
 
 /**
@@ -107,7 +108,7 @@ export const createContainerFromSelection = (
     const bounds = calculateBoundingBox(selectedNodes);
     
     // Create container node
-    const containerId = `container_${Math.random().toString(36).substring(2, 8)}`;
+    const containerId = `container_${uuidv4().substring(0, 6)}`;
     const container: Node = {
         id: containerId,
         type: 'container',
