@@ -79,3 +79,6 @@ bun.lock
 .windsurf/
 .vscode/
 # !.jules/ (keeping this one)
+
+# Local databases
+ledgy_profile_*
