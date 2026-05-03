@@ -36,3 +36,7 @@
 ## 2025-05-28 - Avoid array spreads and chained methods for math operations
 **Learning:** Using `Math.min(...values)` or `Math.max(...values)` on large arrays can cause V8 to throw a "Maximum call stack size exceeded" error. Additionally, chaining array methods like `.map().filter().reduce()` causes redundant iterations and intermediate allocations.
 **Action:** Replace `map/filter/reduce` chains and array spreading with explicit single-pass `for` loops. When calculating `min`/`max` manually, explicitly propagate `NaN` by checking `Number.isNaN(val)` to preserve native `Math` parity.
+
+## 2025-05-28 - Avoid array spreads and chained methods for math operations
+**Learning:** Using `Math.min(...values)` or `Math.max(...values)` on large arrays can cause V8 to throw a "Maximum call stack size exceeded" error. Additionally, chaining array methods like `.map().filter().reduce()` causes redundant iterations and intermediate allocations.
+**Action:** Replace `map/filter/reduce` chains and array spreading with explicit single-pass `for` loops. When calculating `min`/`max` manually, explicitly propagate `NaN` by checking `Number.isNaN(val)` to preserve native `Math` parity.
