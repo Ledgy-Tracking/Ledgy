@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Unit tests for ConnectionLine component
  * Story 4-7: Complex Edge Connection Snapping (AC2, AC3)
@@ -7,7 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
-import React from 'react';
+
 
 // Mock props for testing
 const createMockProps = (

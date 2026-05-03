@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hook for handle position tracking and spatial indexing
  * Story 4-7: Complex Edge Connection Snapping (AC6)

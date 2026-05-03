@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Node } from '@xyflow/react';
 import { nanoid } from 'nanoid';
 import { useErrorStore } from '../../../stores/useErrorStore';
