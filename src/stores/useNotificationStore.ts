@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { v4 as uuidv4 } from 'uuid';
 
 export type NotificationType = 'info' | 'success' | 'warning';
 
@@ -17,7 +18,7 @@ interface NotificationState {
 export const useNotificationStore = create<NotificationState>((set) => ({
     notifications: [],
     addNotification: (message, type = 'info') => {
-        const id = crypto.randomUUID();
+        const id = uuidv4();
         set((state) => ({
             notifications: [...state.notifications, { id, message, type }],
         }));

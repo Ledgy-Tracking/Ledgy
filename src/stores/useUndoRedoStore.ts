@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { v4 as uuidv4 } from 'uuid';
 import { getProfileDb } from '../lib/db';
 import { useErrorStore } from './useErrorStore';
 import type { LedgyDocument } from '../types/profile';
@@ -55,7 +56,7 @@ function trimToMax(actions: UndoRedoAction[]): UndoRedoAction[] {
 }
 
 function actionId(): string {
-    return crypto.randomUUID();
+    return uuidv4();
 }
 
 /**
