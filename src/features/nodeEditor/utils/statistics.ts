@@ -67,6 +67,7 @@ export type ArithmeticOperation = 'add' | 'subtract' | 'multiply' | 'divide' | '
 /**
  * Perform arithmetic operation on array of numbers
  */
+// ⚡ Bolt: Replace map/filter/reduce/Math.min/max with single-pass loop
 export const calculateArithmetic = (
     values: number[],
     operation: ArithmeticOperation
@@ -77,17 +78,26 @@ export const calculateArithmetic = (
 
     switch (operation) {
         case 'add':
-        case 'sum':
-            return { value: values.reduce((a, b) => a + b, 0) };
+        case 'sum': {
+            let sum = 0;
+            for (let i = 0; i < values.length; i++) sum += values[i];
+            return { value: sum };
+        }
 
-        case 'subtract':
+        case 'subtract': {
             if (values.length < 2) {
                 return { value: null, error: 'Need 2+ values for subtraction' };
             }
-            return { value: values.reduce((a, b) => a - b) };
+            let diff = values[0];
+            for (let i = 1; i < values.length; i++) diff -= values[i];
+            return { value: diff };
+        }
 
-        case 'multiply':
-            return { value: values.reduce((a, b) => a * b, 1) };
+        case 'multiply': {
+            let prod = 1;
+            for (let i = 0; i < values.length; i++) prod *= values[i];
+            return { value: prod };
+        }
 
         case 'divide':
             if (values.length < 2) {
@@ -98,14 +108,29 @@ export const calculateArithmetic = (
             }
             return { value: values[0] / values[1] };
 
-        case 'average':
-            return { value: values.reduce((a, b) => a + b, 0) / values.length };
+        case 'average': {
+            let sum = 0;
+            for (let i = 0; i < values.length; i++) sum += values[i];
+            return { value: sum / values.length };
+        }
 
-        case 'min':
-            return { value: Math.min(...values) };
+        case 'min': {
+            let min = Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (Number.isNaN(values[i])) return { value: NaN };
+                if (values[i] < min) min = values[i];
+            }
+            return { value: min };
+        }
 
-        case 'max':
-            return { value: Math.max(...values) };
+        case 'max': {
+            let max = -Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (Number.isNaN(values[i])) return { value: NaN };
+                if (values[i] > max) max = values[i];
+            }
+            return { value: max };
+        }
 
         default:
             return { value: null, error: 'Unknown operation' };

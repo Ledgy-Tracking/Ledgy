@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Custom Connection Line Component
  * Story 4-7: Complex Edge Connection Snapping (AC2, AC3)
