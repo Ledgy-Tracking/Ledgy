@@ -79,3 +79,4 @@ bun.lock
 .windsurf/
 .vscode/
 # !.jules/ (keeping this one)
+ledgy_profile_*
