@@ -19,6 +19,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
+import { v4 as uuidv4 } from 'uuid';
 import { ArithmeticNode } from './nodes/ArithmeticNode';
 import { TriggerNode } from './nodes/TriggerNode';
 import { DashboardOutputNode } from './nodes/DashboardOutputNode';
@@ -432,12 +433,8 @@ const generateNodeId = (): string => {
     } catch {
         // crypto.randomUUID may throw in insecure contexts
     }
-    // Fallback: generate UUID v4 manually
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+    // Fallback: generate UUID v4 using the uuid library
+    return uuidv4();
 };
 
     const handleAddFirstNode = useCallback(() => {
