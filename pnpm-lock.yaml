@@ -62,9 +62,6 @@ importers:
       lucide-react:
         specifier: ^0.575.0
         version: 0.575.0(react@19.2.4)
-      nanoid:
-        specifier: ^5.1.11
-        version: 5.1.11
       pouchdb:
         specifier: ^9.0.0
         version: 9.0.0
@@ -144,6 +141,9 @@ importers:
       jsdom:
         specifier: ^28.1.0
         version: 28.1.0(@noble/hashes@1.8.0)
+      nanoid:
+        specifier: ^5.1.11
+        version: 5.1.11
       pouchdb-adapter-memory:
         specifier: ^9.0.0
         version: 9.0.0
