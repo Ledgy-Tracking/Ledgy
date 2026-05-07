@@ -33,7 +33,7 @@ import { NavigationToolbar } from './components/NavigationToolbar';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
-import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { isTypeCompatible } from './types/port';
 import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
@@ -252,13 +252,11 @@ export const NodeCanvas: React.FC = () => {
     );
 
     // Story 4-8: Track connection start for rejection detection
-    const onConnectStart = useCallback(({
-        handleId,
-        nodeId,
-    }: {
+    const onConnectStart = useCallback((event: React.MouseEvent | React.TouchEvent | any, params: {
         handleId: string | null;
         nodeId: string;
     }) => {
+        const { handleId, nodeId } = params;
         connectionAttemptRef.current = {
             isConnecting: true,
             sourceHandle: handleId,
@@ -282,7 +280,8 @@ export const NodeCanvas: React.FC = () => {
             // Safely check if target is an Element before calling closest()
             if (!(target instanceof Element)) {
                 // Reset connection state before returning
-                connectionAttemptRef.current = {
+                const { handleId, nodeId } = params;
+        connectionAttemptRef.current = {
                     isConnecting: false,
                     sourceHandle: null,
                     source: null,
@@ -324,6 +323,7 @@ export const NodeCanvas: React.FC = () => {
         }
 
         // Reset connection state
+        const { handleId, nodeId } = params;
         connectionAttemptRef.current = {
             isConnecting: false,
             sourceHandle: null,
@@ -517,7 +517,7 @@ const generateNodeId = (): string => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                onConnectStart={onConnectStart}
+                onConnectStart={(e, params) => onConnectStart(e as any, params)}
                 onConnectEnd={onConnectEnd}
                 onSelectionChange={handleSelectionChange}
                 isValidConnection={isValidConnection}
@@ -565,7 +565,7 @@ const generateNodeId = (): string => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                onConnectStart={onConnectStart}
+                onConnectStart={(e, params) => onConnectStart(e as any, params)}
                 onConnectEnd={onConnectEnd}
                 onViewportChange={onViewportChange}
                 onNodeDragStart={onNodeDragStart}
