@@ -11,6 +11,7 @@ import {
     Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { v4 as uuidv4 } from 'uuid';
 import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
@@ -32,7 +33,7 @@ import { NavigationToolbar } from './components/NavigationToolbar';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
-import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { isTypeCompatible } from './types/port';
 import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
@@ -185,11 +186,11 @@ export const NodeCanvas: React.FC = () => {
     // Story 4-8 AC5: Schema change subscription for edge re-validation
     // Subscribe to ledger schema changes and re-validate connected edges
     useEffect(() => {
-        // Subscribe to schema changes in the store
+        // Subscribe to schema changes in the store (assuming we might need to re-validate on general state changes if schemas isn't explicitly on NodeState)
         const unsubscribe = useNodeStore.subscribe(
-            (state) => state.schemas,
-            (schemas) => {
-                // When schemas change, re-validate all edges
+            (state) => state.nodes, // Using nodes as a trigger instead since schemas doesn't exist on NodeState
+            () => {
+                // When nodes change (which might include schema updates in data), re-validate all edges
                 const currentNodes = useNodeStore.getState().nodes;
                 const currentEdges = useNodeStore.getState().edges;
                 
@@ -251,13 +252,14 @@ export const NodeCanvas: React.FC = () => {
     );
 
     // Story 4-8: Track connection start for rejection detection
-    const onConnectStart = useCallback(({
+    const onConnectStart = useCallback((_: any, {
         handleId,
         nodeId,
     }: {
         handleId: string | null;
-        nodeId: string;
+        nodeId: string | null;
     }) => {
+        if (!nodeId) return;
         connectionAttemptRef.current = {
             isConnecting: true,
             sourceHandle: handleId,
@@ -432,12 +434,8 @@ const generateNodeId = (): string => {
     } catch {
         // crypto.randomUUID may throw in insecure contexts
     }
-    // Fallback: generate UUID v4 manually
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+    // Fallback: use uuid package which has its own cryptographically secure fallback
+    return uuidv4();
 };
 
     const handleAddFirstNode = useCallback(() => {
