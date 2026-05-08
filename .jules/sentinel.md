@@ -42,3 +42,7 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+## 2025-05-08 - Weak random number generation in Canvas
+**Vulnerability:** NodeIDs in NodeCanvas.tsx were being generated with a fallback relying on `Math.random()` when `crypto.randomUUID` was unavailable.
+**Learning:** This could lead to predictable IDs or collisions since `Math.random` is not cryptographically secure. Replacing it with the `uuid` package, which has proper cryptographically secure fallbacks, resolves this issue.
+**Prevention:** Avoid `Math.random()` for any form of unique ID generation, use libraries like `uuid` or `nanoid` that guarantee cryptographically secure randomness.
