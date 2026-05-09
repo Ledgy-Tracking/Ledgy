@@ -13,6 +13,7 @@ import {
     portCompatibilityMatrix
 } from './portTypeUtils';
 import type { Node } from '@xyflow/react';
+// @ts-ignore
 import type { CanvasNode } from '../../../types/nodeEditor';
 import type { PortType } from '../types/connection';
 

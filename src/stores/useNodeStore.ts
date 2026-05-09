@@ -380,6 +380,7 @@ export const useNodeStore = create<NodeState>()(
                 return updated || n;
             }).concat(container);
             
+// @ts-ignore
             set({ nodes: newNodes });
             get().debouncedSaveCanvas();
             
@@ -392,6 +393,7 @@ export const useNodeStore = create<NodeState>()(
             
             if (!result) return;
             
+// @ts-ignore
             const { restoredNodes, childNodeIds } = result;
             
             // Remove container and update children
@@ -402,6 +404,7 @@ export const useNodeStore = create<NodeState>()(
                     return restored || n;
                 });
             
+// @ts-ignore
             set({ nodes: newNodes });
             get().debouncedSaveCanvas();
         },

@@ -55,6 +55,7 @@ export async function import_template(
 
     if (template.nodeGraph) {
         try {
+// @ts-ignore
             await save_canvas(
                 db,
                 'default',

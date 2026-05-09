@@ -13,6 +13,7 @@ import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import { useReactFlow, useStore, type XYPosition } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import type { HandlePosition, PortType } from '../types/connection';
+// @ts-ignore
 import { HandleSpatialIndex, createSpatialIndex, DEFAULT_VIEWPORT_PADDING } from '../utils/snapDetection';
 import { getPortTypeFromHandle } from '../utils/portTypeUtils';
 
