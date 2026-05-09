@@ -99,9 +99,16 @@ export const LedgerTable: React.FC<LedgerTableProps> = ({ schemaId, highlightEnt
     const sortedEntries = useMemo(() => {
         if (sortConfig.length === 0) return flattenedLedgerEntries;
 
+        // ⚡ Bolt: Hoist metadata lookups out of the O(N log N) sort comparator
+        // to avoid redundant O(F) searches for each item comparison
+        const sortMetadata = sortConfig.map(({ field, direction }) => ({
+            field,
+            direction,
+            schemaField: schema?.fields.find(f => f.name === field)
+        }));
+
         return [...flattenedLedgerEntries].sort((a, b) => {
-            for (const { field, direction } of sortConfig) {
-                const schemaField = schema?.fields.find(f => f.name === field);
+            for (const { field, direction, schemaField } of sortMetadata) {
                 const aVal = a.data[field];
                 const bVal = b.data[field];
 
