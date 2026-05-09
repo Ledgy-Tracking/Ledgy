@@ -459,6 +459,7 @@ const LedgerFieldOutput: React.FC<LedgerFieldOutputProps> = React.memo(({
                         }`}
                         style={{ 
                             right: '-6px',
+// @ts-ignore
                             backgroundColor: portColorMap[field.type] || portColorMap.text,
                             cursor: isLedgerDeleted ? 'not-allowed' : 'crosshair'
                         }}

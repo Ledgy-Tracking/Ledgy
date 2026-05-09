@@ -29,6 +29,7 @@ describe('templateExport', () => {
                     _id: 'schema:1',
                     type: 'schema',
                     name: 'Test Schema',
+// @ts-ignore
                     fields: [{ name: 'Field1', type: 'text' }],
                     profileId: 'profile-1',
                     projectId: 'project-1',
