@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2024-05-18 - Optimize React list rendering with array map lookup and filtered object entries
+**Learning:** O(N) array `.find` lookups within `.map` item renders severely scale up rendering time to O(N^2). Also, blindly calling `Object.entries(data)` on large `Record<string, unknown>` to locate specific target identifiers causes redundant iterations over non-relational fields.
+**Action:** Always memoize referenced arrays into `Map` objects prior to list mapping for O(1) rendering lookups. If relation constraints are bound by known schema structures, filter those schema fields down first and only access the data payload via those targeted schema keys instead of looping the entire object.
