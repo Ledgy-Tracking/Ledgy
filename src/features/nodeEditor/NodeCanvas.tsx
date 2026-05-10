@@ -528,7 +528,7 @@ const generateNodeId = (): string => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                onConnectStart={onConnectStart as any}
+                onConnectStart={onConnectStart}
                 onConnectEnd={onConnectEnd}
                 onSelectionChange={handleSelectionChange}
                 isValidConnection={isValidConnection}
@@ -576,7 +576,7 @@ const generateNodeId = (): string => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                onConnectStart={onConnectStart as any}
+                onConnectStart={onConnectStart}
                 onConnectEnd={onConnectEnd}
                 onViewportChange={onViewportChange}
                 onNodeDragStart={onNodeDragStart}
