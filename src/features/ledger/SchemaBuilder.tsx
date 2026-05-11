@@ -3,6 +3,7 @@ import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useSchemaBuilderStore } from '../../stores/useSchemaBuilderStore';
 import { useErrorStore } from '../../stores/useErrorStore';
+import { validateRegexPattern } from '../../utils/security';
 import { FieldType } from '../../types/ledger';
 import { Plus, Trash2, ChevronUp, ChevronDown, Save, Info } from 'lucide-react';
 import { Button } from '../../components/ui/button';
@@ -330,11 +331,11 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                         onChange={(e) => updateField(index, { pattern: e.target.value === '' ? undefined : e.target.value })}
                                                         onBlur={(e) => {
                                                             if (e.target.value) {
-                                                                try {
-                                                                    new RegExp(e.target.value);
+                                                                const validation = validateRegexPattern(e.target.value);
+                                                                if (validation.isValid) {
                                                                     setPatternError(prev => ({ ...prev, [index]: null }));
-                                                                } catch {
-                                                                    setPatternError(prev => ({ ...prev, [index]: 'Invalid RegEx pattern' }));
+                                                                } else {
+                                                                    setPatternError(prev => ({ ...prev, [index]: validation.error || 'Invalid RegEx pattern' }));
                                                                 }
                                                             } else {
                                                                 setPatternError(prev => ({ ...prev, [index]: null }));
