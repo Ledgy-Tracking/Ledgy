@@ -17,20 +17,20 @@ import { getConnectionPath } from '../utils/bezierPath';
 /**
  * Connection line visual states (AC2)
  */
-type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
+type CustomConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped' | null;
 
 /**
  * Extended props including connection status and direction
  */
-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
-    connectionStatus?: ConnectionStatus;
+interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, 'connectionStatus'> {
+    connectionStatus?: CustomConnectionStatus;
     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
 }
 
 /**
  * Style configuration for different connection states
  */
-const getConnectionStyles = (status: ConnectionStatus) => {
+const getConnectionStyles = (status: CustomConnectionStatus) => {
     switch (status) {
         case 'snapped':
             return {
