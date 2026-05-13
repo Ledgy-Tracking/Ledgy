@@ -8,9 +8,9 @@ import {
     groupNodes,
 } from '../../../src/features/nodeEditor/utils/groupNodes';
 
-// Mock nanoid
-vi.mock('nanoid', () => ({
-    nanoid: vi.fn(() => 'abc123'),
+// Mock uuid
+vi.mock('uuid', () => ({
+    v4: vi.fn(() => 'abc123456'),
 }));
 
 // Mock error store
