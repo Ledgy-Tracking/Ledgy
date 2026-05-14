@@ -32,7 +32,7 @@ import { NavigationToolbar } from './components/NavigationToolbar';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
-import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { isTypeCompatible } from './types/port';
 import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
@@ -185,33 +185,39 @@ export const NodeCanvas: React.FC = () => {
     // Story 4-8 AC5: Schema change subscription for edge re-validation
     // Subscribe to ledger schema changes and re-validate connected edges
     useEffect(() => {
-        // Subscribe to schema changes in the store
-        const unsubscribe = useNodeStore.subscribe(
-            (state) => state.schemas,
-            (schemas) => {
-                // When schemas change, re-validate all edges
-                const currentNodes = useNodeStore.getState().nodes;
-                const currentEdges = useNodeStore.getState().edges;
-                
-                // Import validation function dynamically to avoid circular deps
-                import('./utils/edgeValidation').then(({ validateGraphEdges }) => {
-                    const validEdges = validateGraphEdges(currentEdges, currentNodes);
-                    
-                    // Only update if edges were removed
-                    if (validEdges.length !== currentEdges.length) {
-                        useNodeStore.getState().setEdges(validEdges);
-                        useNodeStore.getState().debouncedSaveCanvas();
-                        
-                        if (process.env.NODE_ENV === 'development') {
-                            console.log('[EdgeValidation] Removed invalid edges after schema change:', 
-                                currentEdges.length - validEdges.length);
-                        }
-                    }
-                });
-            }
-        );
+        let cleanup: (() => void) | undefined;
 
-        return () => unsubscribe();
+        // Subscribe to schema changes in the store (schemas is in useLedgerStore)
+        import('../../stores/useLedgerStore').then(({ useLedgerStore }) => {
+            cleanup = useLedgerStore.subscribe(
+                (state) => state.schemas,
+                () => {
+                    // When schemas change, re-validate all edges
+                    const currentNodes = useNodeStore.getState().nodes;
+                    const currentEdges = useNodeStore.getState().edges;
+                    
+                    // Import validation function dynamically to avoid circular deps
+                    import('./utils/edgeValidation').then(({ validateGraphEdges }) => {
+                        const validEdges = validateGraphEdges(currentEdges, currentNodes);
+                        
+                        // Only update if edges were removed
+                        if (validEdges.length !== currentEdges.length) {
+                            useNodeStore.getState().setEdges(validEdges);
+                            useNodeStore.getState().debouncedSaveCanvas();
+
+                            if (process.env.NODE_ENV === 'development') {
+                                console.log('[EdgeValidation] Removed invalid edges after schema change:',
+                                    currentEdges.length - validEdges.length);
+                            }
+                        }
+                    });
+                }
+            );
+        });
+
+        return () => {
+            if (cleanup) cleanup();
+        };
     }, []);
 
     // 5. Stable Handlers - use store's onConnect to keep store in sync
@@ -251,17 +257,18 @@ export const NodeCanvas: React.FC = () => {
     );
 
     // Story 4-8: Track connection start for rejection detection
-    const onConnectStart = useCallback(({
-        handleId,
-        nodeId,
-    }: {
-        handleId: string | null;
-        nodeId: string;
-    }) => {
+    const onConnectStart = useCallback((
+        event: React.MouseEvent | React.TouchEvent,
+        params: {
+            handleId: string | null;
+            nodeId: string | null;
+            handleType: "source" | "target";
+        }
+    ) => {
         connectionAttemptRef.current = {
             isConnecting: true,
-            sourceHandle: handleId,
-            source: nodeId,
+            sourceHandle: params.handleId,
+            source: params.nodeId,
             targetHandle: null,
             target: null,
         };

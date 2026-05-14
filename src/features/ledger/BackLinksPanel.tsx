@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useLedgerStore } from '../../stores/useLedgerStore';
+import { LedgerSchema } from '../../types/ledger';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { LedgerEntry } from '../../types/ledger';
 import { Link, useParams } from 'react-router-dom';
@@ -20,8 +21,12 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
     targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks } = useLedgerStore();
+    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
+
+    const schemaMap = useMemo(() => {
+        return new Map(schemas.map((s) => [s._id, s]));
+    }, [schemas]);
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -50,6 +55,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                         entry={entry}
                         targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
+                        schemaMap={schemaMap}
                     />
                 ))}
             </div>
@@ -61,24 +67,45 @@ interface BackLinkItemProps {
     entry: LedgerEntry;
     targetEntryId: string;
     targetLedgerId: string;
+    schemaMap: Map<string, LedgerSchema>;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
-    const { schemas } = useLedgerStore();
+const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, schemaMap }) => {
     const { profileId } = useParams<{ profileId: string }>();
     const { activeProfileId } = useProfileStore();
 
     // Find the schema for this entry's ledger
-    const entrySchema = schemas.find(s => s._id === entry.schemaId);
+    const entrySchema = schemaMap.get(entry.schemaId);
     const ledgerName = entrySchema?.name || entry.ledgerId;
 
     // Find which fields in this entry reference the target
     const referencingFields: { fieldName: string; value: string | string[] }[] = [];
-    for (const [fieldName, value] of Object.entries(entry.data)) {
-        if (Array.isArray(value) && value.includes(targetEntryId)) {
-            referencingFields.push({ fieldName, value });
-        } else if (value === targetEntryId) {
-            referencingFields.push({ fieldName, value: [value] });
+
+    const relationFieldNames = entrySchema
+        ? entrySchema.fields.filter(f => f.type === 'relation').map(f => f.name)
+        : [];
+
+    if (relationFieldNames.length > 0) {
+        for (let i = 0; i < relationFieldNames.length; i++) {
+            const fieldName = relationFieldNames[i];
+            const value = entry.data[fieldName];
+
+            if (value) {
+                if (Array.isArray(value) && value.includes(targetEntryId)) {
+                    referencingFields.push({ fieldName, value });
+                } else if (value === targetEntryId) {
+                    referencingFields.push({ fieldName, value: [value] });
+                }
+            }
+        }
+    } else {
+        // Fallback if no schema or relation fields found, scan entire entry data
+        for (const [fieldName, value] of Object.entries(entry.data)) {
+            if (Array.isArray(value) && value.includes(targetEntryId)) {
+                referencingFields.push({ fieldName, value });
+            } else if (value === targetEntryId) {
+                referencingFields.push({ fieldName, value: [value] });
+            }
         }
     }
 
