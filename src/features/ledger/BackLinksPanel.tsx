@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
-import { LedgerEntry } from '../../types/ledger';
+import { LedgerEntry, LedgerSchema } from '../../types/ledger';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,8 +20,9 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
     targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks } = useLedgerStore();
+    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
+    const { profileId } = useParams<{ profileId: string }>();
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -30,6 +31,10 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     }, [activeProfileId, targetEntryId, fetchBackLinks]);
 
     const entries = backLinks[targetEntryId] || [];
+
+    // Pre-calculate schemas mapping for O(1) lookups in the children
+    const schemaMap = useMemo(() => new Map(schemas.map(s => [s._id, s])), [schemas]);
+    const navProfileId = profileId || activeProfileId;
 
     if (entries.length === 0) {
         return null;
@@ -50,6 +55,8 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                         entry={entry}
                         targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
+                        entrySchema={schemaMap.get(entry.schemaId)}
+                        navProfileId={navProfileId}
                     />
                 ))}
             </div>
@@ -61,24 +68,35 @@ interface BackLinkItemProps {
     entry: LedgerEntry;
     targetEntryId: string;
     targetLedgerId: string;
+    entrySchema?: LedgerSchema;
+    navProfileId?: string;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
-    const { schemas } = useLedgerStore();
-    const { profileId } = useParams<{ profileId: string }>();
-    const { activeProfileId } = useProfileStore();
-
-    // Find the schema for this entry's ledger
-    const entrySchema = schemas.find(s => s._id === entry.schemaId);
+const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, entrySchema, navProfileId }) => {
     const ledgerName = entrySchema?.name || entry.ledgerId;
 
     // Find which fields in this entry reference the target
     const referencingFields: { fieldName: string; value: string | string[] }[] = [];
-    for (const [fieldName, value] of Object.entries(entry.data)) {
-        if (Array.isArray(value) && value.includes(targetEntryId)) {
-            referencingFields.push({ fieldName, value });
-        } else if (value === targetEntryId) {
-            referencingFields.push({ fieldName, value: [value] });
+
+    // Bolt Optimization: Pre-filter relation fields from schema to avoid looping large objects
+    if (entrySchema) {
+        const relationFields = entrySchema.fields.filter(f => f.type === 'relation');
+        for (const field of relationFields) {
+            const value = entry.data[field.name];
+            if (Array.isArray(value) && value.includes(targetEntryId)) {
+                referencingFields.push({ fieldName: field.name, value: value as string[] });
+            } else if (value === targetEntryId) {
+                referencingFields.push({ fieldName: field.name, value: [value as string] });
+            }
+        }
+    } else {
+        // Fallback if schema somehow not found
+        for (const [fieldName, value] of Object.entries(entry.data)) {
+            if (Array.isArray(value) && value.includes(targetEntryId)) {
+                referencingFields.push({ fieldName, value: value as string[] });
+            } else if (value === targetEntryId) {
+                referencingFields.push({ fieldName, value: [value as string] });
+            }
         }
     }
 
@@ -86,8 +104,6 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => 
     const displayValue = entrySchema?.fields.length
         ? String(entry.data[entrySchema.fields[0].name] || entry._id)
         : entry._id;
-
-    const navProfileId = profileId || activeProfileId;
 
     return (
         <Card className="p-3 bg-gray-100 dark:bg-zinc-800/30 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-600 transition-colors">
