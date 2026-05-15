@@ -61,6 +61,7 @@ export async function import_template(
                 template.nodeGraph.nodes,
                 template.nodeGraph.edges,
                 template.nodeGraph.viewport,
+                { showMinimap: true, showGrid: true, snapToGrid: true, gridSize: 15 },
                 profileId
             );
             importedNodes = template.nodeGraph.nodes.length;
