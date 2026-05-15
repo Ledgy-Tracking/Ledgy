@@ -34,7 +34,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
 
     // Pre-calculate schemas mapping for O(1) lookups in the children
     const schemaMap = useMemo(() => new Map(schemas.map(s => [s._id, s])), [schemas]);
-    const navProfileId = profileId || activeProfileId;
+    const navProfileId = profileId || activeProfileId || undefined;
 
     if (entries.length === 0) {
         return null;
