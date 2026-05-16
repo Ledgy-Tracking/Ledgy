@@ -42,3 +42,8 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+
+## 2026-04-12 - File Import Denial of Service (DoS) in Tauri
+**Vulnerability:** The application used Tauri's `readTextFile` without any file size validation, mirroring a previously found issue with `FileReader.readAsText()` in the web implementation.
+**Learning:** Browser environments and native Tauri environments both suffer from memory exhaustion when arbitrarily large files are read into RAM at once. Both implementations need identical size limitations.
+**Prevention:** Always use Tauri's `stat()` from `@tauri-apps/api/fs` or `@tauri-apps/plugin-fs` to check `file.size` against a sane maximum (like 5MB) before calling `readTextFile` on user-provided file paths.
