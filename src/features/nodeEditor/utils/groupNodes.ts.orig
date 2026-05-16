@@ -1,5 +1,5 @@
 import { Node } from '@xyflow/react';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { useErrorStore } from '../../../stores/useErrorStore';
 
 /**
@@ -77,18 +77,18 @@ export const validateGrouping = (
     // Check if any node is already in a container (React Flow v12 uses parentId)
     const nodesInContainers = selectedNodes.filter(n => n.parentId !== undefined);
     if (nodesInContainers.length > 0) {
-        return { 
-            valid: false, 
-            error: 'Cannot group: node already in a container' 
+        return {
+            valid: false,
+            error: 'Cannot group: node already in a container'
         };
     }
 
     // Check if nodes are from different containers
     const parentIds = new Set(selectedNodes.map(n => n.parentId).filter(Boolean));
     if (parentIds.size > 1) {
-        return { 
-            valid: false, 
-            error: 'Cannot group: nodes from different containers' 
+        return {
+            valid: false,
+            error: 'Cannot group: nodes from different containers'
         };
     }
 
@@ -97,7 +97,7 @@ export const validateGrouping = (
 
 /**
  * Create a container node from selected nodes
- * 
+ *
  * Algorithm:
  * 1. Validate: Prevent nesting
  * 2. Calculate bounding box with padding
@@ -110,18 +110,18 @@ export const createContainerFromSelection = (
     label?: string
 ): GroupCreationResult => {
     const padding = 40;
-    
+
     // Calculate bounding box
     const bounds = calculateBoundingBox(selectedNodes);
-    
+
     // Create container node
-    const containerId = `container_${uuidv4().substring(0, 6)}`;
+    const containerId = `container_${nanoid(6)}`;
     const container: Node = {
         id: containerId,
         type: 'container',
-        position: { 
-            x: bounds.minX - padding, 
-            y: bounds.minY - padding 
+        position: {
+            x: bounds.minX - padding,
+            y: bounds.minY - padding
         },
         style: {
             width: Math.max(200, bounds.width + padding * 2),
@@ -135,7 +135,7 @@ export const createContainerFromSelection = (
             createdAt: new Date().toISOString(),
         },
     };
-    
+
     // Convert children to relative positions
     // React Flow v12 uses parentId instead of parentNode
     const updatedChildren = selectedNodes.map(node => ({
@@ -147,7 +147,7 @@ export const createContainerFromSelection = (
         parentId: containerId,
         extent: 'parent' as const,  // React Flow native constraint
     }));
-    
+
     return { container, updatedChildren };
 };
 
@@ -161,13 +161,13 @@ export const groupNodes = (
     label?: string
 ): GroupCreationResult | null => {
     const selectedNodes = allNodes.filter(n => nodeIds.includes(n.id));
-    
+
     const validation = validateGrouping(selectedNodes, allNodes);
     if (!validation.valid) {
         useErrorStore.getState().dispatchError(validation.error || 'Cannot group nodes');
         return null;
     }
-    
+
     return createContainerFromSelection(selectedNodes, allNodes, label);
 };
 
