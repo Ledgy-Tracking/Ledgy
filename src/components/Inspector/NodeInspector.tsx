@@ -188,6 +188,8 @@ const TriggerPanel: React.FC<{ id: string; data: any }> = ({ id, data }) => {
                             variant={data.eventType === ev ? 'default' : 'outline'}
                             className={data.eventType === ev ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white' : 'text-zinc-400'}
                             onClick={() => useNodeStore.getState().updateNodeData(id, { eventType: ev })}
+                            aria-label={ev}
+                            aria-pressed={data.eventType === ev}
                         >
                             {ev === 'on-create' ? 'On Create' : 'On Edit'}
                         </Button>
@@ -251,6 +253,8 @@ const DashboardOutputPanel: React.FC<{ id: string; data: any }> = ({ id, data })
                             className={data.widgetType === wt ? `${color} text-zinc-900 dark:text-white` : 'text-zinc-400'}
                             title={wt}
                             onClick={() => handleWidgetType(wt)}
+                            aria-label={wt}
+                            aria-pressed={data.widgetType === wt}
                         >
                             {icon}
                         </Button>
