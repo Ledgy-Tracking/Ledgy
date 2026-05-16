@@ -32,7 +32,7 @@ import { NavigationToolbar } from './components/NavigationToolbar';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
-import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { isTypeCompatible } from './types/port';
 import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
@@ -187,8 +187,8 @@ export const NodeCanvas: React.FC = () => {
     useEffect(() => {
         // Subscribe to schema changes in the store
         const unsubscribe = useNodeStore.subscribe(
-            (state) => state.schemas,
-            (schemas) => {
+            (state) => (state as any).schemas,
+            (_schemas) => {
                 // When schemas change, re-validate all edges
                 const currentNodes = useNodeStore.getState().nodes;
                 const currentEdges = useNodeStore.getState().edges;
@@ -251,13 +251,8 @@ export const NodeCanvas: React.FC = () => {
     );
 
     // Story 4-8: Track connection start for rejection detection
-    const onConnectStart = useCallback(({
-        handleId,
-        nodeId,
-    }: {
-        handleId: string | null;
-        nodeId: string;
-    }) => {
+    const onConnectStart = useCallback((_event: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent, params: any) => {
+        const { handleId, nodeId } = params;
         connectionAttemptRef.current = {
             isConnecting: true,
             sourceHandle: handleId,

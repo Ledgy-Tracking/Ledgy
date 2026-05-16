@@ -1,5 +1,6 @@
 import { Database, create_schema, list_schemas, save_canvas } from './db';
 import { TemplateExport, TemplateImportResult, ImportConflict } from '../types/templates';
+import { DEFAULT_VIEW_CONTROLS } from '../types/nodeEditor';
 
 export { isTauri } from './templateExport';
 
@@ -61,6 +62,7 @@ export async function import_template(
                 template.nodeGraph.nodes,
                 template.nodeGraph.edges,
                 template.nodeGraph.viewport,
+                DEFAULT_VIEW_CONTROLS,
                 profileId
             );
             importedNodes = template.nodeGraph.nodes.length;
@@ -100,6 +102,13 @@ export async function readTemplateTauri(): Promise<TemplateExport | null> {
         });
 
         if (!filePath) return null; // User cancelled
+
+        // Security: Enforce 5MB file size limit to prevent client-side DoS
+        // and memory exhaustion from excessively large files
+        const fileStat = await fsModule.stat(filePath as string);
+        if (fileStat.size > 5 * 1024 * 1024) {
+            throw new Error('File exceeds the 5MB size limit');
+        }
 
         const content = await fsModule.readTextFile(filePath as string);
         return JSON.parse(content) as TemplateExport;
