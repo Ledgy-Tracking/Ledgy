@@ -106,6 +106,13 @@ describe('import_template', () => {
             templateWithGraph.nodeGraph.nodes,
             templateWithGraph.nodeGraph.edges,
             templateWithGraph.nodeGraph.viewport,
+            {
+                showMinimap: true,
+                showGrid: true,
+                snapToGrid: false,
+                gridSize: 15,
+                isViewControlsCollapsed: false,
+            },
             profileId
         );
     });
