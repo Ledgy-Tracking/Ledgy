@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
-import { LedgerEntry } from '../../types/ledger';
+import { LedgerEntry, LedgerSchema } from '../../types/ledger';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,8 +20,9 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
     targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks } = useLedgerStore();
+    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
+    const { profileId } = useParams<{ profileId: string }>();
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -29,11 +30,17 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
         }
     }, [activeProfileId, targetEntryId, fetchBackLinks]);
 
+    const schemasMap = useMemo(() => {
+        return new Map(schemas.map(s => [s._id, s]));
+    }, [schemas]);
+
     const entries = backLinks[targetEntryId] || [];
 
     if (entries.length === 0) {
         return null;
     }
+
+    const navProfileId = profileId || activeProfileId;
 
     return (
         <div className="mt-4 border-t border-zinc-200 dark:border-zinc-800 pt-4">
@@ -50,6 +57,8 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                         entry={entry}
                         targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
+                        entrySchema={schemasMap.get(entry.schemaId)}
+                        navProfileId={navProfileId}
                     />
                 ))}
             </div>
@@ -61,24 +70,26 @@ interface BackLinkItemProps {
     entry: LedgerEntry;
     targetEntryId: string;
     targetLedgerId: string;
+    entrySchema?: LedgerSchema;
+    navProfileId?: string;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
-    const { schemas } = useLedgerStore();
-    const { profileId } = useParams<{ profileId: string }>();
-    const { activeProfileId } = useProfileStore();
-
+const BackLinkItem: React.FC<BackLinkItemProps> = React.memo(({ entry, targetEntryId, entrySchema, navProfileId }) => {
     // Find the schema for this entry's ledger
-    const entrySchema = schemas.find(s => s._id === entry.schemaId);
     const ledgerName = entrySchema?.name || entry.ledgerId;
+
+    const relationFieldNames = useMemo(() => {
+        return entrySchema?.fields.filter(f => f.type === 'relation').map(f => f.name) || [];
+    }, [entrySchema]);
 
     // Find which fields in this entry reference the target
     const referencingFields: { fieldName: string; value: string | string[] }[] = [];
-    for (const [fieldName, value] of Object.entries(entry.data)) {
+    for (const fieldName of relationFieldNames) {
+        const value = entry.data[fieldName];
         if (Array.isArray(value) && value.includes(targetEntryId)) {
-            referencingFields.push({ fieldName, value });
+            referencingFields.push({ fieldName, value: value as string[] });
         } else if (value === targetEntryId) {
-            referencingFields.push({ fieldName, value: [value] });
+            referencingFields.push({ fieldName, value: [value as string] });
         }
     }
 
@@ -86,8 +97,6 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => 
     const displayValue = entrySchema?.fields.length
         ? String(entry.data[entrySchema.fields[0].name] || entry._id)
         : entry._id;
-
-    const navProfileId = profileId || activeProfileId;
 
     return (
         <Card className="p-3 bg-gray-100 dark:bg-zinc-800/30 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-600 transition-colors">
@@ -120,4 +129,4 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => 
             </CardContent>
         </Card>
     );
-};
+});
