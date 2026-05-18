@@ -15,19 +15,14 @@ describe('security utils', () => {
         it('throws on dangerous nested quantifiers', () => {
             expect(() => validateRegexPattern('(a+)+')).toThrow('Potentially dangerous nested quantifiers detected in regex pattern');
             expect(() => validateRegexPattern('(a*)*')).toThrow('Potentially dangerous nested quantifiers detected in regex pattern');
+            expect(() => validateRegexPattern('(a+)*')).toThrow('Potentially dangerous nested quantifiers detected in regex pattern');
+            expect(() => validateRegexPattern('(a*)+')).toThrow('Potentially dangerous nested quantifiers detected in regex pattern');
         });
 
         it('allows valid lazy quantifiers', () => {
             expect(() => validateRegexPattern('a+?')).not.toThrow();
             expect(() => validateRegexPattern('a*?')).not.toThrow();
             expect(() => validateRegexPattern('(a+)?')).not.toThrow();
-        });
-
-        it('allows escaped literals inside groups', () => {
-             // We want to make sure the heuristic is not over-eager.
-             // ([\+])+ could technically still trigger the simple regex we have,
-             // but let's test according to the heuristic provided.
-             // For now, testing basic ReDoS signatures is sufficient.
         });
 
         it('throws if regex does not compile', () => {
