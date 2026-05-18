@@ -40,7 +40,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
         return null;
     }
 
-    const navProfileId = profileId || activeProfileId;
+    const navProfileId = profileId || activeProfileId || undefined;
 
     return (
         <div className="mt-4 border-t border-zinc-200 dark:border-zinc-800 pt-4">
