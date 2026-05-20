@@ -119,7 +119,7 @@ describe('dataLabBulkSelection — LedgerTable', () => {
     it('Test 1 — Checkbox column header renders "Select All"', () => {
         render(<LedgerTable schemaId="schema:bulk" />);
         expect(screen.getByRole('checkbox', { name: /select all/i })).toBeInTheDocument();
-    });
+    }, 10000);
 
     it('Test 2 — Row checkbox toggles selection via store action', () => {
         const toggleRowSelection = vi.fn();

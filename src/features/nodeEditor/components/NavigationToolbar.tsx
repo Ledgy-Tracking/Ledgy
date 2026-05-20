@@ -3,6 +3,8 @@ import { useReactFlow } from '@xyflow/react';
 import { Maximize2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { useShallow } from 'zustand/react/shallow';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 /**
  * NavigationToolbar - Zoom and fit controls for the Node Canvas
@@ -102,9 +104,9 @@ export const NavigationToolbar: React.FC = () => {
     const isZoomOutDisabled = zoom <= 0.1;
 
     return (
-        <div className="absolute top-4 left-4 z-10 flex items-center gap-1 p-1.5 bg-gray-100/90 dark:bg-zinc-800/90 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-lg backdrop-blur-sm">
+        <Card className="absolute top-4 left-4 z-10 flex items-center gap-1 p-1.5 bg-gray-100/90 dark:bg-zinc-800/90 border border-zinc-300 dark:border-zinc-700 rounded-lg shadow-lg backdrop-blur-sm">
             {/* Fit to Screen */}
-            <button
+            <Button
                 onClick={handleFitView}
                 disabled={isFitDisabled}
                 aria-label="Fit to Screen (Shift+1)"
@@ -122,13 +124,13 @@ export const NavigationToolbar: React.FC = () => {
                 "
             >
                 <Maximize2 className="w-4 h-4" aria-hidden="true" />
-            </button>
+            </Button>
 
             {/* Divider */}
             <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-700 mx-1" />
 
             {/* Zoom Out */}
-            <button
+            <Button
                 onClick={handleZoomOut}
                 disabled={isZoomOutDisabled}
                 aria-label="Zoom out (Ctrl + -)"
@@ -146,7 +148,7 @@ export const NavigationToolbar: React.FC = () => {
                 "
             >
                 <ZoomOut className="w-4 h-4" aria-hidden="true" />
-            </button>
+            </Button>
 
             {/* Zoom Percentage Display */}
             <div 
@@ -158,7 +160,7 @@ export const NavigationToolbar: React.FC = () => {
             </div>
 
             {/* Zoom In */}
-            <button
+            <Button
                 onClick={handleZoomIn}
                 disabled={isZoomInDisabled}
                 aria-label="Zoom in (Ctrl + Plus)"
@@ -176,13 +178,13 @@ export const NavigationToolbar: React.FC = () => {
                 "
             >
                 <ZoomIn className="w-4 h-4" aria-hidden="true" />
-            </button>
+            </Button>
 
             {/* Divider */}
             <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-700 mx-1" />
 
             {/* Reset Zoom */}
-            <button
+            <Button
                 onClick={handleResetZoom}
                 aria-label="Reset zoom (Ctrl + 0)"
                 title="Reset zoom (Ctrl + 0)"
@@ -197,8 +199,8 @@ export const NavigationToolbar: React.FC = () => {
                 "
             >
                 <RotateCcw className="w-4 h-4" aria-hidden="true" />
-            </button>
-        </div>
+            </Button>
+        </Card>
     );
 };
 

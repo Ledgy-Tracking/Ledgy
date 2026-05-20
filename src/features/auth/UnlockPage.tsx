@@ -243,8 +243,7 @@ export const UnlockPage: React.FC = () => {
 
                 {/* ── Passphrase-restore UI ── */}
                 {showPassphraseRestore ? (
-                    <form onSubmit={passphraseForm.handleSubmit(handlePassphraseUnlock)} className="flex flex-col w-full space-y-4">
-                        <Form {...passphraseForm}>
+                    <Form {...passphraseForm} onSubmit={passphraseForm.handleSubmit(handlePassphraseUnlock)} className="flex flex-col w-full space-y-4">
                         <FormField
                                 control={passphraseForm.control}
                                 name="passphrase"
@@ -294,12 +293,10 @@ export const UnlockPage: React.FC = () => {
                                     </>
                                 )}
                             </Button>
-                        </Form>
-                    </form>
+                    </Form>
                 ) : (
                     /* ── Standard TOTP unlock UI ── */
-                    <form onSubmit={unlockForm.handleSubmit(handleUnlockOptions)} className="flex flex-col items-center w-full space-y-6">
-                        <Form {...unlockForm}>
+                    <Form {...unlockForm} onSubmit={unlockForm.handleSubmit(handleUnlockOptions)} className="flex flex-col items-center w-full space-y-6">
                             <OTPInput
                                 autoFocus
                                 ref={inputRef}
@@ -443,8 +440,7 @@ export const UnlockPage: React.FC = () => {
                                     </>
                                 )}
                             </Button>
-                        </Form>
-                    </form>
+                    </Form>
                 )}
 
                 <div className="pt-8 text-center space-y-4 flex flex-col items-center">

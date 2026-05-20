@@ -37,7 +37,7 @@ generated: 2026-04-11
 # Epic 4 story count expanded 17 → 24 after Party Mode sprint review (2026-04-13)
 # Gaps found: missing execution runtime, FR29 logic/temporal/string nodes, output node,
 # permission grant system (split from 4-17), integration test suite, node palette UX.
-last_updated: 2026-04-13
+last_updated: 2026-04-16
 project: ledgy
 project_key: NOKEY
 tracking_system: file-system
@@ -58,7 +58,7 @@ development_status:
   1-11-auth-rate-limiting-escalating-delays: done
   epic-1-retrospective: done
 
-  epic-2: in-progress
+  epic-2: done
   2-1-profile-db-segregation-logic: done
   2-2-profile-selector-canvas: done
   2-3-profile-creation-flow: done
@@ -69,7 +69,7 @@ development_status:
   2-8-template-engine-json-import: done
   epic-2-retrospective: done
 
-  epic-3: in-progress
+  epic-3: done
   3-1-pouchdb-document-adapters: done
   3-2-schema-strict-validation-engine: done
   3-3-schema-builder-type-configuration-store: done

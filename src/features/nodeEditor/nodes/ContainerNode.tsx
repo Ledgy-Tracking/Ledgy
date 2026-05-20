@@ -1,6 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { NodeProps, Handle, Position, useReactFlow } from '@xyflow/react';
 import { ChevronDown, FolderOpen } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Collapsible } from '@/components/ui/collapsible';
 import { useContainerState } from '../hooks/useContainerState';
 import { portColorMap } from '../utils/portColors';
 import { isExternalConnection, calculateContainerPortPosition } from '../utils/connectionUtils';
@@ -185,15 +188,15 @@ export const ContainerNode: React.FC<NodeProps> = React.memo(({
             <div 
                 className={`
                     w-full h-full rounded-lg border-2 overflow-hidden
-                    ${selected ? 'border-emerald-500' : 'border-zinc-700'}
-                    bg-zinc-900/50
+                    ${selected ? 'border-emerald-500' : 'border-zinc-300 dark:border-zinc-700'}
+                    bg-gray-50/50 dark:bg-zinc-900/50
                     transition-colors duration-150
                 `}
             >
                 {/* Header */}
-                <div
+                <Collapsible
                     ref={headerRef}
-                    className="container-header flex items-center justify-between px-3 py-2 bg-zinc-800 border-b border-zinc-700 cursor-pointer"
+                    className="container-header flex items-center justify-between px-3 py-2 bg-gray-100 dark:bg-zinc-800 border-b border-zinc-300 dark:border-zinc-700 cursor-pointer"
                     onDoubleClick={handleHeaderDoubleClick}
                     onClick={isEditing ? undefined : startEditing}
                     onKeyDown={handleKeyDown}
@@ -206,7 +209,7 @@ export const ContainerNode: React.FC<NodeProps> = React.memo(({
                         <FolderOpen size={14} className="text-zinc-400 flex-shrink-0" />
                         
                         {isEditing ? (
-                            <input
+                            <Input
                                 ref={inputRef}
                                 type="text"
                                 value={editLabel}
@@ -225,7 +228,7 @@ export const ContainerNode: React.FC<NodeProps> = React.memo(({
                     </div>
                     
                     {/* Collapse/Expand Button */}
-                    <button
+                    <Button
                         onClick={handleToggle}
                         className="p-1 rounded hover:bg-zinc-700 transition-colors flex-shrink-0"
                         aria-label={isCollapsed ? 'Expand group' : 'Collapse group'}
@@ -235,8 +238,8 @@ export const ContainerNode: React.FC<NodeProps> = React.memo(({
                             size={16} 
                             className={`chevron-icon ${isCollapsed ? 'collapsed' : 'expanded'} text-zinc-400`}
                         />
-                    </button>
-                </div>
+                    </Button>
+                </Collapsible>
 
                 {/* External Ports (only when collapsed) */}
                 {isCollapsed && externalPorts.length > 0 && (

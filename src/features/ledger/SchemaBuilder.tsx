@@ -118,8 +118,7 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                     <DialogDescription>Define the structure of your new ledger.</DialogDescription>
                 </DialogHeader>
 
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleSave)} className="space-y-6 mt-4">
+                <Form {...form} onSubmit={form.handleSubmit(handleSave)} className="space-y-6 mt-4">
                         {error && (
                             <Card className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg">
                                 <CardContent>
@@ -448,7 +447,6 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                             Create Schema
                         </Button>
                     </div>
-                </form>
                 </Form>
             </DialogContent>
             </TooltipProvider>

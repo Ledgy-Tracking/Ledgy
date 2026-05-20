@@ -13,7 +13,19 @@ vi.mock('@xyflow/react', () => ({
 
 // Mock stores
 vi.mock('../src/stores/useLedgerStore');
-vi.mock('../src/stores/useProfileStore');
+vi.mock('../src/stores/useProfileStore', () => {
+    const getState = vi.fn(() => ({ activeProfileId: 'profile-1' }));
+    const useProfileStore = vi.fn(() => ({ activeProfileId: 'profile-1' }));
+    useProfileStore.getState = getState;
+    return { useProfileStore };
+});
+// Also mock db so useLiveQuery's subscription setup doesn't throw
+vi.mock('../src/lib/db', () => ({
+    getProfileDb: vi.fn(() => ({
+        changes: vi.fn(() => ({ on: vi.fn().mockReturnThis(), cancel: vi.fn() })),
+        getAllDocuments: vi.fn().mockResolvedValue([]),
+    })),
+}));
 
 describe('LedgerSourceNode', () => {
     const mockSchemas = [

@@ -13,6 +13,7 @@
 import React, { useMemo } from 'react';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
 import { getConnectionPath } from '../utils/bezierPath';
+import { Toast } from '@/components/ui/toast';
 
 /**
  * Connection line visual states (AC2)
@@ -153,14 +154,14 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
 
             {/* ARIA live region for status announcements */}
             <foreignObject width={0} height={0}>
-                <div 
+                <Toast 
                     role="status" 
                     aria-live="polite" 
                     aria-atomic="true"
                     className="sr-only"
                 >
                     {ariaLabel}
-                </div>
+                </Toast>
             </foreignObject>
 
             {/* Source handle indicator */}

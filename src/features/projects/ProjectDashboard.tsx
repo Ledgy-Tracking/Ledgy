@@ -148,8 +148,7 @@ export const ProjectDashboard: React.FC = () => {
                             <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Define a new container for your tracking ecosystems.</p>
                         </CardHeader>
                         <CardContent>
-                            <form onSubmit={form.handleSubmit(handleCreateProject)} className="space-y-4">
-                                <Form {...form}>
+                            <Form {...form} onSubmit={form.handleSubmit(handleCreateProject)} className="space-y-4">
                                     <FormField
                                         control={form.control}
                                         name="name"
@@ -205,8 +204,7 @@ export const ProjectDashboard: React.FC = () => {
                                             Create Project
                                         </Button>
                                     </div>
-                                </Form>
-                            </form>
+                            </Form>
                         </CardContent>
                     </Card>
                 </div>

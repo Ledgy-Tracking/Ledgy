@@ -486,7 +486,7 @@ describe('edgeDataFlow', () => {
             // Wait for async execution
             setTimeout(() => {
                 expect(mockState.updateNodeData).toHaveBeenCalledWith('node2', {
-                    input: [1, 2, 3]
+                    inputA: [1, 2, 3]
                 });
             }, 10);
         });

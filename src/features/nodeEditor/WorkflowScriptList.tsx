@@ -55,8 +55,7 @@ const CreateWorkflowModal: React.FC<CreateWorkflowModalProps> = ({ onClose, onSu
                     <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Create a named Node Forge workflow for this project.</p>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                        <Form {...form}>
+                    <Form {...form} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                             <FormField
                                 control={form.control}
                                 name="name"
@@ -104,8 +103,7 @@ const CreateWorkflowModal: React.FC<CreateWorkflowModalProps> = ({ onClose, onSu
                                     {isSubmitting ? 'Creating...' : 'Create Workflow'}
                                 </Button>
                             </div>
-                        </Form>
-                    </form>
+                    </Form>
                 </CardContent>
             </Card>
         </div>
@@ -136,8 +134,7 @@ const RenameWorkflowModal: React.FC<RenameWorkflowModalProps> = ({ workflow, onC
                     <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Rename Workflow</h2>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                        <Form {...form}>
+                    <Form {...form} onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
                             <FormField
                                 control={form.control}
                                 name="name"
@@ -165,8 +162,7 @@ const RenameWorkflowModal: React.FC<RenameWorkflowModalProps> = ({ workflow, onC
                                     {isSubmitting ? 'Renaming...' : 'Rename'}
                                 </Button>
                             </div>
-                        </Form>
-                    </form>
+                    </Form>
                 </CardContent>
             </Card>
         </div>

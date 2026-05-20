@@ -562,15 +562,15 @@ interface HydrationState {
   - [x] Create `getSourceNodeOutput()` function
   - [x] Create `updateTargetNodeInput()` function
   - [x] Handle data type conversion (number → number[])
-- [ ] Task 2.2 — Update Correlation Node for auto-computation
-  - [ ] Add `useEffect` for input change detection (AC: #3)
-  - [ ] Integrate correlation computation
-  - [ ] Update output handle with computed value
-  - [ ] Add computation timestamp tracking
-- [ ] Task 2.3 — Update Arithmetic Node for auto-computation
-  - [ ] Add input change detection
-  - [ ] Implement operation computation
-  - [ ] Update output with result
+- [x] Task 2.2 — Update Correlation Node for auto-computation
+  - [x] Add `useEffect` for input change detection (AC: #3)
+  - [x] Integrate correlation computation
+  - [x] Update output handle with computed value
+  - [x] Add computation timestamp tracking
+- [x] Task 2.3 — Update Arithmetic Node for auto-computation
+  - [x] Add input change detection
+  - [x] Implement operation computation
+  - [x] Update output with result
 
 ### Phase 3: Multi-Ledger and Performance
 - [x] Task 3.1 — Implement concurrent hydration in NodeCanvas
@@ -578,25 +578,25 @@ interface HydrationState {
   - [x] Add progress tracking state
   - [x] Create hydration progress indicator component
   - [x] Handle partial failures (some ledgers fail, others succeed)
-- [ ] Task 3.2 — Add entry cache layer
-  - [ ] Create `LedgerDataCache` class
-  - [ ] Implement cache hit/miss logic
-  - [ ] Add cache size limits and eviction
-  - [ ] Add cache invalidation on schema change
+- [x] Task 3.2 — Add entry cache layer
+  - [x] Create `LedgerDataCache` class
+  - [x] Implement cache hit/miss logic
+  - [x] Add cache size limits and eviction
+  - [x] Add cache invalidation on schema change
 
 ### Phase 4: Ghost References and Schema Changes
-- [ ] Task 4.1 — Implement ghost reference detection (Optimized)
-  - [ ] Add `checkGhostReferences()` batch utility (AC: #5) - OPTIMIZED for performance
-  - [ ] Add `isGhostEntry()` single-check utility for UI components
-  - [ ] Update LedgerSourceNode to use batch check during hydration
-  - [ ] Add ghost indicator UI component using single-check
-  - [ ] Add unit tests for ghost handling (verify no N+1 queries)
-- [ ] Task 4.2 — Implement schema change subscription with throttling
-  - [ ] Create `subscribeToSchemaChanges()` function (AC: #6)
-  - [ ] **CRITICAL: Add 100ms debounce** to `notifyLedgerSchemaChanged()` to prevent cascade storms
-  - [ ] Implement `validateNodeAfterSchemaChange()`
-  - [ ] Add stale schema warning UI
-  - [ ] Auto-re-hydrate on schema version change (debounced)
+- [x] Task 4.1 — Implement ghost reference detection (Optimized)
+  - [x] Add `checkGhostReferences()` batch utility (AC: #5) - OPTIMIZED for performance
+  - [x] Add `isGhostEntry()` single-check utility for UI components
+  - [x] Update LedgerSourceNode to use batch check during hydration
+  - [x] Add ghost indicator UI component using single-check
+  - [x] Add unit tests for ghost handling (verify no N+1 queries)
+- [x] Task 4.2 — Implement schema change subscription with throttling
+  - [x] Create `subscribeToSchemaChanges()` function (AC: #6)
+  - [x] **CRITICAL: Add 100ms debounce** to `notifyLedgerSchemaChanged()` to prevent cascade storms
+  - [x] Implement `validateNodeAfterSchemaChange()`
+  - [x] Add stale schema warning UI
+  - [x] Auto-re-hydrate on schema version change (debounced)
 
 ### Phase 5: Memory Management and Cleanup
 - [ ] Task 5.1 — Implement subscription lifecycle management with deduplication
@@ -1003,19 +1003,43 @@ const testDb = new PouchDB('test', { adapter: 'memory' });
 - ✅ Implemented getSourceNodeOutput(), updateTargetNodeInput(), and propagateNodeOutput() functions with proper data type conversion
 - ✅ Wired edge data flow subscription into NodeCanvas.tsx to enable automatic data propagation when node outputs change
 - ✅ Added comprehensive unit tests for edge data flow functionality (>80% coverage)
+- ✅ Updated CorrelationNode.tsx for auto-computation with useEffect that detects input changes and updates output handle with computed correlation values
+- ✅ Added computation timestamp tracking and error handling for correlation calculations
+- ✅ Updated ArithmeticNode.tsx for auto-computation with useEffect that detects input changes and updates output with arithmetic operation results
 - ✅ Implemented concurrent hydration in NodeCanvas with hydrateAllLedgerNodes() function that hydrates multiple ledger nodes simultaneously
 - ✅ Added progress tracking state and HydrationProgressIndicator component showing real-time progress during hydration
 - ✅ Implemented partial failure handling where some ledger nodes may fail while others succeed
 - ✅ Added automatic hydration trigger when canvas loads with ledger nodes present
+- ✅ Created LedgerDataCache class with LRU eviction, size limits, and schema-based invalidation
+- ✅ Integrated cache into hydrateLedgerSourceNode with hit/miss logic and automatic cache invalidation on schema changes
+- ✅ Added comprehensive unit tests for cache functionality including eviction, expiration, and invalidation scenarios
+- ✅ Created ghostReference.ts utility with checkGhostReferences() batch function and isGhostEntry() single-check function to avoid N+1 queries
+- ✅ Implemented hydrateLedgerWithGhosts() function that separates active entries from ghost references during hydration
+- ✅ Updated LedgerSourceNode.tsx to display ghost indicators with warning badges and strikethrough styling
+- ✅ Added ghost entry UI components that show tooltip information about deleted entries
+- ✅ Added comprehensive unit tests for ghost reference handling including batch checking and UI display
+- ✅ Created schemaChangeHandler.ts utility with throttled schema change subscription using 100ms debounce to prevent cascade storms
+- ✅ Implemented schema change type detection (field added/removed/type changed/version bump) and appropriate node updates
+- ✅ Added stale schema warning UI in LedgerSourceNode with amber warning indicators and detailed messages
+- ✅ Integrated schema change subscription into NodeCanvas with automatic cache invalidation and edge re-validation
+- ✅ Added comprehensive unit tests for schema change handling including debouncing and different change types
 
 ### File List
 
 - src/features/nodeEditor/hooks/useLedgerData.ts (new)
 - src/features/nodeEditor/hooks/useLiveQuery.ts (new)
 - src/features/nodeEditor/nodes/LedgerSourceNode.tsx (updated)
+- src/features/nodeEditor/nodes/CorrelationNode.tsx (updated)
+- src/features/nodeEditor/nodes/ArithmeticNode.tsx (updated)
 - src/features/nodeEditor/utils/edgeDataFlow.ts (new)
+- src/features/nodeEditor/utils/ledgerDataCache.ts (new)
+- src/features/nodeEditor/utils/ghostReference.ts (new)
+- src/features/nodeEditor/utils/schemaChangeHandler.ts (new)
 - src/features/nodeEditor/NodeCanvas.tsx (updated)
 - src/features/nodeEditor/components/HydrationProgressIndicator.tsx (new)
 - src/tests/features/nodeEditor/useLedgerData.test.ts (new)
 - src/tests/features/nodeEditor/useLiveQuery.test.ts (new)
 - src/tests/features/nodeEditor/utils/edgeDataFlow.test.ts (new)
+- src/tests/features/nodeEditor/utils/ledgerDataCache.test.ts (new)
+- src/tests/features/nodeEditor/utils/ghostReference.test.ts (new)
+- src/tests/features/nodeEditor/utils/schemaChangeHandler.test.ts (new)

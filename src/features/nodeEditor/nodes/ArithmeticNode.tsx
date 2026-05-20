@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { Handle, Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { Calculator, AlertCircle, Plus, Minus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -13,6 +13,7 @@ export interface ArithmeticNodeData {
     precision?: number;
     inputCount?: number;
     inputs?: number[];
+    output?: number;
     lastResult?: {
         value: number | null;
         computedAt: string;
@@ -89,14 +90,42 @@ export const ArithmeticNode: React.FC<NodeProps> = React.memo(({ id, data, selec
         return calculateArithmetic(validInputs, operation);
     }, [inputs, operation]);
 
-    // Determine display value
+    // Auto-compute and update output when inputs change (Story 4.10 AC #3)
+    useEffect(() => {
+        if (computedResult && computedResult.value !== null && !computedResult.error) {
+            // Update node data with computed output
+            updateNodeData(id, {
+                output: computedResult.value,
+                lastResult: {
+                    value: computedResult.value,
+                    computedAt: new Date().toISOString(),
+                    error: undefined
+                },
+                isComputing: false
+            });
+        } else if (computedResult?.error) {
+            // Handle computation errors
+            updateNodeData(id, {
+                output: undefined,
+                lastResult: {
+                    value: null,
+                    computedAt: new Date().toISOString(),
+                    error: computedResult.error
+                },
+                isComputing: false
+            });
+        }
+    }, [computedResult, id, updateNodeData]);
+
+    // Determine display value - prioritize nodeData.output for edge data flow consistency
     const displayValue = useMemo(() => {
         if (nodeData.lastResult?.error) return null;
         if (nodeData.isComputing) return null;
+        if (nodeData.output != null) return nodeData.output;
         if (computedResult?.value != null) return computedResult.value;
         if (nodeData.lastResult?.value != null) return nodeData.lastResult.value;
         return null;
-    }, [nodeData.lastResult, nodeData.isComputing, computedResult]);
+    }, [nodeData.lastResult, nodeData.isComputing, nodeData.output, computedResult]);
 
     const errorMessage = nodeData.lastResult?.error || computedResult?.error;
 

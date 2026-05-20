@@ -1,5 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { X, Keyboard } from 'lucide-react';
+import { Dialog } from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 
 interface ShortcutHelpPanelProps {
     isOpen: boolean;
@@ -138,13 +142,13 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
     if (!isOpen) return null;
 
     return (
-        <div 
+        <Dialog 
             className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/50 backdrop-blur-sm"
             role="dialog"
             aria-modal="true"
             aria-labelledby="shortcut-help-title"
         >
-            <div 
+            <Card 
                 ref={panelRef}
                 className="w-full max-w-2xl max-h-[80vh] overflow-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-2xl"
             >
@@ -159,7 +163,7 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
                             Keyboard Shortcuts
                         </h2>
                     </div>
-                    <button
+                    <Button
                         ref={closeButtonRef}
                         onClick={onClose}
                         aria-label="Close help panel"
@@ -172,13 +176,13 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
                         "
                     >
                         <X className="w-5 h-5" aria-hidden="true" />
-                    </button>
+                    </Button>
                 </div>
 
                 {/* Shortcuts Grid */}
-                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <ScrollArea className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     {shortcutCategories.map((category) => (
-                        <div key={category.name}>
+                        <Card key={category.name}>
                             <h3 className="text-sm font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-3">
                                 {category.name}
                             </h3>
@@ -202,16 +206,16 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </Card>
                     ))}
-                </div>
+                </ScrollArea>
 
                 {/* Footer */}
-                <div className="px-6 py-4 bg-zinc-50 dark:bg-zinc-950/50 border-t border-zinc-200 dark:border-zinc-800 text-sm text-zinc-500 dark:text-zinc-500">
+                <Card className="px-6 py-4 bg-zinc-50 dark:bg-zinc-950/50 border-t border-zinc-200 dark:border-zinc-800 text-sm text-zinc-500 dark:text-zinc-500">
                     Press <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded text-zinc-700 dark:text-zinc-400">?</kbd> to toggle this panel anytime
-                </div>
-            </div>
-        </div>
+                </Card>
+            </Card>
+        </Dialog>
     );
 };
 

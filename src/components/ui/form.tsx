@@ -9,12 +9,26 @@ import {
   type ControllerProps,
   type FieldPath,
   type FieldValues,
+  type UseFormReturn,
 } from "react-hook-form"
 
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
-const Form = FormProvider
+function Form({
+  className,
+  children,
+  onSubmit,
+  ...props
+}: any) {
+  return (
+    <FormProvider {...(props as UseFormReturn<any>)}>
+      <form className={className} onSubmit={onSubmit}>
+        {children}
+      </form>
+    </FormProvider>
+  )
+}
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,

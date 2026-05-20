@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { hydrateLedgerSourceNode, useLedgerData } from '../../../features/nodeEditor/hooks/useLedgerData';
+import { ledgerDataCache } from '../../../features/nodeEditor/utils/ledgerDataCache';
 import { getProfileDb } from '@/lib/db';
 import { useProfileStore } from '@/stores/useProfileStore';
 import { useErrorStore } from '@/stores/useErrorStore';
@@ -80,16 +81,20 @@ describe('useLedgerData', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-
+    // Clear cache so tests don't get stale results from prior test runs
+    ledgerDataCache.clear();
+    // Re-establish mocks that may have been overridden by individual tests
+    (useProfileStore.getState as any).mockReturnValue({ activeProfileId: mockProfileId });
+    mockDb.getAllDocuments.mockResolvedValue([]); // default: empty
+    (getProfileDb as any).mockReturnValue(mockDb);
     (useErrorStore as any).getState.mockReturnValue({
       dispatchError: vi.fn()
     });
-
-    (getProfileDb as any).mockReturnValue(mockDb);
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
+    ledgerDataCache.clear();
   });
 
   describe('hydrateLedgerSourceNode', () => {

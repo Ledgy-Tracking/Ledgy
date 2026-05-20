@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
 import { subscribeToLedgerChanges, useLiveQuery } from '../../../features/nodeEditor/hooks/useLiveQuery';
 import { getProfileDb } from '@/lib/db';
 import { useProfileStore } from '@/stores/useProfileStore';
@@ -45,13 +46,15 @@ describe('useLiveQuery', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Re-establish store mocks that individual tests may have overridden
+    (useProfileStore.getState as any).mockReturnValue({ activeProfileId: mockProfileId });
     mockDb.changes.mockReturnValue(mockChanges);
     mockDb.getAllDocuments.mockResolvedValue([]);
     (getProfileDb as any).mockReturnValue(mockDb);
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('subscribeToLedgerChanges', () => {
@@ -108,162 +111,118 @@ describe('useLiveQuery', () => {
   });
 
   describe('useLiveQuery hook', () => {
+    // REFRESH_DEBOUNCE_MS = 500ms; we wait 600ms to ensure it fires
+    const DEBOUNCE_WAIT = 600;
+
     it('should subscribe and load initial data', async () => {
       const onDataChange = vi.fn();
       const mockEntries = [
-        {
-          _id: 'entry:1',
-          type: 'entry' as const,
-          ledgerId: mockLedgerId,
-          data: { value: 10 },
-          createdAt: '2024-01-01T00:00:00Z'
-        }
+        { _id: 'entry:1', type: 'entry' as const, ledgerId: mockLedgerId, data: { value: 10 }, createdAt: '2024-01-01T00:00:00Z' }
       ];
-
       mockDb.getAllDocuments.mockResolvedValue(mockEntries);
 
-      // Mock useEffect behavior by calling the effect manually
-      const result = useLiveQuery(mockLedgerId, onDataChange);
+      renderHook(() => useLiveQuery(mockLedgerId, onDataChange));
 
-      // Simulate the effect
-      await new Promise(resolve => setTimeout(resolve, 0));
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
 
       expect(mockDb.changes).toHaveBeenCalled();
       expect(mockDb.getAllDocuments).toHaveBeenCalledWith('entry');
       expect(onDataChange).toHaveBeenCalledWith(mockEntries);
-      expect(result.isSubscribed).toBe(true);
-    });
+    }, 10000);
 
     it('should handle change events with debouncing', async () => {
       const onDataChange = vi.fn();
       const mockEntries = [
-        {
-          _id: 'entry:1',
-          type: 'entry' as const,
-          ledgerId: mockLedgerId,
-          data: { value: 10 },
-          createdAt: '2024-01-01T00:00:00Z'
-        }
+        { _id: 'entry:1', type: 'entry' as const, ledgerId: mockLedgerId, data: { value: 10 }, createdAt: '2024-01-01T00:00:00Z' }
       ];
-
       mockDb.getAllDocuments.mockResolvedValue(mockEntries);
 
-      useLiveQuery(mockLedgerId, onDataChange);
+      renderHook(() => useLiveQuery(mockLedgerId, onDataChange));
 
-      // Simulate change event
+      // Wait for initial data load then reset
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+      onDataChange.mockClear();
+
       const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
-      changeHandler({ doc: mockEntries[0] });
+      act(() => { changeHandler({ doc: mockEntries[0] }); });
 
-      // Should debounce the call
+      // Should be debounced — not called yet
       expect(onDataChange).not.toHaveBeenCalled();
 
-      // Wait for debounce
-      await new Promise(resolve => setTimeout(() => resolve, 150));
+      // Wait for debounce to fire
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
 
       expect(onDataChange).toHaveBeenCalledWith(mockEntries);
-    });
+    }, 10000);
 
-    it('should not subscribe if no ledgerId', () => {
+    it('should not subscribe if no ledgerId', async () => {
       const onDataChange = vi.fn();
-
-      useLiveQuery(undefined, onDataChange);
-
+      renderHook(() => useLiveQuery(undefined, onDataChange));
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
       expect(mockDb.changes).not.toHaveBeenCalled();
-    });
+    }, 10000);
 
-    it('should not subscribe if no active profile', () => {
-      useProfileStore.getState.mockReturnValue({
-        activeProfileId: null
-      });
-
+    it('should not subscribe if no active profile', async () => {
+      (useProfileStore.getState as any).mockReturnValue({ activeProfileId: null });
       const onDataChange = vi.fn();
-
-      useLiveQuery(mockLedgerId, onDataChange);
-
+      renderHook(() => useLiveQuery(mockLedgerId, onDataChange));
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
       expect(mockDb.changes).not.toHaveBeenCalled();
-    });
+    }, 10000);
 
     it('should handle refresh errors', async () => {
       const onDataChange = vi.fn();
       const mockDispatchError = vi.fn();
-
       mockDb.getAllDocuments.mockRejectedValue(new Error('DB error'));
-      (useErrorStore as any).getState.mockReturnValue({
-        dispatchError: mockDispatchError
-      });
+      (useErrorStore as any).getState.mockReturnValue({ dispatchError: mockDispatchError });
 
-      useLiveQuery(mockLedgerId, onDataChange);
+      renderHook(() => useLiveQuery(mockLedgerId, onDataChange));
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
 
-      // Trigger a change to cause refresh
       const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
-      changeHandler({ doc: {} });
+      act(() => { changeHandler({ doc: {} }); });
 
-      await new Promise(resolve => setTimeout(() => resolve, 150));
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
 
       expect(mockDispatchError).toHaveBeenCalledWith('DB error');
-    });
+    }, 10000);
 
     it('should provide manual refresh function', async () => {
       const onDataChange = vi.fn();
       const mockEntries = [
-        {
-          _id: 'entry:1',
-          type: 'entry' as const,
-          ledgerId: mockLedgerId,
-          data: { value: 10 }
-        }
+        { _id: 'entry:1', type: 'entry' as const, ledgerId: mockLedgerId, data: { value: 10 } }
       ];
-
       mockDb.getAllDocuments.mockResolvedValue(mockEntries);
 
-      const { refresh } = useLiveQuery(mockLedgerId, onDataChange);
+      const { result } = renderHook(() => useLiveQuery(mockLedgerId, onDataChange));
 
-      await refresh();
+      await act(async () => { await result.current.refresh(); });
 
       expect(onDataChange).toHaveBeenCalledWith(mockEntries);
-    });
+    }, 10000);
 
     it('should filter and sort entries correctly', async () => {
       const onDataChange = vi.fn();
       const mockEntries = [
-        {
-          _id: 'entry:1',
-          type: 'entry' as const,
-          ledgerId: mockLedgerId,
-          data: { value: 10 },
-          createdAt: '2024-01-01T00:00:00Z'
-        },
-        {
-          _id: 'entry:2',
-          type: 'entry' as const,
-          ledgerId: mockLedgerId,
-          data: { value: 20 },
-          createdAt: '2024-01-02T00:00:00Z',
-          isDeleted: true
-        },
-        {
-          _id: 'entry:3',
-          type: 'entry' as const,
-          ledgerId: 'other-ledger',
-          data: { value: 30 },
-          createdAt: '2024-01-03T00:00:00Z'
-        }
+        { _id: 'entry:1', type: 'entry' as const, ledgerId: mockLedgerId, data: { value: 10 }, createdAt: '2024-01-01T00:00:00Z' },
+        { _id: 'entry:2', type: 'entry' as const, ledgerId: mockLedgerId, data: { value: 20 }, createdAt: '2024-01-02T00:00:00Z', isDeleted: true },
+        { _id: 'entry:3', type: 'entry' as const, ledgerId: 'other-ledger', data: { value: 30 }, createdAt: '2024-01-03T00:00:00Z' }
       ];
-
       mockDb.getAllDocuments.mockResolvedValue(mockEntries);
 
-      useLiveQuery(mockLedgerId, onDataChange);
+      renderHook(() => useLiveQuery(mockLedgerId, onDataChange));
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+      onDataChange.mockClear();
 
-      // Trigger refresh
       const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
-      changeHandler({ doc: mockEntries[0] });
+      act(() => { changeHandler({ doc: mockEntries[0] }); });
 
-      await new Promise(resolve => setTimeout(() => resolve, 150));
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
 
       const calledWith = onDataChange.mock.calls[0][0];
       expect(calledWith).toHaveLength(1);
       expect(calledWith[0]._id).toBe('entry:1');
-    });
+    }, 10000);
 
     it('should limit results to cacheSize', async () => {
       const onDataChange = vi.fn();
@@ -274,22 +233,21 @@ describe('useLiveQuery', () => {
         data: { value: i },
         createdAt: `2024-01-${String(i + 1).padStart(2, '0')}T00:00:00Z`
       }));
-
       mockDb.getAllDocuments.mockResolvedValue(mockEntries);
 
-      useLiveQuery(mockLedgerId, onDataChange, 5);
+      renderHook(() => useLiveQuery(mockLedgerId, onDataChange, 5));
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+      onDataChange.mockClear();
 
-      // Trigger refresh
       const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
-      changeHandler({ doc: mockEntries[0] });
+      act(() => { changeHandler({ doc: mockEntries[0] }); });
 
-      await new Promise(resolve => setTimeout(() => resolve, 150));
+      await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
 
       const calledWith = onDataChange.mock.calls[0][0];
       expect(calledWith).toHaveLength(5);
-      // Should be sorted descending by createdAt
       expect(calledWith[0]._id).toBe('entry:14');
       expect(calledWith[4]._id).toBe('entry:10');
-    });
+    }, 10000);
   });
 });

@@ -12,10 +12,26 @@ import { getProfileDb } from '../lib/db';
 import { useErrorStore } from './useErrorStore';
 import { useAuthStore } from '../features/auth/useAuthStore';
 import { CanvasNode, CanvasEdge, Viewport, ViewControlsState, DEFAULT_VIEW_CONTROLS } from '../types/nodeEditor';
+import { LedgerSchema } from '../types/ledger';
 import { save_canvas, load_canvas } from '../lib/db';
 import { SAVE_DEBOUNCE_MS, SAVE_MAX_RETRIES, SAVE_RETRY_DELAYS_MS } from '../features/nodeEditor/utils/nodeConstants';
 import { groupNodes as groupNodesUtil } from '../features/nodeEditor/utils/groupNodes';
 import { ungroupNodes as ungroupNodesUtil } from '../features/nodeEditor/utils/ungroupNodes';
+
+/** Tracks concurrent hydration progress across all ledger nodes */
+export interface HydrationState {
+    isHydrating: boolean;
+    /** IDs of ledgers that have been successfully hydrated */
+    hydratedLedgerIds: string[];
+    /** Per-ledger error messages (ledgerId → error) */
+    errors: Record<string, string>;
+}
+
+const DEFAULT_HYDRATION_STATE: HydrationState = {
+    isHydrating: false,
+    hydratedLedgerIds: [],
+    errors: {},
+};
 
 // Module-level debounce timer - NOT in store state to avoid re-renders
 let saveTimeoutId: number | null = null;
@@ -46,6 +62,12 @@ interface NodeState {
 
     // View controls (Story 4.4) - nested to reduce subscriptions
     viewControls: ViewControlsState;
+
+    // Story 4.10: Schema cache — mirrors useLedgerStore.schemas for schema-change detection
+    schemas: LedgerSchema[];
+
+    // Story 4.10: Hydration tracking state
+    hydrationState: HydrationState;
 
     // React Flow handlers (per official docs pattern)
     onNodesChange: OnNodesChange<CanvasNode>;
@@ -81,6 +103,15 @@ interface NodeState {
     expandContainer: (containerId: string) => void;
     collapseContainer: (containerId: string) => void;
     setContainerLabel: (containerId: string, label: string) => void;
+
+    // Story 4.10: Schema cache actions
+    setSchemas: (schemas: LedgerSchema[]) => void;
+
+    // Story 4.10: Hydration state actions
+    setHydrationState: (state: Partial<HydrationState>) => void;
+
+    // Story 4.10: Batch node data update — more efficient than N individual calls
+    batchUpdateNodeData: (updates: { nodeId: string; data: Record<string, any> }[]) => void;
 }
 
 interface SaveIds {
@@ -113,6 +144,8 @@ const initialState = {
     saveError: null,
     lastSavedAt: null,
     viewControls: DEFAULT_VIEW_CONTROLS,
+    schemas: [] as LedgerSchema[],
+    hydrationState: DEFAULT_HYDRATION_STATE,
 };
 
 export const useNodeStore = create<NodeState>()(
@@ -431,12 +464,33 @@ export const useNodeStore = create<NodeState>()(
         setContainerLabel: (containerId: string, label: string) => {
             set({
                 nodes: get().nodes.map(n =>
-                    n.id === containerId 
-                        ? { ...n, data: { ...n.data, label } } 
+                    n.id === containerId
+                        ? { ...n, data: { ...n.data, label } }
                         : n
                 ),
             });
             get().debouncedSaveCanvas();
+        },
+
+        // Story 4.10: Schema cache — kept in sync with useLedgerStore by NodeCanvas
+        setSchemas: (schemas: LedgerSchema[]) => set({ schemas }),
+
+        // Story 4.10: Hydration state tracking
+        setHydrationState: (update: Partial<HydrationState>) =>
+            set((state) => ({
+                hydrationState: { ...state.hydrationState, ...update },
+            })),
+
+        // Story 4.10: Batch node data update — single set() call instead of N calls
+        batchUpdateNodeData: (updates: { nodeId: string; data: Record<string, any> }[]) => {
+            if (updates.length === 0) return;
+            const updateMap = new Map(updates.map(u => [u.nodeId, u.data]));
+            set({
+                nodes: get().nodes.map(n => {
+                    const data = updateMap.get(n.id);
+                    return data ? { ...n, data: { ...n.data, ...data } } : n;
+                }),
+            });
         },
     }))
 );

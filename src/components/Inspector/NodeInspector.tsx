@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNodes, useReactFlow } from '@xyflow/react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card } from '@/components/ui/card';
 import { ARITHMETIC_OPERATIONS, ArithmeticOperation } from '../../types/nodeEditor';
 import { useDashboardStore } from '../../stores/useDashboardStore';
 
@@ -40,7 +42,7 @@ const ResultBadge: React.FC<{ value: number | null | undefined; error?: string; 
             <AlertTriangle size={12} /> {error}
         </div>
     );
-    if (isComputing) return <div className="text-xs text-amber-400 animate-pulse px-2 py-1.5">Computing…</div>;
+    if (isComputing) return <Skeleton className="h-4 w-24" />;
     return (
         <div className="text-lg font-bold text-emerald-400 px-2 py-1">
             {typeof value === 'number' ? value.toLocaleString(undefined, { maximumFractionDigits: 4 }) : '—'}
@@ -340,11 +342,11 @@ export const NodeInspector: React.FC = () => {
             </ScrollArea>
 
             {/* Footer */}
-            <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 shrink-0">
+            <Card className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 shrink-0">
                 <Button variant="destructive" className="w-full gap-2" onClick={handleDelete}>
                     <Trash2 size={16} /> Delete Node
                 </Button>
-            </div>
+            </Card>
         </div>
     );
 };

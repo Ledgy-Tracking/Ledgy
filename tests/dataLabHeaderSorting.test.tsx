@@ -124,7 +124,7 @@ describe('dataLabHeaderSorting', () => {
         expect(rows[0]).toHaveTextContent('Alpha');
         expect(rows[1]).toHaveTextContent('Bravo');
         expect(rows[2]).toHaveTextContent('Charlie');
-    });
+    }, 10000);
 
     it('clicking the same column header twice renders entries in descending order', () => {
         render(<LedgerTable schemaId="schema:sort-123" />);

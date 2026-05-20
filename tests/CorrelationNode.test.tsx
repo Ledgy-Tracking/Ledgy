@@ -6,6 +6,7 @@ import { CorrelationNode } from '../src/features/nodeEditor/nodes/CorrelationNod
 vi.mock('@xyflow/react', () => ({
     Handle: ({ id, type }: any) => <div data-testid={`handle-${type}-${id}`} />,
     Position: { Right: 'right', Left: 'left' },
+    useReactFlow: () => ({ updateNodeData: vi.fn() }),
 }));
 
 describe('CorrelationNode', () => {

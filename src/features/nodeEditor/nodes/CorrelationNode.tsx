@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Handle, Position, NodeProps } from '@xyflow/react';
+import React, { useMemo, useEffect } from 'react';
+import { Handle, Position, NodeProps, useReactFlow } from '@xyflow/react';
 import { GitBranch, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,6 +11,7 @@ export interface CorrelationNodeData {
     correlationType: 'pearson';
     inputA?: number[];
     inputB?: number[];
+    output?: number;
     lastResult?: {
         correlation: number | null;
         sampleSize: number;
@@ -43,7 +44,9 @@ function isValidCorrelationNodeData(data: unknown): data is CorrelationNodeData 
  * - Input A/B: number[] (cyan for array type)
  * - Output: number (emerald for scalar)
  */
-export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected }) => {
+export const CorrelationNode: React.FC<NodeProps> = React.memo(({ id, data, selected }) => {
+    const { updateNodeData } = useReactFlow();
+
     // Runtime type validation with fallback
     const nodeData = isValidCorrelationNodeData(data) ? data : {
         label: 'Invalid Node Data',
@@ -61,14 +64,44 @@ export const CorrelationNode: React.FC<NodeProps> = React.memo(({ data, selected
         return calculatePearsonCorrelation(nodeData.inputA, nodeData.inputB);
     }, [nodeData.inputA, nodeData.inputB]);
 
-    // Determine display value
+    // Auto-compute and update output when inputs change (Story 4.10 AC #3)
+    useEffect(() => {
+        if (computedResult && computedResult.r !== null && !computedResult.error) {
+            // Update node data with computed output
+            updateNodeData(id, {
+                output: computedResult.r,
+                lastResult: {
+                    correlation: computedResult.r,
+                    sampleSize: computedResult.sampleSize,
+                    computedAt: new Date().toISOString(),
+                    error: undefined
+                },
+                isComputing: false
+            });
+        } else if (computedResult?.error) {
+            // Handle computation errors
+            updateNodeData(id, {
+                output: undefined,
+                lastResult: {
+                    correlation: null,
+                    sampleSize: computedResult.sampleSize || 0,
+                    computedAt: new Date().toISOString(),
+                    error: computedResult.error
+                },
+                isComputing: false
+            });
+        }
+    }, [computedResult, id, updateNodeData]);
+
+    // Determine display value - prioritize nodeData.output for edge data flow consistency
     const displayValue = useMemo(() => {
         if (nodeData.lastResult?.error) return null;
         if (nodeData.isComputing) return null;
+        if (nodeData.output != null) return nodeData.output;
         if (computedResult?.r != null) return computedResult.r;
         if (nodeData.lastResult?.correlation != null) return nodeData.lastResult.correlation;
         return null;
-    }, [nodeData.lastResult, nodeData.isComputing, computedResult]);
+    }, [nodeData.lastResult, nodeData.isComputing, nodeData.output, computedResult]);
 
     const errorMessage = nodeData.lastResult?.error || computedResult?.error;
     const sampleSize = computedResult?.sampleSize || nodeData.lastResult?.sampleSize || 0;

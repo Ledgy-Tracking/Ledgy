@@ -38,9 +38,13 @@ import { showRejectionNotification, announceRejection } from './utils/rejectionN
 import { ConnectionLine } from './components/ConnectionLine';
 import './styles/connectionLine.css';
 import { setupNodeDataChangeSubscription } from './utils/edgeDataFlow';
-import { useLedgerData } from './hooks/useLedgerData';
 import { HydrationProgressIndicator } from './components/HydrationProgressIndicator';
 import { ledgerDataCache } from './utils/ledgerDataCache';
+import { hydrateLedgerWithGhosts } from './utils/ghostReference';
+import { setupSchemaChangeSubscription } from './utils/schemaChangeHandler';
+import { unsubscribeAll, unsubscribeNode, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
+import { logSubscriptionCount, logHydrationSummary } from './utils/performanceMonitor';
+import { useLedgerStore } from '../../stores/useLedgerStore';
 
 // --- STABLE CONFIGURATION (Outside component to prevent re-renders) ---
 
@@ -91,6 +95,7 @@ export const NodeCanvas: React.FC = () => {
 
     // Node Store - subscribe to nodes/edges with useShallow for shallow comparison
     const isLoading = useNodeStore(s => s.isLoading);
+    const isCanvasLoaded = useNodeStore(s => s.isCanvasLoaded);
     const nodes = useNodeStore(useShallow(s => s.nodes));
     const edges = useNodeStore(useShallow(s => s.edges));
     const initialViewport = useMemo(() => useNodeStore.getState().viewport, []);
@@ -136,14 +141,27 @@ export const NodeCanvas: React.FC = () => {
     // Set up edge data flow subscription (Story 4.10)
     useEffect(() => {
         const unsubscribe = setupNodeDataChangeSubscription();
-
-        return () => {
-            unsubscribe();
-        };
+        return () => { unsubscribe(); };
     }, []);
 
-    // Concurrent hydration of all ledger nodes (Story 4.10 AC #4)
-    const { hydrateLedgerSourceNode } = useLedgerData();
+    // Story 4.10: Keep nodeStore.schemas in sync with ledgerStore.schemas
+    // so that schemaChangeHandler can detect schema diffs without importing useLedgerStore
+    const ledgerSchemas = useLedgerStore(useShallow(s => s.schemas));
+    useEffect(() => {
+        useNodeStore.getState().setSchemas(ledgerSchemas);
+    }, [ledgerSchemas]);
+
+    // Story 4.10: Cancel all PouchDB ledger subscriptions on workflow switch or unmount (AC7)
+    useEffect(() => {
+        return () => {
+            unsubscribeAll();
+            if (process.env.NODE_ENV === 'development') {
+                logSubscriptionCount(getActiveSubscriptionCount(), getTotalConsumerCount());
+            }
+        };
+    }, [workflowId]);
+
+    // Concurrent hydration of all ledger nodes (Story 4.10 AC #4 & #5)
     useEffect(() => {
         if (!nodes.length || !isCanvasLoaded) return;
 
@@ -151,58 +169,66 @@ export const NodeCanvas: React.FC = () => {
             const ledgerNodes = nodes.filter(node => node.type === 'ledgerSource');
             if (ledgerNodes.length === 0) return;
 
-            console.log(`[NodeCanvas] Hydrating ${ledgerNodes.length} ledger nodes concurrently`);
-
-            // Show progress indicator
+            // Show progress indicator and mark hydrating
             setHydrationProgress({
                 isActive: true,
                 message: `Hydrating ${ledgerNodes.length} ledger${ledgerNodes.length > 1 ? 's' : ''}...`
             });
+            useNodeStore.getState().setHydrationState({ isHydrating: true });
 
-            // Set loading state for all ledger nodes
-            ledgerNodes.forEach(node => {
-                useNodeStore.getState().updateNodeData(node.id, {
-                    isLoading: true,
-                    error: undefined
-                });
-            });
+            // Batch: set loading state on all ledger nodes in one store update
+            useNodeStore.getState().batchUpdateNodeData(
+                ledgerNodes.map(node => ({ nodeId: node.id, data: { isLoading: true, error: undefined } }))
+            );
 
-            // Track completed hydrations
             let completedCount = 0;
+            const startTime = performance.now();
 
-            // Hydrate all concurrently
             const hydrationPromises = ledgerNodes.map(async (node) => {
+                const ledgerId = node.data.ledgerId as string | undefined;
+                const schemaSnapshot = node.data.schemaSnapshot as any[];
+
+                if (!ledgerId || !schemaSnapshot?.length) {
+                    useNodeStore.getState().updateNodeData(node.id, {
+                        isLoading: false,
+                        error: 'Missing ledger ID or schema'
+                    });
+                    completedCount++;
+                    setHydrationProgress(prev => ({
+                        ...prev,
+                        message: `Hydrating... (${completedCount}/${ledgerNodes.length})`
+                    }));
+                    return;
+                }
+
                 try {
-                    const ledgerId = node.data.ledgerId;
-                    const schemaSnapshot = node.data.schemaSnapshot;
-
-                    if (!ledgerId || !schemaSnapshot?.length) {
-                        useNodeStore.getState().updateNodeData(node.id, {
-                            isLoading: false,
-                            error: 'Missing ledger ID or schema'
-                        });
-                        completedCount++;
-                        setHydrationProgress(prev => ({
-                            ...prev,
-                            message: `Hydrating... (${completedCount}/${ledgerNodes.length})`
-                        }));
-                        return;
-                    }
-
-                    const result = await hydrateLedgerSourceNode(ledgerId, schemaSnapshot);
+                    const result = await hydrateLedgerWithGhosts(ledgerId, schemaSnapshot);
                     useNodeStore.getState().updateNodeData(node.id, {
                         entries: result.entries,
-                        count: result.count,
-                        aggregates: result.aggregates,
+                        count: result.entries.length,
+                        ghosts: result.ghosts,
+                        ghostCount: result.ghostCount,
                         isLoading: false,
-                        error: result.error,
+                        error: undefined,
                         lastUpdated: new Date().toISOString()
+                    });
+                    useNodeStore.getState().setHydrationState({
+                        hydratedLedgerIds: [
+                            ...useNodeStore.getState().hydrationState.hydratedLedgerIds,
+                            ledgerId,
+                        ],
                     });
                 } catch (error) {
                     const errorMessage = error instanceof Error ? error.message : 'Hydration failed';
                     useNodeStore.getState().updateNodeData(node.id, {
                         isLoading: false,
                         error: errorMessage
+                    });
+                    useNodeStore.getState().setHydrationState({
+                        errors: {
+                            ...useNodeStore.getState().hydrationState.errors,
+                            [ledgerId]: errorMessage,
+                        },
                     });
                 }
 
@@ -215,17 +241,16 @@ export const NodeCanvas: React.FC = () => {
 
             await Promise.allSettled(hydrationPromises);
 
-            // Hide progress indicator
-            setHydrationProgress({
-                isActive: false,
-                message: ''
-            });
+            const totalMs = performance.now() - startTime;
+            logHydrationSummary(ledgerNodes.length, totalMs);
 
-            console.log(`[NodeCanvas] Completed hydration of ${ledgerNodes.length} ledger nodes`);
+            useNodeStore.getState().setHydrationState({ isHydrating: false });
+            setHydrationProgress({ isActive: false, message: '' });
         };
 
         hydrateAllLedgerNodes();
-    }, [nodes, isCanvasLoaded, hydrateLedgerSourceNode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isCanvasLoaded]);
 
     const loadedWorkflowRef = useRef<string | null>(null);
     const loadAbortRef = useRef(false);
@@ -289,11 +314,13 @@ export const NodeCanvas: React.FC = () => {
         };
     }, [workflowId, activeProfileId, projectId]);
 
-    // Story 4-8 AC5: Schema change subscription for edge re-validation
-    // Subscribe to ledger schema changes and re-validate connected edges
+    // Story 4-8 AC5 & 4.10 AC6: Schema change subscription with throttling
+    // Subscribe to ledger schema changes with 100ms debounce to prevent cascade storms
     useEffect(() => {
-        // Subscribe to schema changes in the store
-        const unsubscribe = useNodeStore.subscribe(
+        const unsubscribeSchemaChanges = setupSchemaChangeSubscription();
+
+        // Also subscribe to schema changes in the store for cache invalidation
+        const unsubscribeStore = useNodeStore.subscribe(
             (state) => state.schemas,
             (schemas) => {
                 // When schemas change, invalidate cache for affected ledgers
@@ -322,7 +349,10 @@ export const NodeCanvas: React.FC = () => {
             }
         );
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribeSchemaChanges();
+            unsubscribeStore();
+        };
     }, []);
 
     // 5. Stable Handlers - use store's onConnect to keep store in sync

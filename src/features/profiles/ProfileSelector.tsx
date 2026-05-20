@@ -222,8 +222,7 @@ export const ProfileSelector: React.FC = () => {
                         </DialogDescription>
                     </DialogHeader>
                     
-                    <form onSubmit={createForm.handleSubmit(handleConfirmCreate)}>
-                        <Form {...createForm}>
+                    <Form {...createForm} onSubmit={createForm.handleSubmit(handleConfirmCreate)}>
                             <div className="space-y-4 mb-6">
                                 <FormField
                                     control={createForm.control}
@@ -284,8 +283,7 @@ export const ProfileSelector: React.FC = () => {
                                     Create
                                 </Button>
                             </DialogFooter>
-                        </Form>
-                    </form>
+                    </Form>
                 </DialogContent>
             </Dialog>
 
@@ -307,10 +305,9 @@ export const ProfileSelector: React.FC = () => {
                         </DialogDescription>
                     </DialogHeader>
 
-                    <form onSubmit={renameForm.handleSubmit(() => {
+                    <Form {...renameForm} onSubmit={renameForm.handleSubmit(() => {
                             if (isDeleteConfirmed && !isDeleting) handleConfirmDelete(false);
                         })}>
-                        <Form {...renameForm}>
                             <div className="space-y-4 mb-6">
                                 {profileToDelete?.remoteSyncEndpoint ? (
                                     <div className="space-y-4">
@@ -415,8 +412,7 @@ export const ProfileSelector: React.FC = () => {
                                     </Button>
                                 )}
                             </DialogFooter>
-                        </Form>
-                    </form>
+                    </Form>
                 </DialogContent>
             </Dialog>
         </div>

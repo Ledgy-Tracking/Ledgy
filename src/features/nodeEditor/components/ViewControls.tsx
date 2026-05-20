@@ -1,6 +1,9 @@
 import React, { useCallback } from 'react';
 import { Eye, EyeOff, Grid3X3, Magnet, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNodeStore } from '../../../stores/useNodeStore';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Toggle } from '@/components/ui/toggle';
 
 /**
  * ViewControls - Collapsible panel for minimap, grid, and snap controls
@@ -55,7 +58,7 @@ export const ViewControls: React.FC = () => {
     return (
         <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
             {/* Controls Panel - collapsible with 150ms ease-out transition */}
-            <div 
+            <Card 
                 className={`
                     flex items-center gap-1 p-1.5 
                     bg-gray-100/90 dark:bg-zinc-800/90 
@@ -67,7 +70,7 @@ export const ViewControls: React.FC = () => {
                 aria-expanded={!isViewControlsCollapsed}
             >
                 {/* Grid Toggle */}
-                <button
+                <Toggle
                     onClick={handleToggleGrid}
                     aria-label={showGrid ? 'Hide grid (G)' : 'Show grid (G)'}
                     aria-pressed={showGrid}
@@ -83,10 +86,10 @@ export const ViewControls: React.FC = () => {
                     `}
                 >
                     <Grid3X3 className="w-4 h-4" aria-hidden="true" />
-                </button>
+                </Toggle>
 
                 {/* Snap to Grid Toggle */}
-                <button
+                <Toggle
                     onClick={handleToggleSnap}
                     aria-label={snapToGrid ? 'Disable snap to grid (S)' : 'Enable snap to grid (S)'}
                     aria-pressed={snapToGrid}
@@ -102,13 +105,13 @@ export const ViewControls: React.FC = () => {
                     `}
                 >
                     <Magnet className="w-4 h-4" aria-hidden="true" />
-                </button>
+                </Toggle>
 
                 {/* Divider */}
                 <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-700 mx-1" />
 
                 {/* Minimap Toggle */}
-                <button
+                <Toggle
                     onClick={handleToggleMinimap}
                     aria-label={showMinimap ? 'Hide minimap (H)' : 'Show minimap (H)'}
                     aria-pressed={showMinimap}
@@ -128,11 +131,11 @@ export const ViewControls: React.FC = () => {
                     ) : (
                         <EyeOff className="w-4 h-4" aria-hidden="true" />
                     )}
-                </button>
-            </div>
+                </Toggle>
+            </Card>
 
             {/* Collapse Toggle Button (Chevron) */}
-            <button
+            <Button
                 onClick={handleToggleCollapse}
                 aria-label={isViewControlsCollapsed ? 'Expand view controls' : 'Collapse view controls'}
                 aria-expanded={!isViewControlsCollapsed}
@@ -144,7 +147,7 @@ export const ViewControls: React.FC = () => {
                 ) : (
                     <ChevronRight className="w-4 h-4" aria-hidden="true" />
                 )}
-            </button>
+            </Button>
         </div>
     );
 };

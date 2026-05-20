@@ -8,8 +8,10 @@ import { useProfileStore } from '@/stores/useProfileStore';
 import { ChevronDown, ChevronUp, Database, Settings, AlertTriangle, GripVertical, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLedgerData } from '../hooks/useLedgerData';
 import { useLiveQuery } from '../hooks/useLiveQuery';
+import { hydrateLedgerWithGhosts, getGhostDisplayInfo } from '../utils/ghostReference';
 import { useFieldStats } from '../hooks/useLedgerSourceData';
 import { portColorMap } from '../utils/portColors';
 import { SchemaField } from '@/types/ledger';
@@ -37,6 +39,17 @@ export interface LedgerSourceNodeData {
     };
     isLoading?: boolean;
     error?: string;
+    // Ghost reference data
+    ghosts?: Array<{
+        entryId: string;
+        displayText: string;
+        tooltip: string;
+        style: string;
+        originalData?: any;
+    }>;
+    ghostCount?: number;
+    // Schema change warnings
+    schemaStaleWarning?: string;
 }
 
 /**
@@ -98,9 +111,11 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
         isStale: true,
         entries: [],
         count: 0,
+        ghosts: [],
+        ghostCount: 0,
         isLoading: false,
     };
-    const { ledgerId, ledgerName, schemaSnapshot, showFieldTypes, showLatestValues, cacheSize, entries: hydratedEntries, isLoading: hydratedLoading, error: hydratedError } = nodeData;
+    const { ledgerId, ledgerName, schemaSnapshot, showFieldTypes, showLatestValues, cacheSize, entries: hydratedEntries, ghosts, ghostCount, isLoading: hydratedLoading, error: hydratedError, schemaStaleWarning } = nodeData;
 
     // Track previous ledgerId to avoid unnecessary updates
     const prevLedgerIdRef = useRef<string | undefined>(undefined);
@@ -241,11 +256,23 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                         {isLedgerDeleted && (
                             <AlertTriangle size={14} className="text-red-400" />
                         )}
-                        {/* Entry count badge */}
+                        {/* Schema stale warning */}
+                        {schemaStaleWarning && (
+                            <AlertTriangle size={14} className="text-amber-400" title={schemaStaleWarning} />
+                        )}
+                        {/* Entry count and ghost badges */}
                         {ledgerId && !isLoading && !error && (
-                            <div className="text-xs bg-white/20 text-zinc-900 dark:text-white px-1.5 py-0.5 rounded">
-                                {nodeData.count || 0}
-                            </div>
+                            <>
+                                <div className="text-xs bg-white/20 text-zinc-900 dark:text-white px-1.5 py-0.5 rounded">
+                                    {nodeData.count || 0}
+                                </div>
+                                {(ghostCount || 0) > 0 && (
+                                    <div className="text-xs bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                        <span>⚠️</span>
+                                        <span>{ghostCount}</span>
+                                    </div>
+                                )}
+                            </>
                         )}
                         {/* Loading spinner */}
                         {isLoading && (
@@ -366,6 +393,16 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                     </div>
                 )}
 
+                {/* Schema Stale Warning */}
+                {schemaStaleWarning && !error && (
+                    <div className="px-3 py-2 bg-amber-500/10 border-b border-amber-500/30">
+                        <div className="flex items-center gap-2 text-amber-400 text-xs">
+                            <AlertTriangle size={12} />
+                            <span>Schema changed: {schemaStaleWarning}</span>
+                        </div>
+                    </div>
+                )}
+
                 {/* Deleted Ledger Warning */}
                 {isLedgerDeleted && (
                     <Tooltip>
@@ -389,7 +426,7 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
 
                 {/* Fields */}
                 {isExpanded && displayFields.length > 0 && (
-                    <div className="p-2 space-y-1 max-h-[320px] overflow-y-auto">
+                    <ScrollArea className="p-2 space-y-1 max-h-[320px]">
                         {displayFields.map((field, index) => (
                             <LedgerFieldOutput
                                 key={field.name}
@@ -402,7 +439,30 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                                 isLedgerDeleted={isLedgerDeleted}
                             />
                         ))}
-                    </div>
+
+                        {/* Ghost entries */}
+                        {ghosts && ghosts.length > 0 && (
+                            <div className="mt-3 pt-2 border-t border-zinc-300 dark:border-zinc-600">
+                                <div className="text-xs text-zinc-500 mb-2 flex items-center gap-1">
+                                    <span>⚠️</span>
+                                    <span>Ghost References ({ghosts.length})</span>
+                                </div>
+                                {ghosts.slice(0, 3).map((ghost, index) => (
+                                    <LedgerGhostField
+                                        key={ghost.entryId}
+                                        ghost={ghost}
+                                        field={displayFields[0]} // Use first field for display
+                                        showType={showFieldTypes}
+                                    />
+                                ))}
+                                {ghosts.length > 3 && (
+                                    <div className="text-xs text-zinc-500 mt-1 px-2">
+                                        ...and {ghosts.length - 3} more ghost entries
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </ScrollArea>
                 )}
 
                 {/* Empty State */}
@@ -444,30 +504,30 @@ const LedgerFieldOutput: React.FC<LedgerFieldOutputProps> = React.memo(({
     const fieldId = field.id ? sanitizeFieldId(field.id) : sanitizeFieldId(field.name);
     const handleId = `${nodeId}:${fieldId}`;
     const typeColor = typeBadgeColors[field.type] || typeBadgeColors.text;
-    
+
     // Get latest value for preview
     const latestEntry = entries[0];
     const latestValue = latestEntry?.data[field.name];
-    
+
     // Get stats for number fields
     const stats = useFieldStats(entries, field.name);
-    
+
     // Format preview text
     const previewText = useMemo(() => {
         if (!showLatestValue || entries.length === 0) return null;
-        
+
         switch (field.type) {
             case 'text':
             case 'long_text':
                 const text = String(latestValue || '');
                 return `Latest: "${text.substring(0, 40)}${text.length > 40 ? '...' : ''}"`;
-                
+
             case 'number':
                 if (stats) {
                     return `Latest: ${latestValue} (Avg: ${stats.avg?.toFixed(1)}, Min: ${stats.min}, Max: ${stats.max})`;
                 }
                 return `Latest: ${latestValue}`;
-                
+
             case 'date':
                 if (latestValue && typeof latestValue === 'string') {
                     const date = new Date(latestValue);
@@ -479,10 +539,10 @@ const LedgerFieldOutput: React.FC<LedgerFieldOutputProps> = React.memo(({
                     return 'Latest: Invalid date';
                 }
                 return 'Latest: No date';
-                
+
             case 'relation':
                 return `Latest: ${latestValue || 'No relation'}`;
-                
+
             default:
                 return `Latest: ${latestValue || 'Empty'}`;
         }
@@ -493,8 +553,8 @@ const LedgerFieldOutput: React.FC<LedgerFieldOutputProps> = React.memo(({
             <TooltipTrigger asChild>
                 <div
                     className={`relative flex items-center justify-between px-2 py-1.5 rounded transition-colors group ${
-                        isLedgerDeleted 
-                            ? 'bg-gray-200/50 dark:bg-zinc-800/30 cursor-not-allowed' 
+                        isLedgerDeleted
+                            ? 'bg-gray-200/50 dark:bg-zinc-800/30 cursor-not-allowed'
                             : 'bg-gray-200/50 dark:bg-zinc-800/30 hover:bg-gray-200 dark:hover:bg-zinc-800/50 cursor-pointer'
                     }`}
                 >
@@ -503,25 +563,21 @@ const LedgerFieldOutput: React.FC<LedgerFieldOutputProps> = React.memo(({
                         <GripVertical size={12} className="text-zinc-400 dark:text-zinc-600 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                         <span className="text-xs text-zinc-700 dark:text-zinc-300 truncate">{field.name}</span>
                         {showType && (
-                            <span 
+                            <span
                                 className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${typeColor.bg} ${typeColor.text}`}
                             >
                                 {field.type}
                             </span>
                         )}
                     </div>
-                    
+
                     {/* Output Handle */}
                     <Handle
                         type="source"
                         position={Position.Right}
                         id={handleId}
-                        className={`!w-3 !h-3 !border-2 !border-zinc-900 transition-colors ${
-                            isLedgerDeleted 
-                                ? '!bg-zinc-600 cursor-not-allowed' 
-                                : 'hover:!bg-emerald-400'
-                        }`}
-                        style={{ 
+                        className="!w-3 !h-3 !border-2 !border-zinc-900 transition-colors hover:!bg-emerald-400"
+                        style={{
                             right: '-6px',
                             backgroundColor: portColorMap[field.type] || portColorMap.text,
                             cursor: isLedgerDeleted ? 'not-allowed' : 'crosshair'
@@ -531,7 +587,7 @@ const LedgerFieldOutput: React.FC<LedgerFieldOutputProps> = React.memo(({
                     />
                 </div>
             </TooltipTrigger>
-            
+
             {/* Data Preview Tooltip */}
             {showLatestValue && previewText && !isLedgerDeleted && (
                 <TooltipContent side="left" className="max-w-[280px] bg-zinc-800 border-zinc-700">
@@ -547,3 +603,64 @@ const LedgerFieldOutput: React.FC<LedgerFieldOutputProps> = React.memo(({
 });
 
 LedgerFieldOutput.displayName = 'LedgerFieldOutput';
+
+/**
+ * Ghost field display component
+ */
+interface LedgerGhostFieldProps {
+    ghost: {
+        entryId: string;
+        displayText: string;
+        tooltip: string;
+        style: string;
+        originalData?: any;
+    };
+    field: SchemaField;
+    showType: boolean;
+}
+
+const LedgerGhostField: React.FC<LedgerGhostFieldProps> = React.memo(({
+    ghost,
+    field,
+    showType
+}) => {
+    const typeColor = typeBadgeColors[field.type] || typeBadgeColors.text;
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <div className="relative flex items-center justify-between px-2 py-1.5 rounded bg-red-50/50 dark:bg-red-900/10 border border-red-200/50 dark:border-red-800/30">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-xs text-red-600 dark:text-red-400 line-through truncate">
+                            {field.name}
+                        </span>
+                        {showType && (
+                            <span
+                                className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 ${typeColor.bg} ${typeColor.text}`}
+                            >
+                                {field.type}
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                        <span className="text-[10px] text-red-500">⚠️</span>
+                    </div>
+                </div>
+            </TooltipTrigger>
+
+            <TooltipContent side="left" className="max-w-[280px] bg-zinc-800 border-zinc-700">
+                <div className="text-xs text-zinc-300">
+                    <div className="font-medium text-red-400 mb-1">Ghost Entry: {ghost.entryId}</div>
+                    <div>{ghost.tooltip}</div>
+                    {ghost.originalData && (
+                        <div className="text-zinc-500 mt-1">
+                            Last value: {JSON.stringify(ghost.originalData[field.name] || 'empty')}
+                        </div>
+                    )}
+                </div>
+            </TooltipContent>
+        </Tooltip>
+    );
+});
+
+LedgerGhostField.displayName = 'LedgerGhostField';
