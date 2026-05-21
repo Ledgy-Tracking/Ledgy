@@ -33,8 +33,16 @@ export const calculateBoundingBox = (nodes: Node[]): ContainerBounds => {
     
     const minX = Math.min(...xs);
     const minY = Math.min(...ys);
-    const maxX = Math.max(...xs.map((x, i) => x + widths[i]));
-    const maxY = Math.max(...ys.map((y, i) => y + heights[i]));
+    let maxX = xs[0] + widths[0];
+    for (let i = 1; i < xs.length; i++) {
+        const val = xs[i] + widths[i];
+        if (val > maxX) maxX = val;
+    }
+    let maxY = ys[0] + heights[0];
+    for (let i = 1; i < ys.length; i++) {
+        const val = ys[i] + heights[i];
+        if (val > maxY) maxY = val;
+    }
     
     return {
         minX,
