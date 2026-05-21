@@ -61,10 +61,19 @@ export const useLedgerSourceData = (
             if (values.length === 0) {
                 result[fieldId] = null;
             } else {
+                let min = values[0];
+                let max = values[0];
+                let sum = 0;
+                for (let i = 0; i < values.length; i++) {
+                    const val = values[i];
+                    if (val < min) min = val;
+                    if (val > max) max = val;
+                    sum += val;
+                }
                 result[fieldId] = {
-                    avg: values.reduce((a, b) => a + b, 0) / values.length,
-                    min: Math.min(...values),
-                    max: Math.max(...values),
+                    avg: sum / values.length,
+                    min,
+                    max,
                     count: values.length,
                 };
             }
@@ -207,10 +216,20 @@ export const useFieldStats = (
         
         if (values.length === 0) return null;
         
+        let min = values[0];
+        let max = values[0];
+        let sum = 0;
+        for (let i = 0; i < values.length; i++) {
+            const val = values[i];
+            if (val < min) min = val;
+            if (val > max) max = val;
+            sum += val;
+        }
+
         return {
-            avg: values.reduce((a, b) => a + b, 0) / values.length,
-            min: Math.min(...values),
-            max: Math.max(...values),
+            avg: sum / values.length,
+            min,
+            max,
             count: values.length,
         };
     }, [entries, fieldId]);
