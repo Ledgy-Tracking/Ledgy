@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-27 - Prevent child components in lists from subscribing to global state
+**Learning:** In lists of components like `BackLinksPanel`, if each child component (`BackLinkItem`) independently hooks into global store methods (like `useLedgerStore`), it results in unnecessary store subscriptions per item, inflating re-renders and memory overhead when data changes. Also, performing O(N) operations inside a component map leads to O(L * N) complexity.
+**Action:** Always fetch global data in the parent component and pass it down as props, preferably memoized into efficient lookup structures like `Map` for O(1) reads inside list iteration loops.
