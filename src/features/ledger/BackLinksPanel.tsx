@@ -31,7 +31,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     }, [activeProfileId, targetEntryId, fetchBackLinks]);
 
     const schemasMap = useMemo(() => new Map(schemas.map(s => [s._id, s])), [schemas]);
-    const navProfileId = profileId || activeProfileId;
+    const navProfileId = profileId || activeProfileId || undefined;
 
     const entries = backLinks[targetEntryId] || [];
 
