@@ -7,19 +7,19 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
-import React from 'react';
+
 
 // Mock props for testing
 const createMockProps = (
-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
+    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' | null }> = {}
+): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' | null } => ({
     fromX: 100,
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
+    fromPosition: 'right' as any,
+    toPosition: 'left' as any,
+    connectionLineType: 'default' as any,
     connectionStatus: 'default',
     ...overrides
 });
