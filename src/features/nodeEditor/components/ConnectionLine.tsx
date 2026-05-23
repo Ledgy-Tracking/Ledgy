@@ -18,20 +18,20 @@ import { Toast } from '@/components/ui/toast';
 /**
  * Connection line visual states (AC2)
  */
-type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
+type CustomConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
 
 /**
  * Extended props including connection status and direction
  */
-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
-    connectionStatus?: ConnectionStatus;
+interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, 'connectionStatus'> {
+    connectionStatus?: CustomConnectionStatus | null;
     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
 }
 
 /**
  * Style configuration for different connection states
  */
-const getConnectionStyles = (status: ConnectionStatus) => {
+const getConnectionStyles = (status?: CustomConnectionStatus | null) => {
     switch (status) {
         case 'snapped':
             return {
