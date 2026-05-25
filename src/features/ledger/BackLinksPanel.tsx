@@ -30,7 +30,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
         return map;
     }, [schemas]);
 
-    const navProfileId = profileId || activeProfileId;
+    const navProfileId = profileId || activeProfileId || undefined;
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -73,7 +73,7 @@ interface BackLinkItemProps {
     targetEntryId: string;
     targetLedgerId: string;
     schemaMap: Map<string, any>;
-    navProfileId?: string;
+    navProfileId?: string | null;
 }
 
 const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, schemaMap, navProfileId }) => {
