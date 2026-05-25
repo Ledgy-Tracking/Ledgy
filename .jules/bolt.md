@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2024-05-18 - Avoid Over-Restricting Data Iteration in Unstructured Schemas
+**Learning:** While iterating only over pre-calculated schema fields is theoretically faster than iterating over an entire object (e.g., `Object.entries(entry.data)`), applying this pattern blindly in an app that uses duck-typing or relies on schema-less/legacy data entries can lead to regressions by silently dropping valid references not strictly defined in the schema.
+**Action:** When replacing `Object.entries()` with specific field iteration, confirm that the data layer strictly enforces schema adherence. If unstructured data or duck-typing is used, accept the O(K) object iteration overhead to preserve safety and correct functionality.
