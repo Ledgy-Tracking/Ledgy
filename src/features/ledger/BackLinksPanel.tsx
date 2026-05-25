@@ -20,8 +20,17 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
     targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks } = useLedgerStore();
+    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
+    const { profileId } = useParams<{ profileId: string }>();
+
+    const schemaMap = React.useMemo(() => {
+        const map = new Map();
+        schemas.forEach(s => map.set(s._id, s));
+        return map;
+    }, [schemas]);
+
+    const navProfileId = profileId || activeProfileId || undefined;
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -50,6 +59,8 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                         entry={entry}
                         targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
+                        schemaMap={schemaMap}
+                        navProfileId={navProfileId}
                     />
                 ))}
             </div>
@@ -61,15 +72,13 @@ interface BackLinkItemProps {
     entry: LedgerEntry;
     targetEntryId: string;
     targetLedgerId: string;
+    schemaMap: Map<string, any>;
+    navProfileId?: string | null;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
-    const { schemas } = useLedgerStore();
-    const { profileId } = useParams<{ profileId: string }>();
-    const { activeProfileId } = useProfileStore();
-
+const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, schemaMap, navProfileId }) => {
     // Find the schema for this entry's ledger
-    const entrySchema = schemas.find(s => s._id === entry.schemaId);
+    const entrySchema = schemaMap.get(entry.schemaId);
     const ledgerName = entrySchema?.name || entry.ledgerId;
 
     // Find which fields in this entry reference the target
@@ -83,11 +92,9 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => 
     }
 
     // Get display value (first field value or entry ID)
-    const displayValue = entrySchema?.fields.length
+    const displayValue = entrySchema?.fields?.length
         ? String(entry.data[entrySchema.fields[0].name] || entry._id)
         : entry._id;
-
-    const navProfileId = profileId || activeProfileId;
 
     return (
         <Card className="p-3 bg-gray-100 dark:bg-zinc-800/30 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-600 transition-colors">

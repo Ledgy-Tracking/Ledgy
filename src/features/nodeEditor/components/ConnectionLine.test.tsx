@@ -6,7 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
-import type { ConnectionLineComponentProps } from '@xyflow/react';
+import { Position, ConnectionLineType, type ConnectionLineComponentProps } from '@xyflow/react';
 import React from 'react';
 
 // Mock props for testing
@@ -17,12 +17,16 @@ const createMockProps = (
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
-    connectionStatus: 'default',
+    fromPosition: Position.Right,
+    toPosition: Position.Left,
+    connectionLineType: ConnectionLineType.Bezier,
+    connectionStatus: 'default' as any,
+    fromNode: undefined,
+    toNode: undefined,
+    fromHandle: undefined,
+    toHandle: undefined,
     ...overrides
-});
+} as any);
 
 describe('ConnectionLine', () => {
     it('should render without crashing', () => {
@@ -41,7 +45,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should render with valid status', () => {
-        const props = createMockProps({ connectionStatus: 'valid' });
+        const props = createMockProps({ connectionStatus: 'valid' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const line = container.querySelector('g[data-testid="connection-line"]');
@@ -49,7 +53,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should render with invalid status', () => {
-        const props = createMockProps({ connectionStatus: 'invalid' });
+        const props = createMockProps({ connectionStatus: 'invalid' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const line = container.querySelector('g[data-testid="connection-line"]');
@@ -81,7 +85,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should render glow effect for valid connections', () => {
-        const props = createMockProps({ connectionStatus: 'valid' });
+        const props = createMockProps({ connectionStatus: 'valid' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const glow = container.querySelector('.connection-line-glow');
@@ -97,7 +101,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should not render glow effect for invalid connections', () => {
-        const props = createMockProps({ connectionStatus: 'invalid' });
+        const props = createMockProps({ connectionStatus: 'invalid' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const glow = container.querySelector('.connection-line-glow');
@@ -113,7 +117,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should apply correct stroke color for valid status', () => {
-        const props = createMockProps({ connectionStatus: 'valid' });
+        const props = createMockProps({ connectionStatus: 'valid' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const path = container.querySelector('.connection-line-valid');
@@ -121,7 +125,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should apply correct stroke color for invalid status', () => {
-        const props = createMockProps({ connectionStatus: 'invalid' });
+        const props = createMockProps({ connectionStatus: 'invalid' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const path = container.querySelector('.connection-line-invalid');
@@ -138,7 +142,7 @@ describe('ConnectionLineWithStatus', () => {
     });
 
     it('should render status tooltip when message provided', () => {
-        const props = createMockProps({ connectionStatus: 'valid' });
+        const props = createMockProps({ connectionStatus: 'valid' as any });
         const { container } = render(
             <ConnectionLineWithStatus {...props} statusMessage="Valid Connection" />
         );
@@ -156,7 +160,7 @@ describe('ConnectionLineWithStatus', () => {
     });
 
     it('should apply valid styling to tooltip', () => {
-        const props = createMockProps({ connectionStatus: 'valid' });
+        const props = createMockProps({ connectionStatus: 'valid' as any });
         const { container } = render(
             <ConnectionLineWithStatus {...props} statusMessage="Valid" />
         );
@@ -166,7 +170,7 @@ describe('ConnectionLineWithStatus', () => {
     });
 
     it('should apply invalid styling to tooltip', () => {
-        const props = createMockProps({ connectionStatus: 'invalid' });
+        const props = createMockProps({ connectionStatus: 'invalid' as any });
         const { container } = render(
             <ConnectionLineWithStatus {...props} statusMessage="Invalid" />
         );
