@@ -1,0 +1,61 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -32,7 +32,6 @@
+     const snapToGrid = useUIStore(state => state.preferences.snapToGrid);
+
+     // Utility functions mapped to simple vars
+-    const getTypeDisplayName = (type: string) => type; // Will be mapped to proper translation
+
+     // 1. Initial State Hydration with useLedgerData and useLiveQuery
+     const hydrationResult = useLedgerData();
+@@ -42,7 +41,6 @@
+
+     // Expose node state hooks directly
+     const subscribeNode = useNodeStore(state => state.subscribeNode);
+-    const unsubscribeNode = useNodeStore(state => state.unsubscribeNode);
+
+     // Story 4.5: Debounced sync for rapid changes
+     const debouncedSaveCanvas = useNodeStore(state => state.debouncedSaveCanvas);
+@@ -322,7 +320,6 @@
+         );
+
+         const unsubscribeSchemaChanges = useSchemaStore.subscribe(
+-            (state) => state.schemas,
+             () => {
+                 // When schemas change, re-validate all edges
+                 const currentNodes = useNodeStore.getState().nodes;
+@@ -669,14 +666,14 @@
+                 onNodesChange={onNodesChange}
+                 onEdgesChange={onEdgesChange}
+                 onConnect={onConnect}
+-                onConnectStart={onConnectStart}
++                onConnectStart={onConnectStart as any}
+                 onConnectEnd={onConnectEnd}
+                 onSelectionChange={handleSelectionChange}
+                 isValidConnection={isValidConnection}
+                 nodeTypes={nodeTypes}
+                 edgeTypes={edgeTypes}
+                 defaultEdgeOptions={defaultEdgeOptions}
+-                connectionLineComponent={ConnectionLine}
++                connectionLineComponent={ConnectionLine as any}
+                 fitView
+                 selectionOnDrag={true}
+                 selectionKeyCode={['Shift']}
+@@ -717,7 +714,7 @@
+                 onNodesChange={onNodesChange}
+                 onEdgesChange={onEdgesChange}
+                 onConnect={onConnect}
+-                onConnectStart={onConnectStart}
++                onConnectStart={onConnectStart as any}
+                 onConnectEnd={onConnectEnd}
+                 onViewportChange={onViewportChange}
+                 onNodeDragStart={onNodeDragStart}
+@@ -727,7 +724,7 @@
+                 nodeTypes={nodeTypes}
+                 edgeTypes={edgeTypes}
+                 defaultEdgeOptions={defaultEdgeOptions}
+-                connectionLineComponent={ConnectionLine}
++                connectionLineComponent={ConnectionLine as any}
+                 defaultViewport={initialViewport}
+                 panActivationKeyCode={['Space']}
+                 selectionKeyCode={['Shift']}

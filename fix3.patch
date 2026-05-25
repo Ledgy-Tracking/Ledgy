@@ -1,0 +1,45 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -40,7 +40,7 @@
+     });
+
+     it('should render with valid status', () => {
+-        const props = createMockProps({ connectionStatus: 'valid' });
++        const props = createMockProps({ connectionStatus: 'valid' as any });
+         const { container } = render(<ConnectionLine {...props} />);
+
+@@ -49,7 +49,7 @@
+     });
+
+     it('should render with invalid status', () => {
+-        const props = createMockProps({ connectionStatus: 'invalid' });
++        const props = createMockProps({ connectionStatus: 'invalid' as any });
+         const { container } = render(<ConnectionLine {...props} />);
+
+@@ -89,15 +89,15 @@
+     });
+
+     it('should render glow effect for valid connections', () => {
+-        const props = createMockProps({ connectionStatus: 'valid' });
++        const props = createMockProps({ connectionStatus: 'valid' as any });
+         const { container } = render(<ConnectionLine {...props} />);
+
+         const glow = container.querySelector('.connection-line-glow');
+         expect(glow).toBeInTheDocument();
+     });
+
+     it('should not render glow effect for invalid connections', () => {
+-        const props = createMockProps({ connectionStatus: 'invalid' });
++        const props = createMockProps({ connectionStatus: 'invalid' as any });
+         const { container } = render(<ConnectionLine {...props} />);
+
+         const glow = container.querySelector('.connection-line-glow');
+@@ -105,7 +105,7 @@
+     });
+
+     it('should apply correct stroke color for valid status', () => {
+-        const props = createMockProps({ connectionStatus: 'valid' });
++        const props = createMockProps({ connectionStatus: 'valid' as any });
+         const { container } = render(<ConnectionLine {...props} />);
+
+         const path = container.querySelector('.connection-line-valid');
