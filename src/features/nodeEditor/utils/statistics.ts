@@ -101,11 +101,21 @@ export const calculateArithmetic = (
         case 'average':
             return { value: values.reduce((a, b) => a + b, 0) / values.length };
 
-        case 'min':
-            return { value: Math.min(...values) };
+        case 'min': {
+            let min = Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (values[i] < min) min = values[i];
+            }
+            return { value: min === Infinity ? null : min };
+        }
 
-        case 'max':
-            return { value: Math.max(...values) };
+        case 'max': {
+            let max = -Infinity;
+            for (let i = 0; i < values.length; i++) {
+                if (values[i] > max) max = values[i];
+            }
+            return { value: max === -Infinity ? null : max };
+        }
 
         default:
             return { value: null, error: 'Unknown operation' };

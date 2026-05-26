@@ -26,23 +26,31 @@ export interface GroupCreationResult {
  * Calculate bounding box of nodes
  */
 export const calculateBoundingBox = (nodes: Node[]): ContainerBounds => {
-    const xs = nodes.map(n => n.position.x);
-    const ys = nodes.map(n => n.position.y);
-    const widths = nodes.map(n => (n.width || 150));
-    const heights = nodes.map(n => (n.height || 100));
-    
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs.map((x, i) => x + widths[i]));
-    const maxY = Math.max(...ys.map((y, i) => y + heights[i]));
-    
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        const x = n.position.x;
+        const y = n.position.y;
+        const w = n.width || 150;
+        const h = n.height || 100;
+
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x + w > maxX) maxX = x + w;
+        if (y + h > maxY) maxY = y + h;
+    }
+
     return {
-        minX,
-        minY,
-        maxX,
-        maxY,
-        width: maxX - minX,
-        height: maxY - minY,
+        minX: minX === Infinity ? 0 : minX,
+        minY: minY === Infinity ? 0 : minY,
+        maxX: maxX === -Infinity ? 0 : maxX,
+        maxY: maxY === -Infinity ? 0 : maxY,
+        width: maxX === -Infinity ? 0 : maxX - minX,
+        height: maxY === -Infinity ? 0 : maxY - minY,
     };
 };
 
