@@ -397,6 +397,7 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleLeftSidebar}
+                                            aria-expanded={leftSidebarOpen}
                                             aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
@@ -422,6 +423,7 @@ export const AppShell: React.FC = () => {
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => setDashboardViewMode(prev => prev === 'grid' ? 'table' : 'grid')}
+                                                aria-pressed={dashboardViewMode === 'table'}
                                                 aria-label={dashboardViewMode === 'grid' ? 'Switch to Table View' : 'Switch to Grid View'}
                                                 className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                             >
@@ -439,6 +441,7 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleTheme}
+                                            aria-pressed={theme === 'dark'}
                                             aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
@@ -456,6 +459,7 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleRightInspector}
+                                            aria-expanded={rightInspectorOpen}
                                             aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
