@@ -26,15 +26,31 @@ export interface GroupCreationResult {
  * Calculate bounding box of nodes
  */
 export const calculateBoundingBox = (nodes: Node[]): ContainerBounds => {
-    const xs = nodes.map(n => n.position.x);
-    const ys = nodes.map(n => n.position.y);
-    const widths = nodes.map(n => (n.width || 150));
-    const heights = nodes.map(n => (n.height || 100));
+    // ⚡ Bolt: Replace chained .map() and Math.max/min(...array) with single-pass loop
+    // Avoids O(N) intermediate array allocations and "Maximum call stack size exceeded" errors
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
     
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs.map((x, i) => x + widths[i]));
-    const maxY = Math.max(...ys.map((y, i) => y + heights[i]));
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const x = node.position.x;
+        const y = node.position.y;
+        const w = node.width || 150;
+        const h = node.height || 100;
+
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x + w > maxX) maxX = x + w;
+        if (y + h > maxY) maxY = y + h;
+    }
+
+    // Handle empty nodes array case gracefully, though validateGrouping checks for length >= 2
+    if (minX === Infinity) minX = 0;
+    if (minY === Infinity) minY = 0;
+    if (maxX === -Infinity) maxX = 0;
+    if (maxY === -Infinity) maxY = 0;
     
     return {
         minX,
