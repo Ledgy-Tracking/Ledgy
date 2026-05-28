@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2025-05-23 - Avoid redundant map lookups in Array.prototype.sort
+**Learning:** In list rendering components like `LedgerTable`, repeatedly calling `Array.prototype.find` on a schema array inside a `.sort()` comparator creates $O(N \log N \cdot F)$ complexity, where $N$ is the number of items and $F$ is the number of fields.
+**Action:** When sorting data based on external metadata (like a schema configuration), map the sort configuration to an array of objects containing the pre-resolved metadata once before the sort operation. This hoists the $O(F)$ lookup out of the comparator, reducing redundant searches and avoiding unnecessary re-renders or main thread blocking on large datasets.
