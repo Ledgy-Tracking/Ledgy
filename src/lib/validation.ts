@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { LedgerSchema } from "../types/ledger";
+import { validateRegexPattern } from "../utils/security";
 
 export class ValidationError extends Error {
   constructor(zodError: z.ZodError) {
@@ -25,10 +26,10 @@ export function buildZodSchemaFromLedger(
         if (field.minLength !== undefined) base = (base as z.ZodString).min(field.minLength);
         if (field.maxLength !== undefined) base = (base as z.ZodString).max(field.maxLength);
         if (field.pattern !== undefined) {
-          try {
+          if (validateRegexPattern(field.pattern)) {
             base = (base as z.ZodString).regex(new RegExp(field.pattern));
-          } catch {
-            console.warn(`Invalid regex pattern for field "${field.name}": ${field.pattern}`);
+          } else {
+            console.warn(`Invalid or unsafe regex pattern for field "${field.name}": ${field.pattern}`);
           }
         }
         break;
