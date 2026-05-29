@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2024-05-29 - Avoid Call Stack Limits with large Math.max/min
+**Learning:** Spreading large computation arrays into `Math.min(...values)` or `Math.max(...values)` causes "Maximum call stack size exceeded" errors in heavy worker computations. Use explicit `for` loops with `Number.isNaN()` checks to maintain NaN propagation parity with native Math behavior.
+**Action:** When calculating `min`/`max` over potentially large arrays, avoid using spread syntax (`Math.max(...array)`) combined with array mapping (`array.map(...)`). Accumulate min/max values using a single-pass `for` loop.
