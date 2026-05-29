@@ -102,19 +102,25 @@ export const calculateArithmetic = (
             return { value: values.reduce((a, b) => a + b, 0) / values.length };
 
         case 'min': {
+            if (values.length === 0) return { value: null };
             let min = Infinity;
+            let hasValues = false;
             for (let i = 0; i < values.length; i++) {
+                hasValues = true;
                 if (values[i] < min) min = values[i];
             }
-            return { value: min === Infinity ? null : min };
+            return { value: hasValues ? min : null };
         }
 
         case 'max': {
+            if (values.length === 0) return { value: null };
             let max = -Infinity;
+            let hasValues = false;
             for (let i = 0; i < values.length; i++) {
+                hasValues = true;
                 if (values[i] > max) max = values[i];
             }
-            return { value: max === -Infinity ? null : max };
+            return { value: hasValues ? max : null };
         }
 
         default:
