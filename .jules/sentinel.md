@@ -42,3 +42,8 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+
+## 2024-05-30 - Regular Expression Denial of Service (ReDoS)
+**Vulnerability:** User-provided regular expression patterns for ledger schema fields were passed directly to `new RegExp()` and Zod's `regex()` validator without checks. An attacker could craft a computationally expensive regex (e.g., `(a+)+`) causing the application to hang or crash when processing inputs.
+**Learning:** All user-provided regex inputs must be validated and bounded before compilation. The browser's native RegExp engine does not provide built-in protection against catastrophic backtracking.
+**Prevention:** Implement length limits (e.g., 250 characters) and use heuristics to block known dangerous patterns (like nested quantifiers) before compiling the pattern.
