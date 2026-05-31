@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useEffect, useRef } from 'react';
 import { X, Keyboard } from 'lucide-react';
 import { Dialog } from '@/components/ui/dialog';

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { CanvasNode, CanvasEdge } from '../../../types/nodeEditor';
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { create } from 'zustand';
 import { SchemaField, LedgerSchema } from '../types/ledger';
 import { useErrorStore } from './useErrorStore';
