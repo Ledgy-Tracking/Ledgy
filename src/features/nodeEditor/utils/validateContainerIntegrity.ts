@@ -25,10 +25,16 @@ export const validateContainerIntegrity = (
     const errors: string[] = [];
     let repaired = [...nodes];
     
+    // Pre-index nodes for O(1) lookups
+    const nodesById = new Map<string, Node>();
+    for (let i = 0; i < nodes.length; i++) {
+        nodesById.set(nodes[i].id, nodes[i]);
+    }
+
     // 1. Check for orphaned children (React Flow v12 uses parentId)
     repaired.forEach((node, index) => {
         if (node.parentId) {
-            const parent = nodes.find(n => n.id === node.parentId);
+            const parent = nodesById.get(node.parentId);
             if (!parent) {
                 errors.push(`Orphaned child: ${node.id} references missing parent ${node.parentId}`);
                 // Auto-repair: clear parentId
@@ -44,7 +50,7 @@ export const validateContainerIntegrity = (
             const rawChildIds = node.data.childNodeIds;
             const childNodeIds: string[] = Array.isArray(rawChildIds) ? rawChildIds : [];
             const missingChildren = childNodeIds.filter(
-                childId => !nodes.find(n => n.id === childId)
+                childId => !nodesById.has(childId)
             );
             
             if (missingChildren.length > 0) {
@@ -62,13 +68,20 @@ export const validateContainerIntegrity = (
             }
             
             // Check that all children actually reference this container (using parentId)
-            const children = nodes.filter(n => childNodeIds.includes(n.id));
-            const misparentedChildren = children.filter(n => n.parentId !== node.id);
-            if (misparentedChildren.length > 0) {
-                errors.push(`Container ${node.id} has children with wrong parentId: ${misparentedChildren.map(n => n.id).join(', ')}`);
+            const misparentedChildrenIds = new Set<string>();
+            for (let i = 0; i < childNodeIds.length; i++) {
+                const childId = childNodeIds[i];
+                const childNode = nodesById.get(childId);
+                if (childNode && childNode.parentId !== node.id) {
+                    misparentedChildrenIds.add(childId);
+                }
+            }
+
+            if (misparentedChildrenIds.size > 0) {
+                errors.push(`Container ${node.id} has children with wrong parentId: ${Array.from(misparentedChildrenIds).join(', ')}`);
                 // Auto-repair: fix parentId on children
                 repaired = repaired.map(n => {
-                    if (misparentedChildren.find(c => c.id === n.id)) {
+                    if (misparentedChildrenIds.has(n.id)) {
                         return { ...n, parentId: node.id, extent: 'parent' as const };
                     }
                     return n;
@@ -78,10 +91,14 @@ export const validateContainerIntegrity = (
     });
     
     // 3. Prevent circular references
+    const repairedById = new Map<string, Node>();
+    for (let i = 0; i < repaired.length; i++) {
+        repairedById.set(repaired[i].id, repaired[i]);
+    }
     const hasCircularRef = (nodeId: string, visited = new Set<string>()): boolean => {
         if (visited.has(nodeId)) return true;
         visited.add(nodeId);
-        const node = repaired.find(n => n.id === nodeId);
+        const node = repairedById.get(nodeId);
         if (node?.parentId) {
             return hasCircularRef(node.parentId, visited);
         }
@@ -96,6 +113,7 @@ export const validateContainerIntegrity = (
             if (index !== -1) {
                 const { parentId: _, extent: __, ...rest } = node;
                 repaired[index] = rest as Node;
+                repairedById.set(rest.id, rest as Node);
             }
         }
     });
@@ -106,6 +124,13 @@ export const validateContainerIntegrity = (
             const data = node.data;
             if (!data || typeof data !== 'object') {
                 errors.push(`Container ${node.id} has invalid data structure`);
+                // ⚡ Bolt: Replace chained .filter().map() with single-pass loop
+                const validChildNodeIds: string[] = [];
+                for (let i = 0; i < nodes.length; i++) {
+                    if (nodes[i].parentId === node.id) {
+                        validChildNodeIds.push(nodes[i].id);
+                    }
+                }
                 // Auto-repair: set default data
                 repaired[index] = {
                     ...node,
@@ -113,7 +138,7 @@ export const validateContainerIntegrity = (
                         type: 'container',
                         label: 'Group',
                         isCollapsed: false,
-                        childNodeIds: nodes.filter(n => n.parentId === node.id).map(n => n.id),
+                        childNodeIds: validChildNodeIds,
                         createdAt: new Date().toISOString(),
                     },
                 };
