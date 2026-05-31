@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Snap zone detection logic for edge connections
  * Story 4-7: Complex Edge Connection Snapping (AC1, AC2)

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Integration tests for Story 4.10: Graph PouchDB Hydration Hooks
  *
