@@ -42,3 +42,8 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+
+## 2024-05-25 - Prevent Regular Expression Denial of Service (ReDoS)
+**Vulnerability:** The application allowed users to define custom regular expressions for fields without sufficient validation. Attackers could enter malicious regex patterns (like `(a+)+`) leading to catastrophic backtracking, causing the client or server to hang and exhausting resources when evaluating matching inputs.
+**Learning:** Any user-provided regular expression must be treated as untrusted input. Attempting to just compile it via `new RegExp()` does not prevent ReDoS because catastrophic backtracking occurs at execution/validation time, not necessarily compilation time.
+**Prevention:** Validate user-supplied regular expressions with strict length limits and heuristics that block dangerous constructs (like nested quantifiers) before compiling or utilizing them in schema evaluation.
