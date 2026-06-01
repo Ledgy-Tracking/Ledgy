@@ -397,7 +397,8 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleLeftSidebar}
-                                            aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                                            aria-label="Toggle sidebar"
+                                            aria-expanded={leftSidebarOpen}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
@@ -422,7 +423,8 @@ export const AppShell: React.FC = () => {
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => setDashboardViewMode(prev => prev === 'grid' ? 'table' : 'grid')}
-                                                aria-label={dashboardViewMode === 'grid' ? 'Switch to Table View' : 'Switch to Grid View'}
+                                                aria-label="Grid view mode"
+                                                aria-pressed={dashboardViewMode === 'grid'}
                                                 className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                             >
                                                 {dashboardViewMode === 'grid' ? <Table size={18} /> : <Grid3X3 size={18} />}
@@ -439,7 +441,8 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleTheme}
-                                            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                            aria-label="Dark mode"
+                                            aria-pressed={theme === 'dark'}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
@@ -456,7 +459,8 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleRightInspector}
-                                            aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
+                                            aria-label="Toggle inspector"
+                                            aria-expanded={rightInspectorOpen}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             <PanelRightClose size={18} className={rightInspectorOpen ? '' : 'rotate-180'} />
