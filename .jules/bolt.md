@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2024-03-24 - O(N^2) Validation Performance Bottleneck
+**Learning:** Found an O(N^2) performance bottleneck in `validateContainerIntegrity.ts` where `.find()` and `.filter()` operations were used repeatedly inside a `.forEach()` loop to resolve parent-child relationships and fix node hierarchy mismatches. This caused severe lag for large flowcharts because each lookup traversed the entire `nodes` array again.
+**Action:** Replaced nested array loops with pre-indexed `Map` objects for O(1) lookups and `Set` structures to evaluate relationships instantly, resulting in significantly faster graph auto-repair phases.
