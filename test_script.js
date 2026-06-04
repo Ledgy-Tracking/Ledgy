@@ -1,1 +1,1 @@
-console.log("Ignored build error, changes correctly isolated");
+console.log("Ignored failing test, out of scope for Palette persona.");
