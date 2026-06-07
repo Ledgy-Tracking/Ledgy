@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
-import { LedgerEntry } from '../../types/ledger';
+import { LedgerEntry, LedgerSchema } from '../../types/ledger';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,7 +23,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { profileId } = useParams<{ profileId: string }>();
     const { activeProfileId } = useProfileStore();
-    const navProfileId = profileId || activeProfileId;
+    const navProfileId = profileId || activeProfileId || undefined;
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -60,8 +60,6 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
         </div>
     );
 };
-
-import { LedgerSchema } from '../../types/ledger';
 
 interface BackLinkItemProps {
     entry: LedgerEntry;
