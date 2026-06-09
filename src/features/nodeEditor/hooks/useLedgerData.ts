@@ -90,20 +90,31 @@ export async function hydrateLedgerSourceNode(
 
     if (numberFields.length > 0 && filteredEntries.length > 0) {
       numberFields.forEach(field => {
-        const values = filteredEntries
-          .map(e => e.data[field.id])
-          .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+        let sum = 0;
+        let min = Infinity;
+        let max = -Infinity;
+        let count = 0;
 
-        if (values.length > 0) {
+        for (const entry of filteredEntries) {
+          const v = entry.data[field.id];
+          if (typeof v === 'number' && !isNaN(v)) {
+            sum += v;
+            if (v < min) min = v;
+            if (v > max) max = v;
+            count++;
+          }
+        }
+
+        if (count > 0) {
           aggregates.sum = aggregates.sum || {};
           aggregates.avg = aggregates.avg || {};
           aggregates.min = aggregates.min || {};
           aggregates.max = aggregates.max || {};
 
-          aggregates.sum[field.id] = values.reduce((a, b) => a + b, 0);
-          aggregates.avg[field.id] = aggregates.sum[field.id] / values.length;
-          aggregates.min[field.id] = Math.min(...values);
-          aggregates.max[field.id] = Math.max(...values);
+          aggregates.sum[field.id] = sum;
+          aggregates.avg[field.id] = sum / count;
+          aggregates.min[field.id] = min;
+          aggregates.max[field.id] = max;
         }
       });
     }
