@@ -9,9 +9,11 @@ import {
 } from '../../../src/features/nodeEditor/utils/groupNodes';
 
 // Mock nanoid
-vi.mock('nanoid', () => ({
-    nanoid: vi.fn(() => 'abc123'),
-}));
+Object.defineProperty(globalThis, 'crypto', {
+    value: {
+        randomUUID: vi.fn(() => 'abc123xyz')
+    }
+});
 
 // Mock error store
 vi.mock('../../../src/stores/useErrorStore', () => ({
