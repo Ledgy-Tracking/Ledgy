@@ -11,8 +11,8 @@ import type { ConnectionLineComponentProps } from '@xyflow/react';
 
 // Mock props for testing
 const createMockProps = (
-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
+    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' | null | undefined }> = {}
+): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' | null | undefined } => ({
     fromX: 100,
     fromY: 100,
     toX: 300,
@@ -20,7 +20,7 @@ const createMockProps = (
     fromPosition: 'right' as any,
     toPosition: 'left' as any,
     connectionLineType: 'default' as any,
-    connectionStatus: 'default',
+    connectionStatus: null,
     ...overrides
 });
 
@@ -33,7 +33,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should render with default status', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: undefined });
         const { container } = render(<ConnectionLine {...props} />);
         
         const line = container.querySelector('g[data-testid="connection-line"]');
@@ -89,7 +89,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should not render glow effect for non-valid connections', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: undefined });
         const { container } = render(<ConnectionLine {...props} />);
         
         const glow = container.querySelector('.connection-line-glow');
@@ -105,7 +105,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should apply correct stroke color for default status', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: undefined });
         const { container } = render(<ConnectionLine {...props} />);
         
         const path = container.querySelector('.connection-line-default');

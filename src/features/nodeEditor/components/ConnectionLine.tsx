@@ -23,8 +23,8 @@ type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
 /**
  * Extended props including connection status and direction
  */
-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
-    connectionStatus?: ConnectionStatus;
+interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, "connectionStatus"> {
+    connectionStatus?: "valid" | "invalid" | "default" | "snapped" | null | undefined;
     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
 }
 
@@ -74,7 +74,7 @@ const getConnectionStyles = (status: ConnectionStatus) => {
  * Renders during edge drag operations to show the potential connection.
  * Uses cubic Bezier curves for smooth, professional appearance.
  */
-export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
+export const ConnectionLine = ({
     fromX,
     fromY,
     toX,
@@ -84,7 +84,7 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     fromNode,
     fromHandle,
     sourceDirection = 'right'
-}) => {
+}: ExtendedConnectionLineProps) => {
     // Calculate Bezier path using actual handle direction
     const path = useMemo(() => {
         return getConnectionPath(
