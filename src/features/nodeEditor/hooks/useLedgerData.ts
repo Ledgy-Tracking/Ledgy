@@ -100,10 +100,20 @@ export async function hydrateLedgerSourceNode(
           aggregates.min = aggregates.min || {};
           aggregates.max = aggregates.max || {};
 
-          aggregates.sum[field.id] = values.reduce((a, b) => a + b, 0);
-          aggregates.avg[field.id] = aggregates.sum[field.id] / values.length;
-          aggregates.min[field.id] = Math.min(...values);
-          aggregates.max[field.id] = Math.max(...values);
+          let sum = 0;
+          let min = Infinity;
+          let max = -Infinity;
+          for (let i = 0; i < values.length; i++) {
+              const val = values[i];
+              sum += val;
+              if (val < min) min = val;
+              if (val > max) max = val;
+          }
+
+          aggregates.sum[field.id] = sum;
+          aggregates.avg[field.id] = sum / values.length;
+          aggregates.min[field.id] = min;
+          aggregates.max[field.id] = max;
         }
       });
     }
