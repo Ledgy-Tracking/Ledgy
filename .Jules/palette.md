@@ -9,3 +9,11 @@
 ## 2025-02-23 - Playwright Verification Context & Dashboard Icons
 **Learning:** The Dashboard page contains heavily icon-centric action bars (e.g. Inspector open/close, view toggles) which completely lack screen reader accessibility. Verifying these required automating the TOTP and Profile setup flows, revealing that Playwright struggles to click nested elements inside the Profile Card unless targeting specific text nodes.
 **Action:** When adding `aria-labels` to complex dashboards, always ensure `aria-pressed` states are added for toggles. When verifying via Playwright, bypass profile card container clicks by specifically locating and clicking the nested `h3` profile name element.
+
+## 2024-05-18 - ARIA States for Structural Toggles
+**Learning:** Structural navigation elements (like sidebars and inspectors) that use visual shifts (like translating off-screen) often lack programmatic state indicators (`aria-expanded`) even if they have `aria-label`s. This makes it impossible for screen reader users to know if the panel is currently open or closed.
+**Action:** When working with layout toggles that expand/collapse main structural panels, always dynamically bind `aria-expanded={isOpen}` to the toggle buttons.
+
+## 2024-05-18 - ARIA States for Custom Segmented Controls
+**Learning:** When using generic button components to build custom segmented controls or radio-group-like selectors (e.g., Sync Direction toggles), the active state is usually conveyed via CSS classes (e.g., `bg-background` vs `hover:bg-zinc-800`), which screen readers cannot parse.
+**Action:** Always add `aria-pressed={isActive}` to custom buttons functioning as segmented controls so the active selection is programmatically clear.
