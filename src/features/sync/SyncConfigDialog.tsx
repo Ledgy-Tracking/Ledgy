@@ -186,6 +186,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                             ? 'bg-background text-foreground shadow-sm'
                                             : 'text-muted-foreground hover:text-foreground'
                                             }`}
+                                        aria-pressed={syncDirection === 'two-way'}
                                     >
                                         <ArrowRightLeft size={14} /> Two-way
                                     </Button>
@@ -198,6 +199,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                             ? 'bg-background text-foreground shadow-sm'
                                             : 'text-muted-foreground hover:text-foreground'
                                             }`}
+                                        aria-pressed={syncDirection === 'upload'}
                                     >
                                         <Upload size={14} /> Upload only
                                     </Button>
