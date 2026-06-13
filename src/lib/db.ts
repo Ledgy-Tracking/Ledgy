@@ -1852,7 +1852,20 @@ export function setup_sync(
             if (e.message.includes('Insecure connection')) {
                 throw e; // Rethrow security error
             }
-            console.error('Invalid remote URL:', remoteUrl);
+
+            // Sanitize URL before logging
+            let sanitizedUrl = remoteUrl;
+            try {
+                const parsedUrl = new URL(remoteUrl);
+                if (parsedUrl.password) {
+                    parsedUrl.password = '***';
+                }
+                sanitizedUrl = parsedUrl.toString();
+            } catch {
+                // If parsing fails, use regex to mask potential passwords in auth strings
+                sanitizedUrl = remoteUrl.replace(/(?:\/\/[^:]+:)([^@]+)(?=@)/, '***');
+            }
+            console.error('Invalid remote URL:', sanitizedUrl);
         }
     }
 
