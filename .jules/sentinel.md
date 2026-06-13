@@ -42,3 +42,7 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+## 2025-06-13 - Sync Credential Leak in Logs
+**Vulnerability:** The application was logging the full remote CouchDB URL, which could contain the user's plain-text password, when a connection or parsing error occurred during sync setup.
+**Learning:** Even when errors occur early in a setup process, any constructed URLs that include credentials must be sanitized before being passed to `console.error` or any logging system.
+**Prevention:** Always parse URLs and mask the `.password` field (e.g., using `url.password = '***'`) before logging them. If parsing fails, use regex or redact the string to prevent credential leakage.
