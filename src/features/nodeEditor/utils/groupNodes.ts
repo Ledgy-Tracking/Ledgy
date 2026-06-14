@@ -1,5 +1,4 @@
 import { Node } from '@xyflow/react';
-import { nanoid } from 'nanoid';
 import { useErrorStore } from '../../../stores/useErrorStore';
 
 /**
@@ -26,15 +25,29 @@ export interface GroupCreationResult {
  * Calculate bounding box of nodes
  */
 export const calculateBoundingBox = (nodes: Node[]): ContainerBounds => {
-    const xs = nodes.map(n => n.position.x);
-    const ys = nodes.map(n => n.position.y);
-    const widths = nodes.map(n => (n.width || 150));
-    const heights = nodes.map(n => (n.height || 100));
-    
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs.map((x, i) => x + widths[i]));
-    const maxY = Math.max(...ys.map((y, i) => y + heights[i]));
+    if (nodes.length === 0) {
+        return { minX: 0, minY: 0, maxX: 0, maxY: 0, width: 0, height: 0 };
+    }
+
+    // ⚡ Bolt: Replace map + Math.min/max spread with single-pass loop
+    // Avoids Maximum Call Stack Size Exceeded and intermediate arrays
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        const x = n.position.x;
+        const y = n.position.y;
+        const width = n.width || 150;
+        const height = n.height || 100;
+
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x + width > maxX) maxX = x + width;
+        if (y + height > maxY) maxY = y + height;
+    }
     
     return {
         minX,
@@ -108,7 +121,7 @@ export const createContainerFromSelection = (
     const bounds = calculateBoundingBox(selectedNodes);
     
     // Create container node
-    const containerId = `container_${nanoid(6)}`;
+    const containerId = `container_${Math.random().toString(36).substring(2, 8)}`;
     const container: Node = {
         id: containerId,
         type: 'container',
