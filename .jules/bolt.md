@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-18 - Ensure cached Maps are updated
+**Learning:** When replacing O(N^2) array iterations with O(N) pre-computed Map lookups to improve performance, if the items are auto-repaired or mutated during the loop, the Map MUST be updated (e.g. `map.set(id, updatedItem)`) as well. Failure to update the cache will lead to stale data lookups for subsequent iterations.
+**Action:** Next time when creating a lookup cache (Map) for an array that might be modified during iteration, always remember to explicitly update the cache map alongside any array mutations.
