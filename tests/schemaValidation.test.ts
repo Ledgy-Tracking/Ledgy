@@ -388,7 +388,7 @@ describe('Schema Strict Validation Engine', () => {
         ]);
         expect(() => validateEntryAgainstSchema({ code: 'hello' }, schema)).not.toThrow();
         expect(() => validateEntryAgainstSchema({ code: 'Hello' }, schema)).not.toThrow();
-        expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid regex pattern'));
+        expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Skipping invalid or dangerous regex pattern'));
         warnSpy.mockRestore();
     });
 });
