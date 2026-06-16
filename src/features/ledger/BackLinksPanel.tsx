@@ -20,8 +20,9 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
     targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks } = useLedgerStore();
+    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
+    const { profileId } = useParams<{ profileId: string }>();
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -35,6 +36,11 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
         return null;
     }
 
+    const navProfileId = profileId || activeProfileId;
+
+    // ⚡ Bolt Optimization: Lifted store subscriptions out of BackLinkItem and into the parent BackLinksPanel.
+    // This prevents N child components from independently subscribing to useLedgerStore and useProfileStore,
+    // reducing memory overhead and preventing unnecessary cascading re-renders when global state changes.
     return (
         <div className="mt-4 border-t border-zinc-200 dark:border-zinc-800 pt-4">
             <div className="flex items-center gap-2 mb-3">
@@ -50,6 +56,8 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                         entry={entry}
                         targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
+                        schemas={schemas}
+                        navProfileId={navProfileId}
                     />
                 ))}
             </div>
@@ -61,12 +69,11 @@ interface BackLinkItemProps {
     entry: LedgerEntry;
     targetEntryId: string;
     targetLedgerId: string;
+    schemas: import('../../types/ledger').LedgerSchema[];
+    navProfileId: string | undefined;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
-    const { schemas } = useLedgerStore();
-    const { profileId } = useParams<{ profileId: string }>();
-    const { activeProfileId } = useProfileStore();
+const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, schemas, navProfileId }) => {
 
     // Find the schema for this entry's ledger
     const entrySchema = schemas.find(s => s._id === entry.schemaId);
@@ -86,8 +93,6 @@ const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => 
     const displayValue = entrySchema?.fields.length
         ? String(entry.data[entrySchema.fields[0].name] || entry._id)
         : entry._id;
-
-    const navProfileId = profileId || activeProfileId;
 
     return (
         <Card className="p-3 bg-gray-100 dark:bg-zinc-800/30 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-600 transition-colors">
