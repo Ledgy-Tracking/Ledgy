@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2026-04-24 - Avoid Math.min/max spread and chained filters on large datasets
+**Learning:** In `useLedgerSourceData.ts`, calculating statistics using `Math.min(...values)` throws a "Maximum call stack size exceeded" error when `values` has too many elements (e.g., thousands of ledger entries). Additionally, chaining `.map().filter()` creates unnecessary intermediate array allocations, degrading performance.
+**Action:** When calculating statistics or extracting data from large arrays (like ledger entries), replace chained array methods and spread operators with a single-pass `for` loop to compute all metrics simultaneously in O(N) time with O(1) memory overhead.
