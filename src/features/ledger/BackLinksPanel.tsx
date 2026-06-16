@@ -36,7 +36,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
         return null;
     }
 
-    const navProfileId = profileId || activeProfileId;
+    const navProfileId = profileId || activeProfileId || undefined;
 
     // ⚡ Bolt Optimization: Lifted store subscriptions out of BackLinkItem and into the parent BackLinksPanel.
     // This prevents N child components from independently subscribing to useLedgerStore and useProfileStore,
