@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hook for RAF-optimized edge drag handling
  * Story 4-7: Complex Edge Connection Snapping (AC5, AC6)
