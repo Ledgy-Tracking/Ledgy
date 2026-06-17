@@ -7,9 +7,9 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
-import React from 'react';
-
 // Mock props for testing
+import { Position, ConnectionLineType } from '@xyflow/react';
+
 const createMockProps = (
     overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
 ): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
@@ -17,12 +17,12 @@ const createMockProps = (
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
+    fromPosition: Position.Right,
+    toPosition: Position.Left,
+    connectionLineType: ConnectionLineType.Bezier,
     connectionStatus: 'default',
     ...overrides
-});
+} as ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' });
 
 describe('ConnectionLine', () => {
     it('should render without crashing', () => {

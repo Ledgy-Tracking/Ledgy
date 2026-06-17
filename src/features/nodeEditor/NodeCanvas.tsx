@@ -669,14 +669,14 @@ const generateNodeId = (): string => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                onConnectStart={onConnectStart}
+                onConnectStart={onConnectStart as any}
                 onConnectEnd={onConnectEnd}
                 onSelectionChange={handleSelectionChange}
                 isValidConnection={isValidConnection}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
-                connectionLineComponent={ConnectionLine}
+                connectionLineComponent={ConnectionLine as any}
                 fitView
                 selectionOnDrag={true}
                 selectionKeyCode={['Shift']}
@@ -717,7 +717,7 @@ const generateNodeId = (): string => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                onConnectStart={onConnectStart}
+                onConnectStart={onConnectStart as any}
                 onConnectEnd={onConnectEnd}
                 onViewportChange={onViewportChange}
                 onNodeDragStart={onNodeDragStart}
@@ -727,7 +727,7 @@ const generateNodeId = (): string => {
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
-                connectionLineComponent={ConnectionLine}
+                connectionLineComponent={ConnectionLine as any}
                 defaultViewport={initialViewport}
                 panActivationKeyCode={['Space']}
                 selectionKeyCode={['Shift']}

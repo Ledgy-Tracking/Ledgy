@@ -1,5 +1,4 @@
 import { Node } from '@xyflow/react';
-import { nanoid } from 'nanoid';
 import { useErrorStore } from '../../../stores/useErrorStore';
 
 /**
@@ -108,7 +107,7 @@ export const createContainerFromSelection = (
     const bounds = calculateBoundingBox(selectedNodes);
     
     // Create container node
-    const containerId = `container_${nanoid(6)}`;
+    const containerId = `container_${crypto.randomUUID().slice(0, 6)}`;
     const container: Node = {
         id: containerId,
         type: 'container',
