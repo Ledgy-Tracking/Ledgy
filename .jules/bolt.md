@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2024-05-24 - Array Reassignment Inside Loops Causes O(N^3) Reallocations
+**Learning:** When validating large node graphs, replacing the entire array reference (`array = array.map(...)`) from inside a `.forEach` loop over that same array forces redundant O(N) array copies for every single iteration, leading to O(N^2) or O(N^3) overhead and detached memory references.
+**Action:** Pre-index nodes using a `Map` (e.g., `nodesById`), and mutate array elements directly by index (`repaired[index] = newValue`) and sync the cache (`map.set(id, newValue)`). This turns an O(N^2) operation into O(N).
