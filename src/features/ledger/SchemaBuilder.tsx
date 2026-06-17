@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { validateRegexPattern } from '../../utils/security';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useSchemaBuilderStore } from '../../stores/useSchemaBuilderStore';
@@ -330,10 +331,11 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                         onBlur={(e) => {
                                                             if (e.target.value) {
                                                                 try {
+                                                                    validateRegexPattern(e.target.value);
                                                                     new RegExp(e.target.value);
                                                                     setPatternError(prev => ({ ...prev, [index]: null }));
-                                                                } catch {
-                                                                    setPatternError(prev => ({ ...prev, [index]: 'Invalid RegEx pattern' }));
+                                                                } catch (err: any) {
+                                                                    setPatternError(prev => ({ ...prev, [index]: err.message || 'Invalid RegEx pattern' }));
                                                                 }
                                                             } else {
                                                                 setPatternError(prev => ({ ...prev, [index]: null }));
