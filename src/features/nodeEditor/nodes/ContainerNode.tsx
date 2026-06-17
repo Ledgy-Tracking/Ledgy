@@ -206,7 +206,7 @@ export const ContainerNode: React.FC<NodeProps> = React.memo(({
                     aria-label={`Group: ${label}`}
                 >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <FolderOpen size={14} className="text-zinc-400 flex-shrink-0" />
+                        <FolderOpen size={14} className="text-zinc-600 dark:text-zinc-400 flex-shrink-0" />
                         
                         {isEditing ? (
                             <Input
@@ -217,11 +217,11 @@ export const ContainerNode: React.FC<NodeProps> = React.memo(({
                                 onBlur={saveLabel}
                                 onKeyDown={handleInputKeyDown}
                                 onClick={(e) => e.stopPropagation()}
-                                className="flex-1 bg-zinc-700 text-zinc-100 text-sm px-1 py-0.5 rounded border border-emerald-500 outline-none min-w-0"
+                                className="flex-1 bg-gray-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm px-1 py-0.5 rounded border border-emerald-500 outline-none min-w-0"
                                 maxLength={50}
                             />
                         ) : (
-                            <span className="text-sm font-medium text-zinc-100 truncate">
+                            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
                                 {label}
                             </span>
                         )}
@@ -230,13 +230,13 @@ export const ContainerNode: React.FC<NodeProps> = React.memo(({
                     {/* Collapse/Expand Button */}
                     <Button
                         onClick={handleToggle}
-                        className="p-1 rounded hover:bg-zinc-700 transition-colors flex-shrink-0"
+                        className="p-1 rounded hover:bg-gray-200 dark:bg-zinc-700 transition-colors flex-shrink-0"
                         aria-label={isCollapsed ? 'Expand group' : 'Collapse group'}
                         title={isCollapsed ? 'Expand' : 'Collapse'}
                     >
                         <ChevronDown 
                             size={16} 
-                            className={`chevron-icon ${isCollapsed ? 'collapsed' : 'expanded'} text-zinc-400`}
+                            className={`chevron-icon ${isCollapsed ? 'collapsed' : 'expanded'} text-zinc-600 dark:text-zinc-400`}
                         />
                     </Button>
                 </Collapsible>

@@ -9,11 +9,11 @@ interface EmptyDashboardProps {
 export const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onActionClick }) => {
     return (
         <div className="flex flex-col items-center justify-center p-8 bg-white dark:bg-zinc-950/50 rounded-2xl border border-zinc-300 dark:border-zinc-900 border-dashed text-center w-full max-w-lg">
-            <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-6">
+            <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-900 rounded-full flex items-center justify-center mb-6">
                 <Sparkles size={32} className="text-emerald-500" aria-hidden="true" />
             </div>
-            <h2 className="text-2xl font-bold text-zinc-100 mb-2">Welcome to Ledgy!</h2>
-            <p className="text-zinc-400 max-w-sm mb-8">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">Welcome to Ledgy!</h2>
+            <p className="text-zinc-600 dark:text-zinc-400 max-w-sm mb-8">
                 Create your first ledger to get started tracking your data securely and privately.
             </p>
             <Button

@@ -20,7 +20,7 @@ export const EmptyCanvasGuide: React.FC<EmptyCanvasGuideProps> = ({ onAddFirstNo
                     <h2 className="text-2xl font-bold text-emerald-400 mb-4">
                         Welcome to Node Forge
                     </h2>
-                    <p className="text-zinc-400 mb-6">
+                    <p className="text-zinc-500 dark:text-zinc-400 mb-6">
                         Create visual automations by connecting data sources to logic nodes. Let's get started.
                     </p>
 
@@ -43,7 +43,7 @@ export const EmptyCanvasGuide: React.FC<EmptyCanvasGuideProps> = ({ onAddFirstNo
                                 </CardContent>
                             </Card>
                             <div>
-                                <h3 className="font-medium text-sm text-zinc-300">Connect Nodes</h3>
+                                <h3 className="font-medium text-sm text-zinc-700 dark:text-zinc-300">Connect Nodes</h3>
                                 <p className="text-xs text-zinc-500">Drag from output ports to inputs</p>
                             </div>
                         </div>
@@ -55,8 +55,8 @@ export const EmptyCanvasGuide: React.FC<EmptyCanvasGuideProps> = ({ onAddFirstNo
                                 </CardContent>
                             </Card>
                             <div>
-                                <h3 className="font-medium text-sm text-zinc-300">Navigate Canvas</h3>
-                                <p className="text-xs text-zinc-500">Hold <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded text-[10px] text-zinc-300 border border-zinc-300 dark:border-zinc-700">Space</kbd> + drag to pan</p>
+                                <h3 className="font-medium text-sm text-zinc-700 dark:text-zinc-300">Navigate Canvas</h3>
+                                <p className="text-xs text-zinc-500">Hold <kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded text-[10px] text-zinc-700 dark:text-zinc-300 border border-zinc-300 dark:border-zinc-700">Space</kbd> + drag to pan</p>
                             </div>
                         </div>
                     </div>
