@@ -26,16 +26,23 @@ export interface GroupCreationResult {
  * Calculate bounding box of nodes
  */
 export const calculateBoundingBox = (nodes: Node[]): ContainerBounds => {
-    const xs = nodes.map(n => n.position.x);
-    const ys = nodes.map(n => n.position.y);
-    const widths = nodes.map(n => (n.width || 150));
-    const heights = nodes.map(n => (n.height || 100));
-    
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs.map((x, i) => x + widths[i]));
-    const maxY = Math.max(...ys.map((y, i) => y + heights[i]));
-    
+    if (nodes.length === 0) return { minX: 0, minY: 0, maxX: 0, maxY: 0, width: 0, height: 0 };
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        const w = n.width || 150;
+        const h = n.height || 100;
+        if (n.position.x < minX) minX = n.position.x;
+        if (n.position.y < minY) minY = n.position.y;
+        if (n.position.x + w > maxX) maxX = n.position.x + w;
+        if (n.position.y + h > maxY) maxY = n.position.y + h;
+    }
+
     return {
         minX,
         minY,
