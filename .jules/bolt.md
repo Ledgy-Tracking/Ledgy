@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-28 - Optimize Schema Lookup in List Rendering
+**Learning:** Using `Array.prototype.find` to look up referenced data (like a schema) inside a list item component (e.g., `BackLinkItem`) creates an O(L*N) rendering complexity where L is the number of lookup items and N is the number of rendered items.
+**Action:** When rendering a list of components where each item performs a lookup from a shared array, memoize the array into a `Map` in the parent component using `useMemo` and pass the `Map` as a prop. This reduces lookup complexity to O(1) per item, improving overall rendering to O(L+N).
