@@ -11,16 +11,16 @@ import React from 'react';
 
 // Mock props for testing
 const createMockProps = (
-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
+    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | null }> = {}
+): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | null } => ({
     fromX: 100,
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
-    connectionStatus: 'default',
+    fromPosition: "right",
+    toPosition: "left",
+    connectionLineType: "default",
+    connectionStatus: null,
     ...overrides
 });
 
@@ -33,7 +33,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should render with default status', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: null });
         const { container } = render(<ConnectionLine {...props} />);
         
         const line = container.querySelector('g[data-testid="connection-line"]');
@@ -89,7 +89,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should not render glow effect for non-valid connections', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: null });
         const { container } = render(<ConnectionLine {...props} />);
         
         const glow = container.querySelector('.connection-line-glow');
@@ -105,7 +105,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should apply correct stroke color for default status', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: null });
         const { container } = render(<ConnectionLine {...props} />);
         
         const path = container.querySelector('.connection-line-default');
