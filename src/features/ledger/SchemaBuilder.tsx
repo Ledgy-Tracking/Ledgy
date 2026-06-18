@@ -15,6 +15,7 @@ import { Label } from '../../components/ui/label';
 import { Card, CardContent } from '../../components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../components/ui/form';
 import { useForm } from 'react-hook-form';
+import { validateRegexPattern } from '../../utils/security';
 
 interface SchemaBuilderFormValues {
     name: string;
@@ -329,6 +330,10 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                         onChange={(e) => updateField(index, { pattern: e.target.value === '' ? undefined : e.target.value })}
                                                         onBlur={(e) => {
                                                             if (e.target.value) {
+                                                                if (!validateRegexPattern(e.target.value)) {
+                                                                    setPatternError(prev => ({ ...prev, [index]: 'Dangerous or invalid RegEx pattern' }));
+                                                                    return;
+                                                                }
                                                                 try {
                                                                     new RegExp(e.target.value);
                                                                     setPatternError(prev => ({ ...prev, [index]: null }));
