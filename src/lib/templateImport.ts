@@ -101,6 +101,11 @@ export async function readTemplateTauri(): Promise<TemplateExport | null> {
 
         if (!filePath) return null; // User cancelled
 
+        const fileStat = await fsModule.stat(filePath as string);
+        if (fileStat.size > 5 * 1024 * 1024) {
+            throw new Error('File exceeds the 5MB size limit');
+        }
+
         const content = await fsModule.readTextFile(filePath as string);
         return JSON.parse(content) as TemplateExport;
     } catch (e: any) {
