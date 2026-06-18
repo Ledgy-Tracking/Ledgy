@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2026-04-17 - Array.prototype.reduce and single-pass iteration optimization
+**Learning:** In hot loops and statistical calculations, using `.reduce()` incurs function call overhead and implicit intermediate memory allocations. In addition, array operations like `.map().filter()` create temporary intermediate array instances that must be garbage collected, increasing GC pressure and O(N) operations.
+**Action:** Use single-pass `for` loops with scalar accumulation variables to optimize data reductions, especially when chaining transformations.
