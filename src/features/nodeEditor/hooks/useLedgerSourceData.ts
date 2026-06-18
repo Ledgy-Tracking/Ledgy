@@ -204,7 +204,7 @@ export const useFieldStats = (
         const values = entries
             .map(e => e.data[fieldId])
             .filter((v): v is number => typeof v === 'number' && !isNaN(v));
-        
+
         if (values.length === 0) return null;
         
         return {
