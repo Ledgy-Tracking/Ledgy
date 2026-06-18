@@ -12,6 +12,7 @@
  */
 
 import { getProfileDb, list_profiles, create_profile_encrypted, hard_delete_profile } from './db';
+import { v4 as uuidv4 } from 'uuid';
 import { ProfileMetadata } from '../types/profile';
 import { encryptPayload, decryptPayload } from './crypto';
 import { useErrorStore } from '../stores/useErrorStore';
@@ -40,7 +41,7 @@ export function sanitizeProfileName(name: string): string {
  * Generate a unique profile ID
  */
 export function generateProfileId(): string {
-    return crypto.randomUUID();
+    return uuidv4();
 }
 
 /**

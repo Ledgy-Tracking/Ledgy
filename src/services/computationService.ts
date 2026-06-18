@@ -4,6 +4,7 @@
  * Story 4-3: Correlation & Compute Nodes
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { ComputeType, ArithmeticOperation } from '../types/nodeEditor';
 
 interface ComputeRequest {
@@ -80,7 +81,7 @@ class ComputationService {
    * Compute correlation between two numeric arrays
    */
   computeCorrelation(x: number[], y: number[], callback?: ComputeCallback): Promise<ComputeResponse> {
-    const id = `corr-${crypto.randomUUID()}`;
+    const id = `corr-${uuidv4()}`;
     return new Promise((resolve) => {
       const internalCallback: ComputeCallback = (res) => {
         if (callback) callback(res);
@@ -98,7 +99,7 @@ class ComputationService {
     operation: ArithmeticOperation,
     callback?: ComputeCallback
   ): Promise<ComputeResponse> {
-    const id = `arith-${crypto.randomUUID()}`;
+    const id = `arith-${uuidv4()}`;
     return new Promise((resolve) => {
       const internalCallback: ComputeCallback = (res) => {
         if (callback) callback(res);
