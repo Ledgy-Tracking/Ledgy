@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
-import { LedgerEntry } from '../../types/ledger';
+import { LedgerEntry, LedgerSchema } from '../../types/ledger';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -20,7 +20,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
     targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks } = useLedgerStore();
+    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
 
     useEffect(() => {
@@ -31,7 +31,24 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
 
     const entries = backLinks[targetEntryId] || [];
 
-    if (entries.length === 0) {
+    // Pre-calculate active entries in a single pass
+    const activeEntries: LedgerEntry[] = [];
+    for (const entry of entries) {
+        if (!entry.isDeleted) {
+            activeEntries.push(entry);
+        }
+    }
+
+    // Memoize schema map for O(1) lookups
+    const schemasMap = useMemo(() => {
+        const map = new Map<string, LedgerSchema>();
+        for (const schema of schemas) {
+            map.set(schema._id, schema);
+        }
+        return map;
+    }, [schemas]);
+
+    if (activeEntries.length === 0) {
         return null;
     }
 
@@ -40,16 +57,17 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
             <div className="flex items-center gap-2 mb-3">
                 <ArrowLeft size={16} className="text-emerald-400" />
                 <h3 className="text-sm font-semibold text-zinc-300">
-                    Referenced By ({entries.filter(e => !e.isDeleted).length})
+                    Referenced By ({activeEntries.length})
                 </h3>
             </div>
             <div className="space-y-2">
-                {entries.filter(e => !e.isDeleted).map((entry) => (
+                {activeEntries.map((entry) => (
                     <BackLinkItem
                         key={entry._id}
                         entry={entry}
                         targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
+                        schemasMap={schemasMap}
                     />
                 ))}
             </div>
@@ -61,24 +79,42 @@ interface BackLinkItemProps {
     entry: LedgerEntry;
     targetEntryId: string;
     targetLedgerId: string;
+    schemasMap: Map<string, LedgerSchema>;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
-    const { schemas } = useLedgerStore();
+const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, schemasMap }) => {
     const { profileId } = useParams<{ profileId: string }>();
     const { activeProfileId } = useProfileStore();
 
-    // Find the schema for this entry's ledger
-    const entrySchema = schemas.find(s => s._id === entry.schemaId);
+    // Find the schema for this entry's ledger in O(1)
+    const entrySchema = schemasMap.get(entry.schemaId);
     const ledgerName = entrySchema?.name || entry.ledgerId;
 
     // Find which fields in this entry reference the target
     const referencingFields: { fieldName: string; value: string | string[] }[] = [];
-    for (const [fieldName, value] of Object.entries(entry.data)) {
-        if (Array.isArray(value) && value.includes(targetEntryId)) {
-            referencingFields.push({ fieldName, value });
-        } else if (value === targetEntryId) {
-            referencingFields.push({ fieldName, value: [value] });
+
+    // Only check fields defined as relation fields in the schema
+    const relationFields = entrySchema?.fields.filter(f => f.type === 'relation') || [];
+
+    for (const field of relationFields) {
+        const value = entry.data[field.name];
+        if (value) {
+            if (Array.isArray(value) && value.includes(targetEntryId)) {
+                referencingFields.push({ fieldName: field.name, value: value as string[] });
+            } else if (value === targetEntryId) {
+                referencingFields.push({ fieldName: field.name, value: [value as string] });
+            }
+        }
+    }
+
+    // Fallback: If no schema is found, fall back to Object.entries
+    if (!entrySchema) {
+        for (const [fieldName, value] of Object.entries(entry.data)) {
+            if (Array.isArray(value) && value.includes(targetEntryId)) {
+                referencingFields.push({ fieldName, value: value as string[] });
+            } else if (value === targetEntryId) {
+                referencingFields.push({ fieldName, value: [value as string] });
+            }
         }
     }
 
