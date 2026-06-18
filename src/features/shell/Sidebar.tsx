@@ -49,8 +49,7 @@ export const Sidebar = () => {
                     variant="ghost"
                     size="icon-xs"
                     className="text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50"
-                    aria-label="Toggle sidebar"
-                    aria-expanded={sidebarOpen}
+                    aria-label="Collapse sidebar"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </Button>
@@ -63,8 +62,8 @@ export const Sidebar = () => {
                     variant="ghost"
                     size="icon"
                     className="md:hidden absolute left-2 top-2 bg-gray-100 dark:bg-zinc-800/50 hover:bg-zinc-700/50 z-30"
-                    aria-label="Toggle sidebar"
-                    aria-expanded={sidebarOpen}
+                    aria-label="Open sidebar"
+                    aria-expanded="false"
                 >
                     <Menu className="w-5 h-5 text-zinc-400" />
                 </Button>
@@ -103,8 +102,7 @@ export const Sidebar = () => {
                     variant="ghost"
                     size="icon-sm"
                     className="bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md hover:bg-gray-200 dark:hover:bg-zinc-800/50"
-                    aria-label="Toggle sidebar"
-                    aria-expanded={sidebarOpen}
+                    aria-label="Expand sidebar"
                 >
                     <ChevronRight className="w-4 h-4 text-zinc-400" />
                 </Button>

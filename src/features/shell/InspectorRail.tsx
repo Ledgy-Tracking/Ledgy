@@ -29,8 +29,7 @@ export const InspectorRail = () => {
                     variant="ghost"
                     size="icon-xs"
                     className="text-zinc-400"
-                    aria-label="Toggle inspector"
-                    aria-expanded={inspectorOpen}
+                    aria-label="Collapse inspector"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </Button>
@@ -64,8 +63,7 @@ export const InspectorRail = () => {
                     variant="outline"
                     size="icon-sm"
                     className="rounded-full bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md text-zinc-400"
-                    aria-label="Toggle inspector"
-                    aria-expanded={inspectorOpen}
+                    aria-label="Expand inspector"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </Button>
