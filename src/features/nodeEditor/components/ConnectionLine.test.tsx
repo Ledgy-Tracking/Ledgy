@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
-import React from 'react';
+import { Position, ConnectionLineType } from '@xyflow/react';
 
 // Mock props for testing
 const createMockProps = (
@@ -17,10 +17,10 @@ const createMockProps = (
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
-    connectionStatus: 'default',
+    fromPosition: Position.Top,
+    toPosition: Position.Bottom,
+    connectionLineType: ConnectionLineType.Bezier,
+    connectionStatus: 'valid',
     ...overrides
 });
 
@@ -33,7 +33,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should render with default status', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: 'valid' });
         const { container } = render(<ConnectionLine {...props} />);
         
         const line = container.querySelector('g[data-testid="connection-line"]');
@@ -89,7 +89,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should not render glow effect for non-valid connections', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: null });
         const { container } = render(<ConnectionLine {...props} />);
         
         const glow = container.querySelector('.connection-line-glow');
@@ -105,7 +105,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should apply correct stroke color for default status', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: null });
         const { container } = render(<ConnectionLine {...props} />);
         
         const path = container.querySelector('.connection-line-default');
