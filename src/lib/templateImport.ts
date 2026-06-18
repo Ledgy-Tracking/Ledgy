@@ -61,6 +61,7 @@ export async function import_template(
                 template.nodeGraph.nodes,
                 template.nodeGraph.edges,
                 template.nodeGraph.viewport,
+                { showMinimap: true, showGrid: true, snapToGrid: true, gridSize: 15 },
                 profileId
             );
             importedNodes = template.nodeGraph.nodes.length;
@@ -100,6 +101,12 @@ export async function readTemplateTauri(): Promise<TemplateExport | null> {
         });
 
         if (!filePath) return null; // User cancelled
+
+        // Security: Enforce 5MB file size limit to prevent client-side DoS
+        const fileStat = await fsModule.stat(filePath as string);
+        if (fileStat.size > 5 * 1024 * 1024) {
+            throw new Error('File exceeds the 5MB size limit');
+        }
 
         const content = await fsModule.readTextFile(filePath as string);
         return JSON.parse(content) as TemplateExport;
