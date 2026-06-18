@@ -54,18 +54,32 @@ export const useLedgerSourceData = (
 
         // Calculate stats for each field that contains numbers
         fieldIds.forEach(fieldId => {
-            const values = entries
-                .map(e => e.data[fieldId])
-                .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+            // ⚡ Bolt: Single-pass loop optimization for data extraction and statistics calculation.
+            // Avoids O(N) intermediate array allocations from .map().filter() and
+            // prevents "Maximum call stack size exceeded" errors with Math.min/max spread syntax.
+            let count = 0;
+            let sum = 0;
+            let min = Infinity;
+            let max = -Infinity;
 
-            if (values.length === 0) {
+            for (let i = 0; i < entries.length; i++) {
+                const val = entries[i].data[fieldId];
+                if (typeof val === 'number' && !isNaN(val)) {
+                    count++;
+                    sum += val;
+                    if (val < min) min = val;
+                    if (val > max) max = val;
+                }
+            }
+
+            if (count === 0) {
                 result[fieldId] = null;
             } else {
                 result[fieldId] = {
-                    avg: values.reduce((a, b) => a + b, 0) / values.length,
-                    min: Math.min(...values),
-                    max: Math.max(...values),
-                    count: values.length,
+                    avg: sum / count,
+                    min,
+                    max,
+                    count,
                 };
             }
         });
@@ -201,17 +215,31 @@ export const useFieldStats = (
     return useMemo(() => {
         if (entries.length === 0) return null;
         
-        const values = entries
-            .map(e => e.data[fieldId])
-            .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+        // ⚡ Bolt: Single-pass loop optimization for data extraction and statistics calculation.
+        // Avoids O(N) intermediate array allocations from .map().filter() and
+        // prevents "Maximum call stack size exceeded" errors with Math.min/max spread syntax.
+        let count = 0;
+        let sum = 0;
+        let min = Infinity;
+        let max = -Infinity;
+
+        for (let i = 0; i < entries.length; i++) {
+            const val = entries[i].data[fieldId];
+            if (typeof val === 'number' && !isNaN(val)) {
+                count++;
+                sum += val;
+                if (val < min) min = val;
+                if (val > max) max = val;
+            }
+        }
         
-        if (values.length === 0) return null;
+        if (count === 0) return null;
         
         return {
-            avg: values.reduce((a, b) => a + b, 0) / values.length,
-            min: Math.min(...values),
-            max: Math.max(...values),
-            count: values.length,
+            avg: sum / count,
+            min,
+            max,
+            count,
         };
     }, [entries, fieldId]);
 };
