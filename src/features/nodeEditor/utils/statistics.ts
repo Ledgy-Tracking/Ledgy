@@ -101,11 +101,37 @@ export const calculateArithmetic = (
         case 'average':
             return { value: values.reduce((a, b) => a + b, 0) / values.length };
 
-        case 'min':
-            return { value: Math.min(...values) };
+        case 'min': {
+            let min = Infinity;
+            let hasNaN = false;
+            for (let i = 0; i < values.length; i++) {
+                if (Number.isNaN(values[i])) {
+                    hasNaN = true;
+                    break;
+                }
+                if (values[i] < min) {
+                    min = values[i];
+                }
+            }
+            if (hasNaN) return { value: NaN };
+            return { value: min };
+        }
 
-        case 'max':
-            return { value: Math.max(...values) };
+        case 'max': {
+            let max = -Infinity;
+            let hasNaN = false;
+            for (let i = 0; i < values.length; i++) {
+                if (Number.isNaN(values[i])) {
+                    hasNaN = true;
+                    break;
+                }
+                if (values[i] > max) {
+                    max = values[i];
+                }
+            }
+            if (hasNaN) return { value: NaN };
+            return { value: max };
+        }
 
         default:
             return { value: null, error: 'Unknown operation' };

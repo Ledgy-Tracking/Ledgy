@@ -23,7 +23,7 @@ import type { Node } from '@xyflow/react';
 const TOUCH_LONG_PRESS_DURATION = 300; // ms
 const TOUCH_MOVEMENT_THRESHOLD = 10; // px - cancel long-press if moved more than this
 const CLICK_LISTENER_DELAY = 150; // ms - delay before click-outside detection (AC5)
-const REBUILD_THROTTLE_MS = 100; // ms - throttle handle position rebuilds
+ // ms - throttle handle position rebuilds
 
 interface UseEdgeDragOptions {
     nodes: Node[];
@@ -132,7 +132,7 @@ export const useEdgeDrag = ({
                     );
                     if (distanceToSource <= SNAP_RADIUS) {
                         // Cancel drag when returned to source handle
-                        cancelDrag();
+
                         return;
                     }
                 }
@@ -169,13 +169,13 @@ export const useEdgeDrag = ({
     const endDrag = useCallback(() => {
         if (!connectionState?.snapResult?.snapped) {
             // No valid snap - cancel
-            cancelDrag();
+
             return;
         }
 
         // Validate snap result has required fields
         if (!connectionState.snapResult.handleId || !connectionState.snapResult.nodeId) {
-            cancelDrag();
+
             return;
         }
 
@@ -215,7 +215,7 @@ export const useEdgeDrag = ({
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape' && isDragging) {
                 e.preventDefault();
-                cancelDrag();
+
             }
         };
 
@@ -239,7 +239,7 @@ export const useEdgeDrag = ({
                 if (connectionState?.snapResult?.snapped) {
                     endDrag();
                 } else {
-                    cancelDrag();
+
                 }
             }
         };
