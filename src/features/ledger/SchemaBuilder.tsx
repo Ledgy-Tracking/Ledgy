@@ -6,6 +6,7 @@ import { useErrorStore } from '../../stores/useErrorStore';
 import { FieldType } from '../../types/ledger';
 import { Plus, Trash2, ChevronUp, ChevronDown, Save, Info } from 'lucide-react';
 import { Button } from '../../components/ui/button';
+import { validateRegexPattern } from '../../utils/security';
 import { Input } from '../../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../components/ui/dialog';
@@ -330,10 +331,10 @@ export const SchemaBuilder: React.FC<SchemaBuilderProps> = ({ projectId, onClose
                                                         onBlur={(e) => {
                                                             if (e.target.value) {
                                                                 try {
-                                                                    new RegExp(e.target.value);
+                                                                    validateRegexPattern(e.target.value);
                                                                     setPatternError(prev => ({ ...prev, [index]: null }));
-                                                                } catch {
-                                                                    setPatternError(prev => ({ ...prev, [index]: 'Invalid RegEx pattern' }));
+                                                                } catch (error: any) {
+                                                                    setPatternError(prev => ({ ...prev, [index]: error.message || 'Invalid RegEx pattern' }));
                                                                 }
                                                             } else {
                                                                 setPatternError(prev => ({ ...prev, [index]: null }));
