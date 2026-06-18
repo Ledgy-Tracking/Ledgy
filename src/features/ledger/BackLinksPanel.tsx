@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 import { useProfileStore } from '../../stores/useProfileStore';
@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface BackLinksPanelProps {
     targetEntryId: string;
-    targetLedgerId: string;
+    targetLedgerId?: string;
 }
 
 /**
@@ -18,10 +18,10 @@ interface BackLinksPanelProps {
  */
 export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
-    targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks } = useLedgerStore();
+    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
+    const { profileId } = useParams<{ profileId: string }>();
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -34,6 +34,19 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     if (entries.length === 0) {
         return null;
     }
+
+    const schemaMap = useMemo(() => {
+        const map = new Map();
+        schemas.forEach(s => {
+            map.set(s._id, {
+                schema: s,
+                relationFields: s.fields?.filter(f => f.type === 'relation').map(f => f.name) || []
+            });
+        });
+        return map;
+    }, [schemas]);
+
+    const navProfileId = profileId || activeProfileId || undefined;
 
     return (
         <div className="mt-4 border-t border-zinc-200 dark:border-zinc-800 pt-4">
@@ -49,7 +62,8 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                         key={entry._id}
                         entry={entry}
                         targetEntryId={targetEntryId}
-                        targetLedgerId={targetLedgerId}
+                        schemaInfo={schemaMap.get(entry.schemaId)}
+                        navProfileId={navProfileId}
                     />
                 ))}
             </div>
@@ -60,34 +74,32 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
 interface BackLinkItemProps {
     entry: LedgerEntry;
     targetEntryId: string;
-    targetLedgerId: string;
+    schemaInfo?: { schema: any; relationFields: string[] };
+    navProfileId?: string;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
-    const { schemas } = useLedgerStore();
-    const { profileId } = useParams<{ profileId: string }>();
-    const { activeProfileId } = useProfileStore();
-
-    // Find the schema for this entry's ledger
-    const entrySchema = schemas.find(s => s._id === entry.schemaId);
+const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId, schemaInfo, navProfileId }) => {
+    const entrySchema = schemaInfo?.schema;
     const ledgerName = entrySchema?.name || entry.ledgerId;
 
     // Find which fields in this entry reference the target
     const referencingFields: { fieldName: string; value: string | string[] }[] = [];
+
+    // We intentionally iterate over all Object.entries(entry.data) as in the original
+    // functionality instead of just relation fields to ensure no back-links are missed
+    // if relations are stored dynamically or in non-explicit relation fields.
     for (const [fieldName, value] of Object.entries(entry.data)) {
         if (Array.isArray(value) && value.includes(targetEntryId)) {
             referencingFields.push({ fieldName, value });
         } else if (value === targetEntryId) {
-            referencingFields.push({ fieldName, value: [value] });
+            referencingFields.push({ fieldName, value: [value as string] });
         }
     }
 
     // Get display value (first field value or entry ID)
-    const displayValue = entrySchema?.fields.length
+    const displayValue = entrySchema?.fields?.length
         ? String(entry.data[entrySchema.fields[0].name] || entry._id)
         : entry._id;
-
-    const navProfileId = profileId || activeProfileId;
 
     return (
         <Card className="p-3 bg-gray-100 dark:bg-zinc-800/30 rounded border border-zinc-300 dark:border-zinc-700 hover:border-zinc-600 transition-colors">

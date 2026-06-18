@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-24 - Hoisting Subscriptions and Memoizing Arrays
+**Learning:** When rendering a list where each item independently subscribes to a global state store (e.g., `useLedgerStore()`) and performs O(N) lookups on shared arrays (e.g., `schemas.find()`), it causes O(L*N) complexity and excessive re-renders.
+**Action:** Hoist store subscriptions and route parameters to the parent list component. Memoize the shared array into a `Map` using `useMemo` in the parent and pass the map (or pre-computed data) down via props to the children to reduce complexity to O(L+N) and minimize re-renders.
