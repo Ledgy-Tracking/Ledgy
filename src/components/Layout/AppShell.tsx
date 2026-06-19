@@ -397,14 +397,15 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleLeftSidebar}
-                                            aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                                            aria-label="Toggle sidebar"
+                                            aria-expanded={leftSidebarOpen}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>{leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}</p>
+                                        <p>Toggle sidebar</p>
                                     </TooltipContent>
                                 </Tooltip>
                                 <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
@@ -456,14 +457,15 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleRightInspector}
-                                            aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
+                                            aria-label="Toggle inspector"
+                                            aria-expanded={rightInspectorOpen}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             <PanelRightClose size={18} className={rightInspectorOpen ? '' : 'rotate-180'} />
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>{rightInspectorOpen ? 'Close inspector' : 'Open inspector'}</p>
+                                        <p>Toggle inspector</p>
                                     </TooltipContent>
                                 </Tooltip>
                             </div>
