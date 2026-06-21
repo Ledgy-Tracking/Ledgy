@@ -9,3 +9,6 @@
 ## 2025-02-23 - Playwright Verification Context & Dashboard Icons
 **Learning:** The Dashboard page contains heavily icon-centric action bars (e.g. Inspector open/close, view toggles) which completely lack screen reader accessibility. Verifying these required automating the TOTP and Profile setup flows, revealing that Playwright struggles to click nested elements inside the Profile Card unless targeting specific text nodes.
 **Action:** When adding `aria-labels` to complex dashboards, always ensure `aria-pressed` states are added for toggles. When verifying via Playwright, bypass profile card container clicks by specifically locating and clicking the nested `h3` profile name element.
+## 2024-06-21 - Replace dynamic aria-labels on toggles
+**Learning:** For toggleable elements (like sidebars and inspectors), dynamic `aria-label`s (e.g. 'Open' / 'Close') are less accessible. Screen readers prefer a static label combined with `aria-expanded` or `aria-pressed` to announce state changes properly.
+**Action:** Always replace dynamic `aria-label`s on toggles with static labels (e.g. 'Toggle Sidebar') and dynamically bind the `aria-expanded` or `aria-pressed` attributes to correctly reflect visibility and state.
