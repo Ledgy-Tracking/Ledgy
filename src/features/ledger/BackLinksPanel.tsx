@@ -52,7 +52,7 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                         targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
                         schemas={schemas}
-                        navProfileId={profileId || activeProfileId}
+                        navProfileId={(profileId || activeProfileId) ?? undefined}
                     />
                 ))}
             </div>
@@ -68,7 +68,7 @@ interface BackLinkItemProps {
     navProfileId: string | undefined;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = memo(({ entry, targetEntryId, schemas, navProfileId }) => {
+const BackLinkItem = memo(({ entry, targetEntryId, schemas, navProfileId }: BackLinkItemProps) => {
     // Find the schema for this entry's ledger
     const entrySchema = schemas.find(s => s._id === entry.schemaId);
     const ledgerName = entrySchema?.name || entry.ledgerId;
