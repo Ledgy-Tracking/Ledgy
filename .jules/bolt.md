@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2024-05-24 - Map lookups for validation loops
+**Learning:** Using recursive `.find()` checks and `.findIndex()` for integrity validation can lead to O(N^2) lookups. Using `array = array.map()` reassignment inside a `.forEach()` validation loop that iteratively repairs state leads to stale references, high intermediate allocations, and O(N*M) complexity.
+**Action:** Pre-index elements into a `Map` (e.g., `nodesById` and `repairedIndexMap`) for O(1) lookups and mutate elements directly by index (e.g., `repaired[index] = newValue`) when auto-repairing data during validation loops. Always explicitly update the cache Map (`map.set(id, newValue)`) when auto-repairing elements.
