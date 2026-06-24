@@ -408,10 +408,15 @@ export const useNodeStore = create<NodeState>()(
             const { container, updatedChildren } = result;
             
             // Replace updated children and add container
-            const newNodes = state.nodes.map(n => {
-                const updated = updatedChildren.find(u => u.id === n.id);
-                return updated || n;
-            }).concat(container);
+            // ⚡ Bolt: Replaced O(N*M) nested `.find()` with O(1) Map lookup
+            // and single-pass for loop to prevent main thread blocking during large grouping operations
+            const updatedMap = new Map(updatedChildren.map(u => [u.id, u]));
+            const newNodes: CanvasNode[] = [];
+            for (let i = 0; i < state.nodes.length; i++) {
+                const n = state.nodes[i];
+                newNodes.push(updatedMap.get(n.id) || n);
+            }
+            newNodes.push(container);
             
             set({ nodes: newNodes });
             get().debouncedSaveCanvas();
@@ -428,12 +433,16 @@ export const useNodeStore = create<NodeState>()(
             const { restoredNodes, childNodeIds } = result;
             
             // Remove container and update children
-            const newNodes = state.nodes
-                .filter(n => n.id !== containerId)
-                .map(n => {
-                    const restored = restoredNodes.find(r => r.id === n.id);
-                    return restored || n;
-                });
+            // ⚡ Bolt: Replaced chained `.filter().map()` and nested O(N) `.find()`
+            // with a single-pass loop and O(1) Map lookup to improve ungrouping performance
+            const restoredMap = new Map(restoredNodes.map(r => [r.id, r]));
+            const newNodes: CanvasNode[] = [];
+            for (let i = 0; i < state.nodes.length; i++) {
+                const n = state.nodes[i];
+                if (n.id !== containerId) {
+                    newNodes.push(restoredMap.get(n.id) || n);
+                }
+            }
             
             set({ nodes: newNodes });
             get().debouncedSaveCanvas();
