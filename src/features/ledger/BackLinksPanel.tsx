@@ -20,8 +20,9 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
     targetEntryId,
     targetLedgerId,
 }) => {
-    const { backLinks, fetchBackLinks } = useLedgerStore();
+    const { backLinks, fetchBackLinks, schemas } = useLedgerStore();
     const { activeProfileId } = useProfileStore();
+    const { profileId } = useParams<{ profileId: string }>();
 
     useEffect(() => {
         if (activeProfileId && targetEntryId) {
@@ -50,6 +51,9 @@ export const BackLinksPanel: React.FC<BackLinksPanelProps> = ({
                         entry={entry}
                         targetEntryId={targetEntryId}
                         targetLedgerId={targetLedgerId}
+                        schemas={schemas}
+                        profileId={profileId}
+                        activeProfileId={activeProfileId}
                     />
                 ))}
             </div>
@@ -61,12 +65,18 @@ interface BackLinkItemProps {
     entry: LedgerEntry;
     targetEntryId: string;
     targetLedgerId: string;
+    schemas: import('../../types/ledger').LedgerSchema[];
+    profileId?: string;
+    activeProfileId: string | null;
 }
 
-const BackLinkItem: React.FC<BackLinkItemProps> = ({ entry, targetEntryId }) => {
-    const { schemas } = useLedgerStore();
-    const { profileId } = useParams<{ profileId: string }>();
-    const { activeProfileId } = useProfileStore();
+const BackLinkItem: React.FC<BackLinkItemProps> = ({
+    entry,
+    targetEntryId,
+    schemas,
+    profileId,
+    activeProfileId
+}) => {
 
     // Find the schema for this entry's ledger
     const entrySchema = schemas.find(s => s._id === entry.schemaId);
