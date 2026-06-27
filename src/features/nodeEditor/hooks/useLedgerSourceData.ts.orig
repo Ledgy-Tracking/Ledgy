@@ -43,7 +43,7 @@ export const useLedgerSourceData = (
     // Calculate stats for number fields
     const stats = useMemo(() => {
         const result: Record<string, LedgerSourceStats | null> = {};
-        
+
         if (entries.length === 0) return result;
 
         // Get all unique field IDs from entries
@@ -54,29 +54,18 @@ export const useLedgerSourceData = (
 
         // Calculate stats for each field that contains numbers
         fieldIds.forEach(fieldId => {
-            let sum = 0;
-            let count = 0;
-            let min = Infinity;
-            let max = -Infinity;
+            const values = entries
+                .map(e => e.data[fieldId])
+                .filter((v): v is number => typeof v === 'number' && !isNaN(v));
 
-            for (const entry of entries) {
-                const v = entry.data[fieldId];
-                if (typeof v === 'number' && !isNaN(v)) {
-                    sum += v;
-                    count++;
-                    if (v < min) min = v;
-                    if (v > max) max = v;
-                }
-            }
-
-            if (count === 0) {
+            if (values.length === 0) {
                 result[fieldId] = null;
             } else {
                 result[fieldId] = {
-                    avg: sum / count,
-                    min: min,
-                    max: max,
-                    count: count,
+                    avg: values.reduce((a, b) => a + b, 0) / values.length,
+                    min: Math.min(...values),
+                    max: Math.max(...values),
+                    count: values.length,
                 };
             }
         });
@@ -211,29 +200,18 @@ export const useFieldStats = (
 ): LedgerSourceStats | null => {
     return useMemo(() => {
         if (entries.length === 0) return null;
-        
-        let sum = 0;
-        let count = 0;
-        let min = Infinity;
-        let max = -Infinity;
 
-        for (const entry of entries) {
-            const v = entry.data[fieldId];
-            if (typeof v === 'number' && !isNaN(v)) {
-                sum += v;
-                count++;
-                if (v < min) min = v;
-                if (v > max) max = v;
-            }
-        }
-        
-        if (count === 0) return null;
-        
+        const values = entries
+            .map(e => e.data[fieldId])
+            .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+
+        if (values.length === 0) return null;
+
         return {
-            avg: sum / count,
-            min: min,
-            max: max,
-            count: count,
+            avg: values.reduce((a, b) => a + b, 0) / values.length,
+            min: Math.min(...values),
+            max: Math.max(...values),
+            count: values.length,
         };
     }, [entries, fieldId]);
 };

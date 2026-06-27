@@ -23,7 +23,6 @@ import type { Node } from '@xyflow/react';
 const TOUCH_LONG_PRESS_DURATION = 300; // ms
 const TOUCH_MOVEMENT_THRESHOLD = 10; // px - cancel long-press if moved more than this
 const CLICK_LISTENER_DELAY = 150; // ms - delay before click-outside detection (AC5)
-const REBUILD_THROTTLE_MS = 100; // ms - throttle handle position rebuilds
 
 interface UseEdgeDragOptions {
     nodes: Node[];
