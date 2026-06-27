@@ -1,0 +1,222 @@
+--- src/tests/features/nodeEditor/useLiveQuery.test.ts
++++ src/tests/features/nodeEditor/useLiveQuery.test.ts
+@@ -93,7 +93,7 @@
+       subscribeToLedgerChanges(mockLedgerId, onChange);
+
+       // Get the error handler
+-      const errorHandler = mockChanges.on.mock.calls.find(call => call[0] === 'error')[1];
++      const errorHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'error')![1];
+
+       const error = new Error('Changes feed error');
+       errorHandler(error);
+@@ -143,7 +143,7 @@
+       await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+       onDataChange.mockClear();
+
+-      const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
++      const changeHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'change')![1];
+       act(() => { changeHandler({ doc: mockEntries[0] }); });
+
+       // Should be debounced — not called yet
+@@ -179,7 +179,7 @@
+       renderHook(() => useLiveQuery(mockLedgerId, onDataChange));
+       await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+
+-      const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
++      const changeHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'change')![1];
+       act(() => { changeHandler({ doc: {} }); });
+
+       await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
+@@ -214,7 +214,7 @@
+       await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+       onDataChange.mockClear();
+
+-      const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
++      const changeHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'change')![1];
+       act(() => { changeHandler({ doc: mockEntries[0] }); });
+
+       await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
+@@ -239,7 +239,7 @@
+       await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
+       onDataChange.mockClear();
+
+-      const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
++      const changeHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'change')![1];
+       act(() => { changeHandler({ doc: mockEntries[0] }); });
+
+       await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -6,23 +6,22 @@
+ import { describe, it, expect } from 'vitest';
+ import { render } from '@testing-library/react';
+ import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
+-import type { ConnectionLineComponentProps } from '@xyflow/react';
+-import React from 'react';
++import type { ConnectionLineComponentProps, Position } from '@xyflow/react';
+
+ // Mock props for testing
+ const createMockProps = (
+-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
+-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
++    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | null }> = {}
++): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | null } => ({
+     fromX: 100,
+     fromY: 100,
+     toX: 300,
+     toY: 200,
+-    fromPosition: undefined,
+-    toPosition: undefined,
+-    connectionLineType: undefined,
++    fromPosition: 'right' as Position,
++    toPosition: 'left' as Position,
++    connectionLineType: 'default',
+     connectionStatus: 'default',
+     ...overrides
+-});
++} as any);
+
+ describe('ConnectionLine', () => {
+     it('should render without crashing', () => {
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -32,7 +32,7 @@
+ import { ViewControls } from './components/ViewControls';
+ import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
+ import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
+-import { isTypeCompatible, getTypeDisplayName } from './types/port';
++import { isTypeCompatible } from './types/port';
+ import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
+ import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
+ import { ConnectionLine } from './components/ConnectionLine';
+@@ -42,7 +42,7 @@
+ import { ledgerDataCache } from './utils/ledgerDataCache';
+ import { hydrateLedgerWithGhosts } from './utils/ghostReference';
+ import { setupSchemaChangeSubscription } from './utils/schemaChangeHandler';
+-import { unsubscribeAll, unsubscribeNode, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
++import { unsubscribeAll, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
+ import { logSubscriptionCount, logHydrationSummary } from './utils/performanceMonitor';
+ import { useLedgerStore } from '../../stores/useLedgerStore';
+
+@@ -145,11 +145,11 @@
+     }, []);
+
+     // Story 4.10: Keep nodeStore.schemas in sync with ledgerStore.schemas
+     // so that schemaChangeHandler can detect schema diffs without importing useLedgerStore
+-    const ledgerSchemas = useLedgerStore(useShallow(s => s.schemas));
++    const _schemas = useLedgerStore(useShallow(s => s.schemas));
+     useEffect(() => {
+-        useNodeStore.getState().setSchemas(ledgerSchemas);
+-    }, [ledgerSchemas]);
++        useNodeStore.getState().setSchemas(_schemas);
++    }, [_schemas]);
+
+     // Story 4.10: Cancel all PouchDB ledger subscriptions on workflow switch or unmount (AC7)
+     useEffect(() => {
+@@ -322,7 +322,7 @@
+         // Also subscribe to schema changes in the store for cache invalidation
+         const unsubscribeStore = useNodeStore.subscribe(
+             (state) => state.schemas,
+-            (schemas) => {
++            (_schemas) => {
+                 // When schemas change, invalidate cache for affected ledgers
+                 console.log('[Cache] Invalidating cache due to schema changes');
+                 ledgerDataCache.clear(); // For now, clear all cache on any schema change
+@@ -671,7 +671,7 @@
+                 onNodesChange={onNodesChange}
+                 onEdgesChange={onEdgesChange}
+                 onConnect={onConnect}
+-                onConnectStart={onConnectStart}
++                onConnectStart={onConnectStart as any}
+                 onConnectEnd={onConnectEnd}
+                 onSelectionChange={handleSelectionChange}
+                 isValidConnection={isValidConnection}
+@@ -677,7 +677,7 @@
+                 nodeTypes={nodeTypes}
+                 edgeTypes={edgeTypes}
+                 defaultEdgeOptions={defaultEdgeOptions}
+-                connectionLineComponent={ConnectionLine}
++                connectionLineComponent={ConnectionLine as any}
+                 fitView
+                 selectionOnDrag={true}
+                 selectionKeyCode={['Shift']}
+@@ -722,7 +722,7 @@
+                 onNodesChange={onNodesChange}
+                 onEdgesChange={onEdgesChange}
+                 onConnect={onConnect}
+-                onConnectStart={onConnectStart}
++                onConnectStart={onConnectStart as any}
+                 onConnectEnd={onConnectEnd}
+                 onViewportChange={onViewportChange}
+                 onNodeDragStart={onNodeDragStart}
+@@ -728,7 +728,7 @@
+                 nodeTypes={nodeTypes}
+                 edgeTypes={edgeTypes}
+                 defaultEdgeOptions={defaultEdgeOptions}
+-                connectionLineComponent={ConnectionLine}
++                connectionLineComponent={ConnectionLine as any}
+                 defaultViewport={initialViewport}
+                 panActivationKeyCode={['Space']}
+                 selectionKeyCode={['Shift']}
+--- src/features/nodeEditor/components/ConnectionLine.tsx
++++ src/features/nodeEditor/components/ConnectionLine.tsx
+@@ -23,8 +23,8 @@
+ /**
+  * Extended props including connection status and direction
+  */
+-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
+-    connectionStatus?: ConnectionStatus;
++interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, 'connectionStatus'> {
++    connectionStatus?: ConnectionStatus | null;
+     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
+ }
+
+@@ -79,10 +79,10 @@
+     fromY,
+     toX,
+     toY,
+-    connectionLineType,
++    connectionLineType: _connectionLineType,
+     connectionStatus = 'default',
+-    fromNode,
+-    fromHandle,
++    fromNode: _fromNode,
++    fromHandle: _fromHandle,
+     sourceDirection = 'right'
+ }) => {
+     // Calculate Bezier path using actual handle direction
+@@ -95,7 +95,7 @@
+     }, [fromX, fromY, toX, toY, sourceDirection]);
+
+     // Get styles based on connection status
+-    const styles = useMemo(() => getConnectionStyles(connectionStatus), [connectionStatus]);
++    const styles = useMemo(() => getConnectionStyles(connectionStatus || 'default'), [connectionStatus]);
+
+     // Determine if we should show the glow animation for valid/snapped connections
+     const showGlow = connectionStatus === 'valid' || connectionStatus === 'snapped';
+--- src/features/nodeEditor/components/ShortcutHelpPanel.tsx
++++ src/features/nodeEditor/components/ShortcutHelpPanel.tsx
+@@ -142,12 +142,7 @@
+     if (!isOpen) return null;
+
+     return (
+-        <Dialog
+-            className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/50 backdrop-blur-sm"
+-            role="dialog"
+-            aria-modal="true"
+-            aria-labelledby="shortcut-help-title"
+-        >
++        <Dialog open={isOpen} onOpenChange={onClose}>
+             <Card
+                 ref={panelRef}
+                 className="w-full max-w-2xl max-h-[80vh] overflow-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-2xl"
+--- src/features/nodeEditor/hooks/useEdgeDrag.ts
++++ src/features/nodeEditor/hooks/useEdgeDrag.ts
+@@ -23,7 +23,6 @@
+ const TOUCH_LONG_PRESS_DURATION = 300; // ms
+ const TOUCH_MOVEMENT_THRESHOLD = 10; // px - cancel long-press if moved more than this
+ const CLICK_LISTENER_DELAY = 150; // ms - delay before click-outside detection (AC5)
+-const REBUILD_THROTTLE_MS = 100; // ms - throttle handle position rebuilds
+
+ interface UseEdgeDragOptions {
+     nodes: Node[];
