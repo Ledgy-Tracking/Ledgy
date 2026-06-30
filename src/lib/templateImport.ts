@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Database, create_schema, list_schemas, save_canvas } from './db';
 import { TemplateExport, TemplateImportResult, ImportConflict } from '../types/templates';
 

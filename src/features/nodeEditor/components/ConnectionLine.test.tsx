@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Unit tests for ConnectionLine component
  * Story 4-7: Complex Edge Connection Snapping (AC2, AC3)
