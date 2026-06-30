@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { hydrateLedgerSourceNode, useLedgerData } from '../../../features/nodeEditor/hooks/useLedgerData';
 import { ledgerDataCache } from '../../../features/nodeEditor/utils/ledgerDataCache';

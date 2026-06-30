@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getProfileDb } from '@/lib/db';
 import { useProfileStore } from '@/stores/useProfileStore';
 

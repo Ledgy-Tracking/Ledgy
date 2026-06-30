@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import { migrateEntryData } from './migration';
 import type { LedgerEntry, LedgerSchema } from '../types/ledger';

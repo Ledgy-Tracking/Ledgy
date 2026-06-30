@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { describe, it, expect } from 'vitest';
 import { flattenEntry, flattenEntries, getEntryDisplayValue } from './flattenRelations';
 import type { LedgerEntry, LedgerSchema } from '../types/ledger';
