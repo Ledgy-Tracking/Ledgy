@@ -10,8 +10,8 @@ import { Position, type ConnectionLineComponentProps, type ConnectionLineType } 
 
 // Mock props for testing
 const createMockProps = (
-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' }> = {}
-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' } => ({
+    overrides: Partial<Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' | null }> = {}
+): Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' | null } => ({
     fromX: 100,
     fromY: 100,
     toX: 300,
@@ -20,8 +20,13 @@ const createMockProps = (
     toPosition: Position.Bottom,
     connectionLineType: 'default' as ConnectionLineType,
     connectionStatus: 'default',
+    fromNode: {} as any,
+    fromHandle: {} as any,
+    toNode: null,
+    toHandle: null,
+    pointer: { x: 0, y: 0 },
     ...overrides
-});
+}) as Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' | null };
 
 describe('ConnectionLine', () => {
     it('should render without crashing', () => {
