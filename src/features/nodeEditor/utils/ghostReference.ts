@@ -34,7 +34,7 @@ export const checkGhostReferences = async (
   const ghostIds = new Set<string>();
 
   // Build document map and collect explicitly deleted entries
-  allDocs.forEach(doc => {
+  allDocs.forEach((doc: any) => {
     docMap.set(doc._id, doc);
 
     // Check if this document is explicitly marked as deleted
@@ -59,8 +59,7 @@ export const checkGhostReferences = async (
  */
 export const hydrateLedgerWithGhosts = async (
   ledgerId: string,
-  schemaSnapshot: any[],
-  cacheEnabled: boolean = true
+  schemaSnapshot: any[]
 ) => {
   const activeProfileId = useProfileStore.getState().activeProfileId;
   if (!activeProfileId) {
@@ -72,30 +71,30 @@ export const hydrateLedgerWithGhosts = async (
   // Query entries for this ledger
   const allEntries = await db.getAllDocuments();
   const ledgerEntries = allEntries
-    .filter(doc =>
+    .filter((doc: any) =>
       doc.type === 'entry' &&
       doc.ledgerId === ledgerId
       // Note: We include deleted entries here to identify ghosts
     )
-    .sort((a, b) => {
+    .sort((a: any, b: any) => {
       const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return dateB - dateA;
     });
 
   // Separate ghosts from active entries
-  const activeEntries = ledgerEntries.filter(entry => !isGhostEntry(entry));
-  const ghostEntries = ledgerEntries.filter(entry => isGhostEntry(entry));
+  const activeEntries = ledgerEntries.filter((entry: any) => !isGhostEntry(entry));
+  const ghostEntries = ledgerEntries.filter((entry: any) => isGhostEntry(entry));
 
   // Filter active entries to only fields in schema snapshot
   const fieldIds = schemaSnapshot.map(f => f.id);
-  const filteredActiveEntries = activeEntries.map(entry => ({
-    ...entry,
+  const filteredActiveEntries = activeEntries.map((entry: any) => ({
+    ...(entry as object),
     data: pickFields(entry.data, fieldIds)
   }));
 
   // Create ghost indicators
-  const ghostIndicators = ghostEntries.map(entry => ({
+  const ghostIndicators = ghostEntries.map((entry: any) => ({
     entryId: entry._id,
     displayText: '[Deleted Entry]',
     tooltip: 'This entry has been deleted on another device',
