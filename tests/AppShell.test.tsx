@@ -124,7 +124,7 @@ describe("AppShell Component", () => {
         // Resolve ambiguity by checking for the header title specifically
         expect(screen.getByRole('heading', { name: /Ledger: Test Profile/i })).toBeInTheDocument();
         expect(screen.getByText('Inspector')).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /close sidebar/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Toggle sidebar/i })).toBeInTheDocument();
     });
 
     it("performs initial responsive check on mount", () => {
@@ -169,7 +169,7 @@ describe("AppShell Component", () => {
             </MemoryRouter>
         );
 
-        const toggleBtn = screen.getByRole('button', { name: /close sidebar/i });
+        const toggleBtn = screen.getByRole('button', { name: /Toggle sidebar/i });
         fireEvent.click(toggleBtn);
         expect(mockUIState.toggleLeftSidebar).toHaveBeenCalled();
     });

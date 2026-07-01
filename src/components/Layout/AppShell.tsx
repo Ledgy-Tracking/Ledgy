@@ -397,14 +397,15 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleLeftSidebar}
-                                            aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                                            aria-label="Toggle sidebar"
+                                            aria-expanded={leftSidebarOpen}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>{leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}</p>
+                                        <p>Toggle sidebar</p>
                                     </TooltipContent>
                                 </Tooltip>
                                 <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
@@ -422,14 +423,15 @@ export const AppShell: React.FC = () => {
                                                 variant="outline"
                                                 size="icon"
                                                 onClick={() => setDashboardViewMode(prev => prev === 'grid' ? 'table' : 'grid')}
-                                                aria-label={dashboardViewMode === 'grid' ? 'Switch to Table View' : 'Switch to Grid View'}
+                                                aria-label="Toggle view mode"
+                                                aria-pressed={dashboardViewMode === 'grid'}
                                                 className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                             >
                                                 {dashboardViewMode === 'grid' ? <Table size={18} /> : <Grid3X3 size={18} />}
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p>{dashboardViewMode === 'grid' ? 'Switch to Table View' : 'Switch to Grid View'}</p>
+                                            <p>Toggle view mode</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 )}
@@ -439,14 +441,15 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleTheme}
-                                            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                            aria-label="Toggle theme"
+                                            aria-pressed={theme === 'dark'}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>{theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</p>
+                                        <p>Toggle theme</p>
                                     </TooltipContent>
                                 </Tooltip>
                                 <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
@@ -456,14 +459,15 @@ export const AppShell: React.FC = () => {
                                             variant="outline"
                                             size="icon"
                                             onClick={toggleRightInspector}
-                                            aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
+                                            aria-label="Toggle inspector"
+                                            aria-expanded={rightInspectorOpen}
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             <PanelRightClose size={18} className={rightInspectorOpen ? '' : 'rotate-180'} />
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>{rightInspectorOpen ? 'Close inspector' : 'Open inspector'}</p>
+                                        <p>Toggle inspector</p>
                                     </TooltipContent>
                                 </Tooltip>
                             </div>
