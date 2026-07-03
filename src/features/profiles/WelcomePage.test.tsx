@@ -87,7 +87,7 @@ describe('WelcomePage', () => {
 
     it('theme toggle button is present with accessible label', () => {
         renderWithRouter(<WelcomePage />);
-        const themeToggle = screen.getByRole('button', { name: /switch to light mode/i });
+        const themeToggle = screen.getByRole('button', { name: /toggle theme/i });
         expect(themeToggle).toBeDefined();
         expect(themeToggle.tagName).toBe('BUTTON');
     });

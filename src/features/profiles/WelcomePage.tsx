@@ -27,7 +27,8 @@ export const WelcomePage: React.FC = () => {
                 onClick={toggleTheme}
                 variant="outline"
                 size="icon"
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                aria-label="Toggle theme"
+                aria-pressed={theme === 'dark'}
                 className="absolute top-8 right-8 p-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/50 transition-all duration-300 shadow-sm focus:ring-2 focus:ring-emerald-500/50"
             >
                 {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
