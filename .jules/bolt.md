@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2026-07-04 - O(N^2) Validation Avoidance
+**Learning:** Replacing O(N^2) array.find() with O(N) Map lookups in validation logic drastically improves performance.
+**Action:** Use a Map for lookups when validating large data sets, and ensure the Map is updated if the data is auto-repaired during iteration.
