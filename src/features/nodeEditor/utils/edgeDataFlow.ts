@@ -163,10 +163,16 @@ export function setupNodeDataChangeSubscription(): () => void {
     const unsubscribe = useNodeStore.subscribe(
         (state) => state.nodes, // Select only nodes array
         (currentNodes, previousNodes) => {
+            // Pre-index previous nodes into a Map for O(1) lookups
+            const previousNodesMap = new Map(previousNodes.map(p => [p.id, p]));
+
             // Find nodes whose data has changed
             const changedNodes = currentNodes.filter(currentNode => {
-                const previousNode = previousNodes.find(p => p.id === currentNode.id);
+                const previousNode = previousNodesMap.get(currentNode.id);
                 if (!previousNode) return false; // New node, not a change
+
+                // Fast reference check before expensive JSON serialization
+                if (currentNode.data === previousNode.data) return false;
 
                 // Compare data objects (shallow comparison)
                 return JSON.stringify(currentNode.data) !== JSON.stringify(previousNode.data);
