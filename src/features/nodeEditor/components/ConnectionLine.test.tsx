@@ -11,15 +11,15 @@ import React from 'react';
 
 // Mock props for testing
 const createMockProps = (
-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
+    overrides: Partial<Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' }> = {}
+): any => ({
     fromX: 100,
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
+    fromPosition: 'right',
+    toPosition: 'left',
+    connectionLineType: 'default',
     connectionStatus: 'default',
     ...overrides
 });

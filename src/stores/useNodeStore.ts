@@ -414,7 +414,7 @@ export const useNodeStore = create<NodeState>()(
             const newNodes = state.nodes.map(n => {
                 const updated = updatedChildrenMap.get(n.id);
                 return updated || n;
-            }).concat(container);
+            }).concat(container) as CanvasNode[];
             
             set({ nodes: newNodes });
             get().debouncedSaveCanvas();
@@ -439,7 +439,7 @@ export const useNodeStore = create<NodeState>()(
                 .map(n => {
                     const restored = restoredNodesMap.get(n.id);
                     return restored || n;
-                });
+                }) as CanvasNode[];
             
             set({ nodes: newNodes });
             get().debouncedSaveCanvas();
