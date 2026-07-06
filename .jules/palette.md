@@ -9,3 +9,7 @@
 ## 2025-02-23 - Playwright Verification Context & Dashboard Icons
 **Learning:** The Dashboard page contains heavily icon-centric action bars (e.g. Inspector open/close, view toggles) which completely lack screen reader accessibility. Verifying these required automating the TOTP and Profile setup flows, revealing that Playwright struggles to click nested elements inside the Profile Card unless targeting specific text nodes.
 **Action:** When adding `aria-labels` to complex dashboards, always ensure `aria-pressed` states are added for toggles. When verifying via Playwright, bypass profile card container clicks by specifically locating and clicking the nested `h3` profile name element.
+
+## 2026-07-06 - Missing aria-pressed on Editor Toggle Buttons
+**Learning:** Important editor controls in nodes (e.g. TriggerNode event types and LedgerSourceNode display options) were visually indicating state but lacked programmatic indication for screen readers.
+**Action:** Add `aria-pressed` to all toggle buttons, especially those embedded within complex interactive areas like Node Editor components, to ensure state is communicated.
