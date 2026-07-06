@@ -35,3 +35,6 @@
 ## 2026-07-06 - Prevent test runner issues by avoiding bun test for vitest projects
 **Learning:** In this project, running `bun test` on Vitest test files may fail due to unresolved globals like `vi.mock is not a function`, leading to false negatives during verification.
 **Action:** Always use the project's native test runner command (`pnpm test <file_path>`) instead of `bun test` to ensure tests execute within the properly configured Vitest environment.
+## 2026-07-06 - Prevent dependency type mismatch issues
+**Learning:** When `@xyflow/react` or other dependencies update their internal types, existing local type interfaces that extend them (like `ConnectionLineComponentProps`) might break if they redefined properties with incompatible signatures (like `connectionStatus`).
+**Action:** When extending 3rd-party prop interfaces and redefining properties, always explicitly omit the property using `Omit<T, 'propName'>` to ensure compatibility across minor dependency updates.
