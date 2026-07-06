@@ -21,6 +21,8 @@ const createMockProps = (
     toPosition: 'left',
     connectionLineType: 'default',
     connectionStatus: 'default',
+    fromNode: { id: 'mock-from-node', position: { x: 0, y: 0 }, data: { label: 'mock' } },
+    fromHandle: { id: 'mock-from-handle', type: 'source', x: 0, y: 0, position: 'right' },
     ...overrides
 });
 
