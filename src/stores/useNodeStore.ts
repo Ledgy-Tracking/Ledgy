@@ -407,11 +407,14 @@ export const useNodeStore = create<NodeState>()(
             
             const { container, updatedChildren } = result;
             
+            // Fast lookup for updated children to avoid O(N*M) mapping
+            const updatedChildrenMap = new Map(updatedChildren.map(u => [u.id, u]));
+
             // Replace updated children and add container
             const newNodes = state.nodes.map(n => {
-                const updated = updatedChildren.find(u => u.id === n.id);
+                const updated = updatedChildrenMap.get(n.id);
                 return updated || n;
-            }).concat(container);
+            }).concat(container) as CanvasNode[];
             
             set({ nodes: newNodes });
             get().debouncedSaveCanvas();
@@ -427,13 +430,16 @@ export const useNodeStore = create<NodeState>()(
             
             const { restoredNodes, childNodeIds } = result;
             
+            // Fast lookup for restored nodes to avoid O(N*M) mapping
+            const restoredNodesMap = new Map(restoredNodes.map(r => [r.id, r]));
+
             // Remove container and update children
             const newNodes = state.nodes
                 .filter(n => n.id !== containerId)
                 .map(n => {
-                    const restored = restoredNodes.find(r => r.id === n.id);
+                    const restored = restoredNodesMap.get(n.id);
                     return restored || n;
-                });
+                }) as CanvasNode[];
             
             set({ nodes: newNodes });
             get().debouncedSaveCanvas();
