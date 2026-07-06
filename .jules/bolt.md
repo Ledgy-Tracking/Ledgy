@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2026-07-06 - Prevent test runner issues by avoiding bun test for vitest projects
+**Learning:** In this project, running `bun test` on Vitest test files may fail due to unresolved globals like `vi.mock is not a function`, leading to false negatives during verification.
+**Action:** Always use the project's native test runner command (`pnpm test <file_path>`) instead of `bun test` to ensure tests execute within the properly configured Vitest environment.
