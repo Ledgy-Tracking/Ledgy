@@ -32,3 +32,10 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2026-07-07 - Avoid Array Reassignment inside forEach
+**Learning:** Reassigning an array (e.g. `array = array.map(...)`) from within its own `.forEach` loop creates a stale reference bug where the loop continues iterating over the original array in memory. It also incurs O(N*M) reallocation overhead.
+**Action:** When mutating arrays during iteration, always update specific elements directly by index (e.g., `array[index] = newValue`) instead of reassigning the entire array variable.
+
+## 2026-07-07 - Cache Invalidation in Map Lookups
+**Learning:** When replacing O(N^2) array iterations with O(N) pre-computed Map lookups inside a data validation loop, if the items are auto-repaired or mutated during the loop, failing to update the Map results in stale data lookups.
+**Action:** Ensure the pre-computed Map is explicitly updated (e.g., `map.set(id, updatedItem)`) alongside any array mutation to maintain cache integrity.
