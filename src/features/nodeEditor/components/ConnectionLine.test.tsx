@@ -19,7 +19,7 @@ const createMockProps = (
     toY: 200,
     fromPosition: undefined,
     toPosition: undefined,
-    connectionLineType: undefined,
+    connectionLineType: "bezier" as any,
     connectionStatus: 'default',
     ...overrides
 });
