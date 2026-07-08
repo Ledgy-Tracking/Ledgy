@@ -23,7 +23,6 @@ import type { Node } from '@xyflow/react';
 const TOUCH_LONG_PRESS_DURATION = 300; // ms
 const TOUCH_MOVEMENT_THRESHOLD = 10; // px - cancel long-press if moved more than this
 const CLICK_LISTENER_DELAY = 150; // ms - delay before click-outside detection (AC5)
-const REBUILD_THROTTLE_MS = 100; // ms - throttle handle position rebuilds
 
 interface UseEdgeDragOptions {
     nodes: Node[];
@@ -53,7 +52,6 @@ export const useEdgeDrag = ({
     const connectionStateRef = useRef<ConnectionLineState | null>(null);
     const rafRef = useRef<number | null>(null);
     const lastPositionRef = useRef<XYPosition | null>(null);
-    const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
     const touchTimerRef = useRef<number | null>(null);
     const sourceTypeRef = useRef<string | undefined>(undefined);
     const clickListenerAddedRef = useRef(false);
@@ -165,6 +163,19 @@ export const useEdgeDrag = ({
         });
     }, [isDragging, connectionState, spatialIndex]);
 
+    // Cancel drag operation (AC5)
+    const cancelDrag = useCallback(() => {
+        setConnectionState(null);
+
+        if (rafRef.current) {
+            cancelAnimationFrame(rafRef.current);
+            rafRef.current = null;
+        }
+
+        onCancel?.();
+
+    }, [onCancel]);
+
     // End drag (mouse/touch release)
     const endDrag = useCallback(() => {
         if (!connectionState?.snapResult?.snapped) {
@@ -197,18 +208,6 @@ export const useEdgeDrag = ({
             performance.measure('edge-drag', 'edge-drag-start', 'edge-drag-end');
         }
     }, [connectionState, onConnect, cancelDrag]);
-
-    // Cancel drag operation (AC5)
-    const cancelDrag = useCallback(() => {
-        setConnectionState(null);
-        
-        if (rafRef.current) {
-            cancelAnimationFrame(rafRef.current);
-            rafRef.current = null;
-        }
-
-        onCancel?.();
-    }, [onCancel]);
 
     // Escape key handler (AC5)
     useEffect(() => {
