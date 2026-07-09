@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2026-07-09 - Optimize state subscriptions with O(1) Map lookups and reference checks
+**Learning:** In Zustand state subscriptions comparing large arrays (e.g., node editor state), using `Array.prototype.find` inside an array filter creates an O(N^2) complexity that blocks the UI thread. Additionally, unconditionally calling `JSON.stringify` for deep comparison is an expensive operation that is often unnecessary if the object reference hasn't changed.
+**Action:** Always index previous arrays into a `Map` keyed by ID for O(1) lookups before filtering. Furthermore, implement a fast identity/reference check (`currentNode.data === previousNode.data`) to bypass expensive serialization overhead for unmodified items.
