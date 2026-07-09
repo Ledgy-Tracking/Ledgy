@@ -137,7 +137,8 @@ export const ProfileSelector: React.FC = () => {
                 onClick={toggleTheme}
                 variant="outline"
                 size="icon"
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                aria-label="Toggle theme"
+                aria-pressed={theme === 'dark'}
                 className="absolute top-8 right-8 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/50 focus:ring-emerald-500/50"
             >
                 {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
