@@ -25,108 +25,147 @@ export const validateContainerIntegrity = (
     const errors: string[] = [];
     let repaired = [...nodes];
     
-    // 1. Check for orphaned children (React Flow v12 uses parentId)
-    repaired.forEach((node, index) => {
+    // Pre-compute maps for O(1) lookups
+    const nodesMap = new Map<string, Node>();
+    const nodesByParentIdMap = new Map<string, Node[]>();
+    const nodeIndexMap = new Map<string, number>();
+    const repairedMap = new Map<string, Node>();
+
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        nodesMap.set(node.id, node);
+        repairedMap.set(node.id, node);
+        nodeIndexMap.set(node.id, i);
+
         if (node.parentId) {
-            const parent = nodes.find(n => n.id === node.parentId);
+            if (!nodesByParentIdMap.has(node.parentId)) {
+                nodesByParentIdMap.set(node.parentId, []);
+            }
+            nodesByParentIdMap.get(node.parentId)!.push(node);
+        }
+    }
+
+    // Helper to safely update both array and map
+    const updateRepairedNode = (nodeId: string, updatedNode: Node) => {
+        const index = nodeIndexMap.get(nodeId);
+        if (index !== undefined) {
+            repaired[index] = updatedNode;
+            repairedMap.set(nodeId, updatedNode);
+        }
+    };
+
+    // 1. Check for orphaned children (React Flow v12 uses parentId)
+    for (let index = 0; index < repaired.length; index++) {
+        const node = repaired[index];
+        if (node.parentId) {
+            const parent = nodesMap.get(node.parentId);
             if (!parent) {
                 errors.push(`Orphaned child: ${node.id} references missing parent ${node.parentId}`);
                 // Auto-repair: clear parentId
                 const { parentId: _, extent: __, ...rest } = node;
-                repaired[index] = rest as Node;
+                updateRepairedNode(node.id, rest as Node);
             }
         }
-    });
+    }
     
     // 2. Validate container child references
-    repaired.forEach((node, index) => {
+    for (let index = 0; index < repaired.length; index++) {
+        const node = repaired[index];
         if (node.type === 'container' && node.data?.childNodeIds) {
             const rawChildIds = node.data.childNodeIds;
             const childNodeIds: string[] = Array.isArray(rawChildIds) ? rawChildIds : [];
-            const missingChildren = childNodeIds.filter(
-                childId => !nodes.find(n => n.id === childId)
-            );
+            const missingChildren: string[] = [];
+
+            for (let i = 0; i < childNodeIds.length; i++) {
+                if (!nodesMap.has(childNodeIds[i])) {
+                    missingChildren.push(childNodeIds[i]);
+                }
+            }
             
             if (missingChildren.length > 0) {
                 errors.push(`Container ${node.id} references missing children: ${missingChildren.join(', ')}`);
                 // Auto-repair: remove missing child IDs
-                repaired[index] = {
+                const missingSet = new Set(missingChildren);
+                updateRepairedNode(node.id, {
                     ...node,
                     data: {
                         ...node.data,
-                        childNodeIds: childNodeIds.filter(
-                            id => !missingChildren.includes(id)
-                        ),
+                        childNodeIds: childNodeIds.filter(id => !missingSet.has(id)),
                     },
-                };
+                });
             }
             
             // Check that all children actually reference this container (using parentId)
-            const children = nodes.filter(n => childNodeIds.includes(n.id));
-            const misparentedChildren = children.filter(n => n.parentId !== node.id);
+            const misparentedChildren: Node[] = [];
+            for (let i = 0; i < childNodeIds.length; i++) {
+                const childNode = nodesMap.get(childNodeIds[i]);
+                if (childNode && childNode.parentId !== node.id) {
+                    misparentedChildren.push(childNode);
+                }
+            }
+
             if (misparentedChildren.length > 0) {
                 errors.push(`Container ${node.id} has children with wrong parentId: ${misparentedChildren.map(n => n.id).join(', ')}`);
                 // Auto-repair: fix parentId on children
-                repaired = repaired.map(n => {
-                    if (misparentedChildren.find(c => c.id === n.id)) {
-                        return { ...n, parentId: node.id, extent: 'parent' as const };
-                    }
-                    return n;
-                });
+                for (let i = 0; i < misparentedChildren.length; i++) {
+                    const child = misparentedChildren[i];
+                    const repairedChild = repairedMap.get(child.id) || child;
+                    updateRepairedNode(child.id, { ...repairedChild, parentId: node.id, extent: 'parent' as const });
+                }
             }
         }
-    });
+    }
     
     // 3. Prevent circular references
     const hasCircularRef = (nodeId: string, visited = new Set<string>()): boolean => {
         if (visited.has(nodeId)) return true;
         visited.add(nodeId);
-        const node = repaired.find(n => n.id === nodeId);
+        const node = repairedMap.get(nodeId);
         if (node?.parentId) {
             return hasCircularRef(node.parentId, visited);
         }
         return false;
     };
     
-    repaired.forEach(node => {
+    for (let i = 0; i < repaired.length; i++) {
+        const node = repaired[i];
         if (node.parentId && hasCircularRef(node.id)) {
             errors.push(`Circular reference detected: ${node.id}`);
             // Auto-repair: clear parentId
-            const index = repaired.findIndex(n => n.id === node.id);
-            if (index !== -1) {
-                const { parentId: _, extent: __, ...rest } = node;
-                repaired[index] = rest as Node;
-            }
+            const { parentId: _, extent: __, ...rest } = node;
+            updateRepairedNode(node.id, rest as Node);
         }
-    });
+    }
     
     // 4. Validate container data structure
-    repaired.forEach((node, index) => {
+    for (let index = 0; index < repaired.length; index++) {
+        const node = repaired[index];
         if (node.type === 'container') {
             const data = node.data;
             if (!data || typeof data !== 'object') {
                 errors.push(`Container ${node.id} has invalid data structure`);
                 // Auto-repair: set default data
-                repaired[index] = {
+                const children = nodesByParentIdMap.get(node.id) || [];
+                updateRepairedNode(node.id, {
                     ...node,
                     data: {
                         type: 'container',
                         label: 'Group',
                         isCollapsed: false,
-                        childNodeIds: nodes.filter(n => n.parentId === node.id).map(n => n.id),
+                        childNodeIds: children.map(n => n.id),
                         createdAt: new Date().toISOString(),
                     },
-                };
+                });
             } else if (data.type !== 'container') {
                 errors.push(`Container ${node.id} has incorrect type discriminator`);
                 // Auto-repair: fix type discriminator
-                repaired[index] = {
+                updateRepairedNode(node.id, {
                     ...node,
                     data: { ...data, type: 'container' },
-                };
+                });
             }
         }
-    });
+    }
     
     return { valid: errors.length === 0, errors, repaired };
 };
