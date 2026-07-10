@@ -13,7 +13,7 @@ vi.mock('@/lib/db', () => ({
 vi.mock('@/stores/useProfileStore', () => {
   const getState = vi.fn(() => ({ activeProfileId: 'test-profile' }));
   const useProfileStore = vi.fn(() => ({ activeProfileId: 'test-profile' }));
-  useProfileStore.getState = getState;
+  (useProfileStore as any).getState = getState;
   return {
     useProfileStore
   };
@@ -26,9 +26,6 @@ vi.mock('@/stores/useErrorStore', () => ({
     }))
   }
 }));
-
-// Import after mocks
-import { useProfileStore } from '@/stores/useProfileStore';
 
 describe('useLedgerData', () => {
   const mockProfileId = 'test-profile';
@@ -146,7 +143,7 @@ describe('useLedgerData', () => {
     });
 
     it('should handle no active profile', async () => {
-      useProfileStore.getState.mockReturnValueOnce({
+      (useProfileStore as any).getState.mockReturnValueOnce({
         activeProfileId: null
       });
 
