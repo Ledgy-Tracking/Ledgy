@@ -13,7 +13,7 @@ vi.mock('@/lib/db', () => ({
 vi.mock('@/stores/useProfileStore', () => {
   const getState = vi.fn(() => ({ activeProfileId: 'test-profile' }));
   const useProfileStore = vi.fn(() => ({ activeProfileId: 'test-profile' }));
-  useProfileStore.getState = getState;
+  (useProfileStore as any).getState = getState;
   return {
     useProfileStore
   };
@@ -26,9 +26,6 @@ vi.mock('@/stores/useErrorStore', () => ({
     }))
   }
 }));
-
-// Import after mocks
-import { useProfileStore } from '@/stores/useProfileStore';
 
 describe('useLiveQuery', () => {
   const mockProfileId = 'test-profile';
@@ -93,7 +90,7 @@ describe('useLiveQuery', () => {
       subscribeToLedgerChanges(mockLedgerId, onChange);
 
       // Get the error handler
-      const errorHandler = mockChanges.on.mock.calls.find(call => call[0] === 'error')[1];
+      const errorHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'error')![1];
 
       const error = new Error('Changes feed error');
       errorHandler(error);
@@ -102,7 +99,7 @@ describe('useLiveQuery', () => {
     });
 
     it('should throw error if no active profile', () => {
-      useProfileStore.getState.mockReturnValueOnce({
+      (useProfileStore as any).getState.mockReturnValueOnce({
         activeProfileId: null
       });
 
@@ -143,7 +140,7 @@ describe('useLiveQuery', () => {
       await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
       onDataChange.mockClear();
 
-      const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
+      const changeHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'change')![1];
       act(() => { changeHandler({ doc: mockEntries[0] }); });
 
       // Should be debounced — not called yet
@@ -179,7 +176,7 @@ describe('useLiveQuery', () => {
       renderHook(() => useLiveQuery(mockLedgerId, onDataChange));
       await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
 
-      const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
+      const changeHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'change')![1];
       act(() => { changeHandler({ doc: {} }); });
 
       await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
@@ -214,7 +211,7 @@ describe('useLiveQuery', () => {
       await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
       onDataChange.mockClear();
 
-      const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
+      const changeHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'change')![1];
       act(() => { changeHandler({ doc: mockEntries[0] }); });
 
       await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
@@ -239,7 +236,7 @@ describe('useLiveQuery', () => {
       await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)); });
       onDataChange.mockClear();
 
-      const changeHandler = mockChanges.on.mock.calls.find(call => call[0] === 'change')[1];
+      const changeHandler = mockChanges.on.mock.calls.find((call: any) => call[0] === 'change')![1];
       act(() => { changeHandler({ doc: mockEntries[0] }); });
 
       await act(async () => { await new Promise(resolve => setTimeout(resolve, DEBOUNCE_WAIT)); });
