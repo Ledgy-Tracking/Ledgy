@@ -23,7 +23,7 @@ type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
 /**
  * Extended props including connection status and direction
  */
-interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, 'connectionStatus'> {
+export interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, 'connectionStatus'> {
     connectionStatus?: ConnectionStatus;
     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
 }
