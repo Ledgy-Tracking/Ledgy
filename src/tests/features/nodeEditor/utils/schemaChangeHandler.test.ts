@@ -8,6 +8,7 @@ import {
 import { getProfileDb } from '@/lib/db';
 import { useProfileStore } from '@/stores/useProfileStore';
 import { useNodeStore } from '@/stores/useNodeStore';
+import type { SchemaField } from '@/types/ledger';
 
 // Mock dependencies
 vi.mock('@/lib/db', () => ({
@@ -56,10 +57,10 @@ describe('schemaChangeHandler', () => {
 
   describe('detectSchemaChange', () => {
     it('should detect field added', () => {
-      const oldSchema = [
+      const oldSchema: SchemaField[] = [
         { id: 'field1', name: 'Field 1', type: 'text' }
       ];
-      const newSchema = [
+      const newSchema: SchemaField[] = [
         { id: 'field1', name: 'Field 1', type: 'text' },
         { id: 'field2', name: 'Field 2', type: 'number' }
       ];
@@ -75,11 +76,11 @@ describe('schemaChangeHandler', () => {
     });
 
     it('should detect field removed', () => {
-      const oldSchema = [
+      const oldSchema: SchemaField[] = [
         { id: 'field1', name: 'Field 1', type: 'text' },
         { id: 'field2', name: 'Field 2', type: 'number' }
       ];
-      const newSchema = [
+      const newSchema: SchemaField[] = [
         { id: 'field1', name: 'Field 1', type: 'text' }
       ];
 
@@ -94,10 +95,10 @@ describe('schemaChangeHandler', () => {
     });
 
     it('should detect field type changed', () => {
-      const oldSchema = [
+      const oldSchema: SchemaField[] = [
         { id: 'field1', name: 'Field 1', type: 'text' }
       ];
-      const newSchema = [
+      const newSchema: SchemaField[] = [
         { id: 'field1', name: 'Field 1', type: 'number' }
       ];
 
@@ -112,10 +113,10 @@ describe('schemaChangeHandler', () => {
     });
 
     it('should detect schema version bump', () => {
-      const oldSchema = [
+      const oldSchema: SchemaField[] = [
         { id: 'field1', name: 'Field 1', type: 'text', required: true }
       ];
-      const newSchema = [
+      const newSchema: SchemaField[] = [
         { id: 'field1', name: 'Field 1', type: 'text', required: false }
       ];
 
@@ -124,7 +125,7 @@ describe('schemaChangeHandler', () => {
     });
 
     it('should return null for no change', () => {
-      const schema = [
+      const schema: SchemaField[] = [
         { id: 'field1', name: 'Field 1', type: 'text' }
       ];
 
@@ -151,7 +152,7 @@ describe('schemaChangeHandler', () => {
     });
 
     it('should handle field added', () => {
-      const change = {
+      const change: any = {
         type: SchemaChangeType.FIELD_ADDED,
         ledgerId: mockLedgerId,
         oldSchema: [],
@@ -167,7 +168,7 @@ describe('schemaChangeHandler', () => {
     });
 
     it('should handle field removed', () => {
-      const change = {
+      const change: any = {
         type: SchemaChangeType.FIELD_REMOVED,
         ledgerId: mockLedgerId,
         oldSchema: [{ id: 'field1', name: 'Field 1', type: 'text' }],
@@ -184,7 +185,7 @@ describe('schemaChangeHandler', () => {
     });
 
     it('should handle field type changed', () => {
-      const change = {
+      const change: any = {
         type: SchemaChangeType.FIELD_TYPE_CHANGED,
         ledgerId: mockLedgerId,
         oldSchema: [{ id: 'field1', name: 'Field 1', type: 'text' }],
@@ -201,7 +202,7 @@ describe('schemaChangeHandler', () => {
     });
 
     it('should handle schema version bump', () => {
-      const change = {
+      const change: any = {
         type: SchemaChangeType.SCHEMA_VERSION_BUMP,
         ledgerId: mockLedgerId,
         oldSchema: [],
@@ -234,7 +235,7 @@ describe('schemaChangeHandler', () => {
         updateNodeData: mockUpdateNodeData
       });
 
-      const change = {
+      const change: any = {
         type: SchemaChangeType.FIELD_ADDED,
         ledgerId: mockLedgerId,
         oldSchema: [],

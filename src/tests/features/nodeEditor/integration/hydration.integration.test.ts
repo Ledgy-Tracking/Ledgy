@@ -72,7 +72,9 @@ vi.mock('@/stores/useNodeStore', () => {
 
 const TEST_PROFILE_ID = 'profile-1';
 const TEST_LEDGER_ID = 'ledger-integration-1';
-const TEST_SCHEMA = [
+import type { SchemaField } from '../../../../types/ledger';
+
+const TEST_SCHEMA: SchemaField[] = [
   { id: 'name', name: 'Name', type: 'text' },
   { id: 'amount', name: 'Amount', type: 'number' },
 ];
