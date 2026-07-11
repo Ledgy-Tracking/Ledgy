@@ -44,5 +44,5 @@
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
 ## 2026-07-11 - Avoid Math.random for security
 **Vulnerability:** NodeCanvas.tsx used Math.random() as a fallback for ID generation.
-**Learning:** Math.random() is not cryptographically secure. Rely on uuid library which handles secure generation correctly.
-**Prevention:** Always use uuid or crypto.getRandomValues() instead of Math.random().
+**Learning:** Math.random() is not cryptographically secure. Rely on WebCrypto getRandomValues() instead.
+**Prevention:** Always use crypto.randomUUID() or crypto.getRandomValues() instead of Math.random().
