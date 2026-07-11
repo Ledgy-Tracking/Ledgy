@@ -9,6 +9,8 @@ import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
 import React from 'react';
 
+import { Position, ConnectionLineType } from '@xyflow/react';
+
 // Mock props for testing
 const createMockProps = (
     overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
@@ -17,10 +19,15 @@ const createMockProps = (
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
-    connectionStatus: 'default',
+    fromPosition: Position.Right,
+    toPosition: Position.Left,
+    connectionLineType: ConnectionLineType.Bezier,
+    fromNode: {} as any,
+    fromHandle: {} as any,
+    toNode: {} as any,
+    toHandle: {} as any,
+    pointer: { x: 300, y: 200 },
+    connectionStatus: 'default' as any,
     ...overrides
 });
 
