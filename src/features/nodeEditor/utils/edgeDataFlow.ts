@@ -163,19 +163,29 @@ export function setupNodeDataChangeSubscription(): () => void {
     const unsubscribe = useNodeStore.subscribe(
         (state) => state.nodes, // Select only nodes array
         (currentNodes, previousNodes) => {
+            // Index previous nodes by id for O(1) lookup
+            const previousNodesMap = new Map(previousNodes.map(node => [node.id, node]));
+
             // Find nodes whose data has changed
             const changedNodes = currentNodes.filter(currentNode => {
-                const previousNode = previousNodes.find(p => p.id === currentNode.id);
+                const previousNode = previousNodesMap.get(currentNode.id);
                 if (!previousNode) return false; // New node, not a change
+
+                // Fast identity check before falling back to deep stringify
+                if (currentNode.data === previousNode.data) return false;
 
                 // Compare data objects (shallow comparison)
                 return JSON.stringify(currentNode.data) !== JSON.stringify(previousNode.data);
             });
 
+            if (changedNodes.length === 0) return;
+
+            // Get store state once instead of inside the loop
+            const state = useNodeStore.getState();
+
             // Propagate changes for each modified node
             changedNodes.forEach(node => {
                 // Only propagate if this node has output connections
-                const state = useNodeStore.getState();
                 const hasOutgoingEdges = state.edges.some(edge => edge.source === node.id);
 
                 if (hasOutgoingEdges) {
