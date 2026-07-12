@@ -18,7 +18,7 @@ const createMockProps = (
     toY: 200,
     fromPosition: Position.Right,
     toPosition: Position.Left,
-    connectionLineType: ConnectionLineType.Default,
+    connectionLineType: ConnectionLineType.Bezier,
     connectionStatus: 'default',
     fromNode: {} as any,
     toNode: null,
