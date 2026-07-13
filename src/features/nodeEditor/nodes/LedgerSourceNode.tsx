@@ -331,7 +331,8 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                                     size="icon-xs"
                                     onClick={() => updateNodeData(id, { showFieldTypes: !showFieldTypes })}
                                     className={`h-5 w-8 ${showFieldTypes ? 'bg-emerald-600' : ''}`}
-                                    aria-label={showFieldTypes ? 'Hide field types' : 'Show field types'}
+                                    aria-label="Toggle field types display"
+                                    aria-pressed={showFieldTypes}
                                 >
                                     <span className="text-[10px]">{showFieldTypes ? 'On' : 'Off'}</span>
                                 </Button>
@@ -345,7 +346,8 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                                     size="icon-xs"
                                     onClick={() => updateNodeData(id, { showLatestValues: !showLatestValues })}
                                     className={`h-5 w-8 ${showLatestValues ? 'bg-emerald-600' : ''}`}
-                                    aria-label={showLatestValues ? 'Hide latest values' : 'Show latest values'}
+                                    aria-label="Toggle latest values display"
+                                    aria-pressed={showLatestValues}
                                 >
                                     <span className="text-[10px]">{showLatestValues ? 'On' : 'Off'}</span>
                                 </Button>
