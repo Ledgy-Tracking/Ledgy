@@ -168,6 +168,9 @@ export function setupNodeDataChangeSubscription(): () => void {
                 const previousNode = previousNodes.find(p => p.id === currentNode.id);
                 if (!previousNode) return false; // New node, not a change
 
+                // Fast path: reference check before expensive serialization
+                if (currentNode.data === previousNode.data) return false;
+
                 // Compare data objects (shallow comparison)
                 return JSON.stringify(currentNode.data) !== JSON.stringify(previousNode.data);
             });
