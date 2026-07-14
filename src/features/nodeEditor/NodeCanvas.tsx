@@ -393,17 +393,15 @@ export const NodeCanvas: React.FC = () => {
     );
 
     // Story 4-8: Track connection start for rejection detection
-    const onConnectStart = useCallback(({
-        handleId,
-        nodeId,
-    }: {
-        handleId: string | null;
-        nodeId: string;
-    }) => {
+    const onConnectStart = useCallback((
+        _event: React.MouseEvent | React.TouchEvent,
+        params: { handleId: string | null; nodeId: string | null; handleType: string | null }
+    ) => {
+        if (!params.nodeId) return;
         connectionAttemptRef.current = {
             isConnecting: true,
-            sourceHandle: handleId,
-            source: nodeId,
+            sourceHandle: params.handleId,
+            source: params.nodeId,
             targetHandle: null,
             target: null,
         };
@@ -673,7 +671,7 @@ const generateNodeId = (): string => {
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
-                connectionLineComponent={ConnectionLine}
+                connectionLineComponent={ConnectionLine as any}
                 fitView
                 selectionOnDrag={true}
                 selectionKeyCode={['Shift']}
@@ -724,7 +722,7 @@ const generateNodeId = (): string => {
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
-                connectionLineComponent={ConnectionLine}
+                connectionLineComponent={ConnectionLine as any}
                 defaultViewport={initialViewport}
                 panActivationKeyCode={['Space']}
                 selectionKeyCode={['Shift']}
