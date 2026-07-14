@@ -6,21 +6,24 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
-import type { ConnectionLineComponentProps } from '@xyflow/react';
-import React from 'react';
+import { Position, ConnectionLineType, type ConnectionLineComponentProps } from '@xyflow/react';
 
 // Mock props for testing
 const createMockProps = (
-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
+    overrides: Partial<Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' }> = {}
+): Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' } => ({
     fromX: 100,
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
+    fromPosition: Position.Right,
+    toPosition: Position.Left,
+    connectionLineType: ConnectionLineType.Bezier,
     connectionStatus: 'default',
+    fromNode: { id: 'test-node', position: { x: 0, y: 0 }, data: {} },
+    fromHandle: null,
+    toNode: null,
+    toHandle: null,
     ...overrides
 });
 
