@@ -169,7 +169,8 @@ export function setupNodeDataChangeSubscription(): () => void {
                 if (!previousNode) return false; // New node, not a change
 
                 // Compare data objects (shallow comparison)
-                return JSON.stringify(currentNode.data) !== JSON.stringify(previousNode.data);
+                // ⚡ Bolt: Fast identity check before expensive deep serialization
+                return currentNode.data !== previousNode.data && JSON.stringify(currentNode.data) !== JSON.stringify(previousNode.data);
             });
 
             // Propagate changes for each modified node
