@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2026-07-15 - Missing Build Dependency Verification
+**Learning:** When encountering a TypeScript error about a missing import or undefined type during CI (e.g. `Type "undefined" is not assignable...` or `Failed to resolve import...`), the missing module may not just be a type error but a missing runtime dependency.
+**Action:** Before replacing a missing module in source code, verify that the package is actually present in `package.json` and install it if necessary, or replace it with an existing equivalent library (like swapping `nanoid` for `uuid`).
