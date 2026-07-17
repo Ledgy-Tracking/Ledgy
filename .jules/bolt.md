@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2026-07-17 - Prevent unnecessary re-renders with aggregate Zustand selectors
+**Learning:** Subscribing to an entire collection in Zustand (e.g., `useNodeStore(useShallow(s => s.nodes))`) causes a component to re-render whenever *any* item in that collection is modified or moves, even if the component only cares about aggregate metrics like the total count. This creates significant rendering overhead during high-frequency updates like node dragging.
+**Action:** Select primitive properties directly (e.g., `useNodeStore(s => s.nodes.length)`) to ensure the component only re-renders when the specific aggregate metric changes, fully preventing unnecessary re-renders.
