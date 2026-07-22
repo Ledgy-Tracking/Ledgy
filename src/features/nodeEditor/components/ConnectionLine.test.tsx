@@ -6,23 +6,34 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
-import type { ConnectionLineComponentProps } from '@xyflow/react';
-import React from 'react';
+import { Position, ConnectionLineType, type ConnectionLineComponentProps } from '@xyflow/react';
 
 // Mock props for testing
 const createMockProps = (
-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
+    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' | null }> = {}
+): any => ({
     fromX: 100,
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
-    connectionStatus: 'default',
+    fromPosition: Position.Right,
+    toPosition: Position.Left,
+    connectionLineType: ConnectionLineType.Bezier,
+    connectionStatus: null,
+    fromNode: {
+        id: '1',
+        position: { x: 0, y: 0 },
+        data: {},
+        measured: {},
+        internals: {
+            positionAbsolute: { x: 0, y: 0 },
+            z: 0,
+            userNode: { id: '1', position: { x: 0, y: 0 }, data: {} }
+        }
+    } as any,
+    fromHandle: { id: '1', type: 'source', nodeId: '1', x: 0, y: 0, width: 0, height: 0 },
     ...overrides
-});
+} as any);
 
 describe('ConnectionLine', () => {
     it('should render without crashing', () => {
@@ -33,7 +44,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should render with default status', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: 'default' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const line = container.querySelector('g[data-testid="connection-line"]');
@@ -89,7 +100,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should not render glow effect for non-valid connections', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: 'default' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const glow = container.querySelector('.connection-line-glow');
@@ -105,7 +116,7 @@ describe('ConnectionLine', () => {
     });
 
     it('should apply correct stroke color for default status', () => {
-        const props = createMockProps({ connectionStatus: 'default' });
+        const props = createMockProps({ connectionStatus: 'default' as any });
         const { container } = render(<ConnectionLine {...props} />);
         
         const path = container.querySelector('.connection-line-default');
