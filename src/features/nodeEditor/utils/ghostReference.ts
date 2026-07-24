@@ -27,7 +27,7 @@ export const checkGhostReferences = async (
   const db = getProfileDb(activeProfileId);
 
   // Get all documents that might be ghosts
-  const allDocs = await db.getAllDocuments();
+  const allDocs = await db.getAllDocuments<any>();
 
   // Create maps for efficient lookup
   const docMap = new Map<string, any>();
@@ -60,7 +60,7 @@ export const checkGhostReferences = async (
 export const hydrateLedgerWithGhosts = async (
   ledgerId: string,
   schemaSnapshot: any[],
-  cacheEnabled: boolean = true
+  _cacheEnabled: boolean = true
 ) => {
   const activeProfileId = useProfileStore.getState().activeProfileId;
   if (!activeProfileId) {
@@ -70,7 +70,7 @@ export const hydrateLedgerWithGhosts = async (
   const db = getProfileDb(activeProfileId);
 
   // Query entries for this ledger
-  const allEntries = await db.getAllDocuments();
+  const allEntries = await db.getAllDocuments<any>();
   const ledgerEntries = allEntries
     .filter(doc =>
       doc.type === 'entry' &&
