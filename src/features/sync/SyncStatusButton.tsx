@@ -95,7 +95,17 @@ export const SyncStatusButton: React.FC<SyncStatusButtonProps> = ({ profileId, o
 
             {/* Direct Sync Trigger Button */}
             <div
+                role="button"
+                tabIndex={0}
+                aria-label="Force Sync Now"
                 onClick={handleSyncClick}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSyncClick(e as any);
+                    }
+                }}
                 className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-600 text-zinc-400 hover:text-emerald-500 transition-all"
                 title="Force Sync Now"
             >
