@@ -71,9 +71,16 @@ export const SyncStatusButton: React.FC<SyncStatusButtonProps> = ({ profileId, o
         return `${diffDays}d ago`;
     };
 
-    const handleSyncClick = (e: React.MouseEvent) => {
+    const handleSyncClick = (e: React.MouseEvent | React.KeyboardEvent) => {
         e.stopPropagation();
         triggerSync(profileId);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleSyncClick(e);
+        }
     };
 
     return (
@@ -99,14 +106,8 @@ export const SyncStatusButton: React.FC<SyncStatusButtonProps> = ({ profileId, o
                 tabIndex={0}
                 aria-label="Force Sync Now"
                 onClick={handleSyncClick}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleSyncClick(e as any);
-                    }
-                }}
-                className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-600 text-zinc-400 hover:text-emerald-500 transition-all"
+                onKeyDown={handleKeyDown}
+                className="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-600 text-zinc-400 hover:text-emerald-500 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1 dark:focus:ring-offset-zinc-800"
                 title="Force Sync Now"
             >
                 <RefreshCw size={12} className={isLoading || syncStatus.status === 'syncing' ? 'animate-spin' : ''} />

@@ -58,4 +58,45 @@ describe('SyncStatusButton', () => {
         fireEvent.click(screen.getByTitle('Open Sync Settings'));
         expect(handleClick).toHaveBeenCalled();
     });
+
+    it('triggers sync when force sync button is clicked', () => {
+        const mockTriggerSync = vi.fn();
+        (useSyncStore as any).mockReturnValue({
+            syncStatus: { status: 'idle' },
+            isLoading: false,
+            triggerSync: mockTriggerSync
+        });
+        (useAuthStore as any).mockReturnValue({ isUnlocked: true });
+
+        render(<SyncStatusButton profileId="test-id" onClick={() => { }} />);
+
+        const forceSyncButton = screen.getByRole('button', { name: 'Force Sync Now' });
+        fireEvent.click(forceSyncButton);
+
+        expect(mockTriggerSync).toHaveBeenCalledWith('test-id');
+    });
+
+    it('triggers sync when force sync button is activated via keyboard', () => {
+        const mockTriggerSync = vi.fn();
+        (useSyncStore as any).mockReturnValue({
+            syncStatus: { status: 'idle' },
+            isLoading: false,
+            triggerSync: mockTriggerSync
+        });
+        (useAuthStore as any).mockReturnValue({ isUnlocked: true });
+
+        render(<SyncStatusButton profileId="test-id" onClick={() => { }} />);
+
+        const forceSyncButton = screen.getByRole('button', { name: 'Force Sync Now' });
+
+        // Test Enter key
+        fireEvent.keyDown(forceSyncButton, { key: 'Enter', code: 'Enter' });
+        expect(mockTriggerSync).toHaveBeenCalledWith('test-id');
+
+        mockTriggerSync.mockClear();
+
+        // Test Space key
+        fireEvent.keyDown(forceSyncButton, { key: ' ', code: 'Space' });
+        expect(mockTriggerSync).toHaveBeenCalledWith('test-id');
+    });
 });
