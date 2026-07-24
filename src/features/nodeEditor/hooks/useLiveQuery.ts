@@ -82,7 +82,7 @@ export const useLiveQuery = (
   }, [ledgerId, activeProfileId, onDataChange, cacheSize]);
 
   // Handle change events with debouncing
-  const handleChange = useCallback((change: PouchDB.Core.ChangesResponseChange<{}>) => {
+  const handleChange = useCallback((_change: PouchDB.Core.ChangesResponseChange<{}>) => {
     // Debounce updates to batch rapid changes
     if (refreshTimeout.current) {
       clearTimeout(refreshTimeout.current);
