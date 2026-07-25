@@ -23,7 +23,7 @@ export const NavigationToolbar: React.FC = () => {
     const [isFitDisabled, setIsFitDisabled] = useState(false);
 
     // Subscribe to nodes count to determine if fit view should be disabled
-    const nodes = useNodeStore(useShallow(s => s.nodes));
+    const nodesCount = useNodeStore(s => s.nodes.length);
 
     // Update zoom level on viewport changes (event-driven, not polling)
     useEffect(() => {
@@ -32,7 +32,7 @@ export const NavigationToolbar: React.FC = () => {
         const updateZoom = () => {
             const currentZoom = reactFlow.getZoom();
             setZoom(currentZoom);
-            setIsFitDisabled(nodes.length === 0);
+            setIsFitDisabled(nodesCount === 0);
         };
 
         // Initial update
@@ -57,7 +57,7 @@ export const NavigationToolbar: React.FC = () => {
             unsubscribe();
             if (timeoutId) window.clearTimeout(timeoutId);
         };
-    }, [reactFlow, nodes.length]);
+    }, [reactFlow, nodesCount]);
 
     // Defensive: verify we're inside provider
     if (!reactFlow) {
@@ -68,7 +68,7 @@ export const NavigationToolbar: React.FC = () => {
 
     // Zoom to fit implementation
     const handleFitView = useCallback(() => {
-        if (nodes.length === 0) {
+        if (nodesCount === 0) {
             // Button should be disabled, but guard anyway
             return;
         }
@@ -79,7 +79,7 @@ export const NavigationToolbar: React.FC = () => {
             maxZoom: 2.0,
             includeHiddenNodes: false,
         });
-    }, [fitView, nodes.length]);
+    }, [fitView, nodesCount]);
 
     // Zoom in with animation
     const handleZoomIn = useCallback(() => {
