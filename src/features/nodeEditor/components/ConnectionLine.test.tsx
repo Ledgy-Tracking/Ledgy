@@ -17,9 +17,9 @@ const createMockProps = (
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
+    fromPosition: 'right' as any,
+    toPosition: 'left' as any,
+    connectionLineType: 'default' as any,
     connectionStatus: 'default',
     ...overrides
 });
