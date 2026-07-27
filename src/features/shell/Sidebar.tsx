@@ -50,6 +50,7 @@ export const Sidebar = () => {
                     size="icon-xs"
                     className="text-zinc-400 hover:bg-gray-200 dark:hover:bg-zinc-800/50"
                     aria-label="Collapse sidebar"
+                    aria-expanded={sidebarOpen}
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </Button>
@@ -103,6 +104,7 @@ export const Sidebar = () => {
                     size="icon-sm"
                     className="bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md hover:bg-gray-200 dark:hover:bg-zinc-800/50"
                     aria-label="Expand sidebar"
+                    aria-expanded={sidebarOpen}
                 >
                     <ChevronRight className="w-4 h-4 text-zinc-400" />
                 </Button>
