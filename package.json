@@ -23,6 +23,7 @@
     "@types/pouchdb": "^6.4.2",
     "@types/uuid": "^10.0.0",
     "@xyflow/react": "^12.10.1",
+    "@xyflow/system": "^0.0.79",
     "base32-decode": "^1.0.0",
     "base32-encode": "^2.0.0",
     "class-variance-authority": "^0.7.1",
