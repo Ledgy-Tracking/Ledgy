@@ -11,6 +11,7 @@ import {
     Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { v4 as uuidv4 } from 'uuid';
 import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
@@ -573,12 +574,8 @@ const generateNodeId = (): string => {
     } catch {
         // crypto.randomUUID may throw in insecure contexts
     }
-    // Fallback: generate UUID v4 manually
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+    // Fallback: Use established UUID library rather than weak Math.random()
+    return uuidv4();
 };
 
     const handleAddFirstNode = useCallback(() => {
