@@ -27,7 +27,7 @@ export const checkGhostReferences = async (
   const db = getProfileDb(activeProfileId);
 
   // Get all documents that might be ghosts
-  const allDocs = await db.getAllDocuments();
+  const allDocs = await db.getAllDocuments<any>();
 
   // Create maps for efficient lookup
   const docMap = new Map<string, any>();
@@ -35,11 +35,12 @@ export const checkGhostReferences = async (
 
   // Build document map and collect explicitly deleted entries
   allDocs.forEach(doc => {
-    docMap.set(doc._id, doc);
+    const d = doc as any;
+    docMap.set(d._id, d);
 
     // Check if this document is explicitly marked as deleted
-    if (doc.type === 'entry' && (doc.isDeleted === true || doc.deletedAt != null)) {
-      ghostIds.add(doc._id);
+    if (d.type === 'entry' && (d.isDeleted === true || d.deletedAt != null)) {
+      ghostIds.add(d._id);
     }
   });
 
@@ -70,7 +71,7 @@ export const hydrateLedgerWithGhosts = async (
   const db = getProfileDb(activeProfileId);
 
   // Query entries for this ledger
-  const allEntries = await db.getAllDocuments();
+  const allEntries = await db.getAllDocuments<any>();
   const ledgerEntries = allEntries
     .filter(doc =>
       doc.type === 'entry' &&
