@@ -42,3 +42,7 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+## 2026-07-29 - Insecure random UUID generation fallback
+**Vulnerability:** Insecure custom UUID generation using Math.random as a fallback.
+**Learning:** The application was manually creating UUIDs using Math.random when crypto.randomUUID was unavailable. Math.random is predictable and is not cryptographically secure.
+**Prevention:** Use established and secure libraries like 'uuid' (v4) for UUID generation, which properly handle fallback mechanisms internally without resorting to insecure random sources.
