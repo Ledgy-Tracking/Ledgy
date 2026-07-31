@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { X, Keyboard } from 'lucide-react';
-import { Dialog } from '@/components/ui/dialog';
+import { Dialog, DialogPortal, DialogOverlay } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -142,16 +142,19 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
     if (!isOpen) return null;
 
     return (
-        <Dialog 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/50 backdrop-blur-sm"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="shortcut-help-title"
-        >
-            <Card 
-                ref={panelRef}
-                className="w-full max-w-2xl max-h-[80vh] overflow-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-2xl"
-            >
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogPortal>
+                <DialogOverlay className="bg-zinc-900/50 dark:bg-black/50 backdrop-blur-sm" />
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="shortcut-help-title"
+                >
+                    <Card
+                        ref={panelRef}
+                        className="w-full max-w-2xl max-h-[80vh] overflow-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-2xl"
+                    >
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
                     <div className="flex items-center gap-3">
@@ -210,11 +213,13 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
                     ))}
                 </ScrollArea>
 
-                {/* Footer */}
-                <Card className="px-6 py-4 bg-zinc-50 dark:bg-zinc-950/50 border-t border-zinc-200 dark:border-zinc-800 text-sm text-zinc-500 dark:text-zinc-500">
-                    Press <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded text-zinc-700 dark:text-zinc-400">?</kbd> to toggle this panel anytime
-                </Card>
-            </Card>
+                        {/* Footer */}
+                        <Card className="px-6 py-4 bg-zinc-50 dark:bg-zinc-950/50 border-t border-zinc-200 dark:border-zinc-800 text-sm text-zinc-500 dark:text-zinc-500">
+                            Press <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded text-zinc-700 dark:text-zinc-400">?</kbd> to toggle this panel anytime
+                        </Card>
+                    </Card>
+                </div>
+            </DialogPortal>
         </Dialog>
     );
 };
