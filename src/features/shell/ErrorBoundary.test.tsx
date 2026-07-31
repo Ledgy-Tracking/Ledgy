@@ -57,7 +57,7 @@ describe('ErrorBoundary', () => {
         );
 
         expect(dispatchErrorSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Store test error'),
+            'An unexpected error occurred. Please try again.',
             'error'
         );
 
@@ -122,7 +122,7 @@ describe('ErrorBoundary', () => {
 
         // Verify error was dispatched
         expect(dispatchErrorSpy).toHaveBeenCalledWith(
-            expect.stringContaining('Toast display test'),
+            'An unexpected error occurred. Please try again.',
             'error'
         );
 
