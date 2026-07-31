@@ -49,7 +49,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
         // Security: Avoid leaking componentStack in user-visible error messages
         dispatchError(
-            `An unexpected error occurred: ${error.message}`,
+            `An unexpected error occurred. Please try again.`,
             'error'
         );
 
