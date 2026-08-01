@@ -2,7 +2,6 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { Maximize2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { useNodeStore } from '../../../stores/useNodeStore';
-import { useShallow } from 'zustand/react/shallow';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -22,8 +21,9 @@ export const NavigationToolbar: React.FC = () => {
     const [zoom, setZoom] = useState(1);
     const [isFitDisabled, setIsFitDisabled] = useState(false);
 
-    // Subscribe to nodes count to determine if fit view should be disabled
-    const nodes = useNodeStore(useShallow(s => s.nodes));
+    // Performance Optimization: Select only the nodes length to avoid re-rendering
+    // this component on every node update (like position changes during dragging)
+    const nodeCount = useNodeStore(s => s.nodes.length);
 
     // Update zoom level on viewport changes (event-driven, not polling)
     useEffect(() => {
@@ -32,7 +32,7 @@ export const NavigationToolbar: React.FC = () => {
         const updateZoom = () => {
             const currentZoom = reactFlow.getZoom();
             setZoom(currentZoom);
-            setIsFitDisabled(nodes.length === 0);
+            setIsFitDisabled(nodeCount === 0);
         };
 
         // Initial update
@@ -57,7 +57,7 @@ export const NavigationToolbar: React.FC = () => {
             unsubscribe();
             if (timeoutId) window.clearTimeout(timeoutId);
         };
-    }, [reactFlow, nodes.length]);
+    }, [reactFlow, nodeCount]);
 
     // Defensive: verify we're inside provider
     if (!reactFlow) {
@@ -68,7 +68,7 @@ export const NavigationToolbar: React.FC = () => {
 
     // Zoom to fit implementation
     const handleFitView = useCallback(() => {
-        if (nodes.length === 0) {
+        if (nodeCount === 0) {
             // Button should be disabled, but guard anyway
             return;
         }
@@ -79,7 +79,7 @@ export const NavigationToolbar: React.FC = () => {
             maxZoom: 2.0,
             includeHiddenNodes: false,
         });
-    }, [fitView, nodes.length]);
+    }, [fitView, nodeCount]);
 
     // Zoom in with animation
     const handleZoomIn = useCallback(() => {
