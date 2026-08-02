@@ -27,14 +27,14 @@ export const checkGhostReferences = async (
   const db = getProfileDb(activeProfileId);
 
   // Get all documents that might be ghosts
-  const allDocs = await db.getAllDocuments();
+  const allDocs = await db.getAllDocuments<any>();
 
   // Create maps for efficient lookup
   const docMap = new Map<string, any>();
   const ghostIds = new Set<string>();
 
   // Build document map and collect explicitly deleted entries
-  allDocs.forEach(doc => {
+  allDocs.forEach((doc: any) => {
     docMap.set(doc._id, doc);
 
     // Check if this document is explicitly marked as deleted
@@ -44,7 +44,7 @@ export const checkGhostReferences = async (
   });
 
   // Check for missing documents (not found = ghost)
-  entryIds.forEach(entryId => {
+  entryIds.forEach((entryId: string) => {
     if (!docMap.has(entryId)) {
       ghostIds.add(entryId);
     }
@@ -60,7 +60,7 @@ export const checkGhostReferences = async (
 export const hydrateLedgerWithGhosts = async (
   ledgerId: string,
   schemaSnapshot: any[],
-  cacheEnabled: boolean = true
+  _cacheEnabled: boolean = true
 ) => {
   const activeProfileId = useProfileStore.getState().activeProfileId;
   if (!activeProfileId) {
@@ -70,7 +70,7 @@ export const hydrateLedgerWithGhosts = async (
   const db = getProfileDb(activeProfileId);
 
   // Query entries for this ledger
-  const allEntries = await db.getAllDocuments();
+  const allEntries = await db.getAllDocuments<any>();
   const ledgerEntries = allEntries
     .filter(doc =>
       doc.type === 'entry' &&
@@ -84,18 +84,18 @@ export const hydrateLedgerWithGhosts = async (
     });
 
   // Separate ghosts from active entries
-  const activeEntries = ledgerEntries.filter(entry => !isGhostEntry(entry));
-  const ghostEntries = ledgerEntries.filter(entry => isGhostEntry(entry));
+  const activeEntries = ledgerEntries.filter((entry: any) => !isGhostEntry(entry));
+  const ghostEntries = ledgerEntries.filter((entry: any) => isGhostEntry(entry));
 
   // Filter active entries to only fields in schema snapshot
   const fieldIds = schemaSnapshot.map(f => f.id);
-  const filteredActiveEntries = activeEntries.map(entry => ({
+  const filteredActiveEntries = activeEntries.map((entry: any) => ({
     ...entry,
     data: pickFields(entry.data, fieldIds)
   }));
 
   // Create ghost indicators
-  const ghostIndicators = ghostEntries.map(entry => ({
+  const ghostIndicators = ghostEntries.map((entry: any) => ({
     entryId: entry._id,
     displayText: '[Deleted Entry]',
     tooltip: 'This entry has been deleted on another device',
