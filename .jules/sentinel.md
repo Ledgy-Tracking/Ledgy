@@ -42,3 +42,8 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+
+## 2025-05-27 - Predictable ID Generation
+**Vulnerability:** The application used `Math.random()` as a fallback for generating UUIDs in `NodeCanvas.tsx`. This non-cryptographic generator can produce predictable outputs.
+**Learning:** `Math.random()` is not cryptographically secure and should never be used for generating identifiers or tokens. When `crypto.randomUUID` is unavailable (e.g. in insecure contexts), a proven library like `uuid` should be used.
+**Prevention:** Always use `crypto.randomUUID()`, `crypto.getRandomValues()`, or the `uuid` package for unique identifiers to guarantee cryptographic security and unpredictability.

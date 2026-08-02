@@ -111,7 +111,7 @@ describe('ghostReference utilities', () => {
     });
 
     it('should throw error if no active profile', async () => {
-      useProfileStore.getState.mockReturnValue({ activeProfileId: null });
+      (useProfileStore.getState as any).mockReturnValue({ activeProfileId: null });
 
       await expect(checkGhostReferences(['entry:1'])).rejects.toThrow('No active profile');
     });
@@ -217,7 +217,7 @@ describe('ghostReference utilities', () => {
     });
 
     it('should throw error if no active profile', async () => {
-      useProfileStore.getState.mockReturnValue({ activeProfileId: null });
+      (useProfileStore.getState as any).mockReturnValue({ activeProfileId: null });
 
       await expect(hydrateLedgerWithGhosts(mockLedgerId, schema)).rejects.toThrow('No active profile');
     });
