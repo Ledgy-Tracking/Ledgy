@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { WidgetConfig } from './widgets';
 import { useDashboardStore } from '../../stores/useDashboardStore';
 import { useNodeStore } from '../../stores/useNodeStore';
+import { useShallow } from 'zustand/react/shallow';
 
 interface WidgetConfigSheetProps {
     widget: WidgetConfig | null;
@@ -20,13 +21,13 @@ export const WidgetConfigSheet: React.FC<WidgetConfigSheetProps> = ({
     onOpenChange,
 }) => {
     const { updateWidget } = useDashboardStore();
-    const { nodes } = useNodeStore();
+    // Only select the output nodes to prevent re-renders when other nodes change
+    const outputNodes = useNodeStore(
+        useShallow(state => state.nodes.filter((n: any) => n.type === 'dashboardOutput'))
+    );
     const [title, setTitle] = useState('');
     const [type, setType] = useState<'chart' | 'trend' | 'text'>('text');
     const [nodeId, setNodeId] = useState<string | undefined>(undefined);
-
-    // List of available output nodes
-    const outputNodes = nodes.filter((n: any) => n.type === 'dashboardOutput');
 
     useEffect(() => {
         if (widget) {
