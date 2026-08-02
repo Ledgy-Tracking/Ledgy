@@ -10,8 +10,8 @@ import { type ConnectionLineComponentProps, Position, ConnectionLineType } from 
 
 // Mock props for testing
 const createMockProps = (
-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
+    overrides: Partial<Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
+): Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
     fromX: 100,
     fromY: 100,
     toX: 300,

@@ -74,7 +74,7 @@ const getConnectionStyles = (status: ConnectionStatus) => {
  * Renders during edge drag operations to show the potential connection.
  * Uses cubic Bezier curves for smooth, professional appearance.
  */
-export const ConnectionLine: React.FC<any> = ({
+export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     fromX,
     fromY,
     toX,
@@ -190,7 +190,7 @@ export const ConnectionLine: React.FC<any> = ({
  * Connection line with status overlay
  * Shows additional feedback like "Valid Connection" or "Incompatible Types"
  */
-export const ConnectionLineWithStatus: React.FC<any & {
+export const ConnectionLineWithStatus: React.FC<ExtendedConnectionLineProps & {
     statusMessage?: string;
 }> = (props) => {
     const { statusMessage, toX, toY, connectionStatus } = props;
