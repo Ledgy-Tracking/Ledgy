@@ -11,7 +11,6 @@
  */
 
 import React, { useMemo } from 'react';
-import type { ConnectionLineComponentProps } from '@xyflow/react';
 import { getConnectionPath } from '../utils/bezierPath';
 import { Toast } from '@/components/ui/toast';
 
@@ -19,14 +18,6 @@ import { Toast } from '@/components/ui/toast';
  * Connection line visual states (AC2)
  */
 type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
-
-/**
- * Extended props including connection status and direction
- */
-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
-    connectionStatus?: ConnectionStatus;
-    sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
-}
 
 /**
  * Style configuration for different connection states
@@ -74,15 +65,12 @@ const getConnectionStyles = (status: ConnectionStatus) => {
  * Renders during edge drag operations to show the potential connection.
  * Uses cubic Bezier curves for smooth, professional appearance.
  */
-export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
+export const ConnectionLine: React.FC<any> = ({
     fromX,
     fromY,
     toX,
     toY,
-    connectionLineType,
     connectionStatus = 'default',
-    fromNode,
-    fromHandle,
     sourceDirection = 'right'
 }) => {
     // Calculate Bezier path using actual handle direction
@@ -190,9 +178,7 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
  * Connection line with status overlay
  * Shows additional feedback like "Valid Connection" or "Incompatible Types"
  */
-export const ConnectionLineWithStatus: React.FC<ExtendedConnectionLineProps & {
-    statusMessage?: string;
-}> = (props) => {
+export const ConnectionLineWithStatus: React.FC<any> = (props) => {
     const { statusMessage, toX, toY, connectionStatus } = props;
 
     return (
