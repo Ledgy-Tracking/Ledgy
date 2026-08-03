@@ -236,22 +236,24 @@ const DashboardOutputPanel: React.FC<{ id: string; data: any }> = ({ id, data })
     };
 
     const widgetTypes = [
-        { id: 'chart', icon: <BarChart3 size={14} />, color: 'bg-blue-600 border-blue-500' },
-        { id: 'trend', icon: <TrendingUp size={14} />, color: 'bg-emerald-600 border-emerald-500' },
-        { id: 'text',  icon: <Type size={14} />,       color: 'bg-purple-600 border-purple-500' },
+        { id: 'chart', label: 'Chart Widget', icon: <BarChart3 size={14} />, color: 'bg-blue-600 border-blue-500' },
+        { id: 'trend', label: 'Trend Widget', icon: <TrendingUp size={14} />, color: 'bg-emerald-600 border-emerald-500' },
+        { id: 'text',  label: 'Text Widget', icon: <Type size={14} />,       color: 'bg-purple-600 border-purple-500' },
     ] as const;
 
     return (
         <>
             <Row label="Widget Type">
-                <div className="flex gap-2">
-                    {widgetTypes.map(({ id: wt, icon, color }) => (
+                <div className="flex gap-2" role="group" aria-label="Select widget type">
+                    {widgetTypes.map(({ id: wt, label, icon, color }) => (
                         <Button
                             key={wt}
                             size="icon-xs"
                             variant={data.widgetType === wt ? 'default' : 'outline'}
                             className={data.widgetType === wt ? `${color} text-zinc-900 dark:text-white` : 'text-zinc-400'}
-                            title={wt}
+                            title={label}
+                            aria-label={label}
+                            aria-pressed={data.widgetType === wt}
                             onClick={() => handleWidgetType(wt)}
                         >
                             {icon}
