@@ -32,3 +32,9 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2024-05-24 - Prevent unnecessary hook re-renders on node updates
+**Learning:** In imperative event handlers (e.g., keyboard shortcuts), subscribing to the entire  array using  causes the component to re-render whenever *any* node changes, even if it's unrelated to the shortcuts.
+**Action:** When accessing state inside imperative event handlers, use  instead of a React hook subscription to avoid subscribing to potentially large state objects within the render cycle. Also, when only needing the length of a collection, select  directly rather than using .
+## 2024-05-24 - Prevent unnecessary hook re-renders on node updates
+**Learning:** In imperative event handlers (e.g., keyboard shortcuts), subscribing to the entire `nodes` array using `useStore(s => s.nodes)` causes the component to re-render whenever *any* node changes, even if it's unrelated to the shortcuts.
+**Action:** When accessing state inside imperative event handlers, use `store.getState()` instead of a React hook subscription to avoid subscribing to potentially large state objects within the render cycle. Also, when only needing the length of a collection, select `s.nodes.length` directly rather than using `useShallow(s => s.nodes)`.
