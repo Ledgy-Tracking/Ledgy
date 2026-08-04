@@ -42,3 +42,8 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+
+## $(date +%Y-%m-%d) - Secure UUID Generation Fallback
+**Vulnerability:** The UUID generation fallback logic inside `generateNodeId` (used for component mapping on canvas) originally used `Math.random()`, exposing predictability. When migrating to WebCrypto for randomness, assuming `crypto` is globally available can cause ReferenceErrors in test environments that don't mock it completely.
+**Learning:** Adding WebCrypto for secure randomness requires cautious checking (`typeof crypto !== 'undefined'`) to avoid test-environment crashes while addressing random value predictability.
+**Prevention:** Always gate usage of global browser objects (`crypto`, `window`, etc.) in utility functions with explicit type checks or fallbacks to ensure Node.js/JSDOM test resilience.
