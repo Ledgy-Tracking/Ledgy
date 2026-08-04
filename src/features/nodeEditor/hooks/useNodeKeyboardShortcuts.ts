@@ -32,10 +32,6 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
     const setShowMinimap = useNodeStore(s => s.setShowMinimap);
     const setShowGrid = useNodeStore(s => s.setShowGrid);
     const setSnapToGrid = useNodeStore(s => s.setSnapToGrid);
-    const viewControls = useNodeStore(s => s.viewControls);
-    const nodes = useNodeStore(s => s.nodes);
-    
-    const { showMinimap, showGrid, snapToGrid } = viewControls;
     
     // Announcement state for ARIA live region
     const [announcement, setAnnouncement] = useState('');
@@ -122,7 +118,8 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
                 case '1':
                     if (event.shiftKey) {
                         event.preventDefault();
-                        if (nodes.length > 0) {
+                        // ⚡ Bolt: Read latest state imperatively to avoid re-binding event listener
+                        if (useNodeStore.getState().nodes.length > 0) {
                             fitView({ padding: 0.2, duration: 300 });
                             announce('Fit to screen');
                         }
@@ -133,16 +130,24 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
                 case 'h':
                 case 'H':
                     event.preventDefault();
-                    setShowMinimap(!showMinimap);
-                    announce(showMinimap ? 'Minimap hidden' : 'Minimap visible');
+                    {
+                        // ⚡ Bolt: Read latest state imperatively
+                        const current = useNodeStore.getState().viewControls.showMinimap;
+                        setShowMinimap(!current);
+                        announce(current ? 'Minimap hidden' : 'Minimap visible');
+                    }
                     break;
 
                 // Toggle Grid: G
                 case 'g':
                 case 'G':
                     event.preventDefault();
-                    setShowGrid(!showGrid);
-                    announce(showGrid ? 'Grid hidden' : 'Grid visible');
+                    {
+                        // ⚡ Bolt: Read latest state imperatively
+                        const current = useNodeStore.getState().viewControls.showGrid;
+                        setShowGrid(!current);
+                        announce(current ? 'Grid hidden' : 'Grid visible');
+                    }
                     break;
 
                 // Toggle Snap to Grid: S
@@ -151,8 +156,10 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
                     // Only trigger if not in combination with ctrl/cmd/alt (save shortcut modifiers)
                     if (!event.ctrlKey && !event.metaKey && !event.altKey) {
                         event.preventDefault();
-                        setSnapToGrid(!snapToGrid);
-                        announce(snapToGrid ? 'Snap to grid off' : 'Snap to grid on');
+                        // ⚡ Bolt: Read latest state imperatively
+                        const current = useNodeStore.getState().viewControls.snapToGrid;
+                        setSnapToGrid(!current);
+                        announce(current ? 'Snap to grid off' : 'Snap to grid on');
                     }
                     break;
 
@@ -217,26 +224,32 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
                 // Home: Center on first node
                 case 'Home':
                     event.preventDefault();
-                    if (nodes.length > 0) {
-                        const firstNode = nodes[0];
-                        setViewport({
-                            x: -firstNode.position.x + window.innerWidth / 2 / reactFlow.getZoom() - 100,
-                            y: -firstNode.position.y + window.innerHeight / 2 / reactFlow.getZoom() - 50,
-                            zoom: reactFlow.getZoom()
-                        }, { duration: 300 });
+                    {
+                        const stateNodes = useNodeStore.getState().nodes;
+                        if (stateNodes.length > 0) {
+                            const firstNode = stateNodes[0];
+                            setViewport({
+                                x: -firstNode.position.x + window.innerWidth / 2 / reactFlow.getZoom() - 100,
+                                y: -firstNode.position.y + window.innerHeight / 2 / reactFlow.getZoom() - 50,
+                                zoom: reactFlow.getZoom()
+                            }, { duration: 300 });
+                        }
                     }
                     break;
 
                 // End: Center on last node
                 case 'End':
                     event.preventDefault();
-                    if (nodes.length > 0) {
-                        const lastNode = nodes[nodes.length - 1];
-                        setViewport({
-                            x: -lastNode.position.x + window.innerWidth / 2 / reactFlow.getZoom() - 100,
-                            y: -lastNode.position.y + window.innerHeight / 2 / reactFlow.getZoom() - 50,
-                            zoom: reactFlow.getZoom()
-                        }, { duration: 300 });
+                    {
+                        const stateNodes = useNodeStore.getState().nodes;
+                        if (stateNodes.length > 0) {
+                            const lastNode = stateNodes[stateNodes.length - 1];
+                            setViewport({
+                                x: -lastNode.position.x + window.innerWidth / 2 / reactFlow.getZoom() - 100,
+                                y: -lastNode.position.y + window.innerHeight / 2 / reactFlow.getZoom() - 50,
+                                zoom: reactFlow.getZoom()
+                            }, { duration: 300 });
+                        }
                     }
                     break;
             }
@@ -253,10 +266,6 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
     }, [
         reactFlow, 
         onOpenHelp, 
-        showMinimap, 
-        showGrid, 
-        snapToGrid, 
-        nodes.length,
         setShowMinimap, 
         setShowGrid, 
         setSnapToGrid, 
