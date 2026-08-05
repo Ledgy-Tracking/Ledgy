@@ -9,3 +9,7 @@
 ## 2025-02-23 - Playwright Verification Context & Dashboard Icons
 **Learning:** The Dashboard page contains heavily icon-centric action bars (e.g. Inspector open/close, view toggles) which completely lack screen reader accessibility. Verifying these required automating the TOTP and Profile setup flows, revealing that Playwright struggles to click nested elements inside the Profile Card unless targeting specific text nodes.
 **Action:** When adding `aria-labels` to complex dashboards, always ensure `aria-pressed` states are added for toggles. When verifying via Playwright, bypass profile card container clicks by specifically locating and clicking the nested `h3` profile name element.
+
+## 2024-05-18 - Keyboard Accessibility for Interactive Divs/Cards
+**Learning:** When using custom components like `<Card>` or standard `<div>` elements as clickable cards (e.g., project or workflow selectors), they inherently lack keyboard accessibility. Even if they have an `onClick` handler and hover states, screen reader and keyboard-only users cannot interact with them.
+**Action:** Always add `role="button"`, `tabIndex={0}`, an appropriate `aria-label`, an `onKeyDown` handler listening for 'Enter' and ' ' (space) to trigger the click action, and `focus-visible` styles to ensure these interactive elements are fully accessible.
