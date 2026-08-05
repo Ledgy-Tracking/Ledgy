@@ -101,8 +101,17 @@ export const ProjectDashboard: React.FC = () => {
                         {projects.map((project) => (
                             <Card
                                 key={project._id}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`Open project ${project.name}`}
                                 onClick={() => handleProjectClick(project._id)}
-                                className="group relative flex flex-col p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:border-emerald-500/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all cursor-pointer shadow-sm hover:shadow-emerald-900/10"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        handleProjectClick(project._id);
+                                    }
+                                }}
+                                className="group relative flex flex-col p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:border-emerald-500/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all cursor-pointer shadow-sm hover:shadow-emerald-900/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
                             >
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="p-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
