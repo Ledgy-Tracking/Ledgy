@@ -10,7 +10,7 @@
  */
 
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
-import { useReactFlow, useStore, type XYPosition } from '@xyflow/react';
+import { useReactFlow, useOnViewportChange, type XYPosition } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import type { HandlePosition, PortType } from '../types/connection';
 import { HandleSpatialIndex, createSpatialIndex, DEFAULT_VIEWPORT_PADDING } from '../utils/snapDetection';
@@ -115,7 +115,6 @@ export const useHandlePositions = (
 ): UseHandlePositionsReturn => {
     const { enabled = true } = options;
     const { getNodes, screenToFlowPosition } = useReactFlow();
-    const viewport = useStore(s => s.transform);
 
     // State to trigger rebuilds
     const [rebuildTrigger, setRebuildTrigger] = useState(0);
@@ -133,7 +132,7 @@ export const useHandlePositions = (
         const positions = extractHandlePositions(nodes, screenToFlowPosition);
         handlePositionsRef.current = positions;
         return positions;
-    }, [getNodes, enabled, rebuildTrigger, viewport, screenToFlowPosition]);
+    }, [getNodes, enabled, rebuildTrigger, screenToFlowPosition]);
 
     // Build spatial index
     const spatialIndex = useMemo(() => {
@@ -158,16 +157,32 @@ export const useHandlePositions = (
         setRebuildTrigger(prev => prev + 1);
     }, []);
 
+    // Timer ref for debouncing viewport changes
+    const viewportTimerRef = useRef<number | null>(null);
+
     // Rebuild index when viewport changes (debounced)
+    useOnViewportChange({
+        onChange: useCallback(() => {
+            if (!enabled) return;
+
+            if (viewportTimerRef.current !== null) {
+                window.clearTimeout(viewportTimerRef.current);
+            }
+
+            viewportTimerRef.current = window.setTimeout(() => {
+                rebuildIndex();
+            }, VIEWPORT_DEBOUNCE_MS);
+        }, [enabled, rebuildIndex])
+    });
+
+    // Cleanup timer on unmount
     useEffect(() => {
-        if (!enabled) return;
-
-        const timer = setTimeout(() => {
-            rebuildIndex();
-        }, VIEWPORT_DEBOUNCE_MS);
-
-        return () => clearTimeout(timer);
-    }, [viewport, enabled, rebuildIndex]);
+        return () => {
+            if (viewportTimerRef.current !== null) {
+                window.clearTimeout(viewportTimerRef.current);
+            }
+        };
+    }, []);
 
     // Cleanup on unmount
     useEffect(() => {
@@ -191,7 +206,29 @@ export const useViewportHandlePositions = (
     canvasSize: { width: number; height: number }
 ) => {
     const { spatialIndex, handlePositions } = useHandlePositions();
-    const viewport = useStore(s => s.transform);
+    const [viewportTrigger, setViewportTrigger] = useState(0);
+    const viewportTimerRef = useRef<number | null>(null);
+    const { getViewport } = useReactFlow();
+
+    useOnViewportChange({
+        onChange: useCallback(() => {
+            if (viewportTimerRef.current !== null) {
+                window.clearTimeout(viewportTimerRef.current);
+            }
+
+            viewportTimerRef.current = window.setTimeout(() => {
+                setViewportTrigger(prev => prev + 1);
+            }, VIEWPORT_DEBOUNCE_MS);
+        }, [])
+    });
+
+    useEffect(() => {
+        return () => {
+            if (viewportTimerRef.current !== null) {
+                window.clearTimeout(viewportTimerRef.current);
+            }
+        };
+    }, []);
 
     const visibleHandles = useMemo(() => {
         if (!spatialIndex) return [];
@@ -199,18 +236,25 @@ export const useViewportHandlePositions = (
         // Guard against zero canvas dimensions
         if (canvasSize.width <= 0 || canvasSize.height <= 0) return [];
 
-        // Calculate viewport bounds in screen coordinates
-        const viewCenterX = canvasSize.width / 2;
-        const viewCenterY = canvasSize.height / 2;
+        const viewport = getViewport();
+
+        // Calculate viewport center in flow coordinates
+        // (screenCenter - viewportTranslation) / viewportZoom
+        const screenCenterX = canvasSize.width / 2;
+        const screenCenterY = canvasSize.height / 2;
+
+        const flowCenterX = (screenCenterX - viewport.x) / viewport.zoom;
+        const flowCenterY = (screenCenterY - viewport.y) / viewport.zoom;
         
         // Query a larger area around viewport for smooth edge dragging
-        const queryRadius = Math.max(canvasSize.width, canvasSize.height) / 2 + 100;
+        // Adjusted for zoom level to maintain consistent query area
+        const queryRadius = (Math.max(canvasSize.width, canvasSize.height) / 2 + 100) / viewport.zoom;
         
         return spatialIndex.queryRange(
-            { x: viewCenterX, y: viewCenterY },
+            { x: flowCenterX, y: flowCenterY },
             queryRadius
         );
-    }, [spatialIndex, viewport, canvasSize]);
+    }, [spatialIndex, viewportTrigger, canvasSize, getViewport]);
 
     return {
         spatialIndex,
