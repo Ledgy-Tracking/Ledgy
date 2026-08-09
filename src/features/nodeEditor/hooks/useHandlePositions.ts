@@ -10,10 +10,10 @@
  */
 
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
-import { useReactFlow, useStore, type XYPosition } from '@xyflow/react';
+import { useReactFlow, useOnViewportChange, type XYPosition } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import type { HandlePosition, PortType } from '../types/connection';
-import { HandleSpatialIndex, createSpatialIndex, DEFAULT_VIEWPORT_PADDING } from '../utils/snapDetection';
+import { HandleSpatialIndex, createSpatialIndex } from '../utils/snapDetection';
 import { getPortTypeFromHandle } from '../utils/portTypeUtils';
 
 /**
@@ -115,7 +115,6 @@ export const useHandlePositions = (
 ): UseHandlePositionsReturn => {
     const { enabled = true } = options;
     const { getNodes, screenToFlowPosition } = useReactFlow();
-    const viewport = useStore(s => s.transform);
 
     // State to trigger rebuilds
     const [rebuildTrigger, setRebuildTrigger] = useState(0);
@@ -124,6 +123,7 @@ export const useHandlePositions = (
     const lastRebuildRef = useRef<number>(0);
     const spatialIndexRef = useRef<HandleSpatialIndex | null>(null);
     const handlePositionsRef = useRef<HandlePosition[]>([]);
+    const viewportTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Memoized handle positions
     const handlePositions = useMemo(() => {
@@ -133,7 +133,7 @@ export const useHandlePositions = (
         const positions = extractHandlePositions(nodes, screenToFlowPosition);
         handlePositionsRef.current = positions;
         return positions;
-    }, [getNodes, enabled, rebuildTrigger, viewport, screenToFlowPosition]);
+    }, [getNodes, enabled, rebuildTrigger, screenToFlowPosition]);
 
     // Build spatial index
     const spatialIndex = useMemo(() => {
@@ -159,20 +159,27 @@ export const useHandlePositions = (
     }, []);
 
     // Rebuild index when viewport changes (debounced)
-    useEffect(() => {
-        if (!enabled) return;
+    useOnViewportChange({
+        onChange: useCallback(() => {
+            if (!enabled) return;
 
-        const timer = setTimeout(() => {
-            rebuildIndex();
-        }, VIEWPORT_DEBOUNCE_MS);
+            if (viewportTimeoutRef.current) {
+                clearTimeout(viewportTimeoutRef.current);
+            }
 
-        return () => clearTimeout(timer);
-    }, [viewport, enabled, rebuildIndex]);
+            viewportTimeoutRef.current = setTimeout(() => {
+                rebuildIndex();
+            }, VIEWPORT_DEBOUNCE_MS);
+        }, [enabled, rebuildIndex])
+    });
 
     // Cleanup on unmount
     useEffect(() => {
         return () => {
             spatialIndexRef.current = null;
+            if (viewportTimeoutRef.current) {
+                clearTimeout(viewportTimeoutRef.current);
+            }
         };
     }, []);
 
@@ -191,7 +198,6 @@ export const useViewportHandlePositions = (
     canvasSize: { width: number; height: number }
 ) => {
     const { spatialIndex, handlePositions } = useHandlePositions();
-    const viewport = useStore(s => s.transform);
 
     const visibleHandles = useMemo(() => {
         if (!spatialIndex) return [];
@@ -210,7 +216,7 @@ export const useViewportHandlePositions = (
             { x: viewCenterX, y: viewCenterY },
             queryRadius
         );
-    }, [spatialIndex, viewport, canvasSize]);
+    }, [spatialIndex, canvasSize]);
 
     return {
         spatialIndex,
