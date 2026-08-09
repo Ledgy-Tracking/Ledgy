@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-18 - Avoid useStore(s => s.transform) in XYFlow
+**Learning:** Subscribing directly to the viewport transform via `useStore(s => s.transform)` in ReactFlow/XYFlow is an anti-pattern that causes continuous component re-renders (60fps) during pan or zoom interactions.
+**Action:** Use the `useOnViewportChange` hook instead to react to viewport changes efficiently, especially when throttling/debouncing spatial index rebuilds or other expensive recalculations that depend on the viewport.
