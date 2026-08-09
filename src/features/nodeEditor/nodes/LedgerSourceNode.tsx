@@ -427,7 +427,7 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                 {/* Fields */}
                 {isExpanded && displayFields.length > 0 && (
                     <ScrollArea className="p-2 space-y-1 max-h-[320px]">
-                        {displayFields.map((field, index) => (
+                        {displayFields.map((field, _index) => (
                             <LedgerFieldOutput
                                 key={field.name}
                                 field={field}
