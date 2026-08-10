@@ -145,6 +145,7 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = () => {
                     onClick={handleManualSave}
                     disabled={isSaveInProgress || !isCanvasLoaded}
                     title="Save workflow (Ctrl+S)"
+                    aria-label="Save workflow (Ctrl+S)"
                 >
                     <span className={saveError ? 'text-red-400' : 'text-zinc-400'}>
                         {saveStatusIcon ?? <Save size={16} />}
@@ -174,6 +175,7 @@ const ToolbarButton: React.FC<ToolbarButtonProps> = ({ icon, label, onClick, col
         className="justify-start gap-3 hover:bg-gray-200 dark:hover:bg-zinc-800 h-9 px-3"
         onClick={onClick}
         title={label}
+        aria-label={label}
     >
         <span className={color}>{icon}</span>
         <span className="text-xs font-medium text-zinc-300">{label}</span>
