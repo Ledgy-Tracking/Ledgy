@@ -5,3 +5,7 @@
 ## 2024-05-19 - Removed continuous React Flow viewport polling
 **Learning:** In React Flow, subscribing directly to the viewport transform via `useStore(s => s.transform)` and passing it as a hook dependency causes the component to re-render continuously (60fps) during pan/zoom interactions. Furthermore, using a standard debounce/throttle on these updates doesn't prevent React from rendering the intermediate frames if the `useStore` subscription itself is still active.
 **Action:** Always use the dedicated `useOnViewportChange` hook, specifically leveraging its `onEnd` callback to handle expensive calculations (like spatial index queries or canvas boundary checks) only after the user has finished interacting with the viewport, thereby preventing 60fps React render cycles.
+
+## 2024-05-19 - Removed continuous React Flow viewport polling
+**Learning:** In React Flow, subscribing directly to the viewport transform via `useStore(s => s.transform)` and passing it as a hook dependency causes the component to re-render continuously (60fps) during pan/zoom interactions. Furthermore, using a standard debounce/throttle on these updates doesn't prevent React from rendering the intermediate frames if the `useStore` subscription itself is still active.
+**Action:** Always use the dedicated `useOnViewportChange` hook, specifically leveraging its `onEnd` callback to handle expensive calculations (like spatial index queries or canvas boundary checks) only after the user has finished interacting with the viewport, thereby preventing 60fps React render cycles.
