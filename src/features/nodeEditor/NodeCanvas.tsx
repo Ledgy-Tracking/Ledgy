@@ -29,6 +29,7 @@ import './styles/containerAnimations.css';
 import { useParams } from 'react-router-dom';
 import { NodeToolbar } from './NodeToolbar';
 import { NavigationToolbar } from './components/NavigationToolbar';
+import { v4 as uuidv4 } from 'uuid';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
@@ -573,12 +574,8 @@ const generateNodeId = (): string => {
     } catch {
         // crypto.randomUUID may throw in insecure contexts
     }
-    // Fallback: generate UUID v4 manually
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+    // Fallback: use uuid package which has proper fallbacks including WebCrypto
+    return uuidv4();
 };
 
     const handleAddFirstNode = useCallback(() => {
