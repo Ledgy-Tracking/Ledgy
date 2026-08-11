@@ -15,6 +15,7 @@ import { useNodeStore } from '../../stores/useNodeStore';
 import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
 import { CanvasNode } from '../../types/nodeEditor';
+import { v4 as uuidv4 } from 'uuid';
 import { useShallow } from 'zustand/react/shallow';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
@@ -32,7 +33,7 @@ import { NavigationToolbar } from './components/NavigationToolbar';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
-import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { isTypeCompatible } from './types/port';
 import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
@@ -42,7 +43,7 @@ import { HydrationProgressIndicator } from './components/HydrationProgressIndica
 import { ledgerDataCache } from './utils/ledgerDataCache';
 import { hydrateLedgerWithGhosts } from './utils/ghostReference';
 import { setupSchemaChangeSubscription } from './utils/schemaChangeHandler';
-import { unsubscribeAll, unsubscribeNode, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
+import { unsubscribeAll, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
 import { logSubscriptionCount, logHydrationSummary } from './utils/performanceMonitor';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 
@@ -322,7 +323,7 @@ export const NodeCanvas: React.FC = () => {
         // Also subscribe to schema changes in the store for cache invalidation
         const unsubscribeStore = useNodeStore.subscribe(
             (state) => state.schemas,
-            (schemas) => {
+            (_schemas) => {
                 // When schemas change, invalidate cache for affected ledgers
                 console.log('[Cache] Invalidating cache due to schema changes');
                 ledgerDataCache.clear(); // For now, clear all cache on any schema change
@@ -392,13 +393,18 @@ export const NodeCanvas: React.FC = () => {
     );
 
     // Story 4-8: Track connection start for rejection detection
-    const onConnectStart = useCallback(({
-        handleId,
-        nodeId,
-    }: {
-        handleId: string | null;
-        nodeId: string;
-    }) => {
+    const onConnectStart = useCallback((
+        _event: React.MouseEvent<Element, MouseEvent> | React.TouchEvent<Element> | MouseEvent | TouchEvent,
+        {
+            handleId,
+            nodeId,
+        }: {
+            handleId: string | null;
+            nodeId: string | null;
+        }
+    ) => {
+        if (!nodeId) return;
+
         connectionAttemptRef.current = {
             isConnecting: true,
             sourceHandle: handleId,
@@ -564,21 +570,9 @@ export const NodeCanvas: React.FC = () => {
         }
     }, [setSelectedNodeId, setRightInspector]);
 
-// Safe UUID generator with fallback for non-HTTPS contexts
+// Safe UUID generator using uuid package which handles crypto properly
 const generateNodeId = (): string => {
-    try {
-        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-            return crypto.randomUUID();
-        }
-    } catch {
-        // crypto.randomUUID may throw in insecure contexts
-    }
-    // Fallback: generate UUID v4 manually
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+    return uuidv4();
 };
 
     const handleAddFirstNode = useCallback(() => {
