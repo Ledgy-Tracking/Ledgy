@@ -23,8 +23,8 @@ type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
 /**
  * Extended props including connection status and direction
  */
-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
-    connectionStatus?: ConnectionStatus;
+interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, 'connectionStatus'> {
+    connectionStatus?: ConnectionStatus | null;
     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
 }
 
@@ -79,12 +79,11 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     fromY,
     toX,
     toY,
-    connectionLineType,
     connectionStatus = 'default',
-    fromNode,
-    fromHandle,
     sourceDirection = 'right'
 }) => {
+    // Normalize null to 'default' for internal use
+    const normalizedStatus = connectionStatus === null ? 'default' : connectionStatus;
     // Calculate Bezier path using actual handle direction
     const path = useMemo(() => {
         return getConnectionPath(
@@ -95,14 +94,14 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     }, [fromX, fromY, toX, toY, sourceDirection]);
 
     // Get styles based on connection status
-    const styles = useMemo(() => getConnectionStyles(connectionStatus), [connectionStatus]);
+    const styles = useMemo(() => getConnectionStyles(normalizedStatus), [normalizedStatus]);
 
     // Determine if we should show the glow animation for valid/snapped connections
-    const showGlow = connectionStatus === 'valid' || connectionStatus === 'snapped';
+    const showGlow = normalizedStatus === 'valid' || normalizedStatus === 'snapped';
 
     // ARIA live region for screen reader announcements
     const ariaLabel = useMemo(() => {
-        switch (connectionStatus) {
+        switch (normalizedStatus) {
             case 'snapped':
                 return 'Connection snapped to handle';
             case 'valid':
@@ -112,12 +111,12 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
             default:
                 return 'Drawing connection line';
         }
-    }, [connectionStatus]);
+    }, [normalizedStatus]);
 
     return (
         <g 
             data-testid="connection-line" 
-            data-connection-status={connectionStatus}
+            data-connection-status={normalizedStatus}
             className="react-flow__connection-line"
             role="img"
             aria-label={ariaLabel}
@@ -194,6 +193,7 @@ export const ConnectionLineWithStatus: React.FC<ExtendedConnectionLineProps & {
     statusMessage?: string;
 }> = (props) => {
     const { statusMessage, toX, toY, connectionStatus } = props;
+    const normalizedStatus = connectionStatus === null ? 'default' : connectionStatus;
 
     return (
         <>
@@ -211,9 +211,9 @@ export const ConnectionLineWithStatus: React.FC<ExtendedConnectionLineProps & {
                     <div
                         className={`
                             inline-block px-2 py-1 rounded text-xs font-medium
-                            ${connectionStatus === 'valid' 
+                            ${normalizedStatus === 'valid'
                                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
-                                : connectionStatus === 'invalid'
+                                : normalizedStatus === 'invalid'
                                     ? 'bg-red-100 text-red-800 border border-red-300'
                                     : 'bg-zinc-100 text-zinc-800 border border-zinc-300'
                             }
