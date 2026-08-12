@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-08-12 - Prevent unnecessary re-renders in Keyboard Handlers
+**Learning:** React hooks subscribing to Zustand stores (e.g., `useNodeStore(s => s.nodes)`) within components defining keyboard shortcut `useEffect` hooks cause the component to unnecessarily re-render every time the store changes (e.g., during 60fps dragging), even though the handler only needs the state imperatively when a key is pressed.
+**Action:** Always replace reactive hook subscriptions with imperative `store.getState()` calls inside the event listener callback when state is only needed momentarily during an event. This avoids polluting the `useEffect` dependency array and stops continuous re-renders.
