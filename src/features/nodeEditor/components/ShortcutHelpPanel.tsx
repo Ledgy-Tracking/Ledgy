@@ -139,15 +139,15 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
         };
     }, [isOpen, onClose]);
 
-    if (!isOpen) return null;
-
     return (
-        <Dialog 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/50 backdrop-blur-sm"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="shortcut-help-title"
-        >
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/50 backdrop-blur-sm"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="shortcut-help-title"
+                data-state={isOpen ? 'open' : 'closed'}
+            >
             <Card 
                 ref={panelRef}
                 className="w-full max-w-2xl max-h-[80vh] overflow-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-2xl"
@@ -215,6 +215,7 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
                     Press <kbd className="px-1.5 py-0.5 bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded text-zinc-700 dark:text-zinc-400">?</kbd> to toggle this panel anytime
                 </Card>
             </Card>
+            </div>
         </Dialog>
     );
 };
