@@ -11,7 +11,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLedgerData } from '../hooks/useLedgerData';
 import { useLiveQuery } from '../hooks/useLiveQuery';
-import { hydrateLedgerWithGhosts, getGhostDisplayInfo } from '../utils/ghostReference';
 import { useFieldStats } from '../hooks/useLedgerSourceData';
 import { portColorMap } from '../utils/portColors';
 import { SchemaField } from '@/types/ledger';
@@ -258,7 +257,9 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                         )}
                         {/* Schema stale warning */}
                         {schemaStaleWarning && (
-                            <AlertTriangle size={14} className="text-amber-400" title={schemaStaleWarning} />
+                            <div title={schemaStaleWarning}>
+                                <AlertTriangle size={14} className="text-amber-400" />
+                            </div>
                         )}
                         {/* Entry count and ghost badges */}
                         {ledgerId && !isLoading && !error && (
@@ -332,6 +333,7 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                                     onClick={() => updateNodeData(id, { showFieldTypes: !showFieldTypes })}
                                     className={`h-5 w-8 ${showFieldTypes ? 'bg-emerald-600' : ''}`}
                                     aria-label={showFieldTypes ? 'Hide field types' : 'Show field types'}
+                                    aria-pressed={showFieldTypes}
                                 >
                                     <span className="text-[10px]">{showFieldTypes ? 'On' : 'Off'}</span>
                                 </Button>
@@ -346,6 +348,7 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                                     onClick={() => updateNodeData(id, { showLatestValues: !showLatestValues })}
                                     className={`h-5 w-8 ${showLatestValues ? 'bg-emerald-600' : ''}`}
                                     aria-label={showLatestValues ? 'Hide latest values' : 'Show latest values'}
+                                    aria-pressed={showLatestValues}
                                 >
                                     <span className="text-[10px]">{showLatestValues ? 'On' : 'Off'}</span>
                                 </Button>
@@ -447,7 +450,7 @@ export const LedgerSourceNode: React.FC<NodeProps> = React.memo(({ id, data, sel
                                     <span>⚠️</span>
                                     <span>Ghost References ({ghosts.length})</span>
                                 </div>
-                                {ghosts.slice(0, 3).map((ghost, index) => (
+                                {ghosts.slice(0, 3).map((ghost) => (
                                     <LedgerGhostField
                                         key={ghost.entryId}
                                         ghost={ghost}
@@ -579,7 +582,7 @@ const LedgerFieldOutput: React.FC<LedgerFieldOutputProps> = React.memo(({
                         className="!w-3 !h-3 !border-2 !border-zinc-900 transition-colors hover:!bg-emerald-400"
                         style={{
                             right: '-6px',
-                            backgroundColor: portColorMap[field.type] || portColorMap.text,
+                            backgroundColor: portColorMap[field.type as keyof typeof portColorMap] || portColorMap.text,
                             cursor: isLedgerDeleted ? 'not-allowed' : 'crosshair'
                         }}
                         aria-label={`${field.name} output handle, ${field.type} type`}
