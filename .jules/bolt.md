@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2026-08-14 - Optimize array traversal in connection mapping
+**Learning:** In utility functions dealing with React Flow data (like `nodes` and `edges`), chaining `.filter().map()` or repeatedly executing `.find()` inside `.filter()` loops creates (E 	imes N)$ complexity and heavy intermediate garbage collection.
+**Action:** Use single-pass helper loops (e.g., `getChildIdsByParentId`) and hoist repeated lookups outside loops to reduce complexity to (E + N)$ and avoid intermediate array allocations.
