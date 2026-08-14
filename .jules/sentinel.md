@@ -42,3 +42,12 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+## 2026-03-24 - Insecure Random Generation for Identifiers
+**Vulnerability:** The application used `Math.random()` as a fallback for generating action IDs in `useUndoRedoStore.ts`. This non-cryptographic generator can produce predictable outputs, potentially allowing an attacker to guess identifiers or bypass security checks relying on ID uniqueness.
+**Learning:** `Math.random()` is not cryptographically secure and should never be used for generating identifiers or tokens. In modern browser environments, WebCrypto API is universally available, making fallbacks unnecessary.
+**Prevention:** Always use `crypto.randomUUID()` or `crypto.getRandomValues()` for unique identifiers to guarantee cryptographic security and unpredictability.
+
+## 2026-03-24 - Insecure Random Generation for Identifiers (NodeCanvas)
+**Vulnerability:** The application used `Math.random()` as a fallback for generating node IDs in `NodeCanvas.tsx` when `crypto.randomUUID` was unavailable. This non-cryptographic generator can produce predictable outputs, potentially allowing an attacker to guess identifiers or bypass security checks relying on ID uniqueness.
+**Learning:** `Math.random()` is not cryptographically secure and should never be used for generating identifiers or tokens. Custom manual fallbacks for UUID generation are often flawed and risky compared to established, battle-tested libraries like `uuid`.
+**Prevention:** Always use standard, secure libraries like `uuid` which internally handle cryptographic fallbacks securely, or rely strictly on standard WebCrypto APIs.
