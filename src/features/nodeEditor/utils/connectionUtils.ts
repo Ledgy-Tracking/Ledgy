@@ -1,6 +1,22 @@
 import { Edge, Node, Position } from '@xyflow/react';
 
 /**
+ * Helper to extract child IDs by parentId in a single pass
+ * @param nodes All nodes
+ * @param parentId Parent ID to find children for
+ * @returns Array of child node IDs
+ */
+const getChildIdsByParentId = (nodes: Node[], parentId: string): string[] => {
+    const childIds: string[] = [];
+    for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].parentId === parentId) {
+            childIds.push(nodes[i].id);
+        }
+    }
+    return childIds;
+};
+
+/**
  * Port position on container edge
  */
 export interface PortPosition {
@@ -20,9 +36,7 @@ export const isInternalConnection = (
     const container = nodes.find(n => n.id === containerId);
     if (!container?.data?.childNodeIds) {
         // Fallback: use parentId (React Flow v12)
-        const childIds = new Set(
-            nodes.filter(n => n.parentId === containerId).map(n => n.id)
-        );
+        const childIds = new Set(getChildIdsByParentId(nodes, containerId));
         return childIds.has(edge.source) && childIds.has(edge.target);
     }
     
@@ -48,9 +62,7 @@ export const isExternalConnection = (
         childIds = new Set(container.data.childNodeIds as string[]);
     } else {
         // Fallback: use parentId (React Flow v12)
-        childIds = new Set(
-            nodes.filter(n => n.parentId === containerId).map(n => n.id)
-        );
+        childIds = new Set(getChildIdsByParentId(nodes, containerId));
     }
     
     const sourceIn = childIds.has(edge.source);
@@ -76,9 +88,7 @@ export const getInternalConnections = (
         childIds = new Set(rawChildIds);
     } else {
         // Fallback: use parentId (React Flow v12)
-        childIds = new Set(
-            nodes.filter(n => n.parentId === containerId).map(n => n.id)
-        );
+        childIds = new Set(getChildIdsByParentId(nodes, containerId));
     }
     
     return edges.filter(
@@ -94,7 +104,27 @@ export const getExternalConnections = (
     edges: Edge[],
     nodes: Node[]
 ): Edge[] => {
-    return edges.filter(edge => isExternalConnection(edge, containerId, nodes));
+    const container = nodes.find(n => n.id === containerId);
+
+    // Get child IDs - prefer data.childNodeIds, fallback to parentId
+    let childIds: Set<string>;
+    if (container?.data?.childNodeIds) {
+        childIds = new Set(container.data.childNodeIds as string[]);
+    } else {
+        // Fallback: use parentId (React Flow v12)
+        childIds = new Set(getChildIdsByParentId(nodes, containerId));
+    }
+
+    const externalEdges: Edge[] = [];
+    for (let i = 0; i < edges.length; i++) {
+        const edge = edges[i];
+        const sourceIn = childIds.has(edge.source);
+        const targetIn = childIds.has(edge.target);
+        if ((sourceIn && !targetIn) || (!sourceIn && targetIn)) {
+            externalEdges.push(edge);
+        }
+    }
+    return externalEdges;
 };
 
 /**
@@ -213,9 +243,7 @@ const getAllDescendants = (
     nodes: Node[]
 ): string[] => {
     // React Flow v12 uses parentId
-    const directChildren = nodes
-        .filter(n => n.parentId === containerId)
-        .map(n => n.id);
+    const directChildren = getChildIdsByParentId(nodes, containerId);
     
     const allDescendants = [...directChildren];
     
