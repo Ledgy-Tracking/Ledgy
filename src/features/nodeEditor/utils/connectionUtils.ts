@@ -20,9 +20,14 @@ export const isInternalConnection = (
     const container = nodes.find(n => n.id === containerId);
     if (!container?.data?.childNodeIds) {
         // Fallback: use parentId (React Flow v12)
-        const childIds = new Set(
-            nodes.filter(n => n.parentId === containerId).map(n => n.id)
-        );
+        // ⚡ Bolt: Replaced chained .filter().map() with single-pass loop
+        const childIdsList: string[] = [];
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].parentId === containerId) {
+                childIdsList.push(nodes[i].id);
+            }
+        }
+        const childIds = new Set(childIdsList);
         return childIds.has(edge.source) && childIds.has(edge.target);
     }
     
@@ -48,9 +53,14 @@ export const isExternalConnection = (
         childIds = new Set(container.data.childNodeIds as string[]);
     } else {
         // Fallback: use parentId (React Flow v12)
-        childIds = new Set(
-            nodes.filter(n => n.parentId === containerId).map(n => n.id)
-        );
+        // ⚡ Bolt: Replaced chained .filter().map() with single-pass loop
+        const childIdsList: string[] = [];
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].parentId === containerId) {
+                childIdsList.push(nodes[i].id);
+            }
+        }
+        childIds = new Set(childIdsList);
     }
     
     const sourceIn = childIds.has(edge.source);
@@ -76,9 +86,14 @@ export const getInternalConnections = (
         childIds = new Set(rawChildIds);
     } else {
         // Fallback: use parentId (React Flow v12)
-        childIds = new Set(
-            nodes.filter(n => n.parentId === containerId).map(n => n.id)
-        );
+        // ⚡ Bolt: Replaced chained .filter().map() with single-pass loop
+        const childIdsList: string[] = [];
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].parentId === containerId) {
+                childIdsList.push(nodes[i].id);
+            }
+        }
+        childIds = new Set(childIdsList);
     }
     
     return edges.filter(
@@ -213,9 +228,13 @@ const getAllDescendants = (
     nodes: Node[]
 ): string[] => {
     // React Flow v12 uses parentId
-    const directChildren = nodes
-        .filter(n => n.parentId === containerId)
-        .map(n => n.id);
+    // ⚡ Bolt: Replaced chained .filter().map() with single-pass loop
+    const directChildren: string[] = [];
+    for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].parentId === containerId) {
+            directChildren.push(nodes[i].id);
+        }
+    }
     
     const allDescendants = [...directChildren];
     
