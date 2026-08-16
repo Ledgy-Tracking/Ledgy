@@ -393,12 +393,12 @@ export const NodeCanvas: React.FC = () => {
     );
 
     // Story 4-8: Track connection start for rejection detection
-    const onConnectStart = useCallback(({
+    const onConnectStart = useCallback((_event: any, {
         handleId,
         nodeId,
     }: {
         handleId: string | null;
-        nodeId: string;
+        nodeId: string | null;
     }) => {
         connectionAttemptRef.current = {
             isConnecting: true,
