@@ -132,7 +132,7 @@ export const useEdgeDrag = ({
                     );
                     if (distanceToSource <= SNAP_RADIUS) {
                         // Cancel drag when returned to source handle
-                        cancelDrag();
+                        if(typeof cancelDrag === 'function') cancelDrag();
                         return;
                     }
                 }

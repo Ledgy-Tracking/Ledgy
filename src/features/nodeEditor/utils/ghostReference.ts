@@ -5,7 +5,7 @@ import { useProfileStore } from '@/stores/useProfileStore';
  * Check if a single document represents a ghost entry
  */
 export const isGhostEntry = (doc: any | null): boolean => {
-  return !doc || doc.isDeleted === true || doc.deletedAt != null;
+  return !doc || (doc as any).isDeleted === true || (doc as any).deletedAt != null;
 };
 
 /**
@@ -35,11 +35,11 @@ export const checkGhostReferences = async (
 
   // Build document map and collect explicitly deleted entries
   allDocs.forEach(doc => {
-    docMap.set(doc._id, doc);
+    docMap.set((doc as any)._id, doc);
 
     // Check if this document is explicitly marked as deleted
-    if (doc.type === 'entry' && (doc.isDeleted === true || doc.deletedAt != null)) {
-      ghostIds.add(doc._id);
+    if ((doc as any).type === 'entry' && ((doc as any).isDeleted === true || (doc as any).deletedAt != null)) {
+      ghostIds.add((doc as any)._id);
     }
   });
 
@@ -73,13 +73,13 @@ export const hydrateLedgerWithGhosts = async (
   const allEntries = await db.getAllDocuments();
   const ledgerEntries = allEntries
     .filter(doc =>
-      doc.type === 'entry' &&
-      doc.ledgerId === ledgerId
+      (doc as any).type === 'entry' &&
+      (doc as any).ledgerId === ledgerId
       // Note: We include deleted entries here to identify ghosts
     )
     .sort((a, b) => {
-      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      const dateA = (a as any).createdAt ? new Date((a as any).createdAt).getTime() : 0;
+      const dateB = (b as any).createdAt ? new Date((b as any).createdAt).getTime() : 0;
       return dateB - dateA;
     });
 
@@ -90,17 +90,17 @@ export const hydrateLedgerWithGhosts = async (
   // Filter active entries to only fields in schema snapshot
   const fieldIds = schemaSnapshot.map(f => f.id);
   const filteredActiveEntries = activeEntries.map(entry => ({
-    ...entry,
-    data: pickFields(entry.data, fieldIds)
+    ...(entry as any),
+    data: pickFields((entry as any).data, fieldIds)
   }));
 
   // Create ghost indicators
   const ghostIndicators = ghostEntries.map(entry => ({
-    entryId: entry._id,
+    entryId: (entry as any)._id,
     displayText: '[Deleted Entry]',
     tooltip: 'This entry has been deleted on another device',
     style: 'strikethrough + gray',
-    originalData: pickFields(entry.data, fieldIds) // Keep original data for tooltips
+    originalData: pickFields((entry as any).data, fieldIds) // Keep original data for tooltips
   }));
 
   return {
@@ -137,7 +137,7 @@ export const getGhostDisplayInfo = (entry: any) => {
   }
 
   return {
-    entryId: entry._id || entry.entryId,
+    entryId: (entry as any)._id || (entry as any).entryId,
     displayText: '[Deleted Entry]',
     tooltip: 'This entry has been deleted on another device',
     style: 'strikethrough + gray',
