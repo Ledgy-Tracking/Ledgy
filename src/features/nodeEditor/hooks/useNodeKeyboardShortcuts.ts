@@ -33,7 +33,6 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
     const setShowGrid = useNodeStore(s => s.setShowGrid);
     const setSnapToGrid = useNodeStore(s => s.setSnapToGrid);
     const viewControls = useNodeStore(s => s.viewControls);
-    const nodes = useNodeStore(s => s.nodes);
     
     const { showMinimap, showGrid, snapToGrid } = viewControls;
     
@@ -122,7 +121,8 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
                 case '1':
                     if (event.shiftKey) {
                         event.preventDefault();
-                        if (nodes.length > 0) {
+                        const currentNodes = useNodeStore.getState().nodes;
+                        if (currentNodes.length > 0) {
                             fitView({ padding: 0.2, duration: 300 });
                             announce('Fit to screen');
                         }
@@ -217,26 +217,32 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
                 // Home: Center on first node
                 case 'Home':
                     event.preventDefault();
-                    if (nodes.length > 0) {
-                        const firstNode = nodes[0];
-                        setViewport({
-                            x: -firstNode.position.x + window.innerWidth / 2 / reactFlow.getZoom() - 100,
-                            y: -firstNode.position.y + window.innerHeight / 2 / reactFlow.getZoom() - 50,
-                            zoom: reactFlow.getZoom()
-                        }, { duration: 300 });
+                    {
+                        const currentNodes = useNodeStore.getState().nodes;
+                        if (currentNodes.length > 0) {
+                            const firstNode = currentNodes[0];
+                            setViewport({
+                                x: -firstNode.position.x + window.innerWidth / 2 / reactFlow.getZoom() - 100,
+                                y: -firstNode.position.y + window.innerHeight / 2 / reactFlow.getZoom() - 50,
+                                zoom: reactFlow.getZoom()
+                            }, { duration: 300 });
+                        }
                     }
                     break;
 
                 // End: Center on last node
                 case 'End':
                     event.preventDefault();
-                    if (nodes.length > 0) {
-                        const lastNode = nodes[nodes.length - 1];
-                        setViewport({
-                            x: -lastNode.position.x + window.innerWidth / 2 / reactFlow.getZoom() - 100,
-                            y: -lastNode.position.y + window.innerHeight / 2 / reactFlow.getZoom() - 50,
-                            zoom: reactFlow.getZoom()
-                        }, { duration: 300 });
+                    {
+                        const currentNodes = useNodeStore.getState().nodes;
+                        if (currentNodes.length > 0) {
+                            const lastNode = currentNodes[currentNodes.length - 1];
+                            setViewport({
+                                x: -lastNode.position.x + window.innerWidth / 2 / reactFlow.getZoom() - 100,
+                                y: -lastNode.position.y + window.innerHeight / 2 / reactFlow.getZoom() - 50,
+                                zoom: reactFlow.getZoom()
+                            }, { duration: 300 });
+                        }
                     }
                     break;
             }
@@ -256,7 +262,6 @@ export const useNodeKeyboardShortcuts = (options: UseNodeKeyboardShortcutsOption
         showMinimap, 
         showGrid, 
         snapToGrid, 
-        nodes.length,
         setShowMinimap, 
         setShowGrid, 
         setSnapToGrid, 

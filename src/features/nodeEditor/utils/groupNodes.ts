@@ -1,5 +1,5 @@
 import { Node } from '@xyflow/react';
-import { nanoid } from 'nanoid';
+import { v4 as uuidv4 } from 'uuid';
 import { useErrorStore } from '../../../stores/useErrorStore';
 
 /**

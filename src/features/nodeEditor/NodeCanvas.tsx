@@ -32,7 +32,7 @@ import { NavigationToolbar } from './components/NavigationToolbar';
 import { ViewControls } from './components/ViewControls';
 import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
 import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
-import { isTypeCompatible, getTypeDisplayName } from './types/port';
+import { isTypeCompatible } from './types/port';
 import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
 import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
 import { ConnectionLine } from './components/ConnectionLine';
@@ -42,7 +42,7 @@ import { HydrationProgressIndicator } from './components/HydrationProgressIndica
 import { ledgerDataCache } from './utils/ledgerDataCache';
 import { hydrateLedgerWithGhosts } from './utils/ghostReference';
 import { setupSchemaChangeSubscription } from './utils/schemaChangeHandler';
-import { unsubscribeAll, unsubscribeNode, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
+import { unsubscribeAll, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
 import { logSubscriptionCount, logHydrationSummary } from './utils/performanceMonitor';
 import { useLedgerStore } from '../../stores/useLedgerStore';
 
@@ -146,7 +146,7 @@ export const NodeCanvas: React.FC = () => {
 
     // Story 4.10: Keep nodeStore.schemas in sync with ledgerStore.schemas
     // so that schemaChangeHandler can detect schema diffs without importing useLedgerStore
-    const ledgerSchemas = useLedgerStore(useShallow(s => s.schemas));
+    // const ledgerSchemas = useLedgerStore(useShallow(s => s.schemas));
     useEffect(() => {
         useNodeStore.getState().setSchemas(ledgerSchemas);
     }, [ledgerSchemas]);
@@ -669,14 +669,14 @@ const generateNodeId = (): string => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                onConnectStart={onConnectStart}
+                onConnectStart={onConnectStart as any}
                 onConnectEnd={onConnectEnd}
                 onSelectionChange={handleSelectionChange}
                 isValidConnection={isValidConnection}
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
-                connectionLineComponent={ConnectionLine}
+                connectionLineComponent={ConnectionLine as any}
                 fitView
                 selectionOnDrag={true}
                 selectionKeyCode={['Shift']}
@@ -717,7 +717,7 @@ const generateNodeId = (): string => {
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
-                onConnectStart={onConnectStart}
+                onConnectStart={onConnectStart as any}
                 onConnectEnd={onConnectEnd}
                 onViewportChange={onViewportChange}
                 onNodeDragStart={onNodeDragStart}
@@ -727,7 +727,7 @@ const generateNodeId = (): string => {
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
-                connectionLineComponent={ConnectionLine}
+                connectionLineComponent={ConnectionLine as any}
                 defaultViewport={initialViewport}
                 panActivationKeyCode={['Space']}
                 selectionKeyCode={['Shift']}
