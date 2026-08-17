@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { Card, CardContent } from '@/components/ui/card';
 import {
     ReactFlow,
@@ -573,12 +574,8 @@ const generateNodeId = (): string => {
     } catch {
         // crypto.randomUUID may throw in insecure contexts
     }
-    // Fallback: generate UUID v4 manually
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+    // Fallback: use secure UUID v4 generation from uuid package
+    return uuidv4();
 };
 
     const handleAddFirstNode = useCallback(() => {
