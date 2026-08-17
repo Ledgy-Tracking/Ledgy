@@ -182,6 +182,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                         onClick={() => form.setValue('syncDirection', 'two-way')}
                                         variant="ghost"
                                         size="sm"
+                                        aria-pressed={syncDirection === 'two-way'}
                                         className={`flex-1 text-xs ${syncDirection === 'two-way'
                                             ? 'bg-background text-foreground shadow-sm'
                                             : 'text-muted-foreground hover:text-foreground'
@@ -194,6 +195,7 @@ export const SyncConfigDialog: React.FC<SyncConfigDialogProps> = ({ profileId, i
                                         onClick={() => form.setValue('syncDirection', 'upload')}
                                         variant="ghost"
                                         size="sm"
+                                        aria-pressed={syncDirection === 'upload'}
                                         className={`flex-1 text-xs ${syncDirection === 'upload'
                                             ? 'bg-background text-foreground shadow-sm'
                                             : 'text-muted-foreground hover:text-foreground'
