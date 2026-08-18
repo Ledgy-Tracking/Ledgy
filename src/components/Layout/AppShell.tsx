@@ -423,6 +423,7 @@ export const AppShell: React.FC = () => {
                                                 size="icon"
                                                 onClick={() => setDashboardViewMode(prev => prev === 'grid' ? 'table' : 'grid')}
                                                 aria-label={dashboardViewMode === 'grid' ? 'Switch to Table View' : 'Switch to Grid View'}
+                                                aria-pressed={dashboardViewMode === 'table'}
                                                 className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                             >
                                                 {dashboardViewMode === 'grid' ? <Table size={18} /> : <Grid3X3 size={18} />}
