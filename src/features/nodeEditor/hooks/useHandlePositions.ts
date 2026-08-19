@@ -10,17 +10,16 @@
  */
 
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
-import { useReactFlow, useStore, type XYPosition } from '@xyflow/react';
+import { useReactFlow, useOnViewportChange, type XYPosition } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import type { HandlePosition, PortType } from '../types/connection';
-import { HandleSpatialIndex, createSpatialIndex, DEFAULT_VIEWPORT_PADDING } from '../utils/snapDetection';
+import { HandleSpatialIndex, createSpatialIndex } from '../utils/snapDetection';
 import { getPortTypeFromHandle } from '../utils/portTypeUtils';
 
 /**
  * Performance configuration
  */
 const REBUILD_THROTTLE_MS = 100; // ms - throttle handle position rebuilds
-const VIEWPORT_DEBOUNCE_MS = 100; // ms - debounce viewport change handling
 const DEFAULT_NODE_WIDTH = 200; // px - default width for bounds calculation
 const DEFAULT_NODE_HEIGHT = 100; // px - default height for bounds calculation
 
@@ -115,7 +114,6 @@ export const useHandlePositions = (
 ): UseHandlePositionsReturn => {
     const { enabled = true } = options;
     const { getNodes, screenToFlowPosition } = useReactFlow();
-    const viewport = useStore(s => s.transform);
 
     // State to trigger rebuilds
     const [rebuildTrigger, setRebuildTrigger] = useState(0);
@@ -133,7 +131,7 @@ export const useHandlePositions = (
         const positions = extractHandlePositions(nodes, screenToFlowPosition);
         handlePositionsRef.current = positions;
         return positions;
-    }, [getNodes, enabled, rebuildTrigger, viewport, screenToFlowPosition]);
+    }, [getNodes, enabled, rebuildTrigger, screenToFlowPosition]);
 
     // Build spatial index
     const spatialIndex = useMemo(() => {
@@ -159,15 +157,12 @@ export const useHandlePositions = (
     }, []);
 
     // Rebuild index when viewport changes (debounced)
-    useEffect(() => {
-        if (!enabled) return;
-
-        const timer = setTimeout(() => {
+    useOnViewportChange({
+        onEnd: () => {
+            if (!enabled) return;
             rebuildIndex();
-        }, VIEWPORT_DEBOUNCE_MS);
-
-        return () => clearTimeout(timer);
-    }, [viewport, enabled, rebuildIndex]);
+        }
+    });
 
     // Cleanup on unmount
     useEffect(() => {
@@ -191,13 +186,21 @@ export const useViewportHandlePositions = (
     canvasSize: { width: number; height: number }
 ) => {
     const { spatialIndex, handlePositions } = useHandlePositions();
-    const viewport = useStore(s => s.transform);
 
-    const visibleHandles = useMemo(() => {
-        if (!spatialIndex) return [];
+    // Use state instead of useMemo to avoid 60fps re-renders when panning/zooming
+    const [visibleHandles, setVisibleHandles] = useState<HandlePosition[]>([]);
+
+    const updateVisibleHandles = useCallback(() => {
+        if (!spatialIndex) {
+            setVisibleHandles([]);
+            return;
+        }
         
         // Guard against zero canvas dimensions
-        if (canvasSize.width <= 0 || canvasSize.height <= 0) return [];
+        if (canvasSize.width <= 0 || canvasSize.height <= 0) {
+            setVisibleHandles([]);
+            return;
+        }
 
         // Calculate viewport bounds in screen coordinates
         const viewCenterX = canvasSize.width / 2;
@@ -206,11 +209,21 @@ export const useViewportHandlePositions = (
         // Query a larger area around viewport for smooth edge dragging
         const queryRadius = Math.max(canvasSize.width, canvasSize.height) / 2 + 100;
         
-        return spatialIndex.queryRange(
+        setVisibleHandles(spatialIndex.queryRange(
             { x: viewCenterX, y: viewCenterY },
             queryRadius
-        );
-    }, [spatialIndex, viewport, canvasSize]);
+        ));
+    }, [spatialIndex, canvasSize.width, canvasSize.height]);
+
+    // Initial calculation and update when dependencies (like spatialIndex) change
+    useEffect(() => {
+        updateVisibleHandles();
+    }, [updateVisibleHandles]);
+
+    // Update only when viewport changes end (avoids 60fps re-renders during pan/zoom)
+    useOnViewportChange({
+        onEnd: updateVisibleHandles
+    });
 
     return {
         spatialIndex,
