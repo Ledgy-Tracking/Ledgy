@@ -32,7 +32,3 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
-
-## 2026-08-20 - Optimize Array.prototype.find inside filter
-**Learning:** Using `Array.prototype.find` inside a loop like `Array.prototype.filter` when cross-referencing two arrays (e.g., `currentNodes` and `previousNodes`) results in O(N^2) complexity. This can cause significant main thread blocking and performance issues during rapid events like node dragging or high-frequency state updates.
-**Action:** Always pre-compute a lookup `Map` keyed by the unique identifier (e.g., node ID) before entering the loop. This reduces the lookup time from O(N) to O(1), bringing the overall complexity of the loop from O(N^2) to O(N).
