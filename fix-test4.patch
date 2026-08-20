@@ -1,0 +1,20 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -90,7 +90,7 @@
+     });
+
+     it('should not render glow effect for non-valid connections', () => {
+-        const props = createMockProps({ connectionStatus: 'default' });
++        const props = createMockProps({ connectionStatus: 'default' as any });
+         const { container } = render(<ConnectionLine {...props} />);
+
+         const glow = container.querySelector('.connection-line-glow');
+@@ -106,7 +106,7 @@
+     });
+
+     it('should apply correct stroke color for default status', () => {
+-        const props = createMockProps({ connectionStatus: 'default' });
++        const props = createMockProps({ connectionStatus: 'default' as any });
+         const { container } = render(<ConnectionLine {...props} />);
+
+         const path = container.querySelector('.connection-line-default');
