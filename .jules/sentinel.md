@@ -42,3 +42,8 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+
+## 2026-03-25 - Insecure Fallback Random Generation for Node IDs
+**Vulnerability:** The `generateNodeId` function in `NodeCanvas.tsx` used `Math.random()` as a fallback when `crypto.randomUUID` was unavailable (e.g., in insecure contexts). This non-cryptographic generator can produce predictable outputs, allowing attackers to guess identifiers.
+**Learning:** `Math.random()` is not cryptographically secure. The `uuid` library resolves this by using `crypto.getRandomValues()` natively, which is broadly supported in all modern browsers even in non-HTTPS contexts, making the custom fallback unnecessary and insecure.
+**Prevention:** Always use established libraries like `uuid` or direct WebCrypto APIs (`crypto.getRandomValues()`) for unique identifiers to guarantee cryptographic security and unpredictability, instead of rolling custom fallbacks with `Math.random()`.
