@@ -1,0 +1,28 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -32,7 +32,7 @@
+
+     it('should render with default status', () => {
+-        const props = createMockProps({ connectionStatus: 'default' });
++        const props = createMockProps({ connectionStatus: 'default' as any });
+         const { container } = render(<ConnectionLine {...props} />);
+
+         const line = container.querySelector('g[data-testid="connection-line"]');
+         expect(line).toHaveAttribute('data-connection-status', 'default');
+     });
+@@ -88,7 +88,7 @@
+
+     it('should render with status message when provided', () => {
+-        const props = createMockProps({ connectionStatus: 'default' });
++        const props = createMockProps({ connectionStatus: 'default' as any });
+         const { container, getByText } = render(
+             <ConnectionLineWithStatus {...props} statusMessage="Test Message" />
+         );
+@@ -104,7 +104,7 @@
+
+     it('should not render status tooltip if statusMessage is empty', () => {
+-        const props = createMockProps({ connectionStatus: 'default' });
++        const props = createMockProps({ connectionStatus: 'default' as any });
+         const { container } = render(
+             <ConnectionLineWithStatus {...props} />
+         );

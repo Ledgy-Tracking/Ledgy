@@ -1,0 +1,11 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -393,7 +393,7 @@
+
+     // Story 4-8: Track connection start for rejection detection
+     const onConnectStart = useCallback((
+-        _event: React.MouseEvent | React.TouchEvent,
++        _event: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent,
+         { handleId, nodeId }: { handleId: string | null; nodeId: string | null }
+     ) => {
+         connectionAttemptRef.current = {

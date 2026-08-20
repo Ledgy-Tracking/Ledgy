@@ -1,0 +1,24 @@
+--- src/features/nodeEditor/components/ConnectionLine.tsx
++++ src/features/nodeEditor/components/ConnectionLine.tsx
+@@ -23,7 +23,7 @@
+ /**
+  * Extended props including connection status and direction
+  */
+-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
++interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps, 'connectionStatus'> {
+     connectionStatus?: ConnectionStatus;
+     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
+ }
+@@ -82,9 +82,9 @@
+     fromY,
+     toX,
+     toY,
+-    connectionLineType,
++    connectionLineType: _connectionLineType,
+     connectionStatus = 'default',
+-    fromNode,
+-    fromHandle,
++    fromNode: _fromNode,
++    fromHandle: _fromHandle,
+     sourceDirection = 'right'
+ }) => {

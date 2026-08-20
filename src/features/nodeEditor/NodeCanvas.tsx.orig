@@ -76,7 +76,7 @@ const defaultEdgeOptions = {
  * 4. Uses store's debouncedSaveCanvas for persistence.
  * 5. Viewport-space node positioning for handleAddFirstNode.
  * 6. Event handlers wired to trigger debounced saves.
- * 
+ *
  * Story 4.4 Additions:
  * - NavigationToolbar: Zoom/fit controls (top-left)
  * - ViewControls: Minimap/grid toggle panel (top-right)
@@ -99,14 +99,14 @@ export const NodeCanvas: React.FC = () => {
     const nodes = useNodeStore(useShallow(s => s.nodes));
     const edges = useNodeStore(useShallow(s => s.edges));
     const initialViewport = useMemo(() => useNodeStore.getState().viewport, []);
-    
+
     // View controls for MiniMap (Story 4.4)
     const viewControls = useNodeStore(s => s.viewControls);
     const { showMinimap, showGrid, snapToGrid } = viewControls;
 
     // Help panel state (Story 4.4)
     const [isHelpOpen, setIsHelpOpen] = useState(false);
-    
+
     // Selection state (Story 4.9)
     const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
 
@@ -120,10 +120,10 @@ export const NodeCanvas: React.FC = () => {
     });
 
     // Detect dark mode for MiniMap theming
-    const [isDarkMode, setIsDarkMode] = useState(() => 
+    const [isDarkMode, setIsDarkMode] = useState(() =>
         document.documentElement.classList.contains('dark')
     );
-    
+
     useEffect(() => {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -294,11 +294,11 @@ export const NodeCanvas: React.FC = () => {
         if (loadedWorkflowRef.current === workflowId) return;
 
         console.log('[NodeCanvas] Initial load triggered');
-        
+
         // CRITICAL ORDER: 1. Clear debounce, 2. Mark not loaded, 3. Load
         useNodeStore.getState().clearDebouncedSave();
         useNodeStore.getState().setIsCanvasLoaded(false);
-        
+
         loadedWorkflowRef.current = workflowId;
         loadAbortRef.current = false;
 
@@ -438,7 +438,7 @@ export const NodeCanvas: React.FC = () => {
                 if (targetNodeId && targetHandleId) {
                     // Get latest nodes from store to avoid stale closure
                     const currentNodes = useNodeStore.getState().nodes;
-                    
+
                     // Get types for rejection notification
                     const sourceType = getPortTypeFromHandle(
                         attempt.source,
@@ -549,7 +549,7 @@ export const NodeCanvas: React.FC = () => {
     const handleSelectionChange = useCallback(({ nodes: selected }: { nodes: CanvasNode[] }) => {
         const ids = selected.map(n => n.id);
         setSelectedNodeIds(ids);
-        
+
         const first = selected[0];
         if (first) {
             setSelectedNodeId(first.id);
@@ -611,7 +611,7 @@ const generateNodeId = (): string => {
                 );
                 return;
             }
-            
+
             // Ctrl/Cmd+A - Select all nodes
             if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !e.shiftKey) {
                 e.preventDefault();
@@ -619,13 +619,13 @@ const generateNodeId = (): string => {
                 setSelectedNodeIds(allNodes.map(n => n.id));
                 return;
             }
-            
+
             // Escape - Clear selection
             if (e.key === 'Escape') {
                 setSelectedNodeIds([]);
                 return;
             }
-            
+
             // Ctrl/Cmd+G - Group selected nodes
             if ((e.ctrlKey || e.metaKey) && e.key === 'g' && !e.shiftKey) {
                 e.preventDefault();
@@ -635,7 +635,7 @@ const generateNodeId = (): string => {
                 }
                 return;
             }
-            
+
             // Ctrl/Cmd+Shift+G - Ungroup selected container
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'G') {
                 e.preventDefault();
@@ -673,7 +673,7 @@ const generateNodeId = (): string => {
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
-                connectionLineComponent={ConnectionLine as any}
+                connectionLineComponent={ConnectionLine}
                 fitView
                 selectionOnDrag={true}
                 selectionKeyCode={['Shift']}
@@ -724,7 +724,7 @@ const generateNodeId = (): string => {
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 defaultEdgeOptions={defaultEdgeOptions}
-                connectionLineComponent={ConnectionLine as any}
+                connectionLineComponent={ConnectionLine}
                 defaultViewport={initialViewport}
                 panActivationKeyCode={['Space']}
                 selectionKeyCode={['Shift']}
