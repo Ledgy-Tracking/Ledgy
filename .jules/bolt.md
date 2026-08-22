@@ -35,3 +35,12 @@
 ## 2025-05-28 - ReactFlow Viewport Optimization
 **Learning:** ReactFlow's `useStore(s => s.transform)` triggers continuous 60fps re-renders during panning/zooming. Using `useOnViewportChange({ onEnd: ... })` debounces this, but requires careful initialization using `getViewport()` from `useReactFlow` to preserve the initial canvas state (e.g., from `fitView`).
 **Action:** When needing viewport updates, use `useOnViewportChange` over direct store subscriptions. Always initialize local viewport state using `getViewport()` to avoid overriding the initial diagram coordinates with defaults.
+## 2026-08-22 - Omit base property in extended props
+**Learning:** When extending types that have a built-in property (e.g. `ConnectionLineComponentProps` with `connectionStatus: 'valid' | 'invalid' | null`), redefining the same property with an incompatible type (e.g. adding 'default' and omitting null) will cause a TS2430 compilation error because the extended interface incorrectly extends the base interface.
+**Action:** When intentionally modifying a built-in property on an extended interface, always `Omit` the original property first (e.g., `interface ExtendedProps extends Omit<BaseProps, 'theProp'> { theProp: newType }`).
+## 2026-08-22 - React Flow v12 onConnectStart Signature
+**Learning:** In @xyflow/react, `onConnectStart` expects `(event: MouseEvent | TouchEvent, params: OnConnectStartParams) => void`. Previous versions or loose typings may have used a single params object.
+**Action:** When defining `onConnectStart` in React Flow, always include the event as the first parameter to satisfy strict TypeScript typings.
+## 2026-08-22 - Radix UI Dialog wrapper usage
+**Learning:** The root `<Dialog>` component from Radix UI does not accept DOM attributes like `className`, `role`, `aria-modal`, or `aria-labelledby`. These attributes belong on the `<DialogContent>` or should be omitted as Radix handles accessibility internally.
+**Action:** Never pass DOM attributes to the root `<Dialog>` component. Also, prefer controlling visibility via the `open` prop rather than returning `null`.

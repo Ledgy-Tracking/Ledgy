@@ -6,21 +6,31 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
-import type { ConnectionLineComponentProps } from '@xyflow/react';
-import React from 'react';
+import type { ConnectionLineComponentProps, Position, ConnectionLineType } from '@xyflow/react';
 
 // Mock props for testing
 const createMockProps = (
-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
+    overrides: Partial<Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' | null }> = {}
+): Omit<ConnectionLineComponentProps, 'connectionStatus'> & { connectionStatus?: 'valid' | 'invalid' | 'default' | 'snapped' | null } => ({
     fromX: 100,
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
+    fromPosition: 'right' as Position,
+    toPosition: 'left' as Position,
+    connectionLineType: 'default' as ConnectionLineType,
     connectionStatus: 'default',
+    fromNode: {
+        id: '1',
+        position: { x: 0, y: 0 },
+        data: {},
+        measured: { width: 100, height: 50 },
+        internals: { positionAbsolute: { x: 0, y: 0 }, z: 1, userNode: { id: '1', position: { x: 0, y: 0 }, data: {} } }
+    } as any,
+    fromHandle: { id: 'h1', type: 'source', nodeId: '1', x: 0, y: 0, position: 'right' as Position, width: 10, height: 10 },
+    toNode: null,
+    toHandle: null,
+    pointer: { x: 0, y: 0 },
     ...overrides
 });
 
