@@ -10,7 +10,7 @@
  */
 
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
-import { useReactFlow, useStore, type XYPosition } from '@xyflow/react';
+import { useReactFlow, useOnViewportChange, type XYPosition } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import type { HandlePosition, PortType } from '../types/connection';
 import { HandleSpatialIndex, createSpatialIndex, DEFAULT_VIEWPORT_PADDING } from '../utils/snapDetection';
@@ -20,7 +20,6 @@ import { getPortTypeFromHandle } from '../utils/portTypeUtils';
  * Performance configuration
  */
 const REBUILD_THROTTLE_MS = 100; // ms - throttle handle position rebuilds
-const VIEWPORT_DEBOUNCE_MS = 100; // ms - debounce viewport change handling
 const DEFAULT_NODE_WIDTH = 200; // px - default width for bounds calculation
 const DEFAULT_NODE_HEIGHT = 100; // px - default height for bounds calculation
 
@@ -114,8 +113,13 @@ export const useHandlePositions = (
     options: UseHandlePositionsOptions = {}
 ): UseHandlePositionsReturn => {
     const { enabled = true } = options;
-    const { getNodes, screenToFlowPosition } = useReactFlow();
-    const viewport = useStore(s => s.transform);
+    const { getNodes, screenToFlowPosition, getViewport } = useReactFlow();
+
+    // Initialize with actual current viewport instead of hardcoded 0,0,1
+    const [viewport, setViewport] = useState<[number, number, number]>(() => {
+        const vp = getViewport();
+        return [vp.x, vp.y, vp.zoom];
+    });
 
     // State to trigger rebuilds
     const [rebuildTrigger, setRebuildTrigger] = useState(0);
@@ -158,16 +162,13 @@ export const useHandlePositions = (
         setRebuildTrigger(prev => prev + 1);
     }, []);
 
-    // Rebuild index when viewport changes (debounced)
-    useEffect(() => {
-        if (!enabled) return;
-
-        const timer = setTimeout(() => {
+    useOnViewportChange({
+        onEnd: useCallback((vp) => {
+            if (!enabled) return;
+            setViewport([vp.x, vp.y, vp.zoom]);
             rebuildIndex();
-        }, VIEWPORT_DEBOUNCE_MS);
-
-        return () => clearTimeout(timer);
-    }, [viewport, enabled, rebuildIndex]);
+        }, [enabled, rebuildIndex])
+    });
 
     // Cleanup on unmount
     useEffect(() => {
@@ -191,7 +192,19 @@ export const useViewportHandlePositions = (
     canvasSize: { width: number; height: number }
 ) => {
     const { spatialIndex, handlePositions } = useHandlePositions();
-    const viewport = useStore(s => s.transform);
+    const { getViewport } = useReactFlow();
+
+    // Initialize with actual current viewport
+    const [viewport, setViewport] = useState<[number, number, number]>(() => {
+        const vp = getViewport();
+        return [vp.x, vp.y, vp.zoom];
+    });
+
+    useOnViewportChange({
+        onEnd: useCallback((vp) => {
+            setViewport([vp.x, vp.y, vp.zoom]);
+        }, [])
+    });
 
     const visibleHandles = useMemo(() => {
         if (!spatialIndex) return [];
