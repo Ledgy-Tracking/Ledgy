@@ -10,10 +10,10 @@
  */
 
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
-import { useReactFlow, useOnViewportChange, type XYPosition } from '@xyflow/react';
+import { useReactFlow, useOnViewportChange, type XYPosition, type Viewport } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import type { HandlePosition, PortType } from '../types/connection';
-import { HandleSpatialIndex, createSpatialIndex, DEFAULT_VIEWPORT_PADDING } from '../utils/snapDetection';
+import { HandleSpatialIndex, createSpatialIndex } from '../utils/snapDetection';
 import { getPortTypeFromHandle } from '../utils/portTypeUtils';
 
 /**
@@ -163,7 +163,7 @@ export const useHandlePositions = (
     }, []);
 
     useOnViewportChange({
-        onEnd: useCallback((vp) => {
+        onEnd: useCallback((vp: Viewport) => {
             if (!enabled) return;
             setViewport([vp.x, vp.y, vp.zoom]);
             rebuildIndex();
@@ -201,7 +201,7 @@ export const useViewportHandlePositions = (
     });
 
     useOnViewportChange({
-        onEnd: useCallback((vp) => {
+        onEnd: useCallback((vp: Viewport) => {
             setViewport([vp.x, vp.y, vp.zoom]);
         }, [])
     });
