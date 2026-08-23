@@ -1,9 +1,0 @@
-<<<<<<< SEARCH
-        it('should propagate changes when node data changes', () => {
-            const mockUnsubscribe = vi.fn();
-            (useNodeStore.subscribe as any).mockImplementation((selector, listener) => {
-=======
-        it('should propagate changes when node data changes', () => {
-            const mockUnsubscribe = vi.fn();
-            (useNodeStore.subscribe as any).mockImplementation((_selector: any, listener: any) => {
->>>>>>> REPLACE
