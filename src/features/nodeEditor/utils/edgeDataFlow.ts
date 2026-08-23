@@ -1,5 +1,5 @@
 import { useNodeStore } from '../../../stores/useNodeStore';
-import { CanvasNode, CanvasEdge } from '../../../types/nodeEditor';
+
 
 /**
  * Get the current output data from a source node
