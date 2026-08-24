@@ -10,17 +10,16 @@
  */
 
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
-import { useReactFlow, useStore, type XYPosition } from '@xyflow/react';
+import { useReactFlow, useOnViewportChange, type XYPosition } from '@xyflow/react';
 import type { Node } from '@xyflow/react';
 import type { HandlePosition, PortType } from '../types/connection';
-import { HandleSpatialIndex, createSpatialIndex, DEFAULT_VIEWPORT_PADDING } from '../utils/snapDetection';
+import { HandleSpatialIndex, createSpatialIndex } from '../utils/snapDetection';
 import { getPortTypeFromHandle } from '../utils/portTypeUtils';
 
 /**
  * Performance configuration
  */
 const REBUILD_THROTTLE_MS = 100; // ms - throttle handle position rebuilds
-const VIEWPORT_DEBOUNCE_MS = 100; // ms - debounce viewport change handling
 const DEFAULT_NODE_WIDTH = 200; // px - default width for bounds calculation
 const DEFAULT_NODE_HEIGHT = 100; // px - default height for bounds calculation
 
@@ -115,7 +114,7 @@ export const useHandlePositions = (
 ): UseHandlePositionsReturn => {
     const { enabled = true } = options;
     const { getNodes, screenToFlowPosition } = useReactFlow();
-    const viewport = useStore(s => s.transform);
+
 
     // State to trigger rebuilds
     const [rebuildTrigger, setRebuildTrigger] = useState(0);
@@ -133,7 +132,7 @@ export const useHandlePositions = (
         const positions = extractHandlePositions(nodes, screenToFlowPosition);
         handlePositionsRef.current = positions;
         return positions;
-    }, [getNodes, enabled, rebuildTrigger, viewport, screenToFlowPosition]);
+    }, [getNodes, enabled, rebuildTrigger, screenToFlowPosition]);
 
     // Build spatial index
     const spatialIndex = useMemo(() => {
@@ -158,16 +157,12 @@ export const useHandlePositions = (
         setRebuildTrigger(prev => prev + 1);
     }, []);
 
-    // Rebuild index when viewport changes (debounced)
-    useEffect(() => {
-        if (!enabled) return;
-
-        const timer = setTimeout(() => {
-            rebuildIndex();
-        }, VIEWPORT_DEBOUNCE_MS);
-
-        return () => clearTimeout(timer);
-    }, [viewport, enabled, rebuildIndex]);
+    // Rebuild index when viewport changes stop
+    useOnViewportChange({
+        onEnd: () => {
+            if (enabled) rebuildIndex();
+        }
+    });
 
     // Cleanup on unmount
     useEffect(() => {
@@ -191,26 +186,48 @@ export const useViewportHandlePositions = (
     canvasSize: { width: number; height: number }
 ) => {
     const { spatialIndex, handlePositions } = useHandlePositions();
-    const viewport = useStore(s => s.transform);
+    const { screenToFlowPosition, getViewport } = useReactFlow();
+    const [visibleHandles, setVisibleHandles] = useState<HandlePosition[]>([]);
 
-    const visibleHandles = useMemo(() => {
-        if (!spatialIndex) return [];
+    const updateVisibleHandles = useCallback(() => {
+        if (!spatialIndex) {
+            setVisibleHandles([]);
+            return;
+        }
         
-        // Guard against zero canvas dimensions
-        if (canvasSize.width <= 0 || canvasSize.height <= 0) return [];
+        if (canvasSize.width <= 0 || canvasSize.height <= 0) {
+            setVisibleHandles([]);
+            return;
+        }
 
-        // Calculate viewport bounds in screen coordinates
-        const viewCenterX = canvasSize.width / 2;
-        const viewCenterY = canvasSize.height / 2;
+        const flowCenter = screenToFlowPosition({
+            x: canvasSize.width / 2,
+            y: canvasSize.height / 2
+        });
+
+        const zoom = getViewport().zoom;
+        const scaledWidth = canvasSize.width / zoom;
+        const scaledHeight = canvasSize.height / zoom;
         
         // Query a larger area around viewport for smooth edge dragging
-        const queryRadius = Math.max(canvasSize.width, canvasSize.height) / 2 + 100;
+        const queryRadius = Math.max(scaledWidth, scaledHeight) / 2 + 100 / zoom;
         
-        return spatialIndex.queryRange(
-            { x: viewCenterX, y: viewCenterY },
+        setVisibleHandles(spatialIndex.queryRange(
+            flowCenter,
             queryRadius
-        );
-    }, [spatialIndex, viewport, canvasSize]);
+        ));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [spatialIndex, canvasSize.width, canvasSize.height, screenToFlowPosition, getViewport]);
+
+    useEffect(() => {
+        updateVisibleHandles();
+    }, [updateVisibleHandles]);
+
+    useOnViewportChange({
+        onEnd: () => {
+            updateVisibleHandles();
+        }
+    });
 
     return {
         spatialIndex,
