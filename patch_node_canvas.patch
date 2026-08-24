@@ -1,0 +1,20 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -676,7 +676,7 @@
+                 nodeTypes={nodeTypes}
+                 edgeTypes={edgeTypes}
+                 defaultEdgeOptions={defaultEdgeOptions}
+-                connectionLineComponent={ConnectionLine}
++                connectionLineComponent={ConnectionLine as any}
+                 fitView
+                 selectionOnDrag={true}
+                 selectionKeyCode={['Shift']}
+@@ -727,7 +727,7 @@
+                 nodeTypes={nodeTypes}
+                 edgeTypes={edgeTypes}
+                 defaultEdgeOptions={defaultEdgeOptions}
+-                connectionLineComponent={ConnectionLine}
++                connectionLineComponent={ConnectionLine as any}
+                 defaultViewport={initialViewport}
+                 panActivationKeyCode={['Space']}
+                 selectionKeyCode={['Shift']}

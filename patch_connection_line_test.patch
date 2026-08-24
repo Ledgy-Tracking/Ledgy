@@ -1,0 +1,37 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -7,7 +7,6 @@
+ // Mock the necessary modules
+ vi.mock('@xyflow/react', () => ({
+     getBezierPath: vi.fn(() => ['M 0,0 C 50,0 50,100 100,100', 50, 50]),
+-    Position: { Left: 'left', Right: 'right', Top: 'top', Bottom: 'bottom' },
+ }));
+
+ describe('ConnectionLine', () => {
+@@ -16,11 +15,11 @@
+         fromY: 0,
+         toX: 100,
+         toY: 100,
+-        fromPosition: 'right' as any,
+-        toPosition: 'left' as any,
+-        connectionLineType: 'bezier' as any,
+-        connectionStatus: 'default' as any,
+-        fromNode: undefined as any,
+-        fromHandle: undefined as any,
++        fromPosition: 'right' as import('@xyflow/react').Position,
++        toPosition: 'left' as import('@xyflow/react').Position,
++        connectionLineType: 'bezier' as import('@xyflow/react').ConnectionLineType,
++        connectionStatus: 'valid' as any,
++        fromNode: undefined,
++        fromHandle: undefined,
+     };
+
+     beforeEach(() => {
+@@ -33,7 +32,7 @@
+     it('renders the SVG path correctly', () => {
+         const { container } = render(
+             <svg>
+-                <ConnectionLine {...defaultProps} />
++                <ConnectionLine {...defaultProps} connectionStatus="default" as any />
+             </svg>
+         );

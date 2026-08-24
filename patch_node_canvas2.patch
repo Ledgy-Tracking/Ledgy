@@ -1,0 +1,11 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -322,7 +322,7 @@
+         // Also subscribe to schema changes in the store for cache invalidation
+         const unsubscribeStore = useNodeStore.subscribe(
+             (state) => state.schemas,
+-            (schemas) => {
++            (_schemas) => {
+                 // When schemas change, invalidate cache for affected ledgers
+                 console.log('[Cache] Invalidating cache due to schema changes');
+                 ledgerDataCache.clear(); // For now, clear all cache on any schema change
