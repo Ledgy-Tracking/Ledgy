@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-28 - React Flow viewport state rendering optimization
+**Learning:** Subscribing directly to the React Flow viewport via `useStore(s => s.transform)` causes continuous component re-renders (60fps) during any panning or zooming interactions, significantly degrading canvas performance.
+**Action:** Instead of listening to `s.transform`, implement the `useOnViewportChange` hook with its `onEnd` callback. Extract and manage visible boundary calculations (like spatial indexes or culling queries) internally using `useState` and update them only when the pan/zoom interaction has finished.
