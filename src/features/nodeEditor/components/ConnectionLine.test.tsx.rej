@@ -1,0 +1,18 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -15,11 +14,11 @@
+ ): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
+     fromX: 100,
+     fromY: 100,
+     toX: 300,
+     toY: 200,
+-    fromPosition: undefined,
+-    toPosition: undefined,
+-    connectionLineType: undefined,
+-    connectionStatus: 'default',
++    fromPosition: 'right' as Position,
++    toPosition: 'left' as Position,
++    connectionLineType: 'bezier' as ConnectionLineType,
++    connectionStatus: 'valid' as any,
+     ...overrides
+ });

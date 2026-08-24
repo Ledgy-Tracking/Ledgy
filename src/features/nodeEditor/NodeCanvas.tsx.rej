@@ -1,0 +1,38 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -32,7 +32,7 @@
+ import { ViewControls } from './components/ViewControls';
+ import { ShortcutHelpPanel } from './components/ShortcutHelpPanel';
+ import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
+-import { isTypeCompatible, getTypeDisplayName } from './types/port';
++import { isTypeCompatible } from './types/port';
+ import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
+ import { showRejectionNotification, announceRejection } from './utils/rejectionNotification';
+ import { ConnectionLine } from './components/ConnectionLine';
+@@ -42,7 +42,7 @@
+ import { ledgerDataCache } from './utils/ledgerDataCache';
+ import { hydrateLedgerWithGhosts } from './utils/ghostReference';
+ import { setupSchemaChangeSubscription } from './utils/schemaChangeHandler';
+-import { unsubscribeAll, unsubscribeNode, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
++import { unsubscribeAll, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
+ import { logSubscriptionCount, logHydrationSummary } from './utils/performanceMonitor';
+ import { useLedgerStore } from '../../stores/useLedgerStore';
+
+@@ -671,7 +671,7 @@
+                 onNodesChange={onNodesChange}
+                 onEdgesChange={onEdgesChange}
+                 onConnect={onConnect}
+-                onConnectStart={onConnectStart}
++                onConnectStart={onConnectStart as any}
+                 onConnectEnd={onConnectEnd}
+                 onSelectionChange={handleSelectionChange}
+                 isValidConnection={isValidConnection}
+@@ -719,7 +719,7 @@
+                 onNodesChange={onNodesChange}
+                 onEdgesChange={onEdgesChange}
+                 onConnect={onConnect}
+-                onConnectStart={onConnectStart}
++                onConnectStart={onConnectStart as any}
+                 onConnectEnd={onConnectEnd}
+                 onViewportChange={onViewportChange}
+                 onNodeDragStart={onNodeDragStart}

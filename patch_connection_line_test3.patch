@@ -1,0 +1,13 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -9,8 +9,8 @@
+
+ // Mock props for testing
+ const createMockProps = (
+-    overrides: Partial<ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' }> = {}
+-): ConnectionLineComponentProps & { connectionStatus?: 'valid' | 'invalid' | 'default' } => ({
++    overrides: Partial<any> = {}
++): any => ({
+     fromX: 100,
+     fromY: 100,
+     toX: 300,

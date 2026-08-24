@@ -1,0 +1,16 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -15,10 +15,10 @@
+     fromY: 100,
+     toX: 300,
+     toY: 200,
+-    fromPosition: undefined,
+-    toPosition: undefined,
+-    connectionLineType: undefined,
+-    connectionStatus: 'default',
++    fromPosition: 'right' as Position,
++    toPosition: 'left' as Position,
++    connectionLineType: 'bezier' as ConnectionLineType,
++    connectionStatus: 'valid' as any,
+     ...overrides
+ });
