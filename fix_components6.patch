@@ -1,0 +1,11 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -19,4 +19,4 @@
+-    fromPosition: undefined,
+-    toPosition: undefined,
+-    connectionLineType: undefined,
+-    connectionStatus: 'default',
++    fromPosition: undefined as any,
++    toPosition: undefined as any,
++    connectionLineType: undefined as any,
++    connectionStatus: 'default' as any,

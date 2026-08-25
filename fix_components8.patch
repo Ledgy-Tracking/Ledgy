@@ -1,0 +1,11 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -5,8 +5,7 @@
+
+ import { describe, it, expect } from 'vitest';
+ import { render } from '@testing-library/react';
+ import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
+-import type { ConnectionLineComponentProps } from '@xyflow/react';
+
+ // Mock props for testing
+ const createMockProps = (

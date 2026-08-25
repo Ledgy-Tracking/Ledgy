@@ -1,0 +1,16 @@
+--- src/features/nodeEditor/components/ConnectionLine.tsx
++++ src/features/nodeEditor/components/ConnectionLine.tsx
+@@ -79,10 +79,10 @@
+     fromY,
+     toX,
+     toY,
+-    connectionLineType,
++    connectionLineType: _connectionLineType,
+     connectionStatus = 'default',
+-    fromNode,
+-    fromHandle,
++    fromNode: _fromNode,
++    fromHandle: _fromHandle,
+     sourceDirection = 'right'
+ }) => {
+     // Calculate Bezier path using actual handle direction

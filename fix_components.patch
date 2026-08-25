@@ -1,0 +1,62 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -7,7 +7,6 @@
+ import { useNodeStore } from '../stores/useNodeStore';
+ import { CanvasNode } from '../../../types/nodeEditor';
+-import React from 'react';
+
+ vi.mock('../stores/useNodeStore');
+
+@@ -17,9 +16,9 @@
+         const props = {
+             fromX: 0,
+             fromY: 0,
+-            toX: undefined,
+-            toY: undefined,
+-            connectionLineType: undefined,
+-            connectionStatus: 'default',
++            toX: undefined as any,
++            toY: undefined as any,
++            connectionLineType: undefined as any,
++            connectionStatus: 'default' as any,
+         };
+
+         const { container } = render(
+@@ -33,7 +32,7 @@
+         const props = {
+             fromX: 0,
+             fromY: 0,
+-            connectionStatus: 'default'
++            connectionStatus: 'default' as any
+         } as ExtendedConnectionLineProps;
+
+         const { container } = render(
+@@ -89,7 +88,7 @@
+         const props = {
+             fromX: 10,
+             fromY: 20,
+-            connectionStatus: 'default'
++            connectionStatus: 'default' as any
+         } as ExtendedConnectionLineProps;
+
+         const { container } = render(
+@@ -105,7 +104,7 @@
+         const props = {
+             fromX: 10,
+             fromY: 20,
+-            connectionStatus: 'default'
++            connectionStatus: 'default' as any
+         } as ExtendedConnectionLineProps;
+
+         const { container } = render(
+--- src/features/nodeEditor/components/ConnectionLine.tsx
++++ src/features/nodeEditor/components/ConnectionLine.tsx
+@@ -23,7 +23,7 @@
+  * Extended props interface for our custom ConnectionLine.
+  */
+ export interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
+-    connectionStatus?: 'valid' | 'invalid' | null;
++    connectionStatus?: 'valid' | 'invalid' | null | 'default';
+ }
+
+ /**
