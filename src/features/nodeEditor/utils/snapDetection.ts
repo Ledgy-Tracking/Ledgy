@@ -285,7 +285,6 @@ export const detectSnapWithHysteresis = (
     sourceType?: string,
     isTouch = false
 ): SnapResult => {
-    const snapRadius = isTouch ? TOUCH_SNAP_RADIUS : SNAP_RADIUS;
     const releaseRadius = isTouch ? TOUCH_SNAP_RADIUS * 1.5 : RELEASE_RADIUS;
 
     // If already snapped to a handle, check if we should release
