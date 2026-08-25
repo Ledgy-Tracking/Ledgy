@@ -1,0 +1,11 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -107,7 +107,7 @@
+         const props = createMockProps({
+             fromX: 10,
+             fromY: 20,
+-            connectionStatus: 'default'
++            connectionStatus: 'default' as any
+         });
+
+         const { container } = render(

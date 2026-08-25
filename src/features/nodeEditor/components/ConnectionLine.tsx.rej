@@ -1,0 +1,20 @@
+--- src/features/nodeEditor/components/ConnectionLine.tsx
++++ src/features/nodeEditor/components/ConnectionLine.tsx
+@@ -23,7 +23,7 @@
+  * Extended props interface for our custom ConnectionLine.
+  */
+ export interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
+-    connectionStatus?: 'valid' | 'invalid' | null;
++    connectionStatus?: 'valid' | 'invalid' | null | 'default';
+ }
+
+ /**
+@@ -79,10 +79,10 @@
+     toY,
+     connectionStatus,
+     connectionLineStyle,
+-    connectionLineType,
++    connectionLineType: _connectionLineType,
+     fromNode: _fromNode,
+     fromHandle: _fromHandle,
+ }: ExtendedConnectionLineProps) => {

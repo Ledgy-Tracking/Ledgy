@@ -1,0 +1,53 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -665,15 +665,15 @@
+                 onNodesChange={onNodesChange}
+                 edges={edges}
+                 onEdgesChange={onEdgesChange}
+                 onConnect={onConnect}
+-                onConnectStart={onConnectStart}
++                onConnectStart={onConnectStart as any}
+                 onConnectEnd={onConnectEnd}
+                 onSelectionChange={handleSelectionChange}
+                 isValidConnection={isValidConnection}
+                 nodeTypes={nodeTypes}
+                 edgeTypes={edgeTypes}
+                 defaultEdgeOptions={defaultEdgeOptions}
+-                connectionLineComponent={ConnectionLine}
++                connectionLineComponent={ConnectionLine as any}
+                 fitView
+                 selectionOnDrag={true}
+                 selectionKeyCode={['Shift']}
+                 className="bg-white dark:bg-zinc-950"
+             >
+                 <Background />
+                 <Controls />
+                 <MiniMap />
+             </ReactFlow>
+
+             {/* Read-only view for Party Mode */}
+             <div className="hidden">
+                 <ReactFlow
+                     nodes={nodes}
+                     edges={edges}
+                     onNodesChange={onNodesChange}
+                     onEdgesChange={onEdgesChange}
+                     onConnect={onConnect}
+-                    onConnectStart={onConnectStart}
++                    onConnectStart={onConnectStart as any}
+                     onConnectEnd={onConnectEnd}
+                     onSelectionChange={handleSelectionChange}
+                     isValidConnection={isValidConnection}
+                     nodeTypes={nodeTypes}
+                     edgeTypes={edgeTypes}
+                     defaultEdgeOptions={defaultEdgeOptions}
+-                    connectionLineComponent={ConnectionLine}
++                    connectionLineComponent={ConnectionLine as any}
+                     fitView
+                     selectionOnDrag={true}
+                     selectionKeyCode={['Shift']}
+                     className="bg-white dark:bg-zinc-950"
+                 >
+                     <Background />
+                 </ReactFlow>
+             </div>

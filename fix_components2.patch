@@ -1,0 +1,74 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -7,7 +7,6 @@
+ import { describe, it, expect } from 'vitest';
+ import { render } from '@testing-library/react';
+ import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
+ import type { ConnectionLineComponentProps } from '@xyflow/react';
+-import React from 'react';
+
+ // Mock props for testing
+ const createMockProps = (
+@@ -17,9 +16,9 @@
+     fromX: 100,
+     fromY: 100,
+     toX: 300,
+     toY: 200,
+-    fromPosition: undefined,
+-    toPosition: undefined,
+-    connectionLineType: undefined,
+-    connectionStatus: 'default',
++    fromPosition: undefined as any,
++    toPosition: undefined as any,
++    connectionLineType: undefined as any,
++    connectionStatus: 'default' as any,
+     ...overrides
+ });
+
+@@ -33,7 +32,7 @@
+         const props = createMockProps({
+             fromX: 0,
+             fromY: 0,
+-            connectionStatus: 'default'
++            connectionStatus: 'default' as any
+         });
+
+         const { container } = render(
+@@ -89,7 +88,7 @@
+         const props = createMockProps({
+             fromX: 10,
+             fromY: 20,
+-            connectionStatus: 'default'
++            connectionStatus: 'default' as any
+         });
+
+         const { container } = render(
+@@ -105,7 +104,7 @@
+         const props = createMockProps({
+             fromX: 10,
+             fromY: 20,
+-            connectionStatus: 'default'
++            connectionStatus: 'default' as any
+         });
+
+         const { container } = render(
+--- src/features/nodeEditor/components/ConnectionLine.tsx
++++ src/features/nodeEditor/components/ConnectionLine.tsx
+@@ -23,7 +23,7 @@
+  * Extended props interface for our custom ConnectionLine.
+  */
+ export interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
+-    connectionStatus?: 'valid' | 'invalid' | null;
++    connectionStatus?: 'valid' | 'invalid' | null | 'default';
+ }
+
+ /**
+@@ -79,10 +79,10 @@
+     toY,
+     connectionStatus,
+     connectionLineStyle,
+-    connectionLineType,
++    connectionLineType: _connectionLineType,
+     fromNode: _fromNode,
+     fromHandle: _fromHandle,
+ }: ExtendedConnectionLineProps) => {

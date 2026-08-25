@@ -1,0 +1,11 @@
+--- NodeCanvas.tsx
++++ NodeCanvas.tsx
+@@ -714,7 +714,7 @@
+                     onNodesChange={onNodesChange}
+                     edges={edges}
+                     onEdgesChange={onEdgesChange}
+                     onConnect={onConnect}
+-                    onConnectStart={onConnectStart}
++                    onConnectStart={onConnectStart as any}
+                     onConnectEnd={onConnectEnd}
+                     onSelectionChange={handleSelectionChange}
