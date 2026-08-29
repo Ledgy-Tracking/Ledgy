@@ -1,0 +1,12 @@
+--- src/features/nodeEditor/components/ConnectionLine.tsx
++++ src/features/nodeEditor/components/ConnectionLine.tsx
+@@ -81,3 +81,3 @@
+     toY,
+-    connectionLineType,
++    connectionLineType: _connectionLineType,
+     connectionStatus = 'default',
+-    fromNode,
+-    fromHandle,
++    fromNode: _fromNode,
++    fromHandle: _fromHandle,
+     sourceDirection = 'right'

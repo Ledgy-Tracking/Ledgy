@@ -1,7 +1,7 @@
 /**
  * Custom Connection Line Component
  * Story 4-7: Complex Edge Connection Snapping (AC2, AC3)
- * 
+ *
  * Implements:
  * - Custom connection line during edge drag
  * - Bezier curves for smooth connections
@@ -70,7 +70,7 @@ const getConnectionStyles = (status: ConnectionStatus) => {
 
 /**
  * Custom Connection Line Component
- * 
+ *
  * Renders during edge drag operations to show the potential connection.
  * Uses cubic Bezier curves for smooth, professional appearance.
  */
@@ -81,8 +81,8 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     toY,
     connectionLineType: _connectionLineType,
     connectionStatus = 'default',
-    fromNode: _fromNode,
-    fromHandle: _fromHandle,
+    fromNode,
+    fromHandle,
     sourceDirection = 'right'
 }) => {
     // Calculate Bezier path using actual handle direction
@@ -115,8 +115,8 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     }, [connectionStatus]);
 
     return (
-        <g 
-            data-testid="connection-line" 
+        <g
+            data-testid="connection-line"
             data-connection-status={connectionStatus}
             className="react-flow__connection-line"
             role="img"
@@ -131,14 +131,14 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
                 strokeDasharray={styles.strokeDasharray}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ 
+                style={{
                     filter: styles.filter,
                     transition: 'stroke 150ms ease, stroke-width 150ms ease'
                 }}
                 data-testid="connection-line-path"
                 className={styles.className}
             />
-            
+
             {/* Animated glow overlay for valid connections */}
             {showGlow && (
                 <path
@@ -154,9 +154,9 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
 
             {/* ARIA live region for status announcements */}
             <foreignObject width={0} height={0}>
-                <Toast 
-                    role="status" 
-                    aria-live="polite" 
+                <Toast
+                    role="status"
+                    aria-live="polite"
                     aria-atomic="true"
                     className="sr-only"
                 >
@@ -198,7 +198,7 @@ export const ConnectionLineWithStatus: React.FC<ExtendedConnectionLineProps & {
     return (
         <>
             <ConnectionLine {...props} />
-            
+
             {/* Status message tooltip */}
             {statusMessage && (
                 <foreignObject
@@ -211,8 +211,8 @@ export const ConnectionLineWithStatus: React.FC<ExtendedConnectionLineProps & {
                     <div
                         className={`
                             inline-block px-2 py-1 rounded text-xs font-medium
-                            ${connectionStatus === 'valid' 
-                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                            ${connectionStatus === 'valid'
+                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                 : connectionStatus === 'invalid'
                                     ? 'bg-red-100 text-red-800 border border-red-300'
                                     : 'bg-zinc-100 text-zinc-800 border border-zinc-300'

@@ -1,0 +1,16 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -34,3 +34,3 @@
+ import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+-import { getTypeDisplayName } from './utils/typeUtils';
++// import { getTypeDisplayName } from './utils/typeUtils';
+ import { UndoRedoControls } from './components/UndoRedoControls';
+@@ -44,3 +44,3 @@
+     const { edges, setEdges, updateEdgeData } = useEdgeStore();
+-    const { subscribeNode, unsubscribeNode } = useLiveQueryStore();
++    const { subscribeNode } = useLiveQueryStore();
+
+@@ -324,3 +324,3 @@
+     const snapGrid: [number, number] = [GRID_SIZE, GRID_SIZE];
+-    const schemas = useSchemaBuilderStore(state => state.schemas);
++    // const schemas = useSchemaBuilderStore(state => state.schemas);

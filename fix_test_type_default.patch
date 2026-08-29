@@ -1,0 +1,17 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -35,3 +35,3 @@
+     it('should render with default status', () => {
+-        const props = createMockProps({ connectionStatus: 'default' });
++        const props = createMockProps({ connectionStatus: 'default' as any });
+         const { container } = render(<ConnectionLine {...props} />);
+@@ -91,3 +91,3 @@
+     it('should render tooltip with message and correct status style', () => {
+-        const props = createMockProps({ connectionStatus: 'default' });
++        const props = createMockProps({ connectionStatus: 'default' as any });
+         const { container, getByText } = render(
+@@ -107,3 +107,3 @@
+     it('should not render tooltip without status message', () => {
+-        const props = createMockProps({ connectionStatus: 'default' });
++        const props = createMockProps({ connectionStatus: 'default' as any });
+         const { container } = render(
