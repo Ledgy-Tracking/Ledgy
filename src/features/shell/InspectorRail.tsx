@@ -9,6 +9,7 @@ export const InspectorRail = () => {
 
     return (
         <aside
+            id="right-inspector"
             className={`
                 flex flex-col border-l border-white/5
                 bg-gray-50 dark:bg-zinc-900/50 backdrop-blur-xl
@@ -30,6 +31,8 @@ export const InspectorRail = () => {
                     size="icon-xs"
                     className="text-zinc-400"
                     aria-label="Collapse inspector"
+                    aria-expanded={inspectorOpen}
+                    aria-controls="right-inspector"
                 >
                     <ChevronRight className="w-4 h-4" />
                 </Button>
@@ -64,6 +67,8 @@ export const InspectorRail = () => {
                     size="icon-sm"
                     className="rounded-full bg-gray-50 dark:bg-zinc-900 border border-white/10 shadow-md text-zinc-400"
                     aria-label="Expand inspector"
+                    aria-expanded={inspectorOpen}
+                    aria-controls="right-inspector"
                 >
                     <ChevronLeft className="w-4 h-4" />
                 </Button>
