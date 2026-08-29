@@ -1,0 +1,18 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -36,7 +36,7 @@
+     it('renders red connection line when status is invalid', () => {
+-        render(<ConnectionLine {...createMockProps({ connectionStatus: 'invalid' })} />);
++        render(<ConnectionLine {...createMockProps({ connectionStatus: 'invalid' as any })} />);
+
+         const path = screen.getByTestId('connection-line-path');
+         expect(path).toHaveStyle({ stroke: '#ef4444' });
+     });
+
+     it('renders standard connection line when status is default', () => {
+-        render(<ConnectionLine {...createMockProps({ connectionStatus: 'default' })} />);
++        render(<ConnectionLine {...createMockProps({ connectionStatus: 'default' as any })} />);
+
+         const path = screen.getByTestId('connection-line-path');
+         expect(path).toHaveStyle({ stroke: '#a1a1aa' });
+     });

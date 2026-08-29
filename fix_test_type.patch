@@ -1,0 +1,11 @@
+--- src/features/nodeEditor/components/ConnectionLine.test.tsx
++++ src/features/nodeEditor/components/ConnectionLine.test.tsx
+@@ -19,7 +19,7 @@
+     toY: 200,
+     fromPosition: Position.Right,
+     toPosition: Position.Left,
+-    connectionLineType: ConnectionLineType.Default,
++    connectionLineType: ConnectionLineType.SmoothStep,
+     connectionStatus: 'default' as any,
+     ...overrides
+ } as any);

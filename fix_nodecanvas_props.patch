@@ -1,0 +1,20 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -681,7 +681,7 @@
+                 isValidConnection={isValidConnection}
+                 nodeTypes={nodeTypes}
+                 edgeTypes={edgeTypes}
+-                connectionLineComponent={ConnectionLine as any}
++                connectionLineComponent={ConnectionLine}
+                 connectionRadius={CONNECTION_RADIUS} // From AC3 snap threshold
+                 snapToGrid={snapToGrid}
+                 snapGrid={snapGrid}
+@@ -732,7 +732,7 @@
+                 onSelectionChange={handleSelectionChange}
+                 nodeTypes={nodeTypes}
+                 edgeTypes={edgeTypes}
+-                connectionLineComponent={ConnectionLine as any}
++                connectionLineComponent={ConnectionLine}
+                 connectionRadius={CONNECTION_RADIUS} // Consistent with non-party mode
+                 snapToGrid={snapToGrid}
+                 snapGrid={snapGrid}

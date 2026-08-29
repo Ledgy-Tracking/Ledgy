@@ -1,0 +1,18 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -34,3 +34,3 @@
+ import { useNodeKeyboardShortcuts } from './hooks/useNodeKeyboardShortcuts';
+-import { isTypeCompatible, getTypeDisplayName } from './types/port';
++import { isTypeCompatible } from './types/port';
+ import { getPortTypeFromHandle } from './utils/getPortTypeFromHandle';
+@@ -44,3 +44,3 @@
+ import { setupSchemaChangeSubscription } from './utils/schemaChangeHandler';
+-import { unsubscribeAll, unsubscribeNode, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
++import { unsubscribeAll, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
+ import { logSubscriptionCount, logHydrationSummary } from './utils/performanceMonitor';
+@@ -324,3 +324,3 @@
+         const unsubscribeStore = useNodeStore.subscribe(
+-            (state) => state.schemas,
+-            (schemas) => {
++            (state) => state.schemas,
++            (_schemas) => {

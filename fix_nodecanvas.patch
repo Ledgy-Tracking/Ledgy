@@ -1,0 +1,20 @@
+--- src/features/nodeEditor/NodeCanvas.tsx
++++ src/features/nodeEditor/NodeCanvas.tsx
+@@ -392,12 +392,10 @@
+
+     // Story 4-8: Track connection start for rejection detection
+-    const onConnectStart = useCallback(({
+-        handleId,
+-        nodeId,
+-    }: {
+-        handleId: string | null;
+-        nodeId: string;
+-    }) => {
++    const onConnectStart = useCallback((
++        _: any,
++        params: { handleId: string | null; nodeId: string | null; handleType: string | null }
++    ) => {
++        const { handleId, nodeId } = params;
++        if (!nodeId) return;
+         connectionAttemptRef.current = {
+             isConnecting: true,
