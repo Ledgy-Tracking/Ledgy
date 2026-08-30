@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-10-27 - React Flow Viewport Debouncing Anti-Pattern
+**Learning:** Replacing a synchronous `useMemo` calculation (like `visibleHandles`) that depends on a high-frequency `useStore` hook (like `s.transform`) with a combination of `useState` and `useEffect` creates a derived state anti-pattern, causing unnecessary double renders and one-frame sync delays.
+**Action:** When needing to debounce viewport calculations to avoid 60fps renders, keep the derived data in `useMemo`. Use `useOnViewportChange({ onEnd: () => setViewportCounter(c => c + 1) })` to increment a dummy state counter, and add that counter to the `useMemo` dependency array instead of the raw viewport value.
