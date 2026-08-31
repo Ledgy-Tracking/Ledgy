@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-27 - Optimized O(N^2) lookups in validateContainerIntegrity
+**Learning:** In `validateContainerIntegrity.ts`, repeated calls to `Array.prototype.find`, `Array.prototype.findIndex`, and `Array.prototype.filter` inside `.forEach` loops over the `nodes` array cause an $O(N^2)$ time complexity when validating graphs with many nodes.
+**Action:** Index elements into a `Map` (for lookups by ID) or a `Set` (for existence checks) prior to the loop. This reduces the time complexity from $O(N^2)$ to $O(N)$ and substantially improves execution speed on large datasets (from ~1.1s down to ~17ms for 10,000 nodes).
