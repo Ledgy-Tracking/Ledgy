@@ -174,6 +174,7 @@ export const AppShell: React.FC = () => {
             )}
             <div className="relative z-10 flex flex-1 overflow-hidden">{/* Left Sidebar */}
                 <aside
+                    id="app-left-sidebar"
                     className={`flex flex-col bg-white dark:bg-zinc-900/50 backdrop-blur-xl border-r border-zinc-200 dark:border-white/5 transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${leftSidebarOpen ? 'w-64' : 'w-12'
                         }`}
                 >
@@ -398,6 +399,8 @@ export const AppShell: React.FC = () => {
                                             size="icon"
                                             onClick={toggleLeftSidebar}
                                             aria-label={leftSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                                            aria-expanded={leftSidebarOpen}
+                                            aria-controls="app-left-sidebar"
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             {leftSidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
@@ -457,6 +460,8 @@ export const AppShell: React.FC = () => {
                                             size="icon"
                                             onClick={toggleRightInspector}
                                             aria-label={rightInspectorOpen ? 'Close inspector' : 'Open inspector'}
+                                            aria-expanded={rightInspectorOpen}
+                                            aria-controls="app-right-inspector"
                                             className="border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                         >
                                             <PanelRightClose size={18} className={rightInspectorOpen ? '' : 'rotate-180'} />
@@ -484,6 +489,7 @@ export const AppShell: React.FC = () => {
 
                 {/* Right Inspector Panel */}
                 <div
+                    id="app-right-inspector"
                     className={`h-full border-l border-zinc-200 dark:border-zinc-200 dark:border-zinc-800 transition-all duration-300 ease-in-out shrink-0 overflow-hidden ${rightInspectorOpen ? 'w-80' : 'w-0 border-l-0'
                         }`}
                 >
