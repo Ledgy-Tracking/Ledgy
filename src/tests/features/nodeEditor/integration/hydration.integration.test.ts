@@ -23,6 +23,7 @@ import {
   handleSchemaChangeForNodes,
   SchemaChangeType,
 } from '../../../../features/nodeEditor/utils/schemaChangeHandler';
+import { v4 as uuidv4 } from 'uuid';
 import { getProfileDb } from '@/lib/db';
 import { useProfileStore } from '@/stores/useProfileStore';
 import { useNodeStore } from '@/stores/useNodeStore';
@@ -79,7 +80,7 @@ const TEST_SCHEMA = [
 
 function makeMockDoc(overrides: Record<string, any> = {}) {
   return {
-    _id: `entry:${Math.random().toString(36).slice(2)}`,
+    _id: `entry:${uuidv4()}`,
     type: 'entry',
     ledgerId: TEST_LEDGER_ID,
     data: { name: 'Alice', amount: 100 },
