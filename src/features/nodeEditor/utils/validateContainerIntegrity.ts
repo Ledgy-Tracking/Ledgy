@@ -107,13 +107,20 @@ export const validateContainerIntegrity = (
             if (!data || typeof data !== 'object') {
                 errors.push(`Container ${node.id} has invalid data structure`);
                 // Auto-repair: set default data
+                const childNodeIds: string[] = [];
+                for (let i = 0; i < nodes.length; i++) {
+                    if (nodes[i].parentId === node.id) {
+                        childNodeIds.push(nodes[i].id);
+                    }
+                }
+
                 repaired[index] = {
                     ...node,
                     data: {
                         type: 'container',
                         label: 'Group',
                         isCollapsed: false,
-                        childNodeIds: nodes.filter(n => n.parentId === node.id).map(n => n.id),
+                        childNodeIds,
                         createdAt: new Date().toISOString(),
                     },
                 };

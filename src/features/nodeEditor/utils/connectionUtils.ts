@@ -10,6 +10,19 @@ export interface PortPosition {
 }
 
 /**
+ * Get all child node IDs for a given container ID in a single pass
+ */
+const getChildIds = (nodes: Node[], containerId: string): string[] => {
+    const childIds: string[] = [];
+    for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].parentId === containerId) {
+            childIds.push(nodes[i].id);
+        }
+    }
+    return childIds;
+};
+
+/**
  * Check if a connection is internal (both ends in the same container)
  */
 export const isInternalConnection = (
@@ -20,9 +33,7 @@ export const isInternalConnection = (
     const container = nodes.find(n => n.id === containerId);
     if (!container?.data?.childNodeIds) {
         // Fallback: use parentId (React Flow v12)
-        const childIds = new Set(
-            nodes.filter(n => n.parentId === containerId).map(n => n.id)
-        );
+        const childIds = new Set(getChildIds(nodes, containerId));
         return childIds.has(edge.source) && childIds.has(edge.target);
     }
     
@@ -48,9 +59,7 @@ export const isExternalConnection = (
         childIds = new Set(container.data.childNodeIds as string[]);
     } else {
         // Fallback: use parentId (React Flow v12)
-        childIds = new Set(
-            nodes.filter(n => n.parentId === containerId).map(n => n.id)
-        );
+        childIds = new Set(getChildIds(nodes, containerId));
     }
     
     const sourceIn = childIds.has(edge.source);
@@ -76,9 +85,7 @@ export const getInternalConnections = (
         childIds = new Set(rawChildIds);
     } else {
         // Fallback: use parentId (React Flow v12)
-        childIds = new Set(
-            nodes.filter(n => n.parentId === containerId).map(n => n.id)
-        );
+        childIds = new Set(getChildIds(nodes, containerId));
     }
     
     return edges.filter(
@@ -213,9 +220,7 @@ const getAllDescendants = (
     nodes: Node[]
 ): string[] => {
     // React Flow v12 uses parentId
-    const directChildren = nodes
-        .filter(n => n.parentId === containerId)
-        .map(n => n.id);
+    const directChildren = getChildIds(nodes, containerId);
     
     const allDescendants = [...directChildren];
     
