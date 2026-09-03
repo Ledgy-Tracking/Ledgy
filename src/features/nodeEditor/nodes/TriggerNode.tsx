@@ -130,6 +130,7 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
                                     ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white'
                                     : 'text-zinc-400'
                                 }
+                                aria-pressed={nodeData.eventType === 'on-create'}
                             >
                                 On Create
                             </Button>
@@ -141,6 +142,7 @@ export const TriggerNode: React.FC<NodeProps> = React.memo(({ id, data, selected
                                     ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white'
                                     : 'text-zinc-400'
                                 }
+                                aria-pressed={nodeData.eventType === 'on-edit'}
                             >
                                 On Edit
                             </Button>
