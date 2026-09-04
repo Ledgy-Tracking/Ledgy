@@ -45,6 +45,7 @@ import { setupSchemaChangeSubscription } from './utils/schemaChangeHandler';
 import { unsubscribeAll, unsubscribeNode, getActiveSubscriptionCount, getTotalConsumerCount } from './utils/subscriptionRegistry';
 import { logSubscriptionCount, logHydrationSummary } from './utils/performanceMonitor';
 import { useLedgerStore } from '../../stores/useLedgerStore';
+import { v4 as uuidv4 } from 'uuid';
 
 // --- STABLE CONFIGURATION (Outside component to prevent re-renders) ---
 
@@ -574,11 +575,7 @@ const generateNodeId = (): string => {
         // crypto.randomUUID may throw in insecure contexts
     }
     // Fallback: generate UUID v4 manually
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+    return uuidv4();
 };
 
     const handleAddFirstNode = useCallback(() => {
