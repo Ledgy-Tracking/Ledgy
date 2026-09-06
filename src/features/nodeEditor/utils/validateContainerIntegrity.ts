@@ -25,10 +25,26 @@ export const validateContainerIntegrity = (
     const errors: string[] = [];
     let repaired = [...nodes];
     
+    // ⚡ Bolt: Pre-compute maps for O(1) lookups inside loops
+    const nodeMap = new Map(nodes.map(n => [n.id, n]));
+
+    const childrenByParent = new Map<string, string[]>();
+    for (let i = 0; i < nodes.length; i++) {
+        const n = nodes[i];
+        if (n.parentId) {
+            let children = childrenByParent.get(n.parentId);
+            if (!children) {
+                children = [];
+                childrenByParent.set(n.parentId, children);
+            }
+            children.push(n.id);
+        }
+    }
+
     // 1. Check for orphaned children (React Flow v12 uses parentId)
     repaired.forEach((node, index) => {
         if (node.parentId) {
-            const parent = nodes.find(n => n.id === node.parentId);
+            const parent = nodeMap.get(node.parentId);
             if (!parent) {
                 errors.push(`Orphaned child: ${node.id} references missing parent ${node.parentId}`);
                 // Auto-repair: clear parentId
@@ -44,7 +60,7 @@ export const validateContainerIntegrity = (
             const rawChildIds = node.data.childNodeIds;
             const childNodeIds: string[] = Array.isArray(rawChildIds) ? rawChildIds : [];
             const missingChildren = childNodeIds.filter(
-                childId => !nodes.find(n => n.id === childId)
+                childId => !nodeMap.has(childId)
             );
             
             if (missingChildren.length > 0) {
@@ -78,25 +94,26 @@ export const validateContainerIntegrity = (
     });
     
     // 3. Prevent circular references
+    // ⚡ Bolt: Pre-compute repaired map for efficient circular ref checks
+    const repairedMap = new Map(repaired.map(n => [n.id, n]));
     const hasCircularRef = (nodeId: string, visited = new Set<string>()): boolean => {
         if (visited.has(nodeId)) return true;
         visited.add(nodeId);
-        const node = repaired.find(n => n.id === nodeId);
+        const node = repairedMap.get(nodeId);
         if (node?.parentId) {
             return hasCircularRef(node.parentId, visited);
         }
         return false;
     };
     
-    repaired.forEach(node => {
+    repaired.forEach((node, index) => {
         if (node.parentId && hasCircularRef(node.id)) {
             errors.push(`Circular reference detected: ${node.id}`);
             // Auto-repair: clear parentId
-            const index = repaired.findIndex(n => n.id === node.id);
-            if (index !== -1) {
-                const { parentId: _, extent: __, ...rest } = node;
-                repaired[index] = rest as Node;
-            }
+            const { parentId: _, extent: __, ...rest } = node;
+            repaired[index] = rest as Node;
+            // Update repairedMap to reflect the change for subsequent checks
+            repairedMap.set(node.id, rest as Node);
         }
     });
     
@@ -113,7 +130,7 @@ export const validateContainerIntegrity = (
                         type: 'container',
                         label: 'Group',
                         isCollapsed: false,
-                        childNodeIds: nodes.filter(n => n.parentId === node.id).map(n => n.id),
+                        childNodeIds: childrenByParent.get(node.id) || [],
                         createdAt: new Date().toISOString(),
                     },
                 };

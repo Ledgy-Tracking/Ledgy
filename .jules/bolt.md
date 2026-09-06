@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-27 - Pre-compute Maps for efficient lookups inside loops
+**Learning:** In `validateContainerIntegrity`, repeatedly calling `Array.prototype.find` (O(N)) inside a `.forEach` loop resulted in O(N^2) time complexity. For a large number of nodes, this becomes a significant bottleneck.
+**Action:** Always pre-compute a `Map` of nodes by `id` (e.g., `const nodeMap = new Map(nodes.map(n => [n.id, n]));`) before iterating, reducing lookup complexity from O(N) to O(1) inside loops.
