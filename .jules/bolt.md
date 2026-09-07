@@ -36,3 +36,7 @@
 ## 2024-05-27 - Replace nested .find() in .map() with Map in Zustand store
 **Learning:** Using `Array.prototype.find` inside a `.map` loop to update arrays of nodes results in O(N*M) time complexity. In `useNodeStore.ts`, this was causing significant slowdowns when grouping or ungrouping large numbers of nodes.
 **Action:** Always pre-index the smaller or lookup array into a `Map` keyed by identifier before iterating over the larger array. This reduces the lookup time to O(1), bringing the total time complexity down from O(N*M) to O(N+M), significantly improving responsiveness on large canvases.
+
+## 2024-05-27 - Safely Type Casting React Flow Node Results
+**Learning:** When using generalized React Flow utilities (like `groupNodesUtil`) that return the generic `Node` interface, trying to store those results into a strictly typed array like `CanvasNode[]` causes compiler failures.
+**Action:** Always explicitly type cast utility return values (e.g., `container as CanvasNode`) when merging generalized `Node` objects back into strongly-typed `CanvasNode` Zustand arrays.

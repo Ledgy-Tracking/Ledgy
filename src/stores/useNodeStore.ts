@@ -412,8 +412,8 @@ export const useNodeStore = create<NodeState>()(
 
             // Replace updated children and add container
             const newNodes = state.nodes.map(n => {
-                return updatedMap.get(n.id) || n;
-            }).concat(container);
+                return (updatedMap.get(n.id) as CanvasNode) || n;
+            }).concat(container as CanvasNode);
             
             set({ nodes: newNodes });
             get().debouncedSaveCanvas();
@@ -427,8 +427,8 @@ export const useNodeStore = create<NodeState>()(
             
             if (!result) return;
             
-            const { restoredNodes, childNodeIds } = result;
-            
+            const { restoredNodes } = result;
+
             // ⚡ Bolt: Replace O(N*M) array search with O(1) map lookup
             const restoredMap = new Map(restoredNodes.map(r => [r.id, r]));
 
@@ -436,7 +436,7 @@ export const useNodeStore = create<NodeState>()(
             const newNodes = state.nodes
                 .filter(n => n.id !== containerId)
                 .map(n => {
-                    return restoredMap.get(n.id) || n;
+                    return (restoredMap.get(n.id) as CanvasNode) || n;
                 });
             
             set({ nodes: newNodes });
