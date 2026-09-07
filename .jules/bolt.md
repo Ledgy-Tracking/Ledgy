@@ -40,3 +40,7 @@
 ## 2024-05-27 - Safely Type Casting React Flow Node Results
 **Learning:** When using generalized React Flow utilities (like `groupNodesUtil`) that return the generic `Node` interface, trying to store those results into a strictly typed array like `CanvasNode[]` causes compiler failures.
 **Action:** Always explicitly type cast utility return values (e.g., `container as CanvasNode`) when merging generalized `Node` objects back into strongly-typed `CanvasNode` Zustand arrays.
+
+## 2024-05-27 - Unused variables break strict TS CI checks
+**Learning:** The project's TypeScript configuration enforces `noUnusedLocals` (TS6133). When destructuring objects or refactoring code (like optimizing array lookups), leaving unused local variables behind will cause the GitHub CI Check Suite to fail.
+**Action:** Always verify that newly created variables and leftover destructured variables are actively used. If they are no longer needed after a refactor, delete them entirely to ensure `tsc` passes.
