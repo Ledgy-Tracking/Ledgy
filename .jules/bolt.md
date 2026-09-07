@@ -32,3 +32,15 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-27 - Replace nested .find() in .map() with Map in Zustand store
+**Learning:** Using `Array.prototype.find` inside a `.map` loop to update arrays of nodes results in O(N*M) time complexity. In `useNodeStore.ts`, this was causing significant slowdowns when grouping or ungrouping large numbers of nodes.
+**Action:** Always pre-index the smaller or lookup array into a `Map` keyed by identifier before iterating over the larger array. This reduces the lookup time to O(1), bringing the total time complexity down from O(N*M) to O(N+M), significantly improving responsiveness on large canvases.
+
+## 2024-05-27 - Safely Type Casting React Flow Node Results
+**Learning:** When using generalized React Flow utilities (like `groupNodesUtil`) that return the generic `Node` interface, trying to store those results into a strictly typed array like `CanvasNode[]` causes compiler failures.
+**Action:** Always explicitly type cast utility return values (e.g., `container as CanvasNode`) when merging generalized `Node` objects back into strongly-typed `CanvasNode` Zustand arrays.
+
+## 2024-05-27 - Unused variables break strict TS CI checks
+**Learning:** The project's TypeScript configuration enforces `noUnusedLocals` (TS6133). When destructuring objects or refactoring code (like optimizing array lookups), leaving unused local variables behind will cause the GitHub CI Check Suite to fail.
+**Action:** Always verify that newly created variables and leftover destructured variables are actively used. If they are no longer needed after a refactor, delete them entirely to ensure `tsc` passes.
