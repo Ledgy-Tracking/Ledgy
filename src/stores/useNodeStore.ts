@@ -407,10 +407,12 @@ export const useNodeStore = create<NodeState>()(
             
             const { container, updatedChildren } = result;
             
+            // ⚡ Bolt: Replace O(N*M) array search with O(1) map lookup
+            const updatedMap = new Map(updatedChildren.map(u => [u.id, u]));
+
             // Replace updated children and add container
             const newNodes = state.nodes.map(n => {
-                const updated = updatedChildren.find(u => u.id === n.id);
-                return updated || n;
+                return updatedMap.get(n.id) || n;
             }).concat(container);
             
             set({ nodes: newNodes });
@@ -427,12 +429,14 @@ export const useNodeStore = create<NodeState>()(
             
             const { restoredNodes, childNodeIds } = result;
             
+            // ⚡ Bolt: Replace O(N*M) array search with O(1) map lookup
+            const restoredMap = new Map(restoredNodes.map(r => [r.id, r]));
+
             // Remove container and update children
             const newNodes = state.nodes
                 .filter(n => n.id !== containerId)
                 .map(n => {
-                    const restored = restoredNodes.find(r => r.id === n.id);
-                    return restored || n;
+                    return restoredMap.get(n.id) || n;
                 });
             
             set({ nodes: newNodes });
