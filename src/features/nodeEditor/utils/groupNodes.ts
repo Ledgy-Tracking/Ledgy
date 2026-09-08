@@ -1,5 +1,5 @@
 import { Node } from '@xyflow/react';
-import { nanoid } from 'nanoid';
+import { v4 as uuidv4 } from 'uuid';
 import { useErrorStore } from '../../../stores/useErrorStore';
 
 /**
@@ -26,15 +26,38 @@ export interface GroupCreationResult {
  * Calculate bounding box of nodes
  */
 export const calculateBoundingBox = (nodes: Node[]): ContainerBounds => {
-    const xs = nodes.map(n => n.position.x);
-    const ys = nodes.map(n => n.position.y);
-    const widths = nodes.map(n => (n.width || 150));
-    const heights = nodes.map(n => (n.height || 100));
-    
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs.map((x, i) => x + widths[i]));
-    const maxY = Math.max(...ys.map((y, i) => y + heights[i]));
+    // ⚡ Bolt: Replaced chained .map() and spread operators with a single-pass loop
+    // to avoid O(N) intermediate array allocations and prevent "Maximum call stack size exceeded" errors
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const x = node.position.x;
+        const y = node.position.y;
+
+        if (Number.isNaN(x) || Number.isNaN(y)) {
+            minX = NaN;
+            minY = NaN;
+            maxX = NaN;
+            maxY = NaN;
+            break;
+        }
+
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+
+        const w = node.width || 150;
+        const h = node.height || 100;
+
+        const right = x + w;
+        const bottom = y + h;
+
+        if (right > maxX) maxX = right;
+        if (bottom > maxY) maxY = bottom;
+    }
     
     return {
         minX,
@@ -108,7 +131,7 @@ export const createContainerFromSelection = (
     const bounds = calculateBoundingBox(selectedNodes);
     
     // Create container node
-    const containerId = `container_${nanoid(6)}`;
+    const containerId = `container_${uuidv4()}`;
     const container: Node = {
         id: containerId,
         type: 'container',
