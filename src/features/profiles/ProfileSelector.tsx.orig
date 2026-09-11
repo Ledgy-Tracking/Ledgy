@@ -137,7 +137,7 @@ export const ProfileSelector: React.FC = () => {
                 onClick={toggleTheme}
                 variant="outline"
                 size="icon"
-                aria-label="Toggle dark mode"
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                 aria-pressed={theme === 'dark'}
                 className="absolute top-8 right-8 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-emerald-500 dark:hover:text-emerald-400 hover:border-emerald-500/50 focus:ring-emerald-500/50"
             >
@@ -222,7 +222,7 @@ export const ProfileSelector: React.FC = () => {
                             Create a new profile to organize your data
                         </DialogDescription>
                     </DialogHeader>
-                    
+
                     <Form {...createForm} onSubmit={createForm.handleSubmit(handleConfirmCreate)}>
                             <div className="space-y-4 mb-6">
                                 <FormField
@@ -289,8 +289,8 @@ export const ProfileSelector: React.FC = () => {
             </Dialog>
 
             {/* Delete Profile Dialog */}
-            <Dialog 
-                open={!!deleteProfileId && !!profileToDelete} 
+            <Dialog
+                open={!!deleteProfileId && !!profileToDelete}
                 onOpenChange={(open) => !open && !isDeleting && handleCancelDelete()}
             >
                 <DialogContent className="max-w-md">
