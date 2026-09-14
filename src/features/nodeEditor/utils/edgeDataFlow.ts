@@ -1,5 +1,5 @@
 import { useNodeStore } from '../../../stores/useNodeStore';
-import { CanvasNode, CanvasEdge } from '../../../types/nodeEditor';
+import { CanvasNode } from '../../../types/nodeEditor';
 
 /**
  * Get the current output data from a source node
@@ -163,14 +163,22 @@ export function setupNodeDataChangeSubscription(): () => void {
     const unsubscribe = useNodeStore.subscribe(
         (state) => state.nodes, // Select only nodes array
         (currentNodes, previousNodes) => {
-            // Find nodes whose data has changed
-            const changedNodes = currentNodes.filter(currentNode => {
-                const previousNode = previousNodes.find(p => p.id === currentNode.id);
-                if (!previousNode) return false; // New node, not a change
+            // Index previous nodes into a Map for O(1) lookup to avoid O(N^2) complexity
+            const previousNodesMap = new Map();
+            for (let i = 0; i < previousNodes.length; i++) {
+                previousNodesMap.set(previousNodes[i].id, previousNodes[i]);
+            }
 
-                // Compare data objects (shallow comparison)
-                return JSON.stringify(currentNode.data) !== JSON.stringify(previousNode.data);
-            });
+            // Find nodes whose data has changed using a single-pass loop
+            const changedNodes: CanvasNode[] = [];
+            for (let i = 0; i < currentNodes.length; i++) {
+                const currentNode = currentNodes[i];
+                const previousNode = previousNodesMap.get(currentNode.id);
+
+                if (previousNode && JSON.stringify(currentNode.data) !== JSON.stringify(previousNode.data)) {
+                    changedNodes.push(currentNode);
+                }
+            }
 
             // Propagate changes for each modified node
             changedNodes.forEach(node => {
