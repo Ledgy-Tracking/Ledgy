@@ -12,6 +12,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { hydrateLedgerSourceNode } from '../../../../features/nodeEditor/hooks/useLedgerData';
 import { hydrateLedgerWithGhosts } from '../../../../features/nodeEditor/utils/ghostReference';
+import { v4 as uuidv4 } from 'uuid';
 import {
   subscribeToLedger,
   unsubscribeAll,
@@ -79,7 +80,7 @@ const TEST_SCHEMA = [
 
 function makeMockDoc(overrides: Record<string, any> = {}) {
   return {
-    _id: `entry:${Math.random().toString(36).slice(2)}`,
+    _id: `entry:${uuidv4()}`,
     type: 'entry',
     ledgerId: TEST_LEDGER_ID,
     data: { name: 'Alice', amount: 100 },
