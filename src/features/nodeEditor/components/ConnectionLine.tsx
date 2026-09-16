@@ -31,7 +31,7 @@ interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps,
 /**
  * Style configuration for different connection states
  */
-const getConnectionStyles = (status: ConnectionStatus) => {
+const getConnectionStyles = (status: ConnectionStatus | null) => {
     switch (status) {
         case 'snapped':
             return {
@@ -79,10 +79,7 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     fromY,
     toX,
     toY,
-    connectionLineType,
-    connectionStatus = 'default',
-    fromNode,
-    fromHandle,
+    connectionStatus = null,
     sourceDirection = 'right'
 }) => {
     // Calculate Bezier path using actual handle direction
