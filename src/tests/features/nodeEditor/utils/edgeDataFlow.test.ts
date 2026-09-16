@@ -457,7 +457,7 @@ describe('edgeDataFlow', () => {
 
         it('should propagate changes when node data changes', () => {
             const mockUnsubscribe = vi.fn();
-            (useNodeStore.subscribe as any).mockImplementation((selector, listener) => {
+            (useNodeStore.subscribe as any).mockImplementation((_selector: any, listener: any) => {
                 // Simulate calling the listener with changed nodes
                 const currentNodes = [
                     { id: 'node1', type: 'ledgerSource', data: { entries: [1, 2, 3] } }

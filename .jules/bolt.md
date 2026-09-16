@@ -32,3 +32,7 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+
+## 2024-05-28 - Optimize array diffs inside Zustand subscriptions
+**Learning:** Performing $O(N^2)$ array diffs (e.g., using `Array.prototype.find` inside `Array.prototype.filter`) within Zustand store subscriptions (like `useNodeStore.subscribe`) causes significant lag during high-frequency updates when node counts are large.
+**Action:** Index previous state arrays into a `Map` for $O(1)$ lookups before filtering current arrays to reduce complexity from $O(N^2)$ to $O(N)$.
