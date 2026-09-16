@@ -163,9 +163,16 @@ export function setupNodeDataChangeSubscription(): () => void {
     const unsubscribe = useNodeStore.subscribe(
         (state) => state.nodes, // Select only nodes array
         (currentNodes, previousNodes) => {
+            // ⚡ Bolt: Index previous arrays into a Map for O(1) lookups
+            // Avoid performing O(N^2) array diffs within Zustand store subscriptions
+            const previousNodesMap = new Map();
+            for (let i = 0; i < previousNodes.length; i++) {
+                previousNodesMap.set(previousNodes[i].id, previousNodes[i]);
+            }
+
             // Find nodes whose data has changed
             const changedNodes = currentNodes.filter(currentNode => {
-                const previousNode = previousNodes.find(p => p.id === currentNode.id);
+                const previousNode = previousNodesMap.get(currentNode.id);
                 if (!previousNode) return false; // New node, not a change
 
                 // Compare data objects (shallow comparison)
