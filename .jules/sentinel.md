@@ -42,3 +42,8 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+
+## 2024-05-26 - Insecure Randomness in UUID Fallbacks
+**Vulnerability:** The application used `Math.random()` as part of a custom fallback generator for UUIDs (`generateNodeId`). This is a known Weak Random Number Generation (CWE-338) vulnerability, which is easily predictable and frequently flagged by SAST tools.
+**Learning:** Even for non-security-critical identifiers like canvas node IDs, using predictable random number generators creates risk, triggers false positives in security scanning, and is unnecessary when robust cryptographic implementations are available.
+**Prevention:** Standardize on cryptographically secure UUID generators like `uuidv4()` from the `uuid` package, which safely utilizes `crypto.getRandomValues()` across environments, completely eliminating the need for insecure `Math.random()` fallbacks.
