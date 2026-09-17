@@ -42,3 +42,7 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+## 2024-05-24 - Math.random() is weak and creates SAST warnings
+**Vulnerability:** Found `Math.random()` used for generating fallback IDs and test strings, which is a weak pseudo-random number generator that triggers SAST tools and raises collision risks.
+**Learning:** Even for non-security critical areas (like DOM element IDs or test suffixes), `Math.random()` shouldn't be used to prevent SAST warnings and false positives.
+**Prevention:** Use standard cryptographic generators like `uuidv4()` for all ID/suffix generation to keep codebase clean of SAST warnings.
