@@ -11,7 +11,7 @@ import { Info, X } from 'lucide-react';
      const hasSelection = !!selectedNodeId || !!selectedEntryId;
  
      return (
-         <aside className="h-full flex flex-col bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800">
+         <aside id="right-inspector" className="h-full flex flex-col bg-white dark:bg-zinc-900 border-l border-zinc-200 dark:border-zinc-800">
              {/* Header / Tabs if multiple? For now just dynamic content */}
              <div className="h-14 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-4 shrink-0">
                  <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
