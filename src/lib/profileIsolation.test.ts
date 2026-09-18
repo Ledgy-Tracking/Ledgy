@@ -10,6 +10,7 @@ import { useAuthStore } from '../features/auth/useAuthStore';
 import { useProfileStore } from '../stores/useProfileStore';
 import { getProfileDb, _clearProfileDatabases } from './db';
 import { deriveUserIdFromSecret } from './crypto';
+import { v4 as uuidv4 } from 'uuid';
 
 // Mock the DB module partially to avoid decryption errors with dummy data
 vi.mock('./db', async (importOriginal) => {
@@ -55,7 +56,7 @@ describe('Profile Isolation Security Tests', () => {
     let testSuffix = '';
 
     beforeEach(async () => {
-        testSuffix = Math.random().toString(36).substring(7);
+        testSuffix = uuidv4();
         // Clear all databases and reset stores
         _clearProfileDatabases();
         useAuthStore.setState({
