@@ -16,6 +16,7 @@ import { useProfileStore } from '../../stores/useProfileStore';
 import { useUIStore } from '../../stores/useUIStore';
 import { CanvasNode } from '../../types/nodeEditor';
 import { useShallow } from 'zustand/react/shallow';
+import { v4 as uuidv4 } from 'uuid';
 import { EmptyCanvasGuide } from './EmptyCanvasGuide';
 import { LedgerSourceNode } from './nodes/LedgerSourceNode';
 import { CorrelationNode } from './nodes/CorrelationNode';
@@ -564,30 +565,13 @@ export const NodeCanvas: React.FC = () => {
         }
     }, [setSelectedNodeId, setRightInspector]);
 
-// Safe UUID generator with fallback for non-HTTPS contexts
-const generateNodeId = (): string => {
-    try {
-        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-            return crypto.randomUUID();
-        }
-    } catch {
-        // crypto.randomUUID may throw in insecure contexts
-    }
-    // Fallback: generate UUID v4 manually
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
-};
-
     const handleAddFirstNode = useCallback(() => {
         const viewport = useNodeStore.getState().viewport || { x: 0, y: 0, zoom: 1 };
         const zoom = viewport.zoom || 1;
         const centerX = (window.innerWidth / 2 - viewport.x) / zoom;
         const centerY = (window.innerHeight / 2 - viewport.y) / zoom;
         const newNode: CanvasNode = {
-            id: `ledgerSource-${generateNodeId()}`,
+            id: `ledgerSource-${uuidv4()}`,
             type: 'ledgerSource',
             position: { x: centerX - 100, y: centerY - 100 },
             data: { label: 'New Ledger Source' }
