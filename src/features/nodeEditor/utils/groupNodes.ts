@@ -26,15 +26,32 @@ export interface GroupCreationResult {
  * Calculate bounding box of nodes
  */
 export const calculateBoundingBox = (nodes: Node[]): ContainerBounds => {
-    const xs = nodes.map(n => n.position.x);
-    const ys = nodes.map(n => n.position.y);
-    const widths = nodes.map(n => (n.width || 150));
-    const heights = nodes.map(n => (n.height || 100));
-    
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs.map((x, i) => x + widths[i]));
-    const maxY = Math.max(...ys.map((y, i) => y + heights[i]));
+    if (nodes.length === 0) {
+        return { minX: 0, minY: 0, maxX: 0, maxY: 0, width: 0, height: 0 };
+    }
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    // ⚡ Bolt: Single-pass for loop avoids spreading large arrays into Math.max/min
+    // which prevents Maximum Call Stack limits errors, and removes intermediate allocations.
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const x = node.position.x;
+        const y = node.position.y;
+        const width = node.width || 150;
+        const height = node.height || 100;
+
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+
+        const right = x + width;
+        const bottom = y + height;
+        if (right > maxX) maxX = right;
+        if (bottom > maxY) maxY = bottom;
+    }
     
     return {
         minX,
