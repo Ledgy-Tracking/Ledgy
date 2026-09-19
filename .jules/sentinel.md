@@ -42,3 +42,8 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+
+## 2024-05-24 - Avoid Math.random() for ID Generation
+**Vulnerability:** Weak random number generation using `Math.random()` was used as a fallback for generating UUIDs.
+**Learning:** Even in non-security-critical contexts like generating IDs for DOM nodes, custom `Math.random()` implementations can trigger SAST tool warnings for "Weak random number generation" and increase collision risks. The fallback logic was attempting to handle environments where `crypto.randomUUID()` is unavailable.
+**Prevention:** Always standardize on a robust cryptographic generator like `uuidv4()` from the `uuid` package. It securely handles fallbacks to `crypto.getRandomValues()` across secure and insecure environments and prevents SAST warnings.
