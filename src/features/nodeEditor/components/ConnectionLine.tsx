@@ -12,6 +12,7 @@
 
 import React, { useMemo } from 'react';
 import type { ConnectionLineComponentProps } from '@xyflow/react';
+import type { CanvasNode } from '../types';
 import { getConnectionPath } from '../utils/bezierPath';
 import { Toast } from '@/components/ui/toast';
 
@@ -23,7 +24,7 @@ type ConnectionStatus = 'valid' | 'invalid' | 'default' | 'snapped';
 /**
  * Extended props including connection status and direction
  */
-interface ExtendedConnectionLineProps extends ConnectionLineComponentProps {
+interface ExtendedConnectionLineProps extends Omit<ConnectionLineComponentProps<CanvasNode>, 'connectionStatus'> {
     connectionStatus?: ConnectionStatus;
     sourceDirection?: 'left' | 'right' | 'top' | 'bottom';
 }
@@ -74,7 +75,7 @@ const getConnectionStyles = (status: ConnectionStatus) => {
  * Renders during edge drag operations to show the potential connection.
  * Uses cubic Bezier curves for smooth, professional appearance.
  */
-export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
+export const ConnectionLine = ({
     fromX,
     fromY,
     toX,
