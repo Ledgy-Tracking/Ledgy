@@ -6,8 +6,9 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { ConnectionLine, ConnectionLineWithStatus } from './ConnectionLine';
-import type { ConnectionLineComponentProps } from '@xyflow/react';
 import React from 'react';
+import type { ConnectionLineComponentProps } from '@xyflow/react';
+
 
 // Mock props for testing
 const createMockProps = (
@@ -17,9 +18,9 @@ const createMockProps = (
     fromY: 100,
     toX: 300,
     toY: 200,
-    fromPosition: undefined,
-    toPosition: undefined,
-    connectionLineType: undefined,
+    fromPosition: 'right',
+    toPosition: 'left',
+    connectionLineType: 'default',
     connectionStatus: 'default',
     ...overrides
 });
