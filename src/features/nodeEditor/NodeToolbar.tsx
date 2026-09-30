@@ -145,6 +145,7 @@ export const NodeToolbar: React.FC<NodeToolbarProps> = () => {
                     onClick={handleManualSave}
                     disabled={isSaveInProgress || !isCanvasLoaded}
                     title="Save workflow (Ctrl+S)"
+                    aria-label="Save workflow"
                 >
                     <span className={saveError ? 'text-red-400' : 'text-zinc-400'}>
                         {saveStatusIcon ?? <Save size={16} />}
