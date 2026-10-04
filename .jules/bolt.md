@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2024-10-04 - Spread syntax bottlenecks in layout calculations
+**Learning:** Found that using spread syntax (`...array`) inside `Math.min()` and `Math.max()` within performance-critical layout calculation functions (like `calculateBoundingBox`) can cause "Maximum call stack size exceeded" errors for very large selections of nodes, while also incurring significant O(n) iteration overhead (running 6 passes with `.map` and spreads).
+**Action:** Always replace chained `.map()` and spread syntax aggregations in graphing algorithms with a single-pass `for` loop to avoid V8 engine call stack limits and unnecessary intermediate array allocations.
