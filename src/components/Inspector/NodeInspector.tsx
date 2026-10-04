@@ -252,6 +252,7 @@ const DashboardOutputPanel: React.FC<{ id: string; data: any }> = ({ id, data })
                             variant={data.widgetType === wt ? 'default' : 'outline'}
                             className={data.widgetType === wt ? `${color} text-zinc-900 dark:text-white` : 'text-zinc-400'}
                             title={wt}
+                            aria-label={wt}
                             onClick={() => handleWidgetType(wt)}
                         >
                             {icon}
