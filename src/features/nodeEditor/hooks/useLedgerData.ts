@@ -90,20 +90,34 @@ export async function hydrateLedgerSourceNode(
 
     if (numberFields.length > 0 && filteredEntries.length > 0) {
       numberFields.forEach(field => {
-        const values = filteredEntries
-          .map(e => e.data[field.id])
-          .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+        // ⚡ Bolt: Replaced .map().filter().reduce() and Math.max/min(...array) with a single-pass for-loop
+        // 🎯 Why: Reduces intermediate allocations and prevents 'Maximum call stack size exceeded' on large arrays
+        // 📊 Impact: O(n) execution time instead of O(3n) and prevents stack overflow
+        let sum = 0;
+        let min = Infinity;
+        let max = -Infinity;
+        let count = 0;
 
-        if (values.length > 0) {
+        for (const entry of filteredEntries) {
+          const val = entry.data[field.id];
+          if (typeof val === 'number' && !isNaN(val)) {
+            sum += val;
+            if (val < min) min = val;
+            if (val > max) max = val;
+            count++;
+          }
+        }
+
+        if (count > 0) {
           aggregates.sum = aggregates.sum || {};
           aggregates.avg = aggregates.avg || {};
           aggregates.min = aggregates.min || {};
           aggregates.max = aggregates.max || {};
 
-          aggregates.sum[field.id] = values.reduce((a, b) => a + b, 0);
-          aggregates.avg[field.id] = aggregates.sum[field.id] / values.length;
-          aggregates.min[field.id] = Math.min(...values);
-          aggregates.max[field.id] = Math.max(...values);
+          aggregates.sum[field.id] = sum;
+          aggregates.avg[field.id] = sum / count;
+          aggregates.min[field.id] = min;
+          aggregates.max[field.id] = max;
         }
       });
     }
