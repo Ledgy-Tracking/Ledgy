@@ -262,16 +262,16 @@ export class Database {
             startkey: options?.type ? `${options.type}:` : undefined,
             endkey: options?.type ? `${options.type}:\ufff0` : undefined,
         });
-        return result.rows
-            .map(row => row.doc as unknown as T)
-            .filter(doc => {
-                if (!doc) return false;
-                // Exclude soft-deleted unless explicitly included
-                if (!options?.includeDeleted && (doc as any).isDeleted) {
-                    return false;
-                }
-                return true;
-            });
+        // ⚡ Bolt: Single-pass iteration to reduce allocations and GC overhead
+        const docs: T[] = [];
+        for (const row of result.rows) {
+            const doc = row.doc as unknown as T;
+            if (!doc) continue;
+            // Exclude soft-deleted unless explicitly included
+            if (!options?.includeDeleted && (doc as any).isDeleted) continue;
+            docs.push(doc);
+        }
+        return docs;
     }
 
     async getAllDocuments<T>(type?: string): Promise<T[]> {
@@ -280,9 +280,14 @@ export class Database {
             startkey: type ? `${type}:` : undefined,
             endkey: type ? `${type}:\ufff0` : undefined,
         });
-        return result.rows
-            .map(row => row.doc as unknown as T)
-            .filter(doc => doc !== undefined);
+        // ⚡ Bolt: Single-pass iteration to reduce allocations and GC overhead
+        const docs: T[] = [];
+        for (const row of result.rows) {
+            if (row.doc !== undefined) {
+                docs.push(row.doc as unknown as T);
+            }
+        }
+        return docs;
     }
 
     // Example sync operation
