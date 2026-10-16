@@ -286,11 +286,12 @@ export class Database {
     }
 
     // Example sync operation
-    sync(remoteUrl: string, options?: PouchDB.Replication.SyncOptions) {
+    sync(remote: string | PouchDB.Database<{}>, options?: PouchDB.Replication.SyncOptions) {
         if (this.replicationInstance) {
             this.replicationInstance.cancel();
         }
-        this.replicationInstance = this.db.sync(remoteUrl, {
+        // 🛡️ Sentinel: Allow passing a securely instantiated PouchDB database object instead of a URL string.
+        this.replicationInstance = this.db.sync(remote as any, {
             live: true,
             retry: true,
             ...options
