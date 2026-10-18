@@ -1878,6 +1878,6 @@ export function setup_sync(
         return (db as any).db.replicate.to(remoteDb as any, options);
     } else {
         // Two-way
-        return db.sync(remoteDb, options);
+        return db.sync(remoteDb as any, options);
     }
 }
