@@ -286,7 +286,7 @@ export class Database {
     }
 
     // Example sync operation
-    sync(remoteUrl: string, options?: PouchDB.Replication.SyncOptions) {
+    sync(remoteUrl: string | PouchDB.Database, options?: PouchDB.Replication.SyncOptions) {
         if (this.replicationInstance) {
             this.replicationInstance.cancel();
         }
@@ -1830,34 +1830,36 @@ export function setup_sync(
     const db = getProfileDb(profileId);
 
 
-    // Construct remote URL with credentials
-    // Note: This is sensitive, so we only do it in memory
-    let remoteUrl = config.remoteUrl;
+    // Construct remote URL
+    const rawRemoteUrl = config.remoteUrl;
 
-    if (remoteUrl) {
-        try {
-            const url = new URL(remoteUrl);
-
-            // 🛡️ Sentinel: Enforce HTTPS for remote connections to prevent credential leakage
-            if (url.protocol !== 'https:' && !isLocalNetwork(url.hostname)) {
-                throw new Error('Insecure connection: HTTPS is required for authenticated remote sync operations.');
-            }
-
-            if (config.username && config.password) {
-                url.username = config.username;
-                url.password = config.password;
-                remoteUrl = url.toString();
-            }
-        } catch (e: any) {
-            if (e.message.includes('Insecure connection')) {
-                throw e; // Rethrow security error
-            }
-            console.error('Invalid remote URL:', remoteUrl);
-        }
+    if (!rawRemoteUrl) {
+        throw new Error('Remote URL is required for sync');
     }
 
-    if (!remoteUrl) {
-        throw new Error('Remote URL is required for sync');
+    let remoteTarget: string | PouchDB.Database = rawRemoteUrl;
+
+    try {
+        const url = new URL(rawRemoteUrl);
+
+        // 🛡️ Sentinel: Enforce HTTPS for remote connections to prevent credential leakage
+        if (url.protocol !== 'https:' && !isLocalNetwork(url.hostname)) {
+            throw new Error('Insecure connection: HTTPS is required for authenticated remote sync operations.');
+        }
+
+        if (config.username && config.password) {
+            // Instantiate a new PouchDB for the remote using the secure auth config
+            remoteTarget = new PouchDB(url.toString(), {
+                auth: { username: config.username, password: config.password }
+            });
+        } else {
+            remoteTarget = url.toString();
+        }
+    } catch (e: any) {
+        if (e.message.includes('Insecure connection')) {
+            throw e; // Rethrow security error
+        }
+        console.error('Invalid remote URL:', rawRemoteUrl);
     }
 
     const options: PouchDB.Replication.SyncOptions = {
@@ -1870,9 +1872,9 @@ export function setup_sync(
         // Note: db.sync does two-way. For one-way we use replicate.to
         // But the Database class has a sync method. Let's add more flexibility.
         // For simplicity in this story, we'll use a custom replication setup
-        return (db as any).db.replicate.to(remoteUrl, options);
+        return (db as any).db.replicate.to(remoteTarget, options);
     } else {
         // Two-way
-        return db.sync(remoteUrl, options);
+        return db.sync(remoteTarget, options);
     }
 }
