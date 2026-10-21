@@ -111,12 +111,13 @@ export const ViewControls: React.FC = () => {
                 <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-700 mx-1" />
 
                 {/* Minimap Toggle */}
-                <Toggle
+                <button
+                    type="button"
                     onClick={handleToggleMinimap}
                     aria-label={showMinimap ? 'Hide minimap (H)' : 'Show minimap (H)'}
-                    aria-pressed={showMinimap}
                     title={showMinimap ? 'Hide minimap (H)' : 'Show minimap (H)'}
                     className={`
+                        inline-flex items-center justify-center
                         p-2 rounded-md border
                         transition-all duration-150 ease-out
                         focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900
@@ -131,7 +132,7 @@ export const ViewControls: React.FC = () => {
                     ) : (
                         <EyeOff className="w-4 h-4" aria-hidden="true" />
                     )}
-                </Toggle>
+                </button>
             </Card>
 
             {/* Collapse Toggle Button (Chevron) */}
