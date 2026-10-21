@@ -9,3 +9,7 @@
 ## 2025-02-23 - Playwright Verification Context & Dashboard Icons
 **Learning:** The Dashboard page contains heavily icon-centric action bars (e.g. Inspector open/close, view toggles) which completely lack screen reader accessibility. Verifying these required automating the TOTP and Profile setup flows, revealing that Playwright struggles to click nested elements inside the Profile Card unless targeting specific text nodes.
 **Action:** When adding `aria-labels` to complex dashboards, always ensure `aria-pressed` states are added for toggles. When verifying via Playwright, bypass profile card container clicks by specifically locating and clicking the nested `h3` profile name element.
+
+## 2025-02-23 - Radix Toggle Accessibility
+**Learning:** Radix TogglePrimitive enforces aria-pressed natively, so for buttons that dynamically swap icons (like Eye/EyeOff) which violate WAI-ARIA guidelines if using aria-pressed, we must replace the component with a native button element rather than just omitting the prop.
+**Action:** Use native buttons with base styling for any dynamically swapping toggle buttons to maintain clean accessibility trees.
