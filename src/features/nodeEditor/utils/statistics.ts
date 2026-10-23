@@ -75,19 +75,24 @@ export const calculateArithmetic = (
         return { value: null, error: 'No inputs provided' };
     }
 
+    // Bolt Performance Optimization: Single-pass loop for arithmetic operations
+    let result = values[0];
     switch (operation) {
         case 'add':
         case 'sum':
-            return { value: values.reduce((a, b) => a + b, 0) };
+            for (let i = 1; i < values.length; i++) result += values[i];
+            return { value: result };
 
         case 'subtract':
             if (values.length < 2) {
                 return { value: null, error: 'Need 2+ values for subtraction' };
             }
-            return { value: values.reduce((a, b) => a - b) };
+            for (let i = 1; i < values.length; i++) result -= values[i];
+            return { value: result };
 
         case 'multiply':
-            return { value: values.reduce((a, b) => a * b, 1) };
+            for (let i = 1; i < values.length; i++) result *= values[i];
+            return { value: result };
 
         case 'divide':
             if (values.length < 2) {
@@ -99,13 +104,20 @@ export const calculateArithmetic = (
             return { value: values[0] / values[1] };
 
         case 'average':
-            return { value: values.reduce((a, b) => a + b, 0) / values.length };
+            for (let i = 1; i < values.length; i++) result += values[i];
+            return { value: result / values.length };
 
         case 'min':
-            return { value: Math.min(...values) };
+            for (let i = 1; i < values.length; i++) {
+                if (values[i] < result) result = values[i];
+            }
+            return { value: result };
 
         case 'max':
-            return { value: Math.max(...values) };
+            for (let i = 1; i < values.length; i++) {
+                if (values[i] > result) result = values[i];
+            }
+            return { value: result };
 
         default:
             return { value: null, error: 'Unknown operation' };

@@ -54,18 +54,31 @@ export const useLedgerSourceData = (
 
         // Calculate stats for each field that contains numbers
         fieldIds.forEach(fieldId => {
-            const values = entries
-                .map(e => e.data[fieldId])
-                .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+            // Bolt Performance Optimization: Replaced chained .map().filter().reduce() and Math.min(...spread)
+            // with a single-pass loop to eliminate O(n) memory allocations and prevent call stack overflows.
+            let sum = 0;
+            let min = Infinity;
+            let max = -Infinity;
+            let count = 0;
 
-            if (values.length === 0) {
+            for (let i = 0; i < entries.length; i++) {
+                const v = entries[i].data[fieldId];
+                if (typeof v === 'number' && !isNaN(v)) {
+                    sum += v;
+                    if (v < min) min = v;
+                    if (v > max) max = v;
+                    count++;
+                }
+            }
+
+            if (count === 0) {
                 result[fieldId] = null;
             } else {
                 result[fieldId] = {
-                    avg: values.reduce((a, b) => a + b, 0) / values.length,
-                    min: Math.min(...values),
-                    max: Math.max(...values),
-                    count: values.length,
+                    avg: sum / count,
+                    min,
+                    max,
+                    count,
                 };
             }
         });
@@ -201,17 +214,30 @@ export const useFieldStats = (
     return useMemo(() => {
         if (entries.length === 0) return null;
         
-        const values = entries
-            .map(e => e.data[fieldId])
-            .filter((v): v is number => typeof v === 'number' && !isNaN(v));
+        // Bolt Performance Optimization: Single-pass iteration to prevent intermediate array allocations
+        // and eliminate maximum call stack size exceeded errors from spreading large arrays into Math.min.
+        let sum = 0;
+        let min = Infinity;
+        let max = -Infinity;
+        let count = 0;
+
+        for (let i = 0; i < entries.length; i++) {
+            const v = entries[i].data[fieldId];
+            if (typeof v === 'number' && !isNaN(v)) {
+                sum += v;
+                if (v < min) min = v;
+                if (v > max) max = v;
+                count++;
+            }
+        }
         
-        if (values.length === 0) return null;
+        if (count === 0) return null;
         
         return {
-            avg: values.reduce((a, b) => a + b, 0) / values.length,
-            min: Math.min(...values),
-            max: Math.max(...values),
-            count: values.length,
+            avg: sum / count,
+            min,
+            max,
+            count,
         };
     }, [entries, fieldId]);
 };
