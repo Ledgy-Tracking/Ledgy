@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2025-02-12 - Prevent Stack Overflow in Group Bounds Calculation
+**Learning:** Found a performance/stability bottleneck where bounding box coordinates were calculated using `Math.max(...array.map(...))` and `Math.min(...array.map(...))`. This iterates multiple times, allocates intermediate arrays (O(N) memory), and most importantly, throws a 'Maximum call stack size exceeded' error if the nodes array is too large.
+**Action:** Always replace spread operators within `Math.max`/`min` combined with chained array methods (`.map`) with a single-pass `for` loop in performance-critical aggregations. Initialize max values to `-Infinity` and min to `Infinity` to securely handle empty arrays.
