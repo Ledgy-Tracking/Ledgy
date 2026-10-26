@@ -36,3 +36,7 @@
 ## 2024-05-28 - Avoid array spreads into Math.min/max for large node arrays
 **Learning:** Spreading arrays of bounding box coordinates (e.g., `Math.max(...xs.map(...))`) in node grouping logic causes `Maximum call stack size exceeded` crashes when the user groups a large number of nodes, and chained `.map` calls create unnecessary intermediate arrays.
 **Action:** Replace map and spread into Math.min/max with a single-pass `for` loop, initializing min values to `Infinity` and max values to `-Infinity` to avoid O(N) allocations and stack limits.
+
+## 2024-05-28 - Avoid array spreads into Math.min/max for large node arrays
+**Learning:** Spreading arrays of bounding box coordinates (e.g., `Math.max(...xs.map(...))`) in node grouping logic causes `Maximum call stack size exceeded` crashes when the user groups a large number of nodes, and chained `.map` calls create unnecessary intermediate arrays.
+**Action:** Replace map and spread into Math.min/max with a single-pass `for` loop, initializing min values to `Infinity` and max values to `-Infinity` to avoid O(N) allocations and stack limits.

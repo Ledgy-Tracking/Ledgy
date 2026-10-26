@@ -26,15 +26,32 @@ export interface GroupCreationResult {
  * Calculate bounding box of nodes
  */
 export const calculateBoundingBox = (nodes: Node[]): ContainerBounds => {
-    const xs = nodes.map(n => n.position.x);
-    const ys = nodes.map(n => n.position.y);
-    const widths = nodes.map(n => (n.width || 150));
-    const heights = nodes.map(n => (n.height || 100));
-    
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs.map((x, i) => x + widths[i]));
-    const maxY = Math.max(...ys.map((y, i) => y + heights[i]));
+    // ⚡ Bolt: Replace map and spread into Math.min/max with single-pass loop to avoid O(N) intermediate allocations and "Maximum call stack size exceeded" errors
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
+        const x = node.position.x;
+        const y = node.position.y;
+        const w = node.width || 150;
+        const h = node.height || 100;
+
+        if (Number.isNaN(x) || Number.isNaN(y) || Number.isNaN(w) || Number.isNaN(h)) {
+            minX = NaN;
+            minY = NaN;
+            maxX = NaN;
+            maxY = NaN;
+            break;
+        }
+
+        if (x < minX) minX = x;
+        if (y < minY) minY = y;
+        if (x + w > maxX) maxX = x + w;
+        if (y + h > maxY) maxY = y + h;
+    }
     
     return {
         minX,
