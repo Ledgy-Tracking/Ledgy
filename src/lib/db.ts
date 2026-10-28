@@ -286,11 +286,11 @@ export class Database {
     }
 
     // Example sync operation
-    sync(remoteUrl: string, options?: PouchDB.Replication.SyncOptions) {
+    sync(remote: string | PouchDB.Database, options?: PouchDB.Replication.SyncOptions) {
         if (this.replicationInstance) {
             this.replicationInstance.cancel();
         }
-        this.replicationInstance = this.db.sync(remoteUrl, {
+        this.replicationInstance = this.db.sync(remote as string, {
             live: true,
             retry: true,
             ...options
@@ -1833,6 +1833,7 @@ export function setup_sync(
     // Construct remote URL with credentials
     // Note: This is sensitive, so we only do it in memory
     let remoteUrl = config.remoteUrl;
+    let remoteDb: PouchDB.Database | string | undefined;
 
     if (remoteUrl) {
         try {
@@ -1844,9 +1845,15 @@ export function setup_sync(
             }
 
             if (config.username && config.password) {
-                url.username = config.username;
-                url.password = config.password;
-                remoteUrl = url.toString();
+                // 🛡️ Sentinel: Use auth configuration object instead of embedding credentials in URL
+                remoteDb = new PouchDB(remoteUrl, {
+                    auth: {
+                        username: config.username,
+                        password: config.password
+                    }
+                });
+            } else {
+                remoteDb = remoteUrl;
             }
         } catch (e: any) {
             if (e.message.includes('Insecure connection')) {
@@ -1856,7 +1863,7 @@ export function setup_sync(
         }
     }
 
-    if (!remoteUrl) {
+    if (!remoteDb) {
         throw new Error('Remote URL is required for sync');
     }
 
@@ -1870,9 +1877,9 @@ export function setup_sync(
         // Note: db.sync does two-way. For one-way we use replicate.to
         // But the Database class has a sync method. Let's add more flexibility.
         // For simplicity in this story, we'll use a custom replication setup
-        return (db as any).db.replicate.to(remoteUrl, options);
+        return (db as any).db.replicate.to(remoteDb, options);
     } else {
         // Two-way
-        return db.sync(remoteUrl, options);
+        return db.sync(remoteDb, options);
     }
 }
