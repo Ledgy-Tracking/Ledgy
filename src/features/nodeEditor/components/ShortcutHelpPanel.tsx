@@ -167,6 +167,7 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
                         ref={closeButtonRef}
                         onClick={onClose}
                         aria-label="Close help panel"
+                        title="Close help panel"
                         className="
                             p-2 rounded-md
                             text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100
