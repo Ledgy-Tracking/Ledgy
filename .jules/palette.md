@@ -9,3 +9,6 @@
 ## 2025-02-23 - Playwright Verification Context & Dashboard Icons
 **Learning:** The Dashboard page contains heavily icon-centric action bars (e.g. Inspector open/close, view toggles) which completely lack screen reader accessibility. Verifying these required automating the TOTP and Profile setup flows, revealing that Playwright struggles to click nested elements inside the Profile Card unless targeting specific text nodes.
 **Action:** When adding `aria-labels` to complex dashboards, always ensure `aria-pressed` states are added for toggles. When verifying via Playwright, bypass profile card container clicks by specifically locating and clicking the nested `h3` profile name element.
+## 2024-10-29 - ShortcutHelpPanel Accessibility Parity
+**Learning:** Tooltip titles should be included alongside aria-labels on icon-only buttons for mouse users. Keyboard accessibility via aria-labels does not cover visual tooltips on hover unless a `title` attribute is explicitly provided.
+**Action:** When adding or verifying accessibility labels (like `aria-label`) on icon-only interactive elements, ensure there is also a `title` attribute or a visual tooltip component to provide parity for mouse users.
