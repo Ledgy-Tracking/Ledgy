@@ -42,3 +42,8 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+
+## 2025-03-31 - [Secure PouchDB Authentication]
+**Vulnerability:** PouchDB remote sync embedded plaintext credentials directly in the URL string, risking exposure in network requests or proxy logs.
+**Learning:** The built-in URL parsing for PouchDB can leak credentials if they are part of the connection string.
+**Prevention:** Instantiate a separate remote PouchDB instance utilizing the `auth` configuration object instead of appending credentials to the URL string.
