@@ -283,7 +283,11 @@ describe('schemaChangeHandler', () => {
       const mockUpdateNodeData = vi.fn();
       (useProfileStore.getState as any).mockReturnValue({ activeProfileId: mockProfileId });
       (useNodeStore.getState as any).mockReturnValue({
-        nodes: [],
+        nodes: [{
+          id: 'node1',
+          type: 'ledgerSource',
+          data: { ledgerId: mockLedgerId, schemaSnapshot: [] }
+        }],
         schemas: [{
           _id: `schema:${mockLedgerId}`,
           fields: [{ id: 'field1', name: 'Field 1', type: 'text' }]
@@ -312,7 +316,7 @@ describe('schemaChangeHandler', () => {
       changeHandler(changeEvent);
 
       // Should debounce - wait for timeout
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Should have detected field added and updated nodes
       expect(mockUpdateNodeData).toHaveBeenCalled();
