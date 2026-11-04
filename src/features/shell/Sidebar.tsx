@@ -63,7 +63,7 @@ export const Sidebar = () => {
                     size="icon"
                     className="md:hidden absolute left-2 top-2 bg-gray-100 dark:bg-zinc-800/50 hover:bg-zinc-700/50 z-30"
                     aria-label="Open sidebar"
-                    aria-expanded="false"
+                    aria-expanded={sidebarOpen}
                 >
                     <Menu className="w-5 h-5 text-zinc-400" />
                 </Button>
