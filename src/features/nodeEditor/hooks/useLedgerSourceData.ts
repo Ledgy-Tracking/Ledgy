@@ -54,6 +54,9 @@ export const useLedgerSourceData = (
 
         // Calculate stats for each field that contains numbers
         fieldIds.forEach(fieldId => {
+            // Optimized: Replaced chained array methods and spread syntax (Math.max(...values))
+            // with a single-pass loop to prevent 'Maximum call stack size exceeded' on large
+            // arrays, saving multiple iterations and intermediate allocations.
             let sum = 0;
             let min = Infinity;
             let max = -Infinity;
@@ -212,6 +215,9 @@ export const useFieldStats = (
     return useMemo(() => {
         if (entries.length === 0) return null;
         
+        // Optimized: Replaced chained array methods and spread syntax (Math.max(...values))
+        // with a single-pass loop to prevent 'Maximum call stack size exceeded' on large
+        // arrays, saving multiple iterations and intermediate allocations.
         let sum = 0;
         let min = Infinity;
         let max = -Infinity;

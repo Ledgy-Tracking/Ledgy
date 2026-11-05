@@ -90,6 +90,9 @@ export async function hydrateLedgerSourceNode(
 
     if (numberFields.length > 0 && filteredEntries.length > 0) {
       numberFields.forEach(field => {
+        // Optimized: Replaced chained array methods and spread syntax (Math.max(...values))
+        // with a single-pass loop to prevent 'Maximum call stack size exceeded' on large
+        // arrays, saving multiple iterations and intermediate allocations.
         let sum = 0;
         let min = Infinity;
         let max = -Infinity;
