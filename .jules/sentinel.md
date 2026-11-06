@@ -42,3 +42,7 @@
 **Vulnerability:** A redundant string-matching check for `https://` and `localhost` (`remoteUrl.startsWith`) was placed before a robust `URL` parsing block that correctly leveraged `isLocalNetwork`. This caused the application to mistakenly throw "HTTPS is required" errors for valid private network IPs (e.g., `192.168.x.x`), breaking self-hosted local-first sync workflows and contradicting intended architecture.
 **Learning:** Fragile string matching for security enforcement often creates false positives that break functionality, especially when robust parsing tools (`new URL()`) and helper utilities (`isLocalNetwork`) are already available and intended for use in the same block.
 **Prevention:** Consolidate security checks using standard URL parsers rather than redundant string prefixes. Ensure security logic aligns with intended architectural exceptions (like local network bypasses).
+## 2024-05-24 - Fix insecure UUID fallback
+**Vulnerability:** Weak random number generation using Math.random() as a fallback for UUIDs.
+**Learning:** Found in `src/features/nodeEditor/NodeCanvas.tsx`. The fallback used Math.random(), which is predictable and not suitable for secure ID generation when crypto.randomUUID is not available. The uuid module's v4 was available but unused.
+**Prevention:** Always use cryptographically secure random number generators (CSPRNG). Use standard libraries like uuid rather than implementing custom Math.random-based ID generation.
