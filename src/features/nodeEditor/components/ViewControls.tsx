@@ -3,7 +3,6 @@ import { Eye, EyeOff, Grid3X3, Magnet, ChevronLeft, ChevronRight } from 'lucide-
 import { useNodeStore } from '../../../stores/useNodeStore';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Toggle } from '@/components/ui/toggle';
 
 /**
  * ViewControls - Collapsible panel for minimap, grid, and snap controls
@@ -70,13 +69,13 @@ export const ViewControls: React.FC = () => {
                 aria-expanded={!isViewControlsCollapsed}
             >
                 {/* Grid Toggle */}
-                <Toggle
+                <button
+                    type="button"
                     onClick={handleToggleGrid}
                     aria-label={showGrid ? 'Hide grid (G)' : 'Show grid (G)'}
-                    aria-pressed={showGrid}
                     title={showGrid ? 'Hide grid (G)' : 'Show grid (G)'}
                     className={`
-                        p-2 rounded-md border
+                        inline-flex items-center justify-center p-2 rounded-md border
                         transition-all duration-150 ease-out
                         focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900
                         ${showGrid 
@@ -86,16 +85,16 @@ export const ViewControls: React.FC = () => {
                     `}
                 >
                     <Grid3X3 className="w-4 h-4" aria-hidden="true" />
-                </Toggle>
+                </button>
 
                 {/* Snap to Grid Toggle */}
-                <Toggle
+                <button
+                    type="button"
                     onClick={handleToggleSnap}
                     aria-label={snapToGrid ? 'Disable snap to grid (S)' : 'Enable snap to grid (S)'}
-                    aria-pressed={snapToGrid}
                     title={snapToGrid ? 'Disable snap to grid (S)' : 'Enable snap to grid (S)'}
                     className={`
-                        p-2 rounded-md border
+                        inline-flex items-center justify-center p-2 rounded-md border
                         transition-all duration-150 ease-out
                         focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900
                         ${snapToGrid 
@@ -105,19 +104,19 @@ export const ViewControls: React.FC = () => {
                     `}
                 >
                     <Magnet className="w-4 h-4" aria-hidden="true" />
-                </Toggle>
+                </button>
 
                 {/* Divider */}
                 <div className="w-px h-6 bg-zinc-300 dark:bg-zinc-700 mx-1" />
 
                 {/* Minimap Toggle */}
-                <Toggle
+                <button
+                    type="button"
                     onClick={handleToggleMinimap}
                     aria-label={showMinimap ? 'Hide minimap (H)' : 'Show minimap (H)'}
-                    aria-pressed={showMinimap}
                     title={showMinimap ? 'Hide minimap (H)' : 'Show minimap (H)'}
                     className={`
-                        p-2 rounded-md border
+                        inline-flex items-center justify-center p-2 rounded-md border
                         transition-all duration-150 ease-out
                         focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-zinc-900
                         ${showMinimap 
@@ -131,7 +130,7 @@ export const ViewControls: React.FC = () => {
                     ) : (
                         <EyeOff className="w-4 h-4" aria-hidden="true" />
                     )}
-                </Toggle>
+                </button>
             </Card>
 
             {/* Collapse Toggle Button (Chevron) */}
