@@ -188,6 +188,7 @@ const TriggerPanel: React.FC<{ id: string; data: any }> = ({ id, data }) => {
                             key={ev}
                             size="xs"
                             variant={data.eventType === ev ? 'default' : 'outline'}
+                            aria-pressed={data.eventType === ev}
                             className={data.eventType === ev ? 'bg-emerald-600 border-emerald-500 text-zinc-900 dark:text-white' : 'text-zinc-400'}
                             onClick={() => useNodeStore.getState().updateNodeData(id, { eventType: ev })}
                         >
