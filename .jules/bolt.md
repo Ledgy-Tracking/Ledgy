@@ -32,3 +32,6 @@
 ## 2024-05-27 - Avoid Array.push(...largeArray) due to Maximum call stack size exceeded
 **Learning:** Spreading very large arrays into `Array.prototype.push(...largeArray)` (e.g. over 100k items) results in V8 throwing a "Maximum call stack size exceeded" error. This is because V8 engine treats the spread arguments as individual function arguments.
 **Action:** When concatenating large arrays, avoid using the spread syntax `push(...array)`. Instead, use a `for` loop to explicitly iterate and push items one by one. This completely avoids the call stack limitation and is highly performant.
+## 2026-11-08 - Ledger Aggregation Stack Size
+**Learning:** Large ledger entry arrays processed with chained .map().filter().reduce() and Math.min(...values)/Math.max(...values) can cause maximum call stack size exceeded errors and high memory allocation overhead.
+**Action:** Always use single-pass loops with min/max initialized to Infinity/-Infinity for performance-critical dataset aggregations.
