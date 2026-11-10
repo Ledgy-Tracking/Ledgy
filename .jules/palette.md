@@ -9,3 +9,6 @@
 ## 2025-02-23 - Playwright Verification Context & Dashboard Icons
 **Learning:** The Dashboard page contains heavily icon-centric action bars (e.g. Inspector open/close, view toggles) which completely lack screen reader accessibility. Verifying these required automating the TOTP and Profile setup flows, revealing that Playwright struggles to click nested elements inside the Profile Card unless targeting specific text nodes.
 **Action:** When adding `aria-labels` to complex dashboards, always ensure `aria-pressed` states are added for toggles. When verifying via Playwright, bypass profile card container clicks by specifically locating and clicking the nested `h3` profile name element.
+## 2024-11-10 - Add confirmation to destructive actions
+**Learning:** Node deletion in Node Inspector lacked a confirmation prompt, which can lead to accidental data loss. This contrasts with Entry Inspector which correctly uses `window.confirm`. A key UX pattern is ensuring destructive actions have a safety mechanism.
+**Action:** Added `window.confirm` to `handleDelete` in `src/components/Inspector/NodeInspector.tsx` to align with the rest of the application and prevent accidental deletions.

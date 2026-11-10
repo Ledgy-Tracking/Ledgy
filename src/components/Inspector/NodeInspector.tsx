@@ -306,8 +306,10 @@ export const NodeInspector: React.FC = () => {
     };
 
     const handleDelete = () => {
-        deleteElements({ nodes: [{ id: node.id }] });
-        setSelectedNodeId(null);
+        if (window.confirm('Are you sure you want to delete this node?')) {
+            deleteElements({ nodes: [{ id: node.id }] });
+            setSelectedNodeId(null);
+        }
     };
 
     return (
