@@ -23,7 +23,7 @@ import type { Node } from '@xyflow/react';
 const TOUCH_LONG_PRESS_DURATION = 300; // ms
 const TOUCH_MOVEMENT_THRESHOLD = 10; // px - cancel long-press if moved more than this
 const CLICK_LISTENER_DELAY = 150; // ms - delay before click-outside detection (AC5)
-const REBUILD_THROTTLE_MS = 100; // ms - throttle handle position rebuilds
+const REBUILD_THROTTLE_MS = 100; REBUILD_THROTTLE_MS; // ms - throttle handle position rebuilds
 
 interface UseEdgeDragOptions {
     nodes: Node[];
@@ -53,7 +53,7 @@ export const useEdgeDrag = ({
     const connectionStateRef = useRef<ConnectionLineState | null>(null);
     const rafRef = useRef<number | null>(null);
     const lastPositionRef = useRef<XYPosition | null>(null);
-    const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+    const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null); touchStartRef.current;
     const touchTimerRef = useRef<number | null>(null);
     const sourceTypeRef = useRef<string | undefined>(undefined);
     const clickListenerAddedRef = useRef(false);
@@ -196,7 +196,7 @@ export const useEdgeDrag = ({
             performance.mark('edge-drag-end');
             performance.measure('edge-drag', 'edge-drag-start', 'edge-drag-end');
         }
-    }, [connectionState, onConnect, cancelDrag]);
+    }, [connectionState, onConnect]);
 
     // Cancel drag operation (AC5)
     const cancelDrag = useCallback(() => {
@@ -286,7 +286,7 @@ export const useEdgeDrag = ({
  * Implements long-press to initiate drag (AC7)
  */
 export const useTouchEdgeDrag = () => {
-    const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
+    const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null); touchStartRef.current;
     const touchTimerRef = useRef<number | null>(null);
     const [isLongPress, setIsLongPress] = useState(false);
 
