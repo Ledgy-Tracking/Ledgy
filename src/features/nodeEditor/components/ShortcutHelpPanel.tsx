@@ -142,11 +142,8 @@ export const ShortcutHelpPanel: React.FC<ShortcutHelpPanelProps> = ({ isOpen, on
     if (!isOpen) return null;
 
     return (
-        <Dialog 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 dark:bg-black/50 backdrop-blur-sm"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="shortcut-help-title"
+        <Dialog open={isOpen} onOpenChange={onClose}
+
         >
             <Card 
                 ref={panelRef}

@@ -79,10 +79,10 @@ export const ConnectionLine: React.FC<ExtendedConnectionLineProps> = ({
     fromY,
     toX,
     toY,
-    connectionLineType,
+    // connectionLineType,
     connectionStatus = 'default',
-    fromNode,
-    fromHandle,
+    // fromNode,
+    // fromHandle,
     sourceDirection = 'right'
 }) => {
     // Calculate Bezier path using actual handle direction
